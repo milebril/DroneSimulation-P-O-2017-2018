@@ -34,7 +34,7 @@ public class hallo extends Application {
     final Xform cameraXform = new Xform();
     final Xform cameraXform2 = new Xform();
     final Xform cameraXform3 = new Xform();
-    final double cameraDistance = 450;
+    final double cameraDistance = 1000;
  
     boolean timelinePlaying = false;
     double ONE_FRAME = 1.0/24.0;
@@ -89,7 +89,6 @@ public class hallo extends Application {
 
 			@Override
 			public void handle(long arg0) {
-				// TODO Auto-generated method stub
 				x += speed;
 				angle++;
 				
@@ -224,24 +223,36 @@ public class hallo extends Application {
              @Override
              public void handle(KeyEvent event) {
                  switch (event.getCode()) {
-                 case X:
-                     if (axisGroup.isVisible()) {
-                         System.out.println("setVisible(false)");
-                         axisGroup.setVisible(false);
-                     }
-                     else {
-                         System.out.println("setVisible(true)");
-                         axisGroup.setVisible(true);
-                     }
-                     break;
-                 case R:
-            		 System.out.println("Resetting World");
-            		 resetCamera();
-            		 break;
-				default:
-					System.out.println("Error: unknown event");
-					break;
-                 }
+	                 case X:
+	                     if (axisGroup.isVisible()) {
+	                         System.out.println("setVisible(false)");
+	                         axisGroup.setVisible(false);
+	                     }
+	                     else {
+	                         System.out.println("setVisible(true)");
+	                         axisGroup.setVisible(true);
+	                     }
+	                     break;
+	                 case R:
+	            		 System.out.println("Resetting World");
+	            		 resetCamera();
+	            		 break;
+	                 case LEFT:
+	                	 cameraXform.ry.setAngle(cameraXform.ry.getAngle() - 5); //-
+	                	 break;
+	                 case RIGHT:
+	                	 cameraXform.ry.setAngle(cameraXform.ry.getAngle() + 5); //+
+	                	 break;
+	                 case UP:
+	                	 cameraXform.rx.setAngle(cameraXform.rx.getAngle() + 5); //+
+	                	 break;
+	                 case DOWN:
+	                	 cameraXform.rx.setAngle(cameraXform.rx.getAngle() - 5); //-
+	                	 break;
+	                 default:
+						System.out.println("Error: unknown event");
+						break;
+	                 }
              }
          });
      }
