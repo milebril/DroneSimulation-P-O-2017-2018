@@ -26,6 +26,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.Node;
 
 public class hallo extends Application {
+	
+	private final int SCALE = 10;
 	 
     final Group root = new Group();
     final Group axisGroup = new Group();
@@ -35,20 +37,19 @@ public class hallo extends Application {
     final Xform cameraXform2 = new Xform();
     final Xform cameraXform3 = new Xform();
     final double cameraDistance = 1000;
- 
-    boolean timelinePlaying = false;
-    double ONE_FRAME = 1.0/24.0;
-    double DELTA_MULTIPLIER = 200.0;
-    double CONTROL_MULTIPLIER = 0.1;
-    double SHIFT_MULTIPLIER = 0.1;
-    double ALT_MULTIPLIER = 0.5;
         
-    double mousePosX;
-    double mousePosY;
-    double mouseOldX;
-    double mouseOldY;
+    // variables for mouse interaction
+    private double mousePosX, mousePosY;
+    private double mouseOldX, mouseOldY;
     double mouseDeltaX;
     double mouseDeltaY;
+    
+    private final Rotate rotateX = new Rotate();
+    { rotateX.setAxis(Rotate.X_AXIS); }
+    private final Rotate rotateY = new Rotate();
+    { rotateY.setAxis(Rotate.Y_AXIS); }
+    private final Rotate rotateZ = new Rotate();
+    { rotateZ.setAxis(Rotate.Z_AXIS); }
     
     Box testBox;
     int x = 0;
@@ -71,11 +72,12 @@ public class hallo extends Application {
         scene.setFill(Color.GREY);
         
         // create axis walls
-        Group grid = createGrid(400);
+        Group grid = createGrid(40 * SCALE);
+        
+        world.getChildren().add(grid);
 
         // add objects to scene
         //StackPane root = new StackPane();
-        root.getChildren().add(grid);
         
         handleKeyboard(scene, world);
         handleMouse(scene, world);
@@ -109,9 +111,8 @@ public class hallo extends Application {
     }
     
     private void buildCamera() {
-        root.getChildren().add(cameraXform);
-        cameraXform.getChildren().add(cameraXform2);
-        cameraXform2.getChildren().add(cameraXform3);
+        //root.getChildren().add(cameraXform);
+        cameraXform.getChildren().add(cameraXform3);
         cameraXform3.getChildren().add(camera);
         cameraXform3.setRotateZ(180.0);
  
@@ -136,13 +137,15 @@ public class hallo extends Application {
         blueMaterial.setDiffuseColor(Color.DARKBLUE);
         blueMaterial.setSpecularColor(Color.BLUE);
  
-        final Box xAxis = new Box(240.0, 0.5, 0.5); //Rood
-        final Box yAxis = new Box(0.5, 240.0, 0.5); //Groen
-        final Box zAxis = new Box(0.5, 0.5, 240.0); //Blauw
+        final Box xAxis = new Box(24.0 * SCALE, 0.5, 0.5); //Rood
+        final Box yAxis = new Box(0.5, 24.0 * SCALE, 0.5); //Groen
+        final Box zAxis = new Box(0.5, 0.5, 24.0 * SCALE); //Blauw
         
-        testBox = new Box(10, 10, 10);
+        int rib = 1 * SCALE;
+        
+        testBox = new Box(rib, rib, rib);
         testBox.setRotationAxis(new Point3D(1, 0, 0));
-        testBox.setTranslateY(100);
+        testBox.setTranslateY(10 * SCALE);
         
         xAxis.setMaterial(redMaterial);
         yAxis.setMaterial(greenMaterial);
@@ -192,8 +195,8 @@ public class hallo extends Application {
                      modifier = 10.0;
                  }     
                  if (me.isPrimaryButtonDown()) {                     
-                     cameraXform.t.setX(cameraXform.t.getX() + mouseDeltaX*modifierFactor*modifier*0.3);  // -
-                     cameraXform.t.setY(cameraXform.t.getY() + mouseDeltaY*modifierFactor*modifier*0.3);  // -
+                     cameraXform.t.setX(cameraXform.t.getX() + mouseDeltaX*modifierFactor*5*0.3);  // -
+                     cameraXform.t.setY(cameraXform.t.getY() + mouseDeltaY*modifierFactor*5*0.3);  // -
                  }
                  else if (me.isSecondaryButtonDown()) {
                      double z = camera.getTranslateZ();
@@ -203,6 +206,10 @@ public class hallo extends Application {
                  else if (me.isMiddleButtonDown()) {
                      cameraXform.ry.setAngle(cameraXform.ry.getAngle() - mouseDeltaX*modifierFactor*modifier*2.0);  // +
                      cameraXform.rx.setAngle(cameraXform.rx.getAngle() + mouseDeltaY*modifierFactor*modifier*2.0);  // -
+                     
+                     //rotateX.setAngle(rotateX.getAngle() - mouseDeltaY*modifierFactor*modifier*2.0);
+                     //rotateZ.setAngle(rotateZ.getAngle() - mouseDeltaY*modifierFactor*modifier*2.0);
+                     //rotateY.setAngle(rotateY.getAngle() + mouseDeltaX*modifierFactor*modifier*2.0);
                  }
              }
          });
@@ -223,36 +230,47 @@ public class hallo extends Application {
              @Override
              public void handle(KeyEvent event) {
                  switch (event.getCode()) {
-	                 case X:
-	                     if (axisGroup.isVisible()) {
-	                         System.out.println("setVisible(false)");
-	                         axisGroup.setVisible(false);
-	                     }
-	                     else {
-	                         System.out.println("setVisible(true)");
-	                         axisGroup.setVisible(true);
-	                     }
-	                     break;
-	                 case R:
-	            		 System.out.println("Resetting World");
-	            		 resetCamera();
-	            		 break;
-	                 case LEFT:
-	                	 cameraXform.ry.setAngle(cameraXform.ry.getAngle() - 5); //-
-	                	 break;
-	                 case RIGHT:
-	                	 cameraXform.ry.setAngle(cameraXform.ry.getAngle() + 5); //+
-	                	 break;
-	                 case UP:
-	                	 cameraXform.rx.setAngle(cameraXform.rx.getAngle() + 5); //+
-	                	 break;
-	                 case DOWN:
-	                	 cameraXform.rx.setAngle(cameraXform.rx.getAngle() - 5); //-
-	                	 break;
-	                 default:
-						System.out.println("Error: unknown event");
-						break;
-	                 }
+                 case X:
+                	 cameraXform.rx.setAngle(0);
+                	 cameraXform.ry.setAngle(-90);
+                	 break;
+                 case Y:
+                	 cameraXform.rx.setAngle(-90);
+                	 cameraXform.ry.setAngle(0);
+                	 break;
+                 case Z:
+                	 cameraXform.rx.setAngle(0);
+                	 cameraXform.ry.setAngle(0);
+                	 break;
+				 case V:
+				     if (axisGroup.isVisible()) {
+				         System.out.println("setVisible(false)");
+				         axisGroup.setVisible(false);
+					 } else {
+						 System.out.println("setVisible(true)");
+						 axisGroup.setVisible(true);
+					 }
+				     break;
+				 case R:
+					 System.out.println("Resetting World");
+					 resetCamera();
+					 break;
+				 case LEFT:
+					 cameraXform.ry.setAngle(cameraXform.ry.getAngle() - 5); //-
+					 break;
+				 case RIGHT:
+					 cameraXform.ry.setAngle(cameraXform.ry.getAngle() + 5); //+
+					 break;
+				 case UP:
+					 cameraXform.rx.setAngle(cameraXform.rx.getAngle() + 5); //+
+					 break;
+				 case DOWN:
+					 cameraXform.rx.setAngle(cameraXform.rx.getAngle() - 5); //-
+					 break;
+				 default:
+					System.out.println("Error: unknown event");
+				break;
+                 }
              }
          });
      }
