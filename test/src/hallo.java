@@ -1,24 +1,38 @@
 
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+
+import com.sun.javafx.sg.prism.NGPhongMaterial;
+
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.AmbientLight;
 import javafx.scene.Group;
 import javafx.scene.PerspectiveCamera;
+import javafx.scene.PointLight;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.effect.Light;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Material;
 import javafx.scene.paint.Paint;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Mesh;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.event.EventHandler;
 import javafx.geometry.Point3D;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -64,20 +78,17 @@ public class hallo extends Application {
     @Override
     public void start(Stage primaryStage) {
         System.out.println("start");
+        
+        // create axis walls
+        Group grid = createGrid(40 * SCALE);
+        world.getChildren().add(grid);
+        
         buildScene();
         buildCamera();
         buildAxes();
  
         Scene scene = new Scene(root, 1024, 768, true);
         scene.setFill(Color.GREY);
-        
-        // create axis walls
-        Group grid = createGrid(40 * SCALE);
-        
-        world.getChildren().add(grid);
-
-        // add objects to scene
-        //StackPane root = new StackPane();
         
         handleKeyboard(scene, world);
         handleMouse(scene, world);
@@ -148,13 +159,12 @@ public class hallo extends Application {
         testBox = new Box(rib, rib, rib);
         testBox.setRotationAxis(new Point3D(1, 0, 0));
         testBox.setTranslateY(10 * SCALE);
+        testBox.setMaterial(new PhongMaterial(Color.ORANGERED));
         
         xAxis.setMaterial(redMaterial);
         yAxis.setMaterial(greenMaterial);
         zAxis.setMaterial(blueMaterial);
- 
-        
-        
+
         axisGroup.getChildren().addAll(xAxis, yAxis, zAxis);
         world.getChildren().addAll(axisGroup);
         world.getChildren().add(testBox);
@@ -227,7 +237,7 @@ public class hallo extends Application {
      }
 
 
-     private void handleKeyboard(Scene scene, final Node root) {
+     private void handleKeyboard(Scene scene, final Node roots) {
          scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
              @Override
              public void handle(KeyEvent event) {
@@ -237,7 +247,7 @@ public class hallo extends Application {
                 	 cameraXform.ry.setAngle(-90);
                 	 break;
                  case Y:
-                	 cameraXform.rx.setAngle(-90);
+                	 cameraXform.rx.setAngle(90);
                 	 cameraXform.ry.setAngle(0);
                 	 break;
                  case Z:
@@ -269,6 +279,43 @@ public class hallo extends Application {
 				 case DOWN:
 					 cameraXform.rx.setAngle(cameraXform.rx.getAngle() - 5); //-
 					 break;
+				 case P:
+					 Thread t = new Thread("Snapshot Thread");
+					 
+					 t.start();
+					 
+					 SnapshotParameters p = new SnapshotParameters();
+					 p.setCamera(camera);
+					 p.setViewport(new Rectangle2D(0, 0, 1024, 768));
+					 p.setDepthBuffer(true);
+					 
+					 BufferedImage bufferedImage = SwingFXUtils.fromFXImage(world.snapshot(p, null), null);
+					 
+					 File file = new File("output.png");
+					 
+				    try {
+				        ImageIO.write(bufferedImage, "png", file);
+				        
+				        /*ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				        ImageIO.write(bufferedImage, "jpg", baos);
+				        byte[] bytes = baos.toByteArray(); */
+				        
+				        t.join();
+				        
+				        /*for (byte b : bytes) {
+				        	System.out.println(b);
+				        } */
+				        
+				    } catch (IOException e) {
+				        System.out.println(e);
+				    } catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					 
+				    
+				    
+				    break;
 				 default:
 					System.out.println("Error: unknown event");
 				break;
