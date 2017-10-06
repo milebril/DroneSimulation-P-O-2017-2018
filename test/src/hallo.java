@@ -137,9 +137,11 @@ public class hallo extends Application {
         blueMaterial.setDiffuseColor(Color.DARKBLUE);
         blueMaterial.setSpecularColor(Color.BLUE);
  
-        final Box xAxis = new Box(24.0 * SCALE, 0.5, 0.5); //Rood
-        final Box yAxis = new Box(0.5, 24.0 * SCALE, 0.5); //Groen
-        final Box zAxis = new Box(0.5, 0.5, 24.0 * SCALE); //Blauw
+        final Box xAxis = new Box(40.0 * SCALE, 1, 1); //Rood = X
+        xAxis.setTranslateY(2);
+        final Box yAxis = new Box(1, 40.0 * SCALE, 1); //Groen = y
+        final Box zAxis = new Box(1, 1, 40.0 * SCALE); //Blauw = z
+        zAxis.setTranslateY(2);
         
         int rib = 1 * SCALE;
         
