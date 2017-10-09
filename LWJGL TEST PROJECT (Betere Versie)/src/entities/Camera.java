@@ -16,9 +16,9 @@ import org.lwjgl.util.vector.Vector3f;
 
 public class Camera {
 	
-	private Vector3f position = new Vector3f(0,5,0);
-	private float pitch = 10;
-	private float yaw ;
+	private Vector3f position = new Vector3f(0,0,0);
+	private float pitch;
+	private float yaw;
 	private float roll;
 	
 	private float distance = 0.2f;
@@ -57,10 +57,11 @@ public class Camera {
 	        pitch -= (dy * mouseSensitivity);
 		}	
 		
+
 		if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
 			GL11.glReadBuffer(GL11.GL_FRONT);
-			int width = Display.getDisplayMode().getWidth();
-			int height= Display.getDisplayMode().getHeight();
+			int width = Display.getWidth();
+			int height= Display.getHeight();
 			int bpp = 4; // Assuming a 32-bit display with a byte each for red, green, blue, and alpha.
 			ByteBuffer buffer = BufferUtils.createByteBuffer(width * height * bpp);
 			GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer );
@@ -80,12 +81,14 @@ public class Camera {
 			        image.setRGB(x, height - (y + 1), (0xFF << 24) | (r << 16) | (g << 8) | b);
 			    }
 			}
+			
+			BufferedImage dest = image.getSubimage(image.getWidth()/2 - 100, image.getHeight()/2 - 100,
+					200, 200);
 			   
 			try {
-			    ImageIO.write(image, format, file);
+			    ImageIO.write(dest, format, file);
 			} catch (IOException e) { e.printStackTrace(); }
 		}
-		
 		
 	}
 

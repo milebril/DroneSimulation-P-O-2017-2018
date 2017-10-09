@@ -82,8 +82,8 @@ public class hallo extends Application {
         System.out.println("start");
         
         // create axis walls
-        Group grid = createGrid(40 * SCALE);
-        world.getChildren().add(grid);
+        //Group grid = createGrid(40 * SCALE);
+        //world.getChildren().add(grid);
         
         buildScene();
         buildCamera();
@@ -100,7 +100,7 @@ public class hallo extends Application {
         primaryStage.show();
         scene.setCamera(camera);
         
-        AnimationTimer animator = new AnimationTimer(){
+      /*  AnimationTimer animator = new AnimationTimer(){
 
 			@Override
 			public void handle(long arg0) {
@@ -120,7 +120,7 @@ public class hallo extends Application {
         	
         };
         
-        animator.start();
+        animator.start(); */
     }
     
     private void buildCamera() {
@@ -160,15 +160,15 @@ public class hallo extends Application {
         
         testBox = new Box(rib, rib, rib);
         testBox.setRotationAxis(new Point3D(1, 0, 0));
-        testBox.setTranslateY(10 * SCALE);
-        testBox.setMaterial(new PhongMaterial(Color.ORANGERED));
+        //testBox.setTranslateY(10 * SCALE);
+        testBox.setMaterial(new PhongMaterial(Color.RED));
         
         xAxis.setMaterial(redMaterial);
         yAxis.setMaterial(greenMaterial);
         zAxis.setMaterial(blueMaterial);
 
         axisGroup.getChildren().addAll(xAxis, yAxis, zAxis);
-        world.getChildren().addAll(axisGroup);
+        //world.getChildren().addAll(axisGroup);
         world.getChildren().add(testBox);
     }
     
@@ -211,6 +211,8 @@ public class hallo extends Application {
                  if (me.isPrimaryButtonDown()) {                     
                      cameraXform.t.setX(cameraXform.t.getX() + mouseDeltaX*modifierFactor*5*0.3);  // -
                      cameraXform.t.setY(cameraXform.t.getY() + mouseDeltaY*modifierFactor*5*0.3);  // -
+                     
+                     System.out.println(cameraXform.t);
                  }
                  else if (me.isSecondaryButtonDown()) {
                      double z = camera.getTranslateZ();
@@ -220,6 +222,8 @@ public class hallo extends Application {
                  else if (me.isMiddleButtonDown()) {
                      cameraXform.ry.setAngle(cameraXform.ry.getAngle() - mouseDeltaX*modifierFactor*modifier*2.0);  // +
                      cameraXform.rx.setAngle(cameraXform.rx.getAngle() + mouseDeltaY*modifierFactor*modifier*2.0);  // -
+                     
+                     System.out.println(cameraXform.rx + " " + cameraXform.ry);
                      
                      //rotateX.setAngle(rotateX.getAngle() - mouseDeltaY*modifierFactor*modifier*2.0);
                      //rotateZ.setAngle(rotateZ.getAngle() - mouseDeltaY*modifierFactor*modifier*2.0);
@@ -293,36 +297,20 @@ public class hallo extends Application {
 					 
 					 Image snapshot = world.snapshot(p, null);
 					 
-					 final byte[] pixels = new byte[(int) (snapshot.getHeight() * snapshot.getWidth() * 3) ];
-					 
-					 for (int y = 0; y < snapshot.getHeight(); y++) {
-						for (int x = 0; x < snapshot.getWidth(); x++) {
-							Color c = snapshot.getPixelReader().getColor(x, y);
-							
-						}
-					}
-					 
 					 //final byte[] pixels = ((DataBufferByte) bufferedImage.getRaster().getDataBuffer()).getData();
 					 
-					 System.out.println(pixels.length);
+					 //System.out.println(pixels.length);
 					 
 					 //System.out.println(bufferedImage);
-					 /*
+					 
 					 
 					 File file = new File("output.png");
 					 
 				     try {
-				        ImageIO.write(bufferedImage, "png", file);
+				    	 ImageIO.write(SwingFXUtils.fromFXImage(snapshot, null), "png", file);
 				        
-				       ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				        ImageIO.write(bufferedImage, "jpg", baos);
-				        byte[] bytes = baos.toByteArray();
-				        
+				       
 				        t.join();
-				        
-				        for (byte b : bytes) {
-				        	System.out.println(b);
-				        } 
 				        
 				    } catch (IOException e) {
 				        System.out.println(e);
@@ -330,7 +318,7 @@ public class hallo extends Application {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					  */
+					
 				    break;
 				 default:
 					System.out.println("Error: unknown event");

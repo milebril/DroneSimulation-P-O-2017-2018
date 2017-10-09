@@ -3,7 +3,6 @@
 /models/
 /renderEngine/
 /shaders/
-/terrains/
+/testObjects/
 /textures/
 /toolbox/
-/testObjects/
