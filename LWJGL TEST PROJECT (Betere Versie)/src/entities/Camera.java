@@ -24,8 +24,16 @@ public class Camera {
 	private float distance = 0.2f;
 	private float mouseSensitivity = 0.1f;
 	
+	private int snapshotWidth;
+	private int snapshotHeight;
+	
 	public Camera(){}
 	
+	public Camera(int nbColumns, int nbRows) {
+		this.snapshotWidth = nbColumns;
+		this.snapshotHeight = nbRows;
+	}
+
 	public void move(){
 		if(Keyboard.isKeyDown(Keyboard.KEY_Z)){
 			position.x += distance * (float)Math.sin(Math.toRadians(yaw));
@@ -69,7 +77,7 @@ public class Camera {
 			File file = new File("res/image.png"); // The file to save to.
 			String format = "PNG"; // Example: "PNG" or "JPG"
 			BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-			   
+			
 			for(int x = 0; x < width; x++) 
 			{
 			    for(int y = 0; y < height; y++)
@@ -81,10 +89,10 @@ public class Camera {
 			        image.setRGB(x, height - (y + 1), (0xFF << 24) | (r << 16) | (g << 8) | b);
 			    }
 			}
-			
+			//Cropping the image
 			BufferedImage dest = image.getSubimage(image.getWidth()/2 - 100, image.getHeight()/2 - 100,
-					200, 200);
-			   
+					this.snapshotWidth, this.snapshotHeight);
+			
 			try {
 			    ImageIO.write(dest, format, file);
 			} catch (IOException e) { e.printStackTrace(); }
