@@ -29,6 +29,7 @@ import testObjects.Cube;
 import textures.ModelTexture;
 import entities.Camera;
 import entities.Entity;
+import entities.cubeTestPlayer;
 
 public class MainGameLoop {
 
@@ -74,7 +75,7 @@ public class MainGameLoop {
 			Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
 			RawModel model = loader.loadToVAO(c.positions, c.colors, null);
 			TexturedModel staticModel = new TexturedModel(model,new ModelTexture(loader.loadTexture("image")));
-			entities.add(new Entity(staticModel, 
+			entities.add(new cubeTestPlayer(staticModel, 
 					new Vector3f(r.nextFloat()*100-50,r.nextFloat()*100-50,r.nextFloat()*-300),0, 0, 0, 1));
 		}
 		
@@ -87,8 +88,8 @@ public class MainGameLoop {
 			shader.start();
 			shader.loadViewMatrix(camera);
 			for (Entity entity : entities) {
-				//entity.increaseRotation(1, 0, 0);
 				renderer.render(entity,shader);
+				((cubeTestPlayer) entity).applyGravity();
 			}
 			shader.stop();
 			DisplayManager.updateDisplay();
