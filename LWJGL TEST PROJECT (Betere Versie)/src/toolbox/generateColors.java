@@ -1,7 +1,9 @@
 package toolbox;
 
 public class generateColors {
-	
+	/**
+	 * Cube Colors
+	 */
 	public static float[] generateColors(float r, float g, float b) {
 		float[] colours = new float[] {
 				//Links

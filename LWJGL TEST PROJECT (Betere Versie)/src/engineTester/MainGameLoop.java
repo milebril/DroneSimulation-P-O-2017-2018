@@ -28,6 +28,7 @@ import shaders.StaticShader;
 import testObjects.Cube;
 import textures.ModelTexture;
 import entities.Camera;
+import entities.Drone;
 import entities.Entity;
 import entities.cubeTestPlayer;
 
@@ -59,7 +60,7 @@ public class MainGameLoop {
 			e.printStackTrace();
 		}
 		
-		//Createinfg the display AKA the screen
+		//Create the display AKA the screen
 		DisplayManager.createDisplay();
 		//Loader is used to load models using VAO's and VBO's
 		Loader loader = new Loader();
@@ -74,23 +75,29 @@ public class MainGameLoop {
 		for (int i = 0; i < 1000; i++) {
 			Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
 			RawModel model = loader.loadToVAO(c.positions, c.colors, null);
-			TexturedModel staticModel = new TexturedModel(model,new ModelTexture(loader.loadTexture("image")));
-			entities.add(new cubeTestPlayer(staticModel, 
+			//TexturedModel staticModel = new TexturedModel(model,new ModelTexture(loader.loadTexture("image")));
+			entities.add(new cubeTestPlayer(model, 
 					new Vector3f(r.nextFloat()*100-50,r.nextFloat()*100-50,r.nextFloat()*-300),0, 0, 0, 1));
 		}
 		
-		Camera camera = new Camera(autopilotConfig.getNbColumns(), autopilotConfig.getNbRows());
+		Cube droneCube = new Cube(1, 0, 0);
+		Drone drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
+				new Vector3f(0, 30, 0), 0, 0, 0, 0, autopilotConfig);
 		
 		while(!Display.isCloseRequested()){
-			//entity.increaseRotation(1, 1, 0);
-			camera.move();
+			//camera.move();
 			renderer.prepare();
 			shader.start();
-			shader.loadViewMatrix(camera);
+			shader.loadViewMatrix(drone.getCamera());
 			for (Entity entity : entities) {
 				renderer.render(entity,shader);
 				((cubeTestPlayer) entity).applyGravity();
 			}
+			
+			//Drone
+			renderer.render(drone, shader);
+			drone.increasePosition(0, 0, -0.1f);
+			drone.increaseCameraRoll(0.2f);
 			shader.stop();
 			DisplayManager.updateDisplay();
 		}

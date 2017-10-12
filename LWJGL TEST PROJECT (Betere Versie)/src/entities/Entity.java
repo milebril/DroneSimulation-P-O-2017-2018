@@ -1,17 +1,18 @@
 package entities;
 
+import models.RawModel;
 import models.TexturedModel;
 
 import org.lwjgl.util.vector.Vector3f;
 
 public class Entity {
 
-	private TexturedModel model;
+	private RawModel model;
 	private Vector3f position;
 	private float rotX, rotY, rotZ;
 	private float scale;
 
-	public Entity(TexturedModel model, Vector3f position, float rotX, float rotY, float rotZ,
+	public Entity(RawModel model, Vector3f position, float rotX, float rotY, float rotZ,
 			float scale) {
 		this.model = model;
 		this.position = position;
@@ -33,11 +34,11 @@ public class Entity {
 		this.rotZ += dz;
 	}
 
-	public TexturedModel getModel() {
+	public RawModel getModel() {
 		return model;
 	}
 
-	public void setModel(TexturedModel model) {
+	public void setModel(RawModel model) {
 		this.model = model;
 	}
 

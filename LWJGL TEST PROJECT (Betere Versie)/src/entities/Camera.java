@@ -116,6 +116,22 @@ public class Camera {
 		return roll;
 	}
 	
+	/*
+	 * Drone Based Camera Movements
+	 */
 	
+	public void increasePosition(float dx, float dy, float dz) {
+			this.position.x += dx;
+			this.position.y += dy;
+			this.position.z += dz;
+	}
+
+	public void setRoll(float roll) {
+		this.roll = roll;
+	}
+
+	public void increaseRoll(float roll) {
+		this.roll += roll;
+	}
 
 }
