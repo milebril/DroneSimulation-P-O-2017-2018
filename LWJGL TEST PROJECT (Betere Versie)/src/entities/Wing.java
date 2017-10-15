@@ -25,8 +25,16 @@ public class Wing {
 		return this.rotAx;
 	}
 	
+	public float setInclination(){
+		return this.inclination;
+	}
+	
 	public float getInclination(){
 		return this.inclination;
+	}
+	
+	public void setLiftSlope(float slope){
+		this.wingLiftSlope = slope;
 	}
 	
 	public float getLiftSlope(){

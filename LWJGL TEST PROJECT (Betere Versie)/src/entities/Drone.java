@@ -82,6 +82,8 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	
 	//Calculates left wing liftforce
 	private Vector3f calculateLeftWingLift(){
+		//TODO: normal wordt gedeclareerd als een 0 vector omdat Vector3f.cross iets moet opslaan in vector.
+		//alternatief is mss vector declareren in Vector3f.cross?
 		Vector3f normal = new Vector3f(0,0,0);
 		Vector3f attackVector = new Vector3f(0,(float)Math.sin(this.leftWing.getInclination()), (float) -Math.cos(this.leftWing.getInclination()));
 		Vector3f.cross(this.leftWing.getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
@@ -98,6 +100,65 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		return result;
 	}
 	
+	//Calculates right wing liftforce
+	private Vector3f calculateRightWingLift(){
+		Vector3f normal = new Vector3f(0,0,0);
+		
+		// The right wing's attack vector is (0, sin(rightWingInclination), -cos(rightWingInclination)).
+		Vector3f attackVector = new Vector3f(0,(float)Math.sin(this.rightWing.getInclination()), (float) -Math.cos(this.rightWing.getInclination()));
+		
+		Vector3f.cross(this.rightWing.getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
+		float liftSlope = this.rightWing.getLiftSlope();
+		
+		//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
+		float AoA = (float) Math.atan2(Vector3f.dot(this.getSpeedVector(),normal), Vector3f.dot(this.getSpeedVector(),attackVector)); 
+		float speed = (float) Math.pow(this.getSpeed(),2);
+		Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*Math.pow(speed, 2)),
+									   (float)(normal.y*liftSlope*AoA*Math.pow(speed, 2)),
+									   (float)(normal.z*liftSlope*AoA*Math.pow(speed, 2)));
+		return result;
+	}
+	
+	//Calculates horizontal stabilizer liftforce
+		private Vector3f calculateHorStabLift(){
+			Vector3f normal = new Vector3f(0,0,0);
+			
+			// The horizontal stabilizer's attack vector is (0, sin(horStabInclination), -cos(horStabInclination)).
+			Vector3f attackVector = new Vector3f(0,(float)Math.sin(this.horizontalStabilizer.getInclination()), (float) -Math.cos(this.horizontalStabilizer.getInclination()));
+			
+			Vector3f.cross(this.horizontalStabilizer.getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
+			float liftSlope = this.horizontalStabilizer.getLiftSlope();
+			
+			//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
+			float AoA = (float) Math.atan2(Vector3f.dot(this.getSpeedVector(),normal), Vector3f.dot(this.getSpeedVector(),attackVector)); 
+			float speed = (float) Math.pow(this.getSpeed(),2);
+			Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*Math.pow(speed, 2)),
+										   (float)(normal.y*liftSlope*AoA*Math.pow(speed, 2)),
+										   (float)(normal.z*liftSlope*AoA*Math.pow(speed, 2)));
+			return result;
+		}
+	
+	
+	//Calculates horizontal stabilizer liftforce
+	private Vector3f calculateVerStabLift(){
+		Vector3f normal = new Vector3f(0,0,0);
+			
+		// The vertical stabilizer's attack vector is (-sin(verStabInclination), 0, -cos(verStabInclination)).
+		Vector3f attackVector = new Vector3f(0,(float) -Math.sin(this.verticalStabilizer.getInclination()), (float) -Math.cos(this.verticalStabilizer.getInclination()));
+			
+		Vector3f.cross(this.verticalStabilizer.getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
+		float liftSlope = this.verticalStabilizer.getLiftSlope();
+			
+		//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
+		float AoA = (float) Math.atan2(Vector3f.dot(this.getSpeedVector(),normal), Vector3f.dot(this.getSpeedVector(),attackVector)); 
+		float speed = (float) Math.pow(this.getSpeed(),2);
+		Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*Math.pow(speed, 2)),
+										   (float)(normal.y*liftSlope*AoA*Math.pow(speed, 2)),
+										   (float)(normal.z*liftSlope*AoA*Math.pow(speed, 2)));
+		return result;
+	}	
+		
+	
 	private Vector3f getSpeedVector(){
 		return this.speedVector;
 	}
@@ -110,7 +171,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	public void applyForces() {
 		//Gravity
 		//in the 2 wings
-		//in the engine          //Can we do this in the massCenter?
+		//in the engine          //Can we do this in the massCenter? -> gewoon in de berekende engine positie
 		//in the stabilizer
 		//Lift Forces, ...
 	}
@@ -197,6 +258,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	*/
 	
 	//TODO nakijken deze formule
+	//functie die de snelheid van de drone berekent uit de speedVector
 	public float getSpeed() {
 		float x = this.getSpeedVector().x;
 		float y = this.getSpeedVector().y;
