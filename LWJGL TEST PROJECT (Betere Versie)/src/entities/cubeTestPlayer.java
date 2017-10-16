@@ -19,7 +19,7 @@ public class cubeTestPlayer extends Entity{
 	}
 
 	public void applyGravity() {
-		downSpeed += GRAVITY * DisplayManager.getFrameTimeSeconds();
+		downSpeed += GRAVITY * DisplayManager.getFrameTimeSeconds(); // v = v + a*t
 		super.increasePosition(0, downSpeed * DisplayManager.getFrameTimeSeconds(), 0);
 		if (super.getPosition().y <= TERRAIN_HEIGHT) {
 			downSpeed = 0;

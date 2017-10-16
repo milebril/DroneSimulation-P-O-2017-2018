@@ -7,7 +7,7 @@ public class Stabilizer {
 	private Vector3f relPosition;
 	private Vector3f rotAx;
 	private float liftSlope;
-	private float inclination;
+	private float inclination = 0;
 	
 	public Stabilizer(Vector3f position, float liftSlope, Vector3f rotationAxis) {
 		this.relPosition = position;

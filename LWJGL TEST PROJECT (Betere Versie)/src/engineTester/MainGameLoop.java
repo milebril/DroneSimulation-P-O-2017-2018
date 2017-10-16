@@ -97,7 +97,7 @@ public class MainGameLoop {
 			//Drone
 			renderer.render(drone, shader);
 			drone.increasePosition(0, 0, -0.1f);
-			drone.increaseCameraRoll(0.2f);
+			//drone.increaseCameraRoll(0.2f);
 			shader.stop();
 			DisplayManager.updateDisplay();
 		}
