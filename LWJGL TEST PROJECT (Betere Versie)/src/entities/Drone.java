@@ -167,9 +167,9 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
 		float AoA = (float) - Math.atan2(Vector3f.dot(this.getSpeedVector(),normal), Vector3f.dot(this.getSpeedVector(),attackVector)); 
 		float speed = (float) Math.pow(this.getSpeed(),2);
-		Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*Math.pow(speed, 2)),
-									   (float)(normal.y*liftSlope*AoA*Math.pow(speed, 2)),
-									   (float)(normal.z*liftSlope*AoA*Math.pow(speed, 2)));
+		Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*speed),
+									   (float)(normal.y*liftSlope*AoA*speed),
+									   (float)(normal.z*liftSlope*AoA*speed));
 		return result;
 	}	
 		
@@ -187,6 +187,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	private static final float GRAVITY = -9.0f;
 	
 	private float downSpeed = 0;
+	private float horSpeed = 0;
 	
 	public void applyForces() {
 		//Gravity
@@ -194,13 +195,20 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		
 		applyLiftForces();
 		
+		applyVerticalStabilizerForces();
 		//in the 2 wings
 		//in the engine          //Can we do this in the massCenter? -> gewoon in de berekende engine positie
 		//in the stabilizer
 		//Lift Forces, ...
-		increasePosition(0, downSpeed * DisplayManager.getFrameTimeSeconds() , 0);
+		increasePosition(horSpeed * DisplayManager.getFrameTimeSeconds(), downSpeed * DisplayManager.getFrameTimeSeconds() , 0);
+		super.increaseRotation(0, horSpeed, 0);
 	}
 	
+	private void applyVerticalStabilizerForces() {
+		Vector3f verticalStabilizer = this.calculateVerStabLift();
+		horSpeed += verticalStabilizer.x * DisplayManager.getFrameTimeSeconds();
+	}
+
 	private void applyLiftForces(){
 		Vector3f leftWing = this.calculateLeftWingLift();
 		System.out.println(leftWing.y);
