@@ -19,6 +19,7 @@ import org.lwjgl.util.vector.Vector3f;
 import autopilot.AutopilotConfig;
 import models.RawModel;
 import models.TexturedModel;
+import renderEngine.DisplayManager;
 
 public class Drone extends Entity /* implements AutopilotConfig */ {
 
@@ -48,7 +49,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 			AutopilotConfig cfg) {
 		super(model, position, rotX, rotY, rotZ, scale);
 		
-		this.speedVector = new Vector3f(0,0,0);
+		this.speedVector = new Vector3f(0,0,-0.1f);
 		
 		//TODO load drone settings through Config
 		//TODO updater for inclination (in wing and stab)
@@ -87,16 +88,29 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		Vector3f normal = new Vector3f(0,0,0);
 		Vector3f attackVector = new Vector3f(0,(float)Math.sin(this.leftWing.getInclination()), (float) -Math.cos(this.leftWing.getInclination()));
 		Vector3f.cross(this.leftWing.getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
+		System.out.println("normal: ");
+		System.out.println(normal);
 		
 		float liftSlope = this.leftWing.getLiftSlope();
 		
 		//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
 		
 		float AoA = (float) - Math.atan2(Vector3f.dot(this.getSpeedVector(),normal), Vector3f.dot(this.getSpeedVector(),attackVector)); 
+		System.out.println("1st dot");
+		System.out.println(Vector3f.dot(this.getSpeedVector(),normal));
+		System.out.println("2nd dot");
+		System.out.println(Vector3f.dot(this.getSpeedVector(),attackVector));
+		System.out.println("AoA");
+		System.out.println(AoA);
+		
+		
 		float speed = (float) Math.pow(this.getSpeed(),2);
-		Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*Math.pow(speed, 2)),
-									   (float)(normal.y*liftSlope*AoA*Math.pow(speed, 2)),
-									   (float)(normal.z*liftSlope*AoA*Math.pow(speed, 2)));
+		System.out.println(speed);
+		Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*speed),
+									   (float)(normal.y*liftSlope*AoA*speed),
+									   (float)(normal.z*liftSlope*AoA*speed));
+		System.out.println("norm*aoa" + normal.y*AoA);
+		System.out.println("result" + result);
 		return result;
 	}
 	
@@ -132,9 +146,10 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 			//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
 			float AoA = (float) - Math.atan2(Vector3f.dot(this.getSpeedVector(),normal), Vector3f.dot(this.getSpeedVector(),attackVector)); 
 			float speed = (float) Math.pow(this.getSpeed(),2);
-			Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*Math.pow(speed, 2)),
-										   (float)(normal.y*liftSlope*AoA*Math.pow(speed, 2)),
-										   (float)(normal.z*liftSlope*AoA*Math.pow(speed, 2)));
+			Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*speed),
+										   (float)(normal.y*liftSlope*AoA*speed),
+										   (float)(normal.z*liftSlope*AoA*speed));
+			
 			return result;
 		}
 	
@@ -169,12 +184,30 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		//TODO increase pos as of speed
 	}
 	
+	private static final float GRAVITY = -9.0f;
+	
+	private float downSpeed = 0;
+	
 	public void applyForces() {
 		//Gravity
+		downSpeed += GRAVITY * DisplayManager.getFrameTimeSeconds(); // v = v + a*t
+		
+		applyLiftForces();
+		
 		//in the 2 wings
 		//in the engine          //Can we do this in the massCenter? -> gewoon in de berekende engine positie
 		//in the stabilizer
 		//Lift Forces, ...
+		increasePosition(0, downSpeed * DisplayManager.getFrameTimeSeconds() , 0);
+	}
+	
+	private void applyLiftForces(){
+		Vector3f leftWing = this.calculateLeftWingLift();
+		System.out.println(leftWing.y);
+		downSpeed += 2*leftWing.getY()*DisplayManager.getFrameTimeSeconds(); //left and right
+		//Vector3f horStab = this.calculateHorStabLift()
+		
+		
 	}
 	
 	public void setRoll(float roll) {

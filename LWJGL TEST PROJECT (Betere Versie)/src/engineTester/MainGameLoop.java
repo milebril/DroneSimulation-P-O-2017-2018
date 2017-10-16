@@ -105,9 +105,10 @@ public class MainGameLoop {
 			//Drone
 			renderer.render(drone, shader);
 			drone.increasePosition(0, 0, -0.1f);
+			drone.applyForces();
 			//drone.increaseCameraRoll(0.2f);
 			if(Math.abs(drone.getPosition().z - e.getPosition().z) < 4) {
-				break;
+				//break;
 			}
 			
 			shader.stop();
