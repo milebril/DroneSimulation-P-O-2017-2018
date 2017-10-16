@@ -69,6 +69,7 @@ public class MainGameLoop {
 		// Renderer based on FOVX and FOVY
 		Renderer renderer = new Renderer(shader, autopilotConfig.getHorizontalAngleOfView(), autopilotConfig.getVerticalAngleOfView());
 		
+		/*
 		//Creating 1000 test cubes
 		Random r = new Random();
 		List<Entity> entities = new ArrayList<>();
@@ -79,6 +80,12 @@ public class MainGameLoop {
 			entities.add(new cubeTestPlayer(model, 
 					new Vector3f(r.nextFloat()*100-50,r.nextFloat()*100-50,r.nextFloat()*-300),0, 0, 0, 1));
 		}
+		*/
+		
+		Cube c = new Cube(1, 0, 0);
+		RawModel model = loader.loadToVAO(c.positions, c.colors, null);
+		Entity e = new Entity(model, 
+				new Vector3f(0,30,-50),0, 0, 0, 1);
 		
 		Cube droneCube = new Cube(1, 0, 0);
 		Drone drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
@@ -89,15 +96,20 @@ public class MainGameLoop {
 			renderer.prepare();
 			shader.start();
 			shader.loadViewMatrix(drone.getCamera());
-			for (Entity entity : entities) {
+			/*for (Entity entity : entities) {
 				renderer.render(entity,shader);
 				((cubeTestPlayer) entity).applyGravity();
-			}
+			}*/
+			renderer.render(e, shader);
 			
 			//Drone
 			renderer.render(drone, shader);
 			drone.increasePosition(0, 0, -0.1f);
 			//drone.increaseCameraRoll(0.2f);
+			if(Math.abs(drone.getPosition().z - e.getPosition().z) < 4) {
+				break;
+			}
+			
 			shader.stop();
 			DisplayManager.updateDisplay();
 		}

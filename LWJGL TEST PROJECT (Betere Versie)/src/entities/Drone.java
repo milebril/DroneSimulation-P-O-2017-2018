@@ -166,6 +166,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	public void increasePosition(float dx, float dy, float dz) {
 		super.increasePosition(dx, dy, dz);
 		camera.increasePosition(dx, dy, dz);
+		//TODO increase pos as of speed
 	}
 	
 	public void applyForces() {
