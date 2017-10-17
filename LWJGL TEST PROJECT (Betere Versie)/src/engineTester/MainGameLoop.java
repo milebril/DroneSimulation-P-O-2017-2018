@@ -104,7 +104,8 @@ public class MainGameLoop {
 			
 			//Drone
 			renderer.render(drone, shader);
-			drone.increasePosition(0, 0, -0.1f);
+			float dt = DisplayManager.getFrameTimeSeconds();
+			drone.increasePosition(drone.getSpeedVector().getX()*dt,drone.getSpeedVector().getY()*dt,drone.getSpeedVector().getZ()*dt);
 			drone.applyForces();
 			//drone.increaseCameraRoll(0.2f);
 			if(Math.abs(drone.getPosition().z - e.getPosition().z) < 4) {
@@ -113,6 +114,7 @@ public class MainGameLoop {
 			
 			shader.stop();
 			DisplayManager.updateDisplay();
+			//break;
 		}
 
 		shader.cleanUp();
