@@ -25,8 +25,8 @@ public class Wing {
 		return this.rotAx;
 	}
 	
-	public float setInclination(){
-		return this.inclination;
+	public void setInclination(float angle){
+		this.inclination = angle;
 	}
 	
 	public float getInclination(){

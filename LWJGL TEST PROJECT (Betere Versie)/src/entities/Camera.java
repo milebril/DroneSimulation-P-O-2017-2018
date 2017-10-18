@@ -134,4 +134,10 @@ public class Camera {
 		this.roll += roll;
 	}
 
+	public void increaseRotation(Vector3f headingVector) {
+		//Yaw:
+		Vector3f xPLUSz = new Vector3f(headingVector.x, 0, headingVector.y);
+		this.yaw = (float) Math.toRadians(Math.atan(Math.sin(headingVector.y) / Math.sin(xPLUSz.length())));
+	}
+
 }

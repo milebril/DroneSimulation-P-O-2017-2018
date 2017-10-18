@@ -85,11 +85,16 @@ public class MainGameLoop {
 		Cube c = new Cube(1, 0, 0);
 		RawModel model = loader.loadToVAO(c.positions, c.colors, null);
 		Entity e = new Entity(model, 
-				new Vector3f(0,30,-50),0, 0, 0, 1);
+				new Vector3f(0,5,-100),0, 0, 0, 1);
 		
 		Cube droneCube = new Cube(1, 0, 0);
 		Drone drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
 				new Vector3f(0, 30, 0), 0, 0, 0, 0, autopilotConfig);
+		
+		Cube c2 = new Cube(0, 0, 1);
+		RawModel model2 = loader.loadToVAO(c2.positions, c2.colors, null);
+		Entity e2 = new Entity(model2, 
+				new Vector3f(0,-1000,-2),0, 0, 0, 1);
 		
 		while(!Display.isCloseRequested()){
 			//camera.move();
@@ -101,12 +106,13 @@ public class MainGameLoop {
 				((cubeTestPlayer) entity).applyGravity();
 			}*/
 			renderer.render(e, shader);
+			renderer.render(e2, shader);
 			
 			//Drone
 			renderer.render(drone, shader);
 			float dt = DisplayManager.getFrameTimeSeconds();
-			drone.increasePosition(drone.getSpeedVector().getX()*dt,drone.getSpeedVector().getY()*dt,drone.getSpeedVector().getZ()*dt);
-			drone.applyForces();
+			drone.increasePosition(dt);
+			drone.applyForces(dt);
 			//drone.increaseCameraRoll(0.2f);
 			if(Math.abs(drone.getPosition().z - e.getPosition().z) < 4) {
 				//break;
