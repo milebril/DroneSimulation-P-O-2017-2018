@@ -227,7 +227,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		deepCopySpeedVector();
 		speedChangeVector = new Vector3f(0,0,0);
 	}
-
+	
 	private void deepCopySpeedVector() {
 		//DeepCopy the vector!!!
 		this.speedVectorOld.x = this.speedVector.x;

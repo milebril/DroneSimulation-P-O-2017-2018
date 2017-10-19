@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -85,7 +86,7 @@ public class MainGameLoop {
 		Cube c = new Cube(1, 0, 0);
 		RawModel model = loader.loadToVAO(c.positions, c.colors, null);
 		Entity e = new Entity(model, 
-				new Vector3f(0,30,-100),0, 0, 0, 1);
+				new Vector3f(0,30,-10),0, 0, 0, 1);
 		
 		Cube droneCube = new Cube(1, 0, 0);
 		Drone drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
@@ -104,9 +105,9 @@ public class MainGameLoop {
 			/* Drone */
 			renderer.render(drone, shader);
 			float dt = DisplayManager.getFrameTimeSeconds();
-			drone.increasePosition(dt);
-			drone.applyForces(dt);
-			
+			//drone.increasePosition(dt);
+			//drone.applyForces(dt);
+			e.increaseRotation(1, 1, 0);
 		
 			if(Math.abs(Math.sqrt(Math.pow(drone.getPosition().x - e.getPosition().x, 2) +
 					Math.pow(drone.getPosition().y - e.getPosition().y, 2) +
@@ -116,6 +117,10 @@ public class MainGameLoop {
 			
 			/* Drone Debug */
 			//drone.moveHeadingVector();
+			
+			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
+				drone.getCamera().takeSnapshot();
+			}
 			
 			shader.stop();
 			DisplayManager.updateDisplay();
