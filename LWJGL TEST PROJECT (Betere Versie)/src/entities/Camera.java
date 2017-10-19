@@ -17,8 +17,8 @@ import org.lwjgl.util.vector.Vector3f;
 public class Camera {
 	
 	private Vector3f position = new Vector3f(0,0,0);
-	private float pitch;
-	private float yaw;
+	public float pitch;
+	public float yaw;
 	private float roll;
 	
 	private float distance = 0.2f;
@@ -135,9 +135,7 @@ public class Camera {
 	}
 
 	public void increaseRotation(Vector3f headingVector) {
-		//Yaw:
-		Vector3f xPLUSz = new Vector3f(headingVector.x, 0, headingVector.y);
-		this.yaw = (float) Math.toRadians(Math.atan(Math.sin(headingVector.y) / Math.sin(xPLUSz.length())));
+		this.yaw = (float) Math.toDegrees(Math.asin(headingVector.y));
+		this.pitch = (float) Math.toDegrees(Math.asin(headingVector.x));
 	}
-
 }

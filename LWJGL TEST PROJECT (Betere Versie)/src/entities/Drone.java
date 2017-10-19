@@ -56,16 +56,12 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 			AutopilotConfig cfg) {
 		super(model, position, rotX, rotY, rotZ, scale);
 		
-		this.speedVector = new Vector3f(0.0f,0.0f,0.0f);
+		this.speedVector = new Vector3f(0.0f,0.0f, -10.0f);
 		this.speedChangeVector = new Vector3f(0.0f,0.0f,0.0f);
 		this.speedVectorOld = new Vector3f(0.0f,0.0f,0.0f);
 		this.headingVector = new Vector3f(0.0f,0.0f,-1.0f);
 		//Vector3f orig = new Vector3f(10,10,10);
-		//System.out.println("Vector orig: " + orig);
-		//System.out.println("Vector scale (1/10): " + orig.scale((float) 1/10));
 		
-		
-		//TODO load drone settings through Config
 		//TODO updater for inclination (in wing and stab)
 		//TODO updater for speedVector
 		
@@ -223,17 +219,11 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 			//Do nothing
 		}
 		
-		//in the 2 wings
-		//in the engine          //Can we do this in the massCenter? -> gewoon in de berekende engine positie
-		//in the stabilizer
-		//Lift Forces, ...
-		
 		//x = x0 + v*t
 		setHeadingVector();
 		
-		System.out.println(this.getPosition());
-		
 		Vector3f.add(speedVector, speedChangeVector, speedVector);
+		System.out.println(this.getPosition());
 		deepCopySpeedVector();
 		speedChangeVector = new Vector3f(0,0,0);
 	}
@@ -302,5 +292,30 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		float y = this.getSpeedVector().y;
 		float z = this.getSpeedVector().z;
 		return (float) Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+	}
+	
+	/*
+	 * DEBUG
+	 */
+	
+	public void moveHeadingVector() {
+		if(Keyboard.isKeyDown(Keyboard.KEY_Z)){
+			this.headingVector.y += 0.01f;
+			this.headingVector.normalise();
+		}
+		if(Keyboard.isKeyDown(Keyboard.KEY_S)){
+			this.headingVector.y -= 0.01f;
+			this.headingVector.normalise();
+		}
+		if(Keyboard.isKeyDown(Keyboard.KEY_D)){
+			this.headingVector.x += 0.01f;
+			this.headingVector.normalise();
+		}
+		if(Keyboard.isKeyDown(Keyboard.KEY_Q)){
+			this.headingVector.x -= 0.01f;
+			this.headingVector.normalise();
+		}
+
+		camera.increaseRotation(this.headingVector);
 	}
 }
