@@ -87,11 +87,11 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	
 	//Calculates engine position
 	private Vector3f calculateEnginePosition(float wingX){
-		float x = (this.leftWing.getMass()*wingX - this.rightWing.getMass()*wingX) / this.engineMass;
-		float z = (-this.tailMass*this.tailSize) / this.engineMass;
+		float x = (this.getLeftWing().getMass()*wingX - this.getRightWing().getMass()*wingX) / this.getEngineMass();
+		float z = (-this.getTailMass()*this.getTailSize()) / this.getEngineMass();
 		return new Vector3f(x,0,z);
 	}
-	
+
 	//Calculates left wing liftforce
 	private Vector3f calculateLeftWingLift(){
 		//TODO: normal wordt gedeclareerd als een 0 vector omdat Vector3f.cross iets moet opslaan in vector.
@@ -99,10 +99,10 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		Vector3f normal = new Vector3f(0,0,0);
 		
 		// The left wing's attack vector is (0, sin(leftWingInclination), -cos(leftWingInclination)).
-		Vector3f attackVector = new Vector3f(0,(float)Math.sin(this.leftWing.getInclination()), (float) -Math.cos(this.leftWing.getInclination()));
-		Vector3f.cross(this.leftWing.getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
+		Vector3f attackVector = new Vector3f(0,(float)Math.sin(this.getLeftWing().getInclination()), (float) -Math.cos(this.getLeftWing().getInclination()));
+		Vector3f.cross(this.getLeftWing().getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
 		
-		float liftSlope = this.leftWing.getLiftSlope();
+		float liftSlope = this.getLeftWing().getLiftSlope();
 		
 		//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
 		
@@ -120,10 +120,10 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		Vector3f normal = new Vector3f(0,0,0);
 		
 		// The right wing's attack vector is (0, sin(rightWingInclination), -cos(rightWingInclination)).
-		Vector3f attackVector = new Vector3f(0,(float)Math.sin(this.rightWing.getInclination()), (float) -Math.cos(this.rightWing.getInclination()));
-		Vector3f.cross(this.rightWing.getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
+		Vector3f attackVector = new Vector3f(0,(float)Math.sin(this.getRightWing().getInclination()), (float) -Math.cos(this.getRightWing().getInclination()));
+		Vector3f.cross(this.getRightWing().getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
 		
-		float liftSlope = this.rightWing.getLiftSlope();
+		float liftSlope = this.getRightWing().getLiftSlope();
 		
 		//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
 		float AoA = (float) - Math.atan2(Vector3f.dot(this.getSpeedVector(),normal), Vector3f.dot(this.getSpeedVector(),attackVector)); 
@@ -140,10 +140,10 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		Vector3f normal = new Vector3f(0,0,0);
 		
 		// The horizontal stabilizer's attack vector is (0, sin(horStabInclination), -cos(horStabInclination)).
-		Vector3f attackVector = new Vector3f(0,(float)Math.sin(this.horizontalStabilizer.getInclination()), (float) -Math.cos(this.horizontalStabilizer.getInclination()));
+		Vector3f attackVector = new Vector3f(0,(float)Math.sin(this.getHorizontalStabilizer().getInclination()), (float) -Math.cos(this.horizontalStabilizer.getInclination()));
 		
-		Vector3f.cross(this.horizontalStabilizer.getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
-		float liftSlope = this.horizontalStabilizer.getLiftSlope();
+		Vector3f.cross(this.getHorizontalStabilizer().getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
+		float liftSlope = this.getHorizontalStabilizer().getLiftSlope();
 		
 		//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
 		float AoA = (float) - Math.atan2(Vector3f.dot(this.getSpeedVector(),normal), Vector3f.dot(this.getSpeedVector(),attackVector)); 
@@ -162,10 +162,10 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		Vector3f normal = new Vector3f(0,0,0);
 			
 		// The vertical stabilizer's attack vector is (-sin(verStabInclination), 0, -cos(verStabInclination)).
-		Vector3f attackVector = new Vector3f(0,(float) -Math.sin(this.verticalStabilizer.getInclination()), (float) -Math.cos(this.verticalStabilizer.getInclination()));
+		Vector3f attackVector = new Vector3f(0,(float) -Math.sin(this.getVerticalStabilizer().getInclination()), (float) -Math.cos(this.verticalStabilizer.getInclination()));
 			
-		Vector3f.cross(this.verticalStabilizer.getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
-		float liftSlope = this.verticalStabilizer.getLiftSlope();
+		Vector3f.cross(this.getVerticalStabilizer().getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
+		float liftSlope = this.getVerticalStabilizer().getLiftSlope();
 			
 		//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
 		float AoA = (float) - Math.atan2(Vector3f.dot(this.getSpeedVector(),normal), Vector3f.dot(this.getSpeedVector(),attackVector)); 
@@ -176,45 +176,41 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 									   (float)(normal.z*liftSlope*AoA*speed));
 		return result;
 	}	
-		
-	
-	public Vector3f getSpeedVector(){
-		return this.speedVector;
-	}
 	
 	public void increasePosition(float dt) {
-		float dx = this.headingVector.x * dt * Math.abs(this.speedVector.x);
-		float dy = this.headingVector.y * dt * Math.abs(this.speedVector.y);
-		float dz = this.headingVector.z * dt * Math.abs(this.speedVector.z);
+		float dx = this.getHeadingVector().x * dt * Math.abs(this.getSpeedVector().x);
+		float dy = this.getHeadingVector().y * dt * Math.abs(this.getSpeedVector().y);
+		float dz = this.getHeadingVector().z * dt * Math.abs(this.getSpeedVector().z);
 		
 		super.increasePosition(dx, dy, dz);
-		camera.increasePosition(dx, dy, dz);
+		this.getCamera().increasePosition(dx, dy, dz);
 		
-		camera.increaseRotation(this.headingVector);
+		this.getCamera().increaseRotation(this.getHeadingVector());
 	}
 	
 	public void applyForces(float dt) {
 		//Checks:
-		if (this.thrustForce > this.maxThrust) {
-			this.thrustForce = maxThrust;
+		if (this.getThrustForce() > this.getMaxThrust()) { //TODO: deze check is overbodig omdat de setter van Thrus deze check doet?
+			this.setThrustForce(this.getMaxThrust());
 		}
 		
 		//Gravity
-		if (Math.abs(this.speedVector.y) < 60) {
-			this.speedChangeVector.y += GRAVITY * dt; // v = v0 + a*t, a = F/m
+		//Check voor maximale valversnelling
+		if (Math.abs(this.getSpeedVector().y) < 60) {
+			this.getSpeedChangeVector().y += GRAVITY * dt; // v = v0 + a*t, a = F/m
 		}
 		
 		//Engine = Speed
-		if (this.speedVector.length() < 100)
+		if (this.getSpeed() < 100)
 			applyEngineForce(dt);
 		
 		
 		applyLiftForces(dt);
 		
-		if (this.headingVector.y > 0) {
-			leftWing.setInclination(leftWing.getInclination() - 0.01f);
-		} else if (this.headingVector.y < 0) {
-			leftWing.setInclination(leftWing.getInclination() + 0.01f);
+		if (this.getHeadingVector().y > 0) {
+			getLeftWing().setInclination(getLeftWing().getInclination() - 0.01f);
+		} else if (this.getHeadingVector().y < 0) {
+			getLeftWing().setInclination(getLeftWing().getInclination() + 0.01f);
 		} else {
 			//Do nothing
 		}
@@ -222,10 +218,10 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		//x = x0 + v*t
 		setHeadingVector();
 		
-		Vector3f.add(speedVector, speedChangeVector, speedVector);
+		Vector3f.add(this.getSpeedVector(), this.getSpeedChangeVector(), this.getSpeedVector());
 		System.out.println(this.getPosition());
 		deepCopySpeedVector();
-		speedChangeVector = new Vector3f(0,0,0);
+		this.setSpeedChangeVector(new Vector3f(0,0,0));
 	}
 	
 	private void deepCopySpeedVector() {
@@ -238,34 +234,34 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	private void applyEngineForce(float dt) {
 		//v = v0 + a*t -> a = thrustForce / droneMass
 		//speedVectorNew = speedVectorOld + (thrustForce / droneMass)*dt
-		Vector3f engineVector = new Vector3f(this.getHeadingVector().x*(this.thrustForce / this.getDroneMass())*dt,
-											 this.getHeadingVector().y*(this.thrustForce / this.getDroneMass())*dt,
-											 this.getHeadingVector().z*(this.thrustForce / this.getDroneMass())*dt);
-		Vector3f.add(engineVector, this.speedChangeVector, this.speedChangeVector);
+		Vector3f engineVector = new Vector3f(this.getHeadingVector().x*(this.getThrustForce() / this.getDroneMass())*dt,
+											 this.getHeadingVector().y*(this.getThrustForce() / this.getDroneMass())*dt,
+											 this.getHeadingVector().z*(this.getThrustForce() / this.getDroneMass())*dt);
+		Vector3f.add(engineVector, this.getSpeedChangeVector(), this.getSpeedChangeVector());
 	}
 
 	private void applyLiftForces(float dt){
 		//Left Wing
 		Vector3f leftWingLiftForce = this.calculateLeftWingLift(); 			// = F
 		leftWingLiftForce.scale(1/this.getDroneMass() * dt); 			  			// = a = F/Mass
-		this.speedChangeVector.y += leftWingLiftForce.y;
+		this.getSpeedChangeVector().y += leftWingLiftForce.y;
 		
 		//Right Wing
 		//left and right are same for now.
 		//Vector3f.add(rightWing, this.speedChangeVector, this.speedChangeVector); // = v = v0 + a*t
 		Vector3f rightWing = this.calculateRightWingLift(); 		 // = F
 		rightWing.scale(1/this.getDroneMass() * dt); 			  		 // = a = F/Mass
-		this.speedChangeVector.y += rightWing.y;
+		this.getSpeedChangeVector().y += rightWing.y;
 		
 		//Vector3f horStab = this.calculateHorStabLift()
 	}
 	
 	public void setRoll(float roll) {
-		this.camera.setRoll(roll);
+		this.getCamera().setRoll(roll);
 	}
 	
 	public void increaseCameraRoll(float roll) {
-		this.camera.increaseRoll(roll);
+		this.getCamera().increaseRoll(roll);
 	}
 
 	public Camera getCamera() {
@@ -273,7 +269,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	}
 	
 	public float getDroneMass() {
-		return this.engineMass + this.tailMass + this.leftWing.getMass() + this.rightWing.getMass();
+		return this.getEngineMass() + this.tailMass + this.leftWing.getMass() + this.rightWing.getMass();
 	}
 	
 	private void setHeadingVector() {
@@ -286,14 +282,65 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		return this.headingVector;
 	}
 	
-	//functie die de snelheid van de drone berekent uit de speedVector
+//	functie die de snelheid van de drone berekent uit de speedVector
 	public float getSpeed() {
-		float x = this.getSpeedVector().x;
-		float y = this.getSpeedVector().y;
-		float z = this.getSpeedVector().z;
-		return (float) Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+		return this.getSpeedVector().length();
 	}
 	
+	public Vector3f getSpeedVector(){
+		return this.speedVector;
+	}
+	
+	public void setSpeedChangeVector(Vector3f vector){
+		this.speedChangeVector = vector;
+	}
+	
+	public Vector3f getSpeedChangeVector(){
+		return this.speedChangeVector;
+	}
+	
+	public float getEngineMass(){
+		return this.engineMass;
+	}
+	
+	public Wing getRightWing(){
+		return this.rightWing;
+	}
+	
+	public Wing getLeftWing(){
+		return this.leftWing;
+	}
+	
+	public Stabilizer getHorizontalStabilizer(){
+		return this.horizontalStabilizer;
+	}
+	
+	public Stabilizer getVerticalStabilizer(){
+		return this.horizontalStabilizer;
+	}
+	
+	public float getTailMass(){
+		return this.tailMass;
+	}
+	
+	public float getTailSize() {
+		return this.tailSize;
+	}
+	
+	public float getThrustForce() {
+		return this.thrustForce;
+	}
+	
+	public float getMaxThrust() {
+		return this.maxThrust;
+	}
+	
+	public void setThrustForce(float thrustForce) {
+		if(thrustForce <= this.getMaxThrust())
+			this.thrustForce = thrustForce;
+		else
+			this.thrustForce = this.getMaxThrust();
+	}
 	/*
 	 * DEBUG
 	 */
