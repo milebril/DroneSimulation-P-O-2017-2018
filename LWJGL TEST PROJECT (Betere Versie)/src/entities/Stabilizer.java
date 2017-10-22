@@ -10,9 +10,21 @@ public class Stabilizer {
 	private float inclination = 0;
 	
 	public Stabilizer(Vector3f position, float liftSlope, Vector3f rotationAxis) {
-		this.relPosition = position;
-		this.liftSlope = liftSlope;
-		this.rotAx = rotationAxis;
+		this.setRelPosition(position);
+		this.setLiftSlope(liftSlope);
+		this.setRotAxis(rotationAxis);
+	}
+	
+	private void setRelPosition(Vector3f pos){
+		this.relPosition = pos;
+	}
+	
+	public Vector3f getRelPosition(){
+		return this.relPosition;
+	}
+	
+	private void setRotAxis(Vector3f axis){
+		this.rotAx = axis;
 	}
 	
 	public Vector3f getRotAxis(){
@@ -27,13 +39,13 @@ public class Stabilizer {
 		return this.inclination;
 	}
 	
-	public void setLiftSlope(float slope){
+	private void setLiftSlope(float slope){
 		this.liftSlope = slope;
 	}
 	
 	public float getLiftSlope(){
 		return this.liftSlope;
 	}
-	//TODO Set rotationAxis here
+	
 	
 }	
