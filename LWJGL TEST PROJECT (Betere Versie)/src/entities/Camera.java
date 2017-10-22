@@ -101,8 +101,8 @@ public class Camera {
 	}
 
 	public void increaseRotation(Vector3f headingVector) {
-		this.yaw = (float) Math.toDegrees(Math.asin(headingVector.y));
-		this.pitch = (float) Math.toDegrees(Math.asin(headingVector.x));
+		this.yaw = (float) Math.asin(headingVector.y);
+		this.pitch = (float) Math.asin(headingVector.x);
 	}
 	
 	public BufferedImage takeSnapshot() {
