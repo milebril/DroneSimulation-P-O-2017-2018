@@ -50,6 +50,12 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	
 	private Camera camera;
 	
+	/*
+	 * DEBUG VARS
+	 */
+	
+	private boolean flying = false;
+	
 	public Drone(RawModel model, Vector3f position, float rotX, float rotY, float rotZ, float scale,
 			AutopilotConfig cfg) {
 		super(model, position, rotX, rotY, rotZ, scale);
@@ -205,23 +211,31 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		
 		applyLiftForces(dt);
 		
-		if (this.getHeadingVector().y > 0) {
-			getLeftWing().setInclination(getLeftWing().getInclination() - 0.01f);
-		} else if (this.getHeadingVector().y < 0) {
-			getLeftWing().setInclination(getLeftWing().getInclination() + 0.01f);
-		} else {
-			//Do nothing
+		if (Math.abs(this.getHeadingVector().y) > 0.1 && !flying) {
+			if (this.getHeadingVector().y > 0) {
+				getLeftWing().setInclination(getLeftWing().getInclination() - 0.01f);
+				getRightWing().setInclination(getRightWing().getInclination() - 0.01f);
+			} else if (this.getHeadingVector().y < 0) {
+				getLeftWing().setInclination(getLeftWing().getInclination() + 0.01f);
+				getRightWing().setInclination(getRightWing().getInclination() + 0.01f);
+			} else {
+				//Do nothing
+			}
 		}
 		
 		//x = x0 + v*t
+
 		setHeadingVector();
 		
+		System.out.println("Before: " + this.getHeadingVector());
+		flyMode();
+		System.out.println("After: " + this.getHeadingVector());
+		
 		Vector3f.add(this.getSpeedVector(), this.getSpeedChangeVector(), this.getSpeedVector());
-		System.out.println(this.getPosition());
 		deepCopySpeedVector();
 		this.setSpeedChangeVector(new Vector3f(0,0,0));
 	}
-	
+
 	private void deepCopySpeedVector() {
 		//DeepCopy the vector!!!
 		this.speedVectorOld.x = this.speedVector.x;
@@ -362,5 +376,21 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		}
 
 		camera.increaseRotation(this.headingVector);
+	}
+	
+	private void flyMode() {		
+		flying = true;
+		
+		if(Keyboard.isKeyDown(Keyboard.KEY_Z)){
+			this.headingVector.y += 0.01f;
+		} else if(Keyboard.isKeyDown(Keyboard.KEY_S)){
+			this.headingVector.y -= 0.01f;
+		} else if(Keyboard.isKeyDown(Keyboard.KEY_D)){
+			this.headingVector.x += 0.01f;
+		} else if(Keyboard.isKeyDown(Keyboard.KEY_Q)){
+			this.headingVector.x -= 0.01f;
+		} else {
+			flying = false;
+		}
 	}
 }
