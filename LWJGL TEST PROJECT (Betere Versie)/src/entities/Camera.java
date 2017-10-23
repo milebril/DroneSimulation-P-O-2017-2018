@@ -140,4 +140,9 @@ public class Camera {
 		
 		return dest;
 	}
+
+	public void setYaw(int i) {
+		this.yaw = i;
+		
+	}
 }

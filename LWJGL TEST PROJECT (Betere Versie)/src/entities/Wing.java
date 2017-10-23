@@ -17,6 +17,14 @@ public class Wing {
 		this.rotAx = rotAx;
 	}
 	
+	public Vector3f getCenterOfMass() {
+		return centerOfMass;
+	}
+
+	public void setCenterOfMass(Vector3f centerOfMass) {
+		this.centerOfMass = centerOfMass;
+	}
+
 	public float getMass(){
 		return this.wingMass;
 	}
@@ -25,8 +33,8 @@ public class Wing {
 		return this.rotAx;
 	}
 	
-	public void setInclination(float angle){
-		this.inclination = angle;
+	public void setInclination(float angleInRad){
+		this.inclination = angleInRad;
 	}
 	
 	public float getInclination(){
