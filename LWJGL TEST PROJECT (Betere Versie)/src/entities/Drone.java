@@ -56,14 +56,13 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	/*
 	 * DEBUG VARS
 	 */
-	
 	private boolean flying = false;
 	
 	public Drone(RawModel model, Vector3f position, float rotX, float rotY, float rotZ, float scale,
 			AutopilotConfig cfg) {
 		super(model, position, rotX, rotY, rotZ, scale);
 		
-		this.speedVector = new Vector3f(0.0f,0.0f, -10.0f);
+		this.speedVector = new Vector3f(0.0f,0.0f, -1.0f);
 		this.speedChangeVector = new Vector3f(0.0f,0.0f,0.0f);
 		this.speedVectorOld = new Vector3f(0.0f,0.0f,0.0f);
 		this.headingVector = new Vector3f(0.0f,0.0f,-1.0f);
@@ -222,8 +221,11 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		if (this.getSpeed() < 100)
 			applyEngineForce(dt);
 		
+		//System.out.println("Before Left: " + speedChangeVector);
 		applyLiftForces(dt);
+		//System.out.println("After Left: " + speedChangeVector);
 		applyTorqueForces(dt);
+		
 		
 		if (Math.abs(this.getHeadingVector().y) > 0.1 && !flying) {
 			getVerticalStabilizer().setInclination(0);
@@ -231,15 +233,15 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 			if (this.getHeadingVector().y > 0) {
 				getLeftWing().setInclination(getLeftWing().getInclination() - 0.01f);
 				getRightWing().setInclination(getRightWing().getInclination() - 0.01f);
-				getHorizontalStabilizer().setInclination(this.horizontalStabilizer.getInclination() - 0.01f);
+				//getHorizontalStabilizer().setInclination(this.horizontalStabilizer.getInclination() - 0.01f);
 			} else if (this.getHeadingVector().y < 0) {
 				getLeftWing().setInclination(getLeftWing().getInclination() + 0.01f);
 				getRightWing().setInclination(getRightWing().getInclination() + 0.01f);
-				getHorizontalStabilizer().setInclination(this.horizontalStabilizer.getInclination() + 0.01f);
+				//getHorizontalStabilizer().setInclination(this.horizontalStabilizer.getInclination() + 0.01f);
 			} else {
 				//Do nothing
 			}
-		}
+		} 
 		
 		
 		//x = x0 + v*t
@@ -252,8 +254,6 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		deepCopySpeedVector();
 		this.setSpeedChangeVector(new Vector3f(0,0,0));
 		rotationAcceleration = new Vector3f(0,0,0);
-		
-		System.out.println(this.getPosition());
 		
 		setHeadingVector();
 		
