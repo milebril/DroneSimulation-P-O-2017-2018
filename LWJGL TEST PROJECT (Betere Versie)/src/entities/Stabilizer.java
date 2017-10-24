@@ -2,50 +2,19 @@ package entities;
 
 import org.lwjgl.util.vector.Vector3f;
 
-public class Stabilizer {
+public class Stabilizer extends Wing{
 
-	private Vector3f relPosition;
-	private Vector3f rotAx;
-	private float liftSlope;
-	private float inclination = 15;
+	private int rotationAcceleration = 0;
 	
-	public Stabilizer(Vector3f position, float liftSlope, Vector3f rotationAxis) {
-		this.setRelPosition(position);
-		this.setLiftSlope(liftSlope);
-		this.setRotAxis(rotationAxis);
+	public Stabilizer(Vector3f centerOfMass, float wingMass, float wingLiftSlope, Vector3f rotAx) {
+		super(centerOfMass, wingMass, wingLiftSlope, rotAx);
 	}
 	
-	private void setRelPosition(Vector3f pos){
-		this.relPosition = pos;
+	public int getRotationAcceleration() {
+		return rotationAcceleration;
 	}
-	
-	public Vector3f getRelPosition(){
-		return this.relPosition;
+
+	public void setRotationAcceleration(int rotationAcceleration) {
+		this.rotationAcceleration = rotationAcceleration;
 	}
-	
-	private void setRotAxis(Vector3f axis){
-		this.rotAx = axis;
-	}
-	
-	public Vector3f getRotAxis(){
-		return this.rotAx;
-	}
-	
-	public float setInclination(){
-		return this.inclination;
-	}
-	
-	public float getInclination(){
-		return this.inclination;
-	}
-	
-	private void setLiftSlope(float slope){
-		this.liftSlope = slope;
-	}
-	
-	public float getLiftSlope(){
-		return this.liftSlope;
-	}
-	
-	
 }	

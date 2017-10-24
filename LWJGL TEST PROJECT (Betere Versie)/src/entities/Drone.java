@@ -47,17 +47,30 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	private Vector3f speedVectorOld;
 	private Vector3f headingVector;
 	
+	private Vector3f rotationSpeedVector;
+	private Vector3f rotationAcceleration;
+	
 	private static final float GRAVITY = -9.81f;
 	private static final float SPEED_SCALE = 10.0f;
+	
+	private Camera camera;
+	
+	/*
+	 * DEBUG VARS
+	 */
+	private boolean flying = false;
 	
 	public Drone(RawModel model, Vector3f position, float rotX, float rotY, float rotZ, float scale,
 			AutopilotConfig cfg) {
 		super(model, position, rotX, rotY, rotZ, scale);
 		
-		this.speedVector = new Vector3f(0.0f,0.0f, -10.0f);
+		this.speedVector = new Vector3f(0.0f,0.0f, -1.0f);
 		this.speedChangeVector = new Vector3f(0.0f,0.0f,0.0f);
 		this.speedVectorOld = new Vector3f(0.0f,0.0f,0.0f);
 		this.headingVector = new Vector3f(0.0f,0.0f,-1.0f);
+		
+		this.rotationSpeedVector = new Vector3f(0f, 0f, 0f);
+		this.rotationAcceleration = new Vector3f(0f, 0f, 0f);
 		//Vector3f orig = new Vector3f(10,10,10);
 		
 		//TODO updater for inclination (in wing and stab)
@@ -67,13 +80,16 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		this.leftWing  = new Wing(new Vector3f(-cfg.getWingX(),0,0), cfg.getWingMass(), cfg.getWingLiftSlope(), new Vector3f(1,0,0));  //horizontal rotation Axis = (1,0,0)
 		this.rightWing = new Wing(new Vector3f(cfg.getWingX(),0,0), cfg.getWingMass(), cfg.getWingLiftSlope(), new Vector3f(1,0,0));   //horizontal rotation Axis = (1,0,0)
 		
-		this.horizontalStabilizer = new Stabilizer(new Vector3f(0,0,cfg.getTailSize()),cfg.getHorStabLiftSlope(),new Vector3f(1,0,0)); //horizontal rotation Axis = (1,0,0)
-		this.verticalStabilizer   = new Stabilizer(new Vector3f(0,0,cfg.getTailSize()),cfg.getVerStabLiftSlope(),new Vector3f(0,1,0)); //vertical rotation Axis = (0,1,0)
+		this.horizontalStabilizer = new Stabilizer(new Vector3f(0,0,cfg.getTailSize()), cfg.getTailMass(),cfg.getHorStabLiftSlope(),new Vector3f(1,0,0)); //horizontal rotation Axis = (1,0,0)
+		this.verticalStabilizer   = new Stabilizer(new Vector3f(0,0,cfg.getTailSize()), cfg.getTailMass(),cfg.getVerStabLiftSlope(),new Vector3f(0,1,0)); //vertical rotation Axis = (0,1,0)
+		
+		horizontalStabilizer.setInclination(0);
+		verticalStabilizer.setInclination(0);
 		
 		this.maxThrust = cfg.getMaxThrust();
 		this.maxAOA = cfg.getMaxAOA();
 		this.engineMass = cfg.getEngineMass();
-		this.enginePosition = calculateEnginePosition(cfg.getWingX());
+		this.enginePosition = calculateEnginePosition();
 		this.tailMass = cfg.getTailMass();
 		this.tailSize = cfg.getTailSize();
 		
@@ -84,10 +100,9 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	}
 	
 	//Calculates engine position
-	private Vector3f calculateEnginePosition(float wingX){
-		float x = (this.getLeftWing().getMass()*wingX - this.getRightWing().getMass()*wingX) / this.getEngineMass();
+	private Vector3f calculateEnginePosition(){
 		float z = (-this.getTailMass()*this.getTailSize()) / this.getEngineMass();
-		return new Vector3f(x,0,z);
+		return new Vector3f(0,0,z);
 	}
 
 	//Calculates left wing liftforce
@@ -144,7 +159,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		float liftSlope = this.getHorizontalStabilizer().getLiftSlope();
 		
 		//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
-		float AoA = (float) - Math.atan2(Vector3f.dot(this.getSpeedVector(),normal), Vector3f.dot(this.getSpeedVector(),attackVector)); 
+		float AoA = (float) -Math.atan2(Vector3f.dot(this.getSpeedVector(),normal), Vector3f.dot(this.getSpeedVector(),attackVector)); 
 		float speed = (float) Math.pow(this.getSpeed(),2);
 		
 		Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*speed),
@@ -153,27 +168,33 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		
 		return result;
 	}
-
 	
 	//Calculates vertical stabilizer liftforce
 	private Vector3f calculateVerStabLift(){
 		Vector3f normal = new Vector3f(0,0,0);
 			
 		// The vertical stabilizer's attack vector is (-sin(verStabInclination), 0, -cos(verStabInclination)).
-		Vector3f attackVector = new Vector3f(0,(float) -Math.sin(this.getVerticalStabilizer().getInclination()), (float) -Math.cos(this.verticalStabilizer.getInclination()));
-			
+		Vector3f attackVector = new Vector3f((float) -Math.sin(this.getVerticalStabilizer().getInclination()), 0, (float) -Math.cos(this.verticalStabilizer.getInclination()));
 		Vector3f.cross(this.getVerticalStabilizer().getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
 		float liftSlope = this.getVerticalStabilizer().getLiftSlope();
 			
 		//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
 		float AoA = (float) - Math.atan2(Vector3f.dot(this.getSpeedVector(),normal), Vector3f.dot(this.getSpeedVector(),attackVector)); 
 		float speed = (float) Math.pow(this.getSpeed(),2);
-		
 		Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*speed),
 									   (float)(normal.y*liftSlope*AoA*speed),
 									   (float)(normal.z*liftSlope*AoA*speed));
 		return result;
 	}	
+	
+	private Vector3f calculateVerStabTorque() {
+		Vector3f lift = calculateVerStabLift();
+		Vector3f torque = new Vector3f(0,0,0);
+		
+		Vector3f.cross(getVerticalStabilizer().getCenterOfMass(), lift, torque);
+		
+		return torque;
+	}
 	
 	public void increasePosition(float dt) {
 		float dx = this.getHeadingVector().x * dt * Math.abs(this.getSpeedVector().x);
@@ -181,9 +202,9 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		float dz = this.getHeadingVector().z * dt * Math.abs(this.getSpeedVector().z);
 		
 		super.increasePosition(dx, dy, dz);
+
 		this.getCamera().increasePosition(dx, dy, dz);
-		
-		this.getCamera().increaseRotation(this.getHeadingVector());
+		//this.getCamera().increaseRotation(this.getHeadingVector());
 	}
 	
 	public void applyForces(float dt) {
@@ -194,7 +215,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		
 		//Gravity
 		//Check voor maximale valversnelling
-		if (Math.abs(this.getSpeedVector().y) < 60) {
+		if (Math.abs(this.getSpeedVector().y) < 200) {
 			this.getSpeedChangeVector().y += GRAVITY * dt; // v = v0 + a*t, a = F/m
 		}
 		
@@ -202,26 +223,46 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		if (this.getSpeed() < 100)
 			applyEngineForce(dt);
 		
-		
+		//System.out.println("Before Left: " + speedChangeVector);
 		applyLiftForces(dt);
+		//System.out.println("After Left: " + speedChangeVector);
+		applyTorqueForces(dt);
 		
-		if (this.getHeadingVector().y > 0) {
-			getLeftWing().setInclination(getLeftWing().getInclination() - 0.01f);
-		} else if (this.getHeadingVector().y < 0) {
-			getLeftWing().setInclination(getLeftWing().getInclination() + 0.01f);
-		} else {
-			//Do nothing
-		}
+		
+		if (Math.abs(this.getHeadingVector().y) > 0.1 && !flying) {
+			getVerticalStabilizer().setInclination(0);
+			
+			if (this.getHeadingVector().y > 0) {
+				getLeftWing().setInclination(getLeftWing().getInclination() - 0.01f);
+				getRightWing().setInclination(getRightWing().getInclination() - 0.01f);
+				//getHorizontalStabilizer().setInclination(this.horizontalStabilizer.getInclination() - 0.01f);
+			} else if (this.getHeadingVector().y < 0) {
+				getLeftWing().setInclination(getLeftWing().getInclination() + 0.01f);
+				getRightWing().setInclination(getRightWing().getInclination() + 0.01f);
+				//getHorizontalStabilizer().setInclination(this.horizontalStabilizer.getInclination() + 0.01f);
+			} else {
+				//Do nothing
+			}
+		} 
+		
 		
 		//x = x0 + v*t
-		setHeadingVector();
+		
+		flyMode();
 		
 		Vector3f.add(this.getSpeedVector(), this.getSpeedChangeVector(), this.getSpeedVector());
-		System.out.println(this.getPosition());
+		Vector3f.add(rotationSpeedVector, rotationAcceleration, rotationSpeedVector);
+		
 		deepCopySpeedVector();
 		this.setSpeedChangeVector(new Vector3f(0,0,0));
+		rotationAcceleration = new Vector3f(0,0,0);
+		
+		setHeadingVector();
+		
+		//Vector3f.add(getHeadingVector(), rotationSpeedVector, headingVector);
+		//getHeadingVector().normalise();
 	}
-	
+
 	private void deepCopySpeedVector() {
 		//DeepCopy the vector!!!
 		this.speedVectorOld.x = this.speedVector.x;
@@ -240,18 +281,29 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 
 	private void applyLiftForces(float dt){
 		//Left Wing
-		Vector3f leftWingLiftForce = this.calculateLeftWingLift(); 			// = F
-		leftWingLiftForce.scale(1/this.getDroneMass() * dt); 			  			// = a = F/Mass
+		Vector3f leftWingLiftForce = calculateLeftWingLift(); 			// = F
+		leftWingLiftForce.scale(1/getDroneMass() * dt); 			  			// = a = F/Mass
 		this.getSpeedChangeVector().y += leftWingLiftForce.y;
 		
 		//Right Wing
-		//left and right are same for now.
-		//Vector3f.add(rightWing, this.speedChangeVector, this.speedChangeVector); // = v = v0 + a*t
-		Vector3f rightWing = this.calculateRightWingLift(); 		 // = F
-		rightWing.scale(1/this.getDroneMass() * dt); 			  		 // = a = F/Mass
+		Vector3f rightWing = calculateRightWingLift(); 		 // = F
+		rightWing.scale(1/getDroneMass() * dt); 			  		 // = a = F/Mass
 		this.getSpeedChangeVector().y += rightWing.y;
 		
-		//Vector3f horStab = this.calculateHorStabLift()
+		Vector3f horStab= calculateHorStabLift();
+		horStab.scale(1/getDroneMass() * dt);
+		this.getSpeedChangeVector().y += horStab.y;
+		
+		Vector3f verStab= calculateVerStabLift();
+		verStab.scale(1/getDroneMass() * dt);
+		Vector3f.add(verStab, this.speedChangeVector, this.speedChangeVector);
+	}
+	
+	private void applyTorqueForces(float dt) {
+		Vector3f verStabTorque = null;
+		verStabTorque = calculateVerStabTorque();
+		verStabTorque.scale(1/getInertionY() * dt);
+		Vector3f.add(verStabTorque, rotationAcceleration, rotationAcceleration);
 	}
 	
 	public void setRoll(float roll) {
@@ -280,9 +332,11 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		return this.headingVector;
 	}
 	
-//	functie die de snelheid van de drone berekent uit de speedVector
+	/**
+	 * functie die de snelheid van de drone berekent uit de speedVector
+	 */
 	public float getSpeed() {
-		return this.getSpeedVector().length();
+		return this.getSpeedVector().length(); 
 	}
 	
 	public Vector3f getSpeedVector(){
@@ -314,7 +368,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	}
 	
 	public Stabilizer getVerticalStabilizer(){
-		return this.horizontalStabilizer;
+		return this.verticalStabilizer;
 	}
 	
 	public float getTailMass(){
@@ -339,6 +393,26 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		else
 			this.thrustForce = this.getMaxThrust();
 	}
+	
+	private float getInertionY() {
+		float inertia = (float) (getTailMass() * Math.pow(getTailSize(), 2) + 
+				2 * getLeftWing().getMass() * Math.pow(getLeftWing().getCenterOfMass().x, 2) +
+				getEngineMass() * Math.pow(this.enginePosition.z, 2));
+		
+		return inertia;
+	}
+	
+	private float getInertionX() {
+		float inertia = (float) (getTailMass() *  Math.pow(getTailSize(), 2) + 
+				getEngineMass() * Math.pow(this.enginePosition.z, 2));
+		
+		return inertia;
+	}
+	
+	private float getInertionZ() {
+		return (float) (2 * getLeftWing().getMass() * Math.pow(getLeftWing().getCenterOfMass().x, 2));
+	}
+	
 	/*
 	 * DEBUG
 	 */
@@ -362,5 +436,23 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		}
 
 		camera.increaseRotation(this.headingVector);
+	}
+	
+	private void flyMode() {		
+		flying = true;
+		
+		if(Keyboard.isKeyDown(Keyboard.KEY_Z)){
+			if (this.getHorizontalStabilizer().getInclination() < 0.5)
+				this.getHorizontalStabilizer().setInclination(this.horizontalStabilizer.getInclination() + 0.01f);
+		} else if(Keyboard.isKeyDown(Keyboard.KEY_S)){
+			if (this.getHorizontalStabilizer().getInclination() > -0.5)
+				this.getHorizontalStabilizer().setInclination(this.horizontalStabilizer.getInclination() - 0.01f);
+		} else if(Keyboard.isKeyDown(Keyboard.KEY_D)){
+			getVerticalStabilizer().setInclination(-0.5f);
+		} else if(Keyboard.isKeyDown(Keyboard.KEY_Q)){
+			this.headingVector.x -= 0.01f;
+		} else {
+			flying = false;
+		}
 	}
 }

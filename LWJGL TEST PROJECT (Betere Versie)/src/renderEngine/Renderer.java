@@ -30,7 +30,7 @@ public class Renderer {
 	
 	public Renderer(StaticShader shader, float fovx, float fovy){
 		this.FOVX = fovx;
-		this.FOVY = 120;
+		this.FOVY = fovy;
 		this.shader = shader;
 		GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glCullFace(GL11.GL_BACK);
@@ -95,7 +95,7 @@ public class Renderer {
 	private void createProjectionMatrix(){
 		//float aspectRatio = (float) Display.getWidth() / (float) Display.getHeight();
 		float aspectRatio = FOVX / FOVY;
-		float y_scale = (float) ((1f / Math.tan(Math.toRadians(FOVX / 2f))) * aspectRatio);
+		float y_scale = (float) ((1f / Math.tan(Math.toRadians(FOVY / 2f))));
 		float x_scale = y_scale / aspectRatio;
 		float frustum_length = FAR_PLANE - NEAR_PLANE;
 

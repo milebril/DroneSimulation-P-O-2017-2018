@@ -8,7 +8,8 @@ public class Wing {
 	private Vector3f rotAx; //Wings can only rotate around the x-axis -> rotation axis = (1,0,0)
 	private float wingMass;
 	private float wingLiftSlope;
-	private float inclination = 0.2f*(float)Math.PI;
+	//private float inclination = 0.2f*(float)Math.PI;
+	private float inclination = 0;
 	
 	public Wing(Vector3f centerOfMass, float wingMass, float wingLiftSlope,Vector3f rotAx) {
 		this.centerOfMass = centerOfMass;
@@ -17,6 +18,14 @@ public class Wing {
 		this.rotAx = rotAx;
 	}
 	
+	public Vector3f getCenterOfMass() {
+		return centerOfMass;
+	}
+
+	public void setCenterOfMass(Vector3f centerOfMass) {
+		this.centerOfMass = centerOfMass;
+	}
+
 	public float getMass(){
 		return this.wingMass;
 	}
@@ -25,8 +34,8 @@ public class Wing {
 		return this.rotAx;
 	}
 	
-	public void setInclination(float angle){
-		this.inclination = angle;
+	public void setInclination(float angleInRad){
+		this.inclination = angleInRad;
 	}
 	
 	public float getInclination(){
