@@ -62,7 +62,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 			AutopilotConfig cfg) {
 		super(model, position, rotX, rotY, rotZ, scale);
 		
-		this.speedVector = new Vector3f(0.0f,0.0f, -1.0f);
+		this.speedVector = new Vector3f(0.0f,0.0f, -10.0f);
 		this.speedChangeVector = new Vector3f(0.0f,0.0f,0.0f);
 		this.speedVectorOld = new Vector3f(0.0f,0.0f,0.0f);
 		this.headingVector = new Vector3f(0.0f,0.0f,-1.0f);
@@ -221,9 +221,9 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		if (this.getSpeed() < 100)
 			applyEngineForce(dt);
 		
-		//System.out.println("Before Left: " + speedChangeVector);
+		System.out.println(this.getPosition());
+		
 		applyLiftForces(dt);
-		//System.out.println("After Left: " + speedChangeVector);
 		applyTorqueForces(dt);
 		
 		
@@ -441,10 +441,10 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		
 		if(Keyboard.isKeyDown(Keyboard.KEY_Z)){
 			if (this.getHorizontalStabilizer().getInclination() < 0.5)
-				this.getHorizontalStabilizer().setInclination(this.horizontalStabilizer.getInclination() + 0.01f);
+				getLeftWing().setInclination(getLeftWing().getInclination() + 0.01f);
 		} else if(Keyboard.isKeyDown(Keyboard.KEY_S)){
 			if (this.getHorizontalStabilizer().getInclination() > -0.5)
-				this.getHorizontalStabilizer().setInclination(this.horizontalStabilizer.getInclination() - 0.01f);
+				getRightWing().setInclination(getRightWing().getInclination() - 0.01f);
 		} else if(Keyboard.isKeyDown(Keyboard.KEY_D)){
 			getVerticalStabilizer().setInclination(-0.5f);
 		} else if(Keyboard.isKeyDown(Keyboard.KEY_Q)){
