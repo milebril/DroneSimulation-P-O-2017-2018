@@ -53,7 +53,6 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	private static final float GRAVITY = -9.81f;
 	private static final float SPEED_SCALE = 10.0f;
 	
-	private Camera camera;
 	
 	/*
 	 * DEBUG VARS
