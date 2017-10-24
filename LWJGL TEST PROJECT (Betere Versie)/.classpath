@@ -13,5 +13,6 @@
 	<classpathentry kind="lib" path="lib/jars/lwjgl_util.jar"/>
 	<classpathentry kind="lib" path="lib/jars/lwjgl.jar"/>
 	<classpathentry kind="lib" path="lib/jars/slick-util.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

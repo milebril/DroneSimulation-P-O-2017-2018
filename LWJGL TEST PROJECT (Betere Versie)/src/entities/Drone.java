@@ -46,7 +46,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	private Vector3f speedChangeVector;
 	private Vector3f speedVectorOld;
 	private Vector3f headingVector;
-	
+
 	private Vector3f rotationSpeedVector;
 	private Vector3f rotationAcceleration;
 	
@@ -113,7 +113,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		// The left wing's attack vector is (0, sin(leftWingInclination), -cos(leftWingInclination)).
 		Vector3f attackVector = new Vector3f(0,(float)Math.sin(this.getLeftWing().getInclination()), (float) -Math.cos(this.getLeftWing().getInclination()));
 		Vector3f.cross(this.getLeftWing().getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
-		
+
 		float liftSlope = this.getLeftWing().getLiftSlope();
 		
 		//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
@@ -196,9 +196,9 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	}
 	
 	public void increasePosition(float dt) {
-		float dx = this.getHeadingVector().x * dt * Math.abs(this.getSpeedVector().x);
-		float dy = this.getHeadingVector().y * dt * Math.abs(this.getSpeedVector().y);
-		float dz = this.getHeadingVector().z * dt * Math.abs(this.getSpeedVector().z);
+		float dx = dt * this.getSpeedVector().x;
+		float dy = dt * this.getSpeedVector().y;
+		float dz = dt * this.getSpeedVector().z;
 		
 		super.increasePosition(dx, dy, dz);
 
@@ -208,7 +208,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	
 	public void applyForces(float dt) {
 		//Checks:
-		if (this.getThrustForce() > this.getMaxThrust()) { //TODO: deze check is overbodig omdat de setter van Thrus deze check doet?
+		if (this.getThrustForce() > this.getMaxThrust()) { //TODO: deze check is overbodig omdat de setter van Thrust deze check doet?
 			this.setThrustForce(this.getMaxThrust());
 		}
 		
@@ -321,7 +321,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		return this.getEngineMass() + this.tailMass + this.leftWing.getMass() + this.rightWing.getMass();
 	}
 	
-	private void setHeadingVector() {
+	public void setHeadingVector() {
 		if(this.speedVector.getX() == 0 && this.speedVector.getY() == 0 && this.speedVector.getZ() == 0)
 			return;
 		this.speedVector.normalise(this.headingVector);
@@ -338,6 +338,10 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		return this.getSpeedVector().length(); 
 	}
 	
+	public void setSpeedVector(Vector3f speedVector) {
+		this.speedVector = speedVector;
+	}
+
 	public Vector3f getSpeedVector(){
 		return this.speedVector;
 	}
