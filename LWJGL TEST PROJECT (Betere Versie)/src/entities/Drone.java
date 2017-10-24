@@ -203,7 +203,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		super.increasePosition(dx, dy, dz);
 
 		this.getCamera().increasePosition(dx, dy, dz);
-		this.getCamera().increaseRotation(this.getHeadingVector());
+		//this.getCamera().increaseRotation(this.getHeadingVector());
 	}
 	
 	public void applyForces(float dt) {
@@ -214,7 +214,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		
 		//Gravity
 		//Check voor maximale valversnelling
-		if (Math.abs(this.getSpeedVector().y) < 60) {
+		if (Math.abs(this.getSpeedVector().y) < 200) {
 			this.getSpeedChangeVector().y += GRAVITY * dt; // v = v0 + a*t, a = F/m
 		}
 		
@@ -253,7 +253,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		this.setSpeedChangeVector(new Vector3f(0,0,0));
 		rotationAcceleration = new Vector3f(0,0,0);
 		
-		System.out.println(rotationSpeedVector);
+		System.out.println(this.getPosition());
 		
 		setHeadingVector();
 		

@@ -10,7 +10,7 @@ public class AutopilotConfigValues implements AutopilotConfig{
 	private float tailMass = 100.0f;
 	private float maxThrust = 1000.0f;
 	private float maxAOA = 50.0f;
-	private float wingLiftSlope = 100.0f;
+	private float wingLiftSlope = 10.0f;
 	private float horStabLiftSlope = 1000.0f;
 	private float verStabLiftSlope = 100.0f;
 	private float horizontalAngleOfView = 120.0f;
