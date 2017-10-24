@@ -27,6 +27,7 @@ import renderEngine.Loader;
 import renderEngine.Renderer;
 import shaders.StaticShader;
 import testObjects.Cube;
+import testObjects.Cuboid;
 import textures.ModelTexture;
 import entities.Camera;
 import entities.Drone;
@@ -75,7 +76,7 @@ public class MainGameLoop {
 		Random r = new Random();
 		List<Entity> entities = new ArrayList<>();
 		for (int i = 0; i < 1000; i++) {
-			Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
+			Cuboid c = new Cuboid(r.nextFloat(), r.nextFloat(), r.nextFloat());
 			RawModel model = loader.loadToVAO(c.positions, c.colors, null);
 			//TexturedModel staticModel = new TexturedModel(model,new ModelTexture(loader.loadTexture("image")));
 			entities.add(new cubeTestPlayer(model, 

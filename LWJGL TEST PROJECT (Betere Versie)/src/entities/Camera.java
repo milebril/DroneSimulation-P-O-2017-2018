@@ -22,6 +22,7 @@ public class Camera {
 	private float roll;
 	
 	private float distance = 0.2f;
+
 	private float mouseSensitivity = 0.1f;
 	
 	private int snapshotWidth;
@@ -144,5 +145,9 @@ public class Camera {
 	public void setYaw(int i) {
 		this.yaw = i;
 		
+	}
+	
+	public void setPosition(Vector3f position) {
+		this.position = position;
 	}
 }
