@@ -1,26 +1,14 @@
 package entities;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
 import java.lang.Math;
 
-import javax.imageio.ImageIO;
-import javax.swing.plaf.synth.SynthSplitPaneUI;
-
-import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Matrix3f;
+import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
 import autopilot.AutopilotConfig;
 import models.RawModel;
-import models.TexturedModel;
-import renderEngine.DisplayManager;
 
 public class Drone extends Entity /* implements AutopilotConfig */ {
 
@@ -222,14 +210,12 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		if (this.getSpeed() < 100)
 			applyEngineForce(dt);
 		
-		//System.out.println("Before Left: " + speedChangeVector);
 		applyLiftForces(dt);
-		//System.out.println("After Left: " + speedChangeVector);
 		applyTorqueForces(dt);
 		
 		
 		if (Math.abs(this.getHeadingVector().y) > 0.1 && !flying) {
-			getVerticalStabilizer().setInclination(0);
+			//getVerticalStabilizer().setInclination(0);
 			
 			if (this.getHeadingVector().y > 0) {
 				getLeftWing().setInclination(getLeftWing().getInclination() - 0.01f);
@@ -257,11 +243,23 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		rotationAcceleration = new Vector3f(0,0,0);
 		
 		setHeadingVector();
-		
+		System.out.println("voor:" + headingVector);
+		this.headingVector = rotate(rotationSpeedVector.y);
 		//Vector3f.add(getHeadingVector(), rotationSpeedVector, headingVector);
 		//getHeadingVector().normalise();
+		
+		System.out.println(headingVector);
 	}
 
+	private Vector3f rotate(float angle) {
+		Vector3f newH = new Vector3f(0,0,0);
+		newH.x = (float) (this.headingVector.x * Math.cos(angle) - this.headingVector.z * Math.sin(angle));
+		newH.y = this.headingVector.y;
+		newH.z = (float) (this.headingVector.x * Math.sin(angle) + this.headingVector.z * Math.cos(angle));
+		
+		return newH;
+	}
+	
 	private void deepCopySpeedVector() {
 		//DeepCopy the vector!!!
 		this.speedVectorOld.x = this.speedVector.x;
@@ -446,10 +444,10 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		
 		if(Keyboard.isKeyDown(Keyboard.KEY_Z)){
 			if (this.getHorizontalStabilizer().getInclination() < 0.5)
-				this.getHorizontalStabilizer().setInclination(this.horizontalStabilizer.getInclination() + 0.01f);
+				getLeftWing().setInclination(getLeftWing().getInclination() + 0.01f);
 		} else if(Keyboard.isKeyDown(Keyboard.KEY_S)){
 			if (this.getHorizontalStabilizer().getInclination() > -0.5)
-				this.getHorizontalStabilizer().setInclination(this.horizontalStabilizer.getInclination() - 0.01f);
+				getRightWing().setInclination(getRightWing().getInclination() - 0.01f);
 		} else if(Keyboard.isKeyDown(Keyboard.KEY_D)){
 			getVerticalStabilizer().setInclination(-0.5f);
 		} else if(Keyboard.isKeyDown(Keyboard.KEY_Q)){
