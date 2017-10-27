@@ -74,7 +74,7 @@ public class MainGameLoop {
 		StaticShader shaderFreeCam = new StaticShader();
 		// Renderer based on FOVX and FOVY
 		Renderer renderer = new Renderer(shader, autopilotConfig.getHorizontalAngleOfView(), autopilotConfig.getVerticalAngleOfView());
-		Renderer rendererFreeCam = new Renderer(shader, 120, 120);
+		Renderer rendererFreeCam = new Renderer(shaderFreeCam, 120, 120);
 		renderers.add(renderer);
 		renderers.add(rendererFreeCam);
 		
@@ -94,38 +94,42 @@ public class MainGameLoop {
 		Entity e = new Entity(model, 
 				new Vector3f(0,30,-100),0, 0, 0, 1);
 		
-		Cube droneCube = new Cube(1, 0, 0);
+		Cube droneCube = new Cube(0, 0, 0);
 		Drone drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
-				new Vector3f(0, 30, 0), 0, 0, 0, 0, autopilotConfig);
+				new Vector3f(0, 30, 0), 0, 0, 0, 1, autopilotConfig);
 		
 		Camera camera = new Camera();
+		camera.setPosition(new Vector3f(100, 30, -50));
+		camera.setPitch(-45);
 		
 		while(!Display.isCloseRequested()){
-			renderer.prepare();
-			shader.start();
 			GL11.glViewport(0, 0, 200, 200);
 			GL11.glScissor(0,0,200,200);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
+			renderer.prepare();
+			shader.start();
 			shader.loadViewMatrix(drone.getCamera());
 			
+//			for (Entity entity : entities) {
+//				renderer.render(entity,shader);
+//			} 
+			renderer.render(e, shader);
+			renderer.render(drone, shader);
 			
-			rendererFreeCam.prepare();
-			//shaderFreeCam.start();
+			/* 3rd person */
 			GL11.glViewport(200, 0, Display.getWidth() - 200, Display.getHeight());
 			GL11.glScissor(200, 0, Display.getWidth() - 200, Display.getHeight());
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
-			//shader.loadViewMatrix(camera);
+			rendererFreeCam.prepare();
+			shaderFreeCam.start();
+			shaderFreeCam.loadViewMatrix(camera);
 			
-			for (Renderer r1 : renderers) {
-				
-				for (Entity entity : entities) {
-					r1.render(entity,shaderFreeCam);
-				} 
-				
-				r1.render(e, shaderFreeCam);
-				/* Drone */
-				r1.render(drone, shaderFreeCam);
-			}
+//			for (Entity entity : entities) {
+//				rendererFreeCam.render(entity,shaderFreeCam);
+//			} 
+			rendererFreeCam.render(e, shaderFreeCam);
+			rendererFreeCam.render(drone, shaderFreeCam);
+			
 			
 			float dt = DisplayManager.getFrameTimeSeconds();
 			drone.increasePosition(dt);

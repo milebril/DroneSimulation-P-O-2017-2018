@@ -39,6 +39,14 @@ public class Camera {
 		return position;
 	}
 
+	/**
+	 * Set pitch of camera
+	 * @param pitch in degrees
+	 */
+	public void setPitch(float pitch) {
+		this.pitch = pitch;
+	}
+	
 	public float getPitch() {
 		return pitch;
 	}
