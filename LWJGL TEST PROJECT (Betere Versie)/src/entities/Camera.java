@@ -35,38 +35,6 @@ public class Camera {
 		this.snapshotHeight = nbRows;
 	}
 
-	public void move(){
-		if(Keyboard.isKeyDown(Keyboard.KEY_Z)){
-			position.x += distance * (float)Math.sin(Math.toRadians(yaw));
-	        position.z -= distance * (float)Math.cos(Math.toRadians(yaw));
-		}
-		if(Keyboard.isKeyDown(Keyboard.KEY_S)){
-			position.x -= distance * (float)Math.sin(Math.toRadians(yaw));
-	        position.z += distance * (float)Math.cos(Math.toRadians(yaw));
-		}
-		if(Keyboard.isKeyDown(Keyboard.KEY_D)){
-			position.x += distance * (float)Math.sin(Math.toRadians(yaw+90));
-	        position.z -= distance * (float)Math.cos(Math.toRadians(yaw+90));
-		}
-		if(Keyboard.isKeyDown(Keyboard.KEY_Q)){
-			position.x += distance * (float)Math.sin(Math.toRadians(yaw-90));
-	        position.z -= distance * (float)Math.cos(Math.toRadians(yaw-90));
-		}
-		if(Keyboard.isKeyDown(Keyboard.KEY_SPACE)){
-			position.y+=0.2f;
-		}
-		if(Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)){
-			position.y-=0.2f;
-		}
-		
-		if (Mouse.isButtonDown(2)) {
-			int dx = Mouse.getDX();
-	        int dy = Mouse.getDY();
-	        yaw += (dx * mouseSensitivity);
-	        pitch -= (dy * mouseSensitivity);
-		}	
-	}
-
 	public Vector3f getPosition() {
 		return position;
 	}

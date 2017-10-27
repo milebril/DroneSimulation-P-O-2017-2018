@@ -16,6 +16,7 @@ import java.util.Random;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector3f;
 
 import autopilot.AutopilotConfig;
@@ -37,6 +38,8 @@ import entities.cubeTestPlayer;
 public class MainGameLoop {
 
 	public static AutopilotConfig autopilotConfig;
+	
+	public static List<Renderer> renderers = new ArrayList<Renderer>();
 	
 	public static void main(String[] args) {
 
@@ -68,9 +71,12 @@ public class MainGameLoop {
 		Loader loader = new Loader();
 		//
 		StaticShader shader = new StaticShader();
+		StaticShader shaderFreeCam = new StaticShader();
 		// Renderer based on FOVX and FOVY
 		Renderer renderer = new Renderer(shader, autopilotConfig.getHorizontalAngleOfView(), autopilotConfig.getVerticalAngleOfView());
-		
+		Renderer rendererFreeCam = new Renderer(shader, 120, 120);
+		renderers.add(renderer);
+		renderers.add(rendererFreeCam);
 		
 		//Creating 1000 test cubes
 		Random r = new Random();
@@ -92,23 +98,39 @@ public class MainGameLoop {
 		Drone drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
 				new Vector3f(0, 30, 0), 0, 0, 0, 0, autopilotConfig);
 		
+		Camera camera = new Camera();
+		
 		while(!Display.isCloseRequested()){
 			renderer.prepare();
 			shader.start();
+			GL11.glViewport(0, 0, 200, 200);
+			GL11.glScissor(0,0,200,200);
+			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			shader.loadViewMatrix(drone.getCamera());
 			
-			for (Entity entity : entities) {
-				renderer.render(entity,shader);
-			} 
 			
-			renderer.render(e, shader);
+			rendererFreeCam.prepare();
+			//shaderFreeCam.start();
+			GL11.glViewport(200, 0, Display.getWidth() - 200, Display.getHeight());
+			GL11.glScissor(200, 0, Display.getWidth() - 200, Display.getHeight());
+			GL11.glEnable(GL11.GL_SCISSOR_TEST);
+			//shader.loadViewMatrix(camera);
 			
-			/* Drone */
-			renderer.render(drone, shader);
+			for (Renderer r1 : renderers) {
+				
+				for (Entity entity : entities) {
+					r1.render(entity,shaderFreeCam);
+				} 
+				
+				r1.render(e, shaderFreeCam);
+				/* Drone */
+				r1.render(drone, shaderFreeCam);
+			}
+			
 			float dt = DisplayManager.getFrameTimeSeconds();
 			drone.increasePosition(dt);
 			drone.applyForces(dt);
-		
+			
 			if(Math.abs(Math.sqrt(Math.pow(drone.getPosition().x - e.getPosition().x, 2) +
 					Math.pow(drone.getPosition().y - e.getPosition().y, 2) +
 					Math.pow(drone.getPosition().z - e.getPosition().z, 2))) < 4) {
@@ -131,6 +153,7 @@ public class MainGameLoop {
 		}
 
 		shader.cleanUp();
+		shaderFreeCam.cleanUp();
 		loader.cleanUp();
 		DisplayManager.closeDisplay();
 

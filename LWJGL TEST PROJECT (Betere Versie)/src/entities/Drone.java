@@ -51,7 +51,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 			AutopilotConfig cfg) {
 		super(model, position, rotX, rotY, rotZ, scale);
 		
-		this.speedVector = new Vector3f(0.0f,0.0f, -1.0f);
+		this.speedVector = new Vector3f(0.0f,0.0f, -15.0f);
 		this.speedChangeVector = new Vector3f(0.0f,0.0f,0.0f);
 		this.speedVectorOld = new Vector3f(0.0f,0.0f,0.0f);
 		this.headingVector = new Vector3f(0.0f,0.0f,-1.0f);
@@ -167,6 +167,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 			
 		//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
 		float AoA = (float) - Math.atan2(Vector3f.dot(this.getSpeedVector(),normal), Vector3f.dot(this.getSpeedVector(),attackVector)); 
+		System.out.println("normal " + normal);
 		float speed = (float) Math.pow(this.getSpeed(),2);
 		Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*speed),
 									   (float)(normal.y*liftSlope*AoA*speed),
@@ -177,9 +178,10 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	private Vector3f calculateVerStabTorque() {
 		Vector3f lift = calculateVerStabLift();
 		Vector3f torque = new Vector3f(0,0,0);
-		
 		Vector3f.cross(getVerticalStabilizer().getCenterOfMass(), lift, torque);
-		
+		System.out.println("lift: " + lift);
+		System.out.println("position: " + getVerticalStabilizer().getCenterOfMass());
+		System.out.println("torque: " + torque);
 		return torque;
 	}
 	
@@ -191,7 +193,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		super.increasePosition(dx, dy, dz);
 
 		this.getCamera().increasePosition(dx, dy, dz);
-		//this.getCamera().increaseRotation(this.getHeadingVector());
+		this.getCamera().increaseRotation(this.getHeadingVector());
 	}
 	
 	public void applyForces(float dt) {
@@ -213,7 +215,11 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		applyLiftForces(dt);
 		applyTorqueForces(dt);
 		
+		if (!flying) {
+			getVerticalStabilizer().setInclination(0);
+		}
 		
+		/*
 		if (Math.abs(this.getHeadingVector().y) > 0.1 && !flying) {
 			//getVerticalStabilizer().setInclination(0);
 			
@@ -228,10 +234,8 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 			} else {
 				//Do nothing
 			}
-		} 
+		} */
 		
-		
-		//x = x0 + v*t
 		
 		flyMode();
 		
@@ -241,21 +245,42 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		deepCopySpeedVector();
 		this.setSpeedChangeVector(new Vector3f(0,0,0));
 		rotationAcceleration = new Vector3f(0,0,0);
-		
-		setHeadingVector();
-		System.out.println("voor:" + headingVector);
+	
+		//setHeadingVector();
 		this.headingVector = rotate(rotationSpeedVector.y);
-		//Vector3f.add(getHeadingVector(), rotationSpeedVector, headingVector);
-		//getHeadingVector().normalise();
 		
-		System.out.println(headingVector);
+		getHeadingVector().normalise();
+		
+		updateTailPosition();
 	}
 
-	private Vector3f rotate(float angle) {
+	private void updateTailPosition() {
+		Vector3f centerOfMass = new Vector3f(0,0,0);
+		
+		centerOfMass.x = -headingVector.x * tailSize;
+		centerOfMass.y = -headingVector.y * tailSize;
+		centerOfMass.z = -headingVector.z * tailSize;
+		
+		getVerticalStabilizer().setCenterOfMass(centerOfMass);
+	}
+
+	private Vector3f rotate(float angles) {
 		Vector3f newH = new Vector3f(0,0,0);
+		float angle = (float) Math.toRadians(angles);
+		
+		Matrix3f matrix = new Matrix3f();
+		
+		matrix.m00 = (float) Math.cos(angle);
+		matrix.m11 = 1;
+		matrix.m22 = (float) Math.cos(angle);
+		matrix.m12 = (float) Math.sin(angle);
+		matrix.m21 = - (float) Math.sin(angle);
+		
 		newH.x = (float) (this.headingVector.x * Math.cos(angle) - this.headingVector.z * Math.sin(angle));
 		newH.y = this.headingVector.y;
-		newH.z = (float) (this.headingVector.x * Math.sin(angle) + this.headingVector.z * Math.cos(angle));
+		newH.z = (float) (+this.headingVector.x * Math.sin(angle) + this.headingVector.z * Math.cos(angle));
+		
+		//Matrix3f.mul(matrix, getHeadingVector(), newH);
 		
 		return newH;
 	}
@@ -301,6 +326,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		verStabTorque = calculateVerStabTorque();
 		verStabTorque.scale(1/getInertionY() * dt);
 		Vector3f.add(verStabTorque, rotationAcceleration, rotationAcceleration);
+		
 	}
 	
 	public void setRoll(float roll) {
@@ -449,9 +475,9 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 			if (this.getHorizontalStabilizer().getInclination() > -0.5)
 				getRightWing().setInclination(getRightWing().getInclination() - 0.01f);
 		} else if(Keyboard.isKeyDown(Keyboard.KEY_D)){
-			getVerticalStabilizer().setInclination(-0.5f);
+			getVerticalStabilizer().setInclination(-0.1f);
 		} else if(Keyboard.isKeyDown(Keyboard.KEY_Q)){
-			this.headingVector.x -= 0.01f;
+			getVerticalStabilizer().setInclination(0.5f);
 		} else {
 			flying = false;
 		}
