@@ -13,6 +13,7 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector3f;
+import org.opencv.osgi.OpenCVInterface;
 
 public class Camera {
 	
@@ -84,38 +85,36 @@ public class Camera {
 	
 	public BufferedImage takeSnapshot() {
 		GL11.glReadBuffer(GL11.GL_FRONT);
-		int width = Display.getWidth();
-		int height= Display.getHeight();
 		int bpp = 4; // Assuming a 32-bit display with a byte each for red, green, blue, and alpha.
-		ByteBuffer buffer = BufferUtils.createByteBuffer(width * height * bpp);
-		GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer );
+		ByteBuffer buffer = BufferUtils.createByteBuffer(snapshotWidth * snapshotHeight * bpp);
+		GL11.glReadPixels(0, 0, snapshotWidth, snapshotHeight, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer ); //Only take camera view
 		
 		File file = new File("res/image.png"); // The file to save to.
 		String format = "PNG"; // Example: "PNG" or "JPG"
-		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		BufferedImage image = new BufferedImage(snapshotWidth, snapshotHeight, BufferedImage.TYPE_INT_RGB);
 		
-		for(int x = 0; x < width; x++) 
+		for(int x = 0; x < snapshotWidth; x++) 
 		{
-		    for(int y = 0; y < height; y++)
+		    for(int y = 0; y < snapshotHeight; y++)
 		    {
-		        int i = (x + (width * y)) * bpp;
+		        int i = (x + (snapshotWidth * y)) * bpp;
 		        int r = buffer.get(i) & 0xFF;
 		        int g = buffer.get(i + 1) & 0xFF;
 		        int b = buffer.get(i + 2) & 0xFF;
-		        image.setRGB(x, height - (y + 1), (0xFF << 24) | (r << 16) | (g << 8) | b);
+		        image.setRGB(x, snapshotHeight - (y + 1), (0xFF << 24) | (r << 16) | (g << 8) | b);
 		    }
 		}
 		//Cropping the image
-		BufferedImage dest = image.getSubimage(image.getWidth()/2 - 100, image.getHeight()/2 - 100,
-				this.snapshotWidth, this.snapshotHeight);
+		/*BufferedImage dest = image.getSubimage(image.getWidth()/2 - 100, image.getHeight()/2 - 100,
+				this.snapshotWidth, this.snapshotHeight); */
 		
 		try {
-		    ImageIO.write(dest, format, file);
+		    ImageIO.write(image, format, file);
 		} catch (IOException e) { 
 			e.printStackTrace(); 
 		}
 		
-		return dest;
+		return image;
 	}
 
 	public void setYaw(int i) {
