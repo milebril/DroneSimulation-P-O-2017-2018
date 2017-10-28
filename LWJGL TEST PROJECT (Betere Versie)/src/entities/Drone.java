@@ -88,10 +88,10 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		
 		this.maxThrust = cfg.getMaxThrust();
 		this.maxAOA = cfg.getMaxAOA();
-		this.engineMass = cfg.getEngineMass();
+		this.setEngineMass(cfg.getEngineMass());
 		this.enginePosition = calculateEnginePosition();
-		this.tailMass = cfg.getTailMass();
-		this.tailSize = cfg.getTailSize();
+		this.setTailMass(cfg.getTailMass());
+		this.setTailSize(cfg.getTailSize());
 		
 		this.thrustForce = 1000;
 		
@@ -261,13 +261,14 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		
 		applyLiftForces(dt);
 		applyTorqueForces(dt);
-		
+		System.out.println("headingVector: " + this.getHeadingVector());
+		/*
 		if (!flying) {
 			getLeftWing().setInclination(0);
 			getRightWing().setInclination(0);
 			getVerticalStabilizer().setInclination(0);
 		}
-		
+		**/
 		
 		/*if (Math.abs(this.getHeadingVector().y) > 0.1 && !flying) {
 			if (this.getHeadingVector().y > 0) {
@@ -422,6 +423,13 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		return this.speedChangeVector;
 	}
 	
+	public void setEngineMass(float engineMass) {
+		if(engineMass <= 0) throw new IllegalArgumentException("EngineMass must be larger than zero.");
+		this.engineMass = engineMass;
+	}
+	
+	
+	
 	public float getEngineMass(){
 		return this.engineMass;
 	}
@@ -442,8 +450,18 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		return this.verticalStabilizer;
 	}
 	
+	public void setTailMass(float tailMass) {
+		if(tailMass <= 0) throw new IllegalArgumentException("TailMass must be larger than zero.");
+		this.tailMass = tailMass;
+	}
+	
 	public float getTailMass(){
 		return this.tailMass;
+	}
+	
+	public void setTailSize(float tailSize) {
+		if(tailSize <= 0) throw new IllegalArgumentException("TailSize must be larger than zero.");
+		this.tailSize = tailSize;
 	}
 	
 	public float getTailSize() {
