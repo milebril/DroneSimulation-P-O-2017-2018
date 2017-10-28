@@ -13,7 +13,6 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector3f;
-import org.opencv.osgi.OpenCVInterface;
 
 public class Camera {
 	
@@ -49,15 +48,15 @@ public class Camera {
 	}
 	
 	public float getPitch() {
-		return pitch;
+		return this.pitch;
 	}
 
 	public float getYaw() {
-		return yaw;
+		return this.yaw;
 	}
 
 	public float getRoll() {
-		return roll;
+		return this.roll;
 	}
 	
 	/*
@@ -80,7 +79,11 @@ public class Camera {
 
 	public void increaseRotation(Vector3f headingVector) {
 		this.yaw = (float) Math.asin(headingVector.y);
-		this.pitch = (float) Math.asin(headingVector.x);
+		if (headingVector.z < 0) {
+			this.pitch = (float) -Math.atan(headingVector.x / headingVector.z);
+		} else {
+			this.pitch = (float) (-Math.atan(headingVector.x / headingVector.z) + Math.PI);
+		}
 	}
 	
 	public BufferedImage takeSnapshot() {

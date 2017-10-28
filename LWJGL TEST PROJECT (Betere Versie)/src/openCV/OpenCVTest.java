@@ -29,7 +29,7 @@ public class OpenCVTest {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
 		// file locations
-		String imageMap = "C:\\Users\\Stijn\\Desktop\\Documenten\\School\\KU Leuven\\Semester 5\\PenO\\java project\\P-O-CW-2017-2018-Drone-\\test\\src\\images\\";
+		String imageMap = "res/";
 		String fileLocation = imageMap + "image.png";
 		
 		
@@ -98,7 +98,7 @@ public class OpenCVTest {
 		
 		
 		// file locations
-		String imageMap = "C:\\Users\\Stijn\\Desktop\\Documenten\\School\\KU Leuven\\Semester 5\\PenO\\java project\\P-O-CW-2017-2018-Drone-\\test\\src\\images\\";
+		String imageMap = "res/images/";
 		String fileLocation = imageMap + imageName + ".png";
 		
 		

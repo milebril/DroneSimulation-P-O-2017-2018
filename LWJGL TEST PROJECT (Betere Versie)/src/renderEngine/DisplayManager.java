@@ -16,6 +16,7 @@ public class DisplayManager {
 	//private static final int HEIGHT = 200;
 	private static final int FPS_CAP = 120;
 	
+	public static long elapsedTime;
 	private static long lastFrameTime;
 	private static float delta;
 	
@@ -42,6 +43,8 @@ public class DisplayManager {
 		long currentFrameTime = getCurrentTime();
 		delta = (currentFrameTime - lastFrameTime) / 1000f; // In seconds
 		lastFrameTime = currentFrameTime;
+		
+		elapsedTime += delta;
 	}
 	
 	public static float getFrameTimeSeconds() {
@@ -54,5 +57,9 @@ public class DisplayManager {
 
 	private static long getCurrentTime() {
 		return Sys.getTime() * 1000 / Sys.getTimerResolution();
+	}
+
+	public static float getElapsedTime() {
+		return elapsedTime;
 	}
 }

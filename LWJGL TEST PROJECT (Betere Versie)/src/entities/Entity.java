@@ -82,4 +82,10 @@ public class Entity {
 		this.scale = scale;
 	}
 
+	public void setRotation(float yaw, float pitch, float roll) {
+		this.rotX = yaw;
+		this.rotY = pitch;
+		this.rotZ = roll;
+	}
+
 }

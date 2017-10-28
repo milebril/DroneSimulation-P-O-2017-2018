@@ -41,6 +41,8 @@ public class MainGameLoop {
 	
 	public static List<Renderer> renderers = new ArrayList<Renderer>();
 	
+	public static long elapsedTime = 0;
+	
 	public static void main(String[] args) {
 
 		/*
@@ -81,26 +83,26 @@ public class MainGameLoop {
 		//Creating 1000 test cubes
 		Random r = new Random();
 		List<Entity> entities = new ArrayList<>();
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < 2000; i++) {
 			Cuboid c = new Cuboid(r.nextFloat(), r.nextFloat(), r.nextFloat());
 			RawModel model = loader.loadToVAO(c.positions, c.colors, null);
 			//TexturedModel staticModel = new TexturedModel(model,new ModelTexture(loader.loadTexture("image")));
 			entities.add(new cubeTestPlayer(model, 
-					new Vector3f(r.nextFloat()*100-50,r.nextFloat()*100-50,r.nextFloat()*-300),0, 0, 0, 1));
+					new Vector3f(r.nextFloat()*200-100,r.nextFloat()*200-100,r.nextFloat()*-1000),0, 0, 0, 1));
 		}
 		
 		Cube c = new Cube(1, 0, 0);
 		RawModel model = loader.loadToVAO(c.positions, c.colors, null);
 		Entity e = new Entity(model, 
-				new Vector3f(0,30,-10),0, 0, 0, 1);
+				new Vector3f(0,0,-100),0, 0, 0, 1);
 		
 		Cube droneCube = new Cube(0, 0, 0);
 		Drone drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
-				new Vector3f(0, 30, 0), 0, 0, 0, 1, autopilotConfig);
+				new Vector3f(0, 30, 0), 0, 0, 0, 4, autopilotConfig);
 		
 		Camera camera = new Camera();
-		camera.setPosition(new Vector3f(100, 30, -50));
-		camera.setPitch(-45);
+		camera.setPosition(new Vector3f(0, 300, -100));
+		camera.setYaw(-45);
 		
 		while(!Display.isCloseRequested()){
 			GL11.glViewport(0, 0, 200, 200);
@@ -114,9 +116,9 @@ public class MainGameLoop {
 				drone.getCamera().takeSnapshot();
 			}
 			
-//			for (Entity entity : entities) {
-//				renderer.render(entity,shader);
-//			} 
+			for (Entity entity : entities) {
+				renderer.render(entity,shader);
+			} 
 			renderer.render(e, shader);
 			renderer.render(drone, shader);
 			
@@ -128,16 +130,16 @@ public class MainGameLoop {
 			shaderFreeCam.start();
 			shaderFreeCam.loadViewMatrix(camera);
 			
-//			for (Entity entity : entities) {
-//				rendererFreeCam.render(entity,shaderFreeCam);
-//			} 
+			for (Entity entity : entities) {
+				rendererFreeCam.render(entity,shaderFreeCam);
+			} 
 			rendererFreeCam.render(e, shaderFreeCam);
 			rendererFreeCam.render(drone, shaderFreeCam);
 			
 			
 			float dt = DisplayManager.getFrameTimeSeconds();
-			//drone.increasePosition(dt);
-			//drone.applyForces(dt);
+			drone.increasePosition(dt);
+			drone.applyForces(dt);
 			
 			if(Math.abs(Math.sqrt(Math.pow(drone.getPosition().x - e.getPosition().x, 2) +
 					Math.pow(drone.getPosition().y - e.getPosition().y, 2) +
@@ -148,7 +150,7 @@ public class MainGameLoop {
 			/* Drone Debug */
 			//drone.moveHeadingVector();
 			
-			if (drone.getPosition().z < -300) {
+			if (drone.getPosition().z < -1000) {
 				break;
 			}
 			
