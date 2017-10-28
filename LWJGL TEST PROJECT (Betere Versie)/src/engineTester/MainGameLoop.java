@@ -92,7 +92,7 @@ public class MainGameLoop {
 		Cube c = new Cube(1, 0, 0);
 		RawModel model = loader.loadToVAO(c.positions, c.colors, null);
 		Entity e = new Entity(model, 
-				new Vector3f(0,30,-100),0, 0, 0, 1);
+				new Vector3f(0,30,-10),0, 0, 0, 1);
 		
 		Cube droneCube = new Cube(0, 0, 0);
 		Drone drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
@@ -109,6 +109,10 @@ public class MainGameLoop {
 			renderer.prepare();
 			shader.start();
 			shader.loadViewMatrix(drone.getCamera());
+			
+			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
+				drone.getCamera().takeSnapshot();
+			}
 			
 //			for (Entity entity : entities) {
 //				renderer.render(entity,shader);
@@ -132,8 +136,8 @@ public class MainGameLoop {
 			
 			
 			float dt = DisplayManager.getFrameTimeSeconds();
-			drone.increasePosition(dt);
-			drone.applyForces(dt);
+			//drone.increasePosition(dt);
+			//drone.applyForces(dt);
 			
 			if(Math.abs(Math.sqrt(Math.pow(drone.getPosition().x - e.getPosition().x, 2) +
 					Math.pow(drone.getPosition().y - e.getPosition().y, 2) +
@@ -143,10 +147,6 @@ public class MainGameLoop {
 			
 			/* Drone Debug */
 			//drone.moveHeadingVector();
-			
-			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
-				drone.getCamera().takeSnapshot();
-			}
 			
 			if (drone.getPosition().z < -300) {
 				break;
