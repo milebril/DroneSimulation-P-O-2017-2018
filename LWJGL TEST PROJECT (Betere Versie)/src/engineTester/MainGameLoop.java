@@ -96,7 +96,7 @@ public class MainGameLoop {
 		Entity e = new Entity(model, 
 				new Vector3f(0,30,-300),0, 0, 0, 1);
 		
-		Cube droneCube = new Cube(0, 0, 0);
+		Cuboid droneCube = new Cuboid(0, 0, 0);
 		Drone drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
 				new Vector3f(0, 30, 0), 0, 0, 0, 4, autopilotConfig);
 		
@@ -148,7 +148,7 @@ public class MainGameLoop {
 			}
 			
 			/* Drone Debug */
-			//drone.moveHeadingVector();
+			drone.moveHeadingVector();
 			
 			if (drone.getPosition().z < -1000) {
 				break;
