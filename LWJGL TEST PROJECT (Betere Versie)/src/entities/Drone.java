@@ -162,6 +162,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 			
 		// The vertical stabilizer's attack vector is (-sin(verStabInclination), 0, -cos(verStabInclination)).
 		Vector3f attackVector = new Vector3f((float) -Math.sin(this.getVerticalStabilizer().getInclination()), 0, (float) -Math.cos(this.verticalStabilizer.getInclination()));
+		
 		Vector3f.cross(this.getVerticalStabilizer().getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
 		float liftSlope = this.getVerticalStabilizer().getLiftSlope();
 			
@@ -180,7 +181,6 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		Vector3f torque = new Vector3f(0,0,0);
 		Vector3f.cross(getVerticalStabilizer().getCenterOfMass(), lift, torque);
 		System.out.println("lift: " + lift);
-		System.out.println("position: " + getVerticalStabilizer().getCenterOfMass());
 		System.out.println("torque: " + torque);
 		return torque;
 	}
@@ -443,7 +443,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	/*
 	 * DEBUG
 	 */
-	
+	/**
 	public void moveHeadingVector() {
 		if(Keyboard.isKeyDown(Keyboard.KEY_Z)){
 			this.headingVector.y += 0.01f;
@@ -461,10 +461,10 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 			this.headingVector.x -= 0.01f;
 			this.headingVector.normalise();
 		}
-
+  
 		camera.increaseRotation(this.headingVector);
 	}
-	
+	*/
 	private void flyMode() {		
 		flying = true;
 		
@@ -475,7 +475,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 			if (this.getHorizontalStabilizer().getInclination() > -0.5)
 				getRightWing().setInclination(getRightWing().getInclination() - 0.01f);
 		} else if(Keyboard.isKeyDown(Keyboard.KEY_D)){
-			getVerticalStabilizer().setInclination(-0.1f);
+			getVerticalStabilizer().setInclination((float)-Math.PI/3);
 		} else if(Keyboard.isKeyDown(Keyboard.KEY_Q)){
 			getVerticalStabilizer().setInclination(0.5f);
 		} else {
