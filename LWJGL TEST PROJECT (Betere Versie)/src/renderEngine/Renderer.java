@@ -95,7 +95,7 @@ public class Renderer {
 	private void createProjectionMatrix(){
 		//float aspectRatio = (float) Display.getWidth() / (float) Display.getHeight();
 		float aspectRatio = FOVX / FOVY;
-		float y_scale = (float) ((1f / Math.tan(Math.toRadians(FOVY / 2f))));
+		float y_scale = (float) ((1f / Math.tan(Math.toRadians(FOVX / 2f))));
 		float x_scale = y_scale / aspectRatio;
 		float frustum_length = FAR_PLANE - NEAR_PLANE;
 

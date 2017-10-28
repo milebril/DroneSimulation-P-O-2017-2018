@@ -79,28 +79,35 @@ public class MainGameLoop {
 		renderers.add(rendererFreeCam);
 		
 		//Creating 1000 test cubes
+		
+		
 		Random r = new Random();
 		List<Entity> entities = new ArrayList<>();
 		for (int i = 0; i < 1000; i++) {
-			Cuboid c = new Cuboid(r.nextFloat(), r.nextFloat(), r.nextFloat());
+			Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
 			RawModel model = loader.loadToVAO(c.positions, c.colors, null);
 			//TexturedModel staticModel = new TexturedModel(model,new ModelTexture(loader.loadTexture("image")));
 			entities.add(new cubeTestPlayer(model, 
 					new Vector3f(r.nextFloat()*100-50,r.nextFloat()*100-50,r.nextFloat()*-300),0, 0, 0, 1));
 		}
 		
+		
 		Cube c = new Cube(1, 0, 0);
 		RawModel model = loader.loadToVAO(c.positions, c.colors, null);
 		Entity e = new Entity(model, 
-				new Vector3f(0,30,-100),0, 0, 0, 1);
+				new Vector3f(0,0,-10),0, 0, 0, 1);
 		
 		Cube droneCube = new Cube(0, 0, 0);
 		Drone drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
+<<<<<<< Updated upstream
 				new Vector3f(0, 30, 0), 0, 0, 0, 1, autopilotConfig);
 		
 		Camera camera = new Camera();
 		camera.setPosition(new Vector3f(100, 30, -50));
 		camera.setPitch(-45);
+=======
+				new Vector3f(0, 0, 0), 0, 0, 0, 0, autopilotConfig);
+>>>>>>> Stashed changes
 		
 		while(!Display.isCloseRequested()){
 			GL11.glViewport(0, 0, 200, 200);
@@ -110,9 +117,17 @@ public class MainGameLoop {
 			shader.start();
 			shader.loadViewMatrix(drone.getCamera());
 			
+<<<<<<< Updated upstream
 //			for (Entity entity : entities) {
 //				renderer.render(entity,shader);
 //			} 
+=======
+			
+			for (Entity entity : entities) {
+				renderer.render(entity,shader);
+			} 
+			
+>>>>>>> Stashed changes
 			renderer.render(e, shader);
 			renderer.render(drone, shader);
 			
@@ -132,14 +147,20 @@ public class MainGameLoop {
 			
 			
 			float dt = DisplayManager.getFrameTimeSeconds();
+			System.out.println("drone position" + drone.getPosition());
 			drone.increasePosition(dt);
 			drone.applyForces(dt);
 			
+<<<<<<< Updated upstream
+=======
+			
+>>>>>>> Stashed changes
 			if(Math.abs(Math.sqrt(Math.pow(drone.getPosition().x - e.getPosition().x, 2) +
 					Math.pow(drone.getPosition().y - e.getPosition().y, 2) +
 					Math.pow(drone.getPosition().z - e.getPosition().z, 2))) < 4) {
 				break;
 			}
+			
 			
 			/* Drone Debug */
 			//drone.moveHeadingVector();

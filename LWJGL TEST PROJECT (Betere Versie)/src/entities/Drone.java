@@ -179,13 +179,19 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		Vector3f lift = calculateVerStabLift();
 		Vector3f torque = new Vector3f(0,0,0);
 		Vector3f.cross(getVerticalStabilizer().getCenterOfMass(), lift, torque);
+<<<<<<< Updated upstream
 		System.out.println("lift: " + lift);
 		System.out.println("position: " + getVerticalStabilizer().getCenterOfMass());
 		System.out.println("torque: " + torque);
+=======
+		System.out.println("lift :" + lift);
+		System.out.println("torque :" + torque);
+>>>>>>> Stashed changes
 		return torque;
 	}
 	
 	public void increasePosition(float dt) {
+		
 		float dx = dt * this.getSpeedVector().x;
 		float dy = dt * this.getSpeedVector().y;
 		float dz = dt * this.getSpeedVector().z;
@@ -245,6 +251,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		deepCopySpeedVector();
 		this.setSpeedChangeVector(new Vector3f(0,0,0));
 		rotationAcceleration = new Vector3f(0,0,0);
+<<<<<<< Updated upstream
 	
 		//setHeadingVector();
 		this.headingVector = rotate(rotationSpeedVector.y);
@@ -252,6 +259,13 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		getHeadingVector().normalise();
 		
 		updateTailPosition();
+=======
+		
+		setHeadingVector();
+		this.headingVector = rotate(rotationSpeedVector.y);
+		//Vector3f.add(getHeadingVector(), rotationSpeedVector, headingVector);
+		//getHeadingVector().normalise();
+>>>>>>> Stashed changes
 	}
 
 	private void updateTailPosition() {
