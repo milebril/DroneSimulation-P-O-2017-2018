@@ -17,6 +17,7 @@ import java.util.Random;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import autopilot.AutopilotConfig;
@@ -34,6 +35,9 @@ import entities.Camera;
 import entities.Drone;
 import entities.Entity;
 import entities.cubeTestPlayer;
+import fontMeshCreator.FontType;
+import fontMeshCreator.GUIText;
+import fontRendering.TextMaster;
 
 public class MainGameLoop {
 
@@ -72,11 +76,17 @@ public class MainGameLoop {
 		//Loader is used to load models using VAO's and VBO's
 		Loader loader = new Loader();
 		//
+		TextMaster.init(loader);
+		
+		
+		
 		StaticShader shader = new StaticShader();
 		StaticShader shaderFreeCam = new StaticShader();
+		StaticShader shaderText = new StaticShader();
 		// Renderer based on FOVX and FOVY
 		Renderer renderer = new Renderer(shader, autopilotConfig.getHorizontalAngleOfView(), autopilotConfig.getVerticalAngleOfView());
 		Renderer rendererFreeCam = new Renderer(shaderFreeCam, 120, 120);
+		Renderer rendererText = new Renderer(shaderText, 120, 120);
 		renderers.add(renderer);
 		renderers.add(rendererFreeCam);
 		
@@ -104,6 +114,8 @@ public class MainGameLoop {
 		camera.setPosition(new Vector3f(0, 300, -100));
 		camera.setYaw(-45);
 		
+		Camera camera2 = new Camera();
+		
 		while(!Display.isCloseRequested()){
 			GL11.glViewport(0, 0, 200, 200);
 			GL11.glScissor(0,0,200,200);
@@ -112,23 +124,26 @@ public class MainGameLoop {
 			shader.start();
 			shader.loadViewMatrix(drone.getCamera());
 			
-			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
-				drone.getCamera().takeSnapshot();
-			}
-			
 			for (Entity entity : entities) {
 				renderer.render(entity,shader);
 			} 
 			renderer.render(e, shader);
 			renderer.render(drone, shader);
 			
-			/* 3rd person */
+			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
+				drone.getCamera().takeSnapshot();
+			}
+			
+			
 			GL11.glViewport(200, 0, Display.getWidth() - 200, Display.getHeight());
 			GL11.glScissor(200, 0, Display.getWidth() - 200, Display.getHeight());
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
-			rendererFreeCam.prepare();
+			rendererFreeCam.prepareText();
 			shaderFreeCam.start();
 			shaderFreeCam.loadViewMatrix(camera);
+			/* 3rd person */
+
+
 			
 			for (Entity entity : entities) {
 				rendererFreeCam.render(entity,shaderFreeCam);
@@ -136,10 +151,42 @@ public class MainGameLoop {
 			rendererFreeCam.render(e, shaderFreeCam);
 			rendererFreeCam.render(drone, shaderFreeCam);
 			
+			GL11.glViewport(0, 200, 200, Display.getHeight() - 200);
+			GL11.glScissor(0, 200, 200, Display.getHeight() - 200);
+			GL11.glEnable(GL11.GL_SCISSOR_TEST);
+			rendererText.prepare();
+			shaderText.start();
+			shaderText.loadViewMatrix(camera2);
+			
+			rendererText.render(e, shaderText);
+			
+			/* GUI */
+			// GUIText: 1ste argument is de string die geprint moet worden
+			// 2de argument is de fontsize
+			// 3de argument is het font
+			// 4de argument is de positie (x,y) tussen 0 en 1, (0,0) is links van boven
+			// 5de argument is de lengte van een regel (tussen 0 en 1), 1 wilt zeggen dat de tekst over heel de lengte van het 
+			// 		beeld mag
+			// 6de argument is gecentreerd (true) of niet (false)
+			
+			// snelheid van de drone
+			String speed = String.valueOf(Math.round(drone.getSpeed()));
+			FontType font = new FontType(loader.loadTexture("verdana"), new File("res/verdana.fnt"));
+			GUIText textSpeed = new GUIText("Speed = " + speed + "m/s", 5, font, new Vector2f(0.01f,0), 1, true);
+			textSpeed.setColour(1, 1, 1);
+			
+			// positie van de drone
+			Vector3f Dposition = drone.getPosition();
+			String xpos = String.valueOf(Math.round(Dposition.x));
+			String ypos = String.valueOf(Math.round(Dposition.y));
+			String zpos = String.valueOf(Math.round(Dposition.z));
+			GUIText textPosition = new GUIText("Position = ("+xpos+" , "+ypos+" , "+zpos +")" , 5, font, new Vector2f(0.01f,0.2f), 1, true);
+			textPosition.setColour(1, 1, 1);
 			
 			float dt = DisplayManager.getFrameTimeSeconds();
 			drone.increasePosition(dt);
 			drone.applyForces(dt);
+			
 			
 			if(Math.abs(Math.sqrt(Math.pow(drone.getPosition().x - e.getPosition().x, 2) +
 					Math.pow(drone.getPosition().y - e.getPosition().y, 2) +
@@ -154,10 +201,17 @@ public class MainGameLoop {
 				break;
 			}
 			
+			TextMaster.render();
+			
+			// de tekst moet telkens worden verwijderd, anders wordt er elke loop nieuwe tekst overgeprint (=> onleesbaar)
+			TextMaster.removeText(textSpeed);
+			TextMaster.removeText(textPosition);
 			shader.stop();
 			DisplayManager.updateDisplay();
+			
 		}
 
+		TextMaster.cleanUp();
 		shader.cleanUp();
 		shaderFreeCam.cleanUp();
 		loader.cleanUp();
