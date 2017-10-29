@@ -17,6 +17,7 @@ import java.util.Random;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import autopilot.AutopilotConfig;
@@ -34,6 +35,9 @@ import entities.Camera;
 import entities.Drone;
 import entities.Entity;
 import entities.cubeTestPlayer;
+import fontMeshCreator.FontType;
+import fontMeshCreator.GUIText;
+import fontRendering.TextMaster;
 
 public class MainGameLoop {
 
@@ -70,6 +74,10 @@ public class MainGameLoop {
 		//Loader is used to load models using VAO's and VBO's
 		Loader loader = new Loader();
 		//
+		TextMaster.init(loader);
+		
+		
+		
 		StaticShader shader = new StaticShader();
 		StaticShader shaderFreeCam = new StaticShader();
 		// Renderer based on FOVX and FOVY
@@ -92,7 +100,7 @@ public class MainGameLoop {
 		Cube c = new Cube(1, 0, 0);
 		RawModel model = loader.loadToVAO(c.positions, c.colors, null);
 		Entity e = new Entity(model, 
-				new Vector3f(0,30,-10),0, 0, 0, 1);
+				new Vector3f(0,30,-700),0, 0, 0, 1);
 		
 		Cube droneCube = new Cube(0, 0, 0);
 		Drone drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
@@ -135,9 +143,33 @@ public class MainGameLoop {
 			rendererFreeCam.render(drone, shaderFreeCam);
 			
 			
+			/* GUI */
+			// GUIText: 1ste argument is de string die geprint moet worden
+			// 2de argument is de fontsize
+			// 3de argument is het font
+			// 4de argument is de positie (x,y) tussen 0 en 1, (0,0) is links van boven
+			// 5de argument is de lengte van een regel (tussen 0 en 1), 1 wilt zeggen dat de tekst over heel de lengte van het 
+			// 		beeld mag
+			// 6de argument is gecentreerd (true) of niet (false)
+			
+			// snelheid van de drone
+			String speed = String.valueOf(drone.getSpeed());
+			FontType font = new FontType(loader.loadTexture("verdana"), new File("res/verdana.fnt"));
+			GUIText text_speed = new GUIText("Speed = " + speed + "m/s", 1, font, new Vector2f(0,0), 0.5f, false);
+			text_speed.setColour(1, 1, 1);
+			
+			// positie van de drone
+			Vector3f Dposition = drone.getPosition();
+			String xpos = String.valueOf(Dposition.x);
+			String ypos = String.valueOf(Dposition.y);
+			String zpos = String.valueOf(Dposition.z);
+			GUIText text_position = new GUIText("Position = ("+xpos+" , "+ypos+" , "+zpos +")" , 1, font, new Vector2f(0,0.05f), 0.5f, false);
+			text_position.setColour(1, 1, 1);
+			
 			float dt = DisplayManager.getFrameTimeSeconds();
-			//drone.increasePosition(dt);
-			//drone.applyForces(dt);
+			drone.increasePosition(dt);
+			drone.applyForces(dt);
+			
 			
 			if(Math.abs(Math.sqrt(Math.pow(drone.getPosition().x - e.getPosition().x, 2) +
 					Math.pow(drone.getPosition().y - e.getPosition().y, 2) +
@@ -152,10 +184,17 @@ public class MainGameLoop {
 				break;
 			}
 			
+			TextMaster.render();
+			
+			// de tekst moet telkens worden verwijderd, anders wordt er elke loop nieuwe tekst overgeprint (=> onleesbaar)
+			TextMaster.removeText(text_speed);
+			TextMaster.removeText(text_position);
 			shader.stop();
 			DisplayManager.updateDisplay();
+			
 		}
 
+		TextMaster.cleanUp();
 		shader.cleanUp();
 		shaderFreeCam.cleanUp();
 		loader.cleanUp();
