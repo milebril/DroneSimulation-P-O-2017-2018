@@ -170,16 +170,16 @@ public class MainGameLoop {
 			// snelheid van de drone
 			String speed = String.valueOf(Math.round(drone.getSpeed()));
 			FontType font = new FontType(loader.loadTexture("verdana"), new File("res/verdana.fnt"));
-			GUIText text_speed = new GUIText("Speed = " + speed + "m/s", 4, font, new Vector2f(0,0), 1, false);
-			text_speed.setColour(1, 1, 1);
+			GUIText textSpeed = new GUIText("Speed = " + speed + "m/s", 5, font, new Vector2f(0.01f,0), 1, true);
+			textSpeed.setColour(1, 1, 1);
 			
 			// positie van de drone
 			Vector3f Dposition = drone.getPosition();
 			String xpos = String.valueOf(Math.round(Dposition.x));
 			String ypos = String.valueOf(Math.round(Dposition.y));
 			String zpos = String.valueOf(Math.round(Dposition.z));
+			GUIText textPosition = new GUIText("Position = ("+xpos+" , "+ypos+" , "+zpos +")" , 5, font, new Vector2f(0.01f,0.2f), 1, true);
 			textPosition.setColour(1, 1, 1);
-			GUIText text_position = new GUIText("Position = ("+xpos+" , "+ypos+" , "+zpos +")" , 4, font, new Vector2f(0,0.1f), 1, false);
 			
 			float dt = DisplayManager.getFrameTimeSeconds();
 			drone.increasePosition(dt);
@@ -202,7 +202,7 @@ public class MainGameLoop {
 			TextMaster.render();
 			
 			// de tekst moet telkens worden verwijderd, anders wordt er elke loop nieuwe tekst overgeprint (=> onleesbaar)
-			TextMaster.removeText(text_speed);
+			TextMaster.removeText(textSpeed);
 			TextMaster.removeText(textPosition);
 			shader.stop();
 			DisplayManager.updateDisplay();
