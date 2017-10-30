@@ -14,7 +14,7 @@ import openCV.RedCubeLocator;
 
 public class AutoPilot {
 	
-	private static final float CRUISING_SPEED = 200;
+	private static final float CRUISING_SPEED = 500;
 	private static final float INCLINATION = (float) (Math.PI /10);
 
 	public AutoPilot(){
@@ -289,6 +289,9 @@ public class AutoPilot {
 		}
 		
 		else{
+			System.out.println(this.getHorizDeviation());
+			System.out.println(this.getVertDeviation());
+			
 			AutopilotOutputs value = new AutopilotOutputs(){
 	
 				@Override
@@ -308,6 +311,11 @@ public class AutoPilot {
 		s.close();
 	}
 	
+	private char[] getHorStabInclination() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	/**
 	 * pos incl -> neg x-force on tail -> rotation towards pos side
 	 * @return pos inclincation or negative inclination
@@ -337,7 +345,7 @@ public class AutoPilot {
 	}
 	
 	protected float calculatRightWingIncl() {
-		return (float) Math.sqrt((this.getDroneMass() * this.getGravity())/(2 * this.getWingLiftSlope()* this.getSpeed()*this.getSpeed()));
+		return (float) Math.sqrt((this.getDroneMass() * this.getGravity())/(2* this.getWingLiftSlope()* this.getSpeed()*this.getSpeed()));
 	}
 
 	protected float calculateLeftWingIncl() {
@@ -377,11 +385,13 @@ public class AutoPilot {
 		this.setOldX(getX());
 		this.setOldY(getY());
 		this.setOldZ(getZ());	
+		
+		this.setInitialised(true);
 
 		}
 
 	public void getFromDrone() throws IOException {
-		DataInputStream i = new DataInputStream(new FileInputStream("res/APOinputs"));
+		DataInputStream i = new DataInputStream(new FileInputStream("res/APInputs.cfg"));
 		
 		AutopilotInputs inputs = AutopilotInputsReader.read(i);
 		

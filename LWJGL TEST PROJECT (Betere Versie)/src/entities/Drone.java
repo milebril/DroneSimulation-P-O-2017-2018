@@ -215,7 +215,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		DataOutputStream s = new DataOutputStream(new FileOutputStream("res/APInputs.cfg"));
 		
 		AutopilotInputs value = new AutopilotInputs() {
-			public byte[] getImage() { return ImageConverter.imageToByteArray(camera.takeSnapshot()); /* TODO !!!!*/}
+			public byte[] getImage() { return ImageConverter.bufferedImageToByteArray(camera.takeSnapshot()); /* TODO !!!!*/}
 			
 			public float getX() { return getPosition().x; }
 			public float getY() { return getPosition().y; }
@@ -235,7 +235,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	
 	//inputstream niet sluiten?
 	public void getFromAutopilot() throws IOException {
-		DataInputStream i = new DataInputStream(new FileInputStream("res/APOutputs"));
+		DataInputStream i = new DataInputStream(new FileInputStream("res/APOutputs.cfg"));
 		
 		AutopilotOutputs settings = AutopilotOutputsReader.read(i);
 		

@@ -19,6 +19,7 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
+import org.opencv.core.Core;
 
 import autoPilotJar.AutoPilot;
 import autopilot.AutopilotConfig;
@@ -49,6 +50,8 @@ public class MainGameLoop {
 	public static long elapsedTime = 0;
 	
 	public static void main(String[] args) throws IOException {
+		
+		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
 		/*
 		 * Start reading AutopilotConfig.cfg
@@ -105,7 +108,7 @@ public class MainGameLoop {
 		Cube c = new Cube(1, 0, 0);
 		RawModel model = loader.loadToVAO(c.positions, c.colors, null);
 		Entity e = new Entity(model, 
-				new Vector3f(0,30,-300),0, 0, 0, 1);
+				new Vector3f(10,100,-200),0, 0, 0, 1);
 		
 		Cuboid droneCube = new Cuboid(0, 0, 0);
 		Drone drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
@@ -126,9 +129,9 @@ public class MainGameLoop {
 			shader.start();
 			shader.loadViewMatrix(drone.getCamera());
 			
-			for (Entity entity : entities) {
-				renderer.render(entity,shader);
-			} 
+//			for (Entity entity : entities) {
+//				renderer.render(entity,shader);
+//			} 
 			renderer.render(e, shader);
 			renderer.render(drone, shader);
 			
@@ -147,9 +150,9 @@ public class MainGameLoop {
 
 
 			
-			for (Entity entity : entities) {
-				rendererFreeCam.render(entity,shaderFreeCam);
-			} 
+//			for (Entity entity : entities) {
+//				rendererFreeCam.render(entity,shaderFreeCam);
+//			} 
 			rendererFreeCam.render(e, shaderFreeCam);
 			rendererFreeCam.render(drone, shaderFreeCam);
 			

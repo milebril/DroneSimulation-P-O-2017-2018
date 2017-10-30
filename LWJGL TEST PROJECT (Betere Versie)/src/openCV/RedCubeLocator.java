@@ -136,24 +136,24 @@ public class RedCubeLocator {
 		// 2D straight size
 		double ratio = getAreaRatio(45 * (Math.PI / 180),  45 * (Math.PI / 180));
 		double size = perspectiveSize / ratio;
-		System.out.println("perspectiveSize: " + String.valueOf(perspectiveSize));
-		System.out.println("ratio: " + String.valueOf(ratio));
-		System.out.println("size: " + String.valueOf(size));
+//		System.out.println("perspectiveSize: " + String.valueOf(perspectiveSize));
+//		System.out.println("ratio: " + String.valueOf(ratio));
+//		System.out.println("size: " + String.valueOf(size));
 		
 		// 2D pixels for 1 meter
 		double pixelsPerMeter = Math.sqrt(size);
-		System.out.println("pixels per meter: " + String.valueOf(pixelsPerMeter));
+//		System.out.println("pixels per meter: " + String.valueOf(pixelsPerMeter));
 		
 		double W = 200 / pixelsPerMeter;
 		double hoek = (120.0 / 180) * Math.PI;
-		System.out.println("schermbreedte in meter: " + String.valueOf(W));
+//		System.out.println("schermbreedte in meter: " + String.valueOf(W));
 		
 		double afstand = (W / 2) * (Math.cos(hoek/2) / Math.sin(hoek/2));
-		System.out.println("afstand: " + String.valueOf(afstand));
+//		System.out.println("afstand: " + String.valueOf(afstand));
 		
 		W = 10*2 / (Math.cos(hoek/2) / Math.sin(hoek/2));
-		System.out.println(W);
-		System.out.println(200 / pixelsPerMeter);
+//		System.out.println(W);
+//		System.out.println(200 / pixelsPerMeter);
 		
 		// Get the biggest filter
 		//Mat biggestFilter = getBiggestFilter(matArray);
@@ -183,6 +183,7 @@ public class RedCubeLocator {
 		}
 		
 		// data reads the given array as BGR
+		System.out.println(String.valueOf(width) + " " +  String.valueOf(height) + " " + String.valueOf(byteArray.length) );
 		Mat data = new Mat(height, width, CvType.CV_8UC3);
 		data.put(0, 0, byteArray);
 		
