@@ -19,7 +19,9 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
+import org.opencv.core.Core;
 
+import autoPilotJar.AutoPilot;
 import autopilot.AutopilotConfig;
 import autopilot.AutopilotConfigReader;
 import autopilot.AutopilotConfigValues;
@@ -47,7 +49,9 @@ public class MainGameLoop {
 	
 	public static long elapsedTime = 0;
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
+		
+		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
 		/*
 		 * Start reading AutopilotConfig.cfg
@@ -85,7 +89,7 @@ public class MainGameLoop {
 		StaticShader shaderText = new StaticShader();
 		// Renderer based on FOVX and FOVY
 		Renderer renderer = new Renderer(shader, autopilotConfig.getHorizontalAngleOfView(), autopilotConfig.getVerticalAngleOfView());
-		Renderer rendererFreeCam = new Renderer(shaderFreeCam, 120, 120);
+		Renderer rendererFreeCam = new Renderer(shaderFreeCam, 50, 50);
 		Renderer rendererText = new Renderer(shaderText, 120, 120);
 		renderers.add(renderer);
 		renderers.add(rendererFreeCam);
@@ -103,15 +107,23 @@ public class MainGameLoop {
 		
 		Cube c = new Cube(1, 0, 0);
 		RawModel model = loader.loadToVAO(c.positions, c.colors, null);
+		//Entity e = new Entity(model, 
+			//	new Vector3f(10,30,-50),0, 0, 0, 1);
+		
+		//Entity e = new Entity(model, 
+			//	new Vector3f(0,30,-50),0, 0, 0, 1);
+		
 		Entity e = new Entity(model, 
-				new Vector3f(0,30,-300),0, 0, 0, 1);
+				new Vector3f(-10,30,-50),0, 0, 0, 1);
 		
 		Cuboid droneCube = new Cuboid(0, 0, 0);
 		Drone drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
-				new Vector3f(0, 30, 0), 0, 0, 0, 4, autopilotConfig);
+				new Vector3f(0, 30, 0), 0, 0, 0, 1, autopilotConfig);
+		AutoPilot ap = new AutoPilot();
 		
+		//kak
 		Camera camera = new Camera();
-		camera.setPosition(new Vector3f(0, 300, -100));
+		camera.setPosition(new Vector3f(0, 100, 0));
 		camera.setYaw(-45);
 		
 		Camera camera2 = new Camera();
@@ -124,9 +136,9 @@ public class MainGameLoop {
 			shader.start();
 			shader.loadViewMatrix(drone.getCamera());
 			
-			for (Entity entity : entities) {
-				renderer.render(entity,shader);
-			} 
+//			for (Entity entity : entities) {
+//				renderer.render(entity,shader);
+//			} 
 			renderer.render(e, shader);
 			renderer.render(drone, shader);
 			
@@ -145,9 +157,9 @@ public class MainGameLoop {
 
 
 			
-			for (Entity entity : entities) {
-				rendererFreeCam.render(entity,shaderFreeCam);
-			} 
+//			for (Entity entity : entities) {
+//				rendererFreeCam.render(entity,shaderFreeCam);
+//			} 
 			rendererFreeCam.render(e, shaderFreeCam);
 			rendererFreeCam.render(drone, shaderFreeCam);
 			
@@ -184,14 +196,24 @@ public class MainGameLoop {
 			textPosition.setColour(1, 1, 1);
 			
 			float dt = DisplayManager.getFrameTimeSeconds();
-			drone.increasePosition(dt);
-			drone.applyForces(dt);
 			
+//			drone.increasePosition(dt);
+//			drone.sendToAutopilot(dt);
+//			ap.getFromDrone();
+//			ap.sendToDrone();
+//			drone.getFromAutopilot();
+//			drone.applyForces(dt);
+//			
 			
-			if(Math.abs(Math.sqrt(Math.pow(drone.getPosition().x - e.getPosition().x, 2) +
+			if(!( Math.abs(Math.sqrt(Math.pow(drone.getPosition().x - e.getPosition().x, 2) +
 					Math.pow(drone.getPosition().y - e.getPosition().y, 2) +
-					Math.pow(drone.getPosition().z - e.getPosition().z, 2))) < 4) {
-				break;
+					Math.pow(drone.getPosition().z - e.getPosition().z, 2))) < 4)) {
+				drone.increasePosition(dt);
+				drone.sendToAutopilot(dt);
+				ap.getFromDrone();
+				ap.sendToDrone();
+				drone.getFromAutopilot();
+				drone.applyForces(dt);
 			}
 			
 			/* Drone Debug */
