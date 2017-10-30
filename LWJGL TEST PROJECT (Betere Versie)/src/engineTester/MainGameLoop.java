@@ -110,8 +110,8 @@ public class MainGameLoop {
 /*		Entity e = new Entity(model, 
 				new Vector3f(10,30,-50),0, 0, 0, 1);*/
 		
-		/*Entity e = new Entity(model, 
-				new Vector3f(0,30,-50),0, 0, 0, 1);*/
+		Entity e = new Entity(model, 
+				new Vector3f(0,30,-50),0, 0, 0, 1);
 		
 /*		Entity e = new Entity(model, 
 				new Vector3f(-10,30,-50),0, 0, 0, 1);*/
@@ -121,6 +121,7 @@ public class MainGameLoop {
 				new Vector3f(0, 30, 0), 0, 0, 0, 2, autopilotConfig);
 		AutoPilot ap = new AutoPilot();
 		
+		//kaka
 		Camera camera = new Camera();
 		camera.setPosition(new Vector3f(0, 300, -100));
 		camera.setYaw(-45);
