@@ -33,6 +33,9 @@ public class AutoPilot {
 	private float verStabLiftSlope;
 	private float horizontalAngleOfView;
 	private float verticalAngleOfView;
+	private int nbColumns;
+	private int nbRows;
+	
 	public float getGravity() {
 		return gravity;
 	}
@@ -136,6 +139,23 @@ public class AutoPilot {
 	public void setVerticalAngleOfView(float verticalAngleOfView) {
 		this.verticalAngleOfView = verticalAngleOfView;
 	}
+	
+	public int getNbColumns() {
+		return this.nbColumns;
+	}
+	
+	public void setNbColumns(int nb) {
+		this.nbColumns = nb;
+	}
+	
+	public int getNbRows() {
+		return this.nbRows;
+	}
+	
+	public void setNbRows(int nb) {
+		this.nbRows = nb;
+	}
+	
 
 	public boolean isInitialised() {
 		return isInitialised;
@@ -381,6 +401,11 @@ public class AutoPilot {
 		this.setMaxThrust(autopilotConfig.getMaxThrust());
 		this.setGravity(autopilotConfig.getGravity());
 		this.setWingLiftSlope(autopilotConfig.getWingLiftSlope());
+		this.setHorizontalAngleOfView(autopilotConfig.getHorizontalAngleOfView());
+		this.setVerticalAngleOfView(autopilotConfig.getVerticalAngleOfView());
+		this.setNbColumns(autopilotConfig.getNbColumns());
+		this.setNbRows(autopilotConfig.getNbRows());
+		
 		
 		this.setOldX(getX());
 		this.setOldY(getY());
