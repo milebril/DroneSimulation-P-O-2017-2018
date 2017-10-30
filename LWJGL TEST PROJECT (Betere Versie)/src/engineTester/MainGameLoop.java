@@ -20,6 +20,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
+import autoPilotJar.AutoPilot;
 import autopilot.AutopilotConfig;
 import autopilot.AutopilotConfigReader;
 import autopilot.AutopilotConfigValues;
@@ -47,7 +48,7 @@ public class MainGameLoop {
 	
 	public static long elapsedTime = 0;
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 
 		/*
 		 * Start reading AutopilotConfig.cfg
@@ -109,6 +110,7 @@ public class MainGameLoop {
 		Cuboid droneCube = new Cuboid(0, 0, 0);
 		Drone drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
 				new Vector3f(0, 30, 0), 0, 0, 0, 4, autopilotConfig);
+		AutoPilot ap = new AutoPilot();
 		
 		Camera camera = new Camera();
 		camera.setPosition(new Vector3f(0, 300, -100));
@@ -184,7 +186,12 @@ public class MainGameLoop {
 			textPosition.setColour(1, 1, 1);
 			
 			float dt = DisplayManager.getFrameTimeSeconds();
+			
 			drone.increasePosition(dt);
+			drone.sendToAutopilot(dt);
+			ap.getFromDrone();
+			ap.sendToDrone();
+			drone.getFromAutopilot();
 			drone.applyForces(dt);
 			
 			

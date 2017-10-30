@@ -14,12 +14,14 @@ import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
+import autoPilotJar.AutoPilot;
 import autoPilotJar.AutopilotInputs;
 import autoPilotJar.AutopilotInputsWriter;
 import autoPilotJar.AutopilotOutputs;
 import autoPilotJar.AutopilotOutputsReader;
 import autopilot.AutopilotConfig;
 import models.RawModel;
+import openCV.RedCubeLocator;
 import renderEngine.DisplayManager;
 import toolbox.ImageConverter;
 
@@ -62,6 +64,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	
 	public Drone(RawModel model, Vector3f position, float rotX, float rotY, float rotZ, float scale,
 			AutopilotConfig cfg) {
+
 		super(model, position, rotX, rotY, rotZ, scale);
 		
 		this.speedVector = new Vector3f(0.0f,0.0f, -30.0f);
@@ -207,6 +210,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		super.setRotation(0, -this.getCamera().getPitch(), 0);
 	}
 	
+	// wrm argument dt???????????????????????????????????????????????????????????????????????????????
 	public void sendToAutopilot(float dt) throws IOException {
 		DataOutputStream s = new DataOutputStream(new FileOutputStream("res/APInputs.cfg"));
 		
@@ -229,6 +233,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		s.close();
 	}
 	
+	//inputstream niet sluiten?
 	public void getFromAutopilot() throws IOException {
 		DataInputStream i = new DataInputStream(new FileInputStream("res/APOutputs"));
 		
@@ -245,9 +250,9 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	
 	public void applyForces(float dt) {
 		//Checks:
-		if (this.getThrustForce() > this.getMaxThrust()) { //TODO: deze check is overbodig omdat de setter van Thrust deze check doet?
-			this.setThrustForce(this.getMaxThrust());
-		}
+//		if (this.getThrustForce() > this.getMaxThrust()) { //TODO: deze check is overbodig omdat de setter van Thrust deze check doet?
+//			this.setThrustForce(this.getMaxThrust());
+//		}
 		
 		//Gravity
 		//Check voor maximale valversnelling
@@ -256,11 +261,12 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		}
 		
 		//Engine = Speed
-		if (this.getSpeed() < 100)
-			applyEngineForce(dt);
+//		if (this.getSpeed() < 100)
 		
+		applyEngineForce(dt);		
 		applyLiftForces(dt);
 		applyTorqueForces(dt);
+		
 		System.out.println("headingVector: " + this.getHeadingVector());
 		/*
 		if (!flying) {
@@ -282,7 +288,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 			}
 		} 	*/	
 		
-		flyMode();
+//		flyMode();
 		
 		Vector3f.add(this.getSpeedVector(), this.getSpeedChangeVector(), this.getSpeedVector());
 		Vector3f.add(rotationSpeedVector, rotationAcceleration, rotationSpeedVector);
