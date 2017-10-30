@@ -67,7 +67,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 
 		super(model, position, rotX, rotY, rotZ, scale);
 		
-		this.speedVector = new Vector3f(0.0f,0.0f, -30.0f);
+		this.speedVector = new Vector3f(0.0f,0.0f, -15.0f);
 		this.speedChangeVector = new Vector3f(0.0f,0.0f,0.0f);
 		this.speedVectorOld = new Vector3f(0.0f,0.0f,0.0f);
 		this.headingVector = new Vector3f(0.0f,0.0f,-1.0f);
@@ -242,6 +242,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		setThrustForce(settings.getThrust());
 		
 		getLeftWing().setInclination(settings.getLeftWingInclination());
+		System.out.println("hoek: " + settings.getLeftWingInclination());
 		getRightWing().setInclination(settings.getRightWingInclination());
 		
 		getHorizontalStabilizer().setInclination(settings.getHorStabInclination());

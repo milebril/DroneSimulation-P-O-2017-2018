@@ -107,12 +107,18 @@ public class MainGameLoop {
 		
 		Cube c = new Cube(1, 0, 0);
 		RawModel model = loader.loadToVAO(c.positions, c.colors, null);
-		Entity e = new Entity(model, 
-				new Vector3f(10,100,-200),0, 0, 0, 1);
+/*		Entity e = new Entity(model, 
+				new Vector3f(10,30,-50),0, 0, 0, 1);*/
+		
+		/*Entity e = new Entity(model, 
+				new Vector3f(0,30,-50),0, 0, 0, 1);*/
+		
+/*		Entity e = new Entity(model, 
+				new Vector3f(-10,30,-50),0, 0, 0, 1);*/
 		
 		Cuboid droneCube = new Cuboid(0, 0, 0);
 		Drone drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
-				new Vector3f(0, 30, 0), 0, 0, 0, 4, autopilotConfig);
+				new Vector3f(0, 30, 0), 0, 0, 0, 2, autopilotConfig);
 		AutoPilot ap = new AutoPilot();
 		
 		Camera camera = new Camera();

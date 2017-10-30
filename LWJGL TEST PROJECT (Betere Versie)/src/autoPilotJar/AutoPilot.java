@@ -15,11 +15,20 @@ import openCV.RedCubeLocator;
 public class AutoPilot {
 	
 	private static final float CRUISING_SPEED = 500;
-	private static final float INCLINATION = (float) (Math.PI /10);
+	private static final float INCLINATION = (float) (Math.PI/6);
 
 	public AutoPilot(){
 	}
 	
+	private float Dt;
+	public float getDt() {
+		return getElapsedTime() - getOldElapsedTime();
+	}
+
+	public void setDt(float dt) {
+		Dt = dt;
+	}
+
 	private float gravity;
 	private float wingX;
 	private float tailSize;
@@ -160,7 +169,20 @@ public class AutoPilot {
     private float pitch;
     private float roll;
     private float elapsedTime;
-    private RedCubeLocator imageProcessor;
+    private float oldElapsedTime;
+    public float getOldElapsedTime() {
+		return oldElapsedTime;
+	}
+
+	public void setOldElapsedTime(float oldElapsedTime) {
+		this.oldElapsedTime = oldElapsedTime;
+	}
+
+	public static float getInclination() {
+		return INCLINATION;
+	}
+
+	private RedCubeLocator imageProcessor;
 	private boolean isInitialised = false;
 		
 	public byte[] getImage() {
@@ -251,6 +273,7 @@ public class AutoPilot {
 	}
 
 	public void setElapsedTime(float elapsedTime) {
+		this.setOldElapsedTime(this.getElapsedTime());
 		this.elapsedTime = elapsedTime;
 	}
 
@@ -291,6 +314,7 @@ public class AutoPilot {
 		else{
 			System.out.println(this.getHorizDeviation());
 			System.out.println(this.getVertDeviation());
+			System.out.println(this.calculateHorStabIncl());
 			
 			AutopilotOutputs value = new AutopilotOutputs(){
 	
@@ -321,10 +345,20 @@ public class AutoPilot {
 	 * @return pos inclincation or negative inclination
 	 */
 	protected float calculateVertStabIncl() {
-		if (this.getHorizDeviation() < 0){
+		System.out.println("hor:" + this.getHorizDeviation());
+		
+		if (Math.abs(this.getHorizDeviation()) >= 0.95) {
+			return 0;
+		}
+		
+		if (this.getHorizDeviation() <= 0.1){
 			return AutoPilot.INCLINATION;
 		}
-		return -AutoPilot.INCLINATION;
+		if (this.getHorizDeviation() >= 0.1){
+			return -AutoPilot.INCLINATION;
+		} 
+		
+		return 0;
 	}
 
 	/**
@@ -345,7 +379,13 @@ public class AutoPilot {
 	}
 	
 	protected float calculatRightWingIncl() {
-		return (float) Math.sqrt((this.getDroneMass() * this.getGravity())/(2* this.getWingLiftSlope()* this.getSpeed()*this.getSpeed()));
+//		System.out.println("vleugel incl" + Math.sqrt((this.getDroneMass() * this.getGravity())/(this.getWingLiftSlope()* this.getSpeed()*this.getSpeed())));
+//		return (float) Math.sqrt((this.getDroneMass() * this.getGravity())/(this.getWingLiftSlope()* this.getSpeed()*this.getSpeed()));
+//		if (this.getVertDeviation() <0 ){
+//			return -AutoPilot.INCLINATION;
+//		}
+//		return AutoPilot.INCLINATION;
+		return (float)0.01;
 	}
 
 	protected float calculateLeftWingIncl() {
@@ -353,7 +393,9 @@ public class AutoPilot {
 	}
 
 	private float getSpeed(){
-		return (float) Math.sqrt(Math.pow((getX()-getOldX()), 2) + Math.pow((getY()-getOldY()), 2) + Math.pow((getZ()-getOldZ()), 2)) / this.getElapsedTime();
+		System.out.println("speed: " + Math.sqrt(Math.pow((getX()-getOldX()), 2) + Math.pow((getY()-getOldY()), 2) + Math.pow((getZ()-getOldZ()), 2)) / this.getDt());
+		System.out.println("time" + this.getDt());
+		return (float) Math.sqrt(Math.pow((getX()-getOldX()), 2) + Math.pow((getY()-getOldY()), 2) + Math.pow((getZ()-getOldZ()), 2)) / this.getDt();
 	}
 	
 	private float calculateThrust(){
@@ -384,7 +426,8 @@ public class AutoPilot {
 		
 		this.setOldX(getX());
 		this.setOldY(getY());
-		this.setOldZ(getZ());	
+		this.setOldZ(getZ());
+		this.setOldElapsedTime(getElapsedTime());
 		
 		this.setInitialised(true);
 
