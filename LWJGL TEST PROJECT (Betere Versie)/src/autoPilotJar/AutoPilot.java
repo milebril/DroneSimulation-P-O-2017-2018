@@ -15,6 +15,7 @@ import openCV.RedCubeLocator;
 public class AutoPilot {
 	
 	private static final float CRUISING_SPEED = 200;
+	private static final float INCLINATION = (float) (Math.PI /10);
 
 	public AutoPilot(){
 	}
@@ -273,16 +274,18 @@ public class AutoPilot {
 			AutopilotOutputs value = new AutopilotOutputs(){
 
 				@Override
-				public float getThrust() {return 0;}
+				public float getThrust() {return 0f;}
 				@Override
-				public float getLeftWingInclination() {return calculateLeftWingIncl();}
+				public float getLeftWingInclination() {return 0f;}
 				@Override
-				public float getRightWingInclination() {return calculatRightWingIncl();}
+				public float getRightWingInclination() {return 0f;}
 				@Override
-				public float getHorStabInclination() {return calculateHorStabIncl();}
+				public float getHorStabInclination() {return 0f;}
 				@Override
-				public float getVerStabInclination() {return calculateVertStabIncl();}
+				public float getVerStabInclination() {return 0f;}
 			};
+			// herkent value niet als ik die buiten de if zet om een donkere reden
+			AutopilotOutputsWriter.write(s, value);
 		}
 		
 		else{
@@ -299,23 +302,42 @@ public class AutoPilot {
 				@Override
 				public float getVerStabInclination() {return calculateVertStabIncl();}
 			};
+			AutopilotOutputsWriter.write(s, value);
 		}
 		
-		AutopilotOutputsWriter.write(s, value);
 		s.close();
 	}
 	
+	/**
+	 * pos incl -> neg x-force on tail -> rotation towards pos side
+	 * @return pos inclincation or negative inclination
+	 */
 	protected float calculateVertStabIncl() {
-		
+		if (this.getHorizDeviation() < 0){
+			return AutoPilot.INCLINATION;
+		}
+		return -AutoPilot.INCLINATION;
 	}
 
+	/**
+	 * pos incl -> pos-force on tail -> rotation downwards
+	 * @return
+	 */
 	protected float calculateHorStabIncl() {
-		// TODO Auto-generated method stub
+		if (this.getVertDeviation() <0 ){
+			return -AutoPilot.INCLINATION;
+		}
+		return AutoPilot.INCLINATION;
 		
 	}
 
+	private float getDroneMass(){
+		
+		return this.getEngineMass()+ this.getTailMass() + 2* this.getWingMass();
+	}
+	
 	protected float calculatRightWingIncl() {
-				
+		return (float) Math.sqrt((this.getDroneMass() * this.getGravity())/(2 * this.getWingLiftSlope()* this.getSpeed()*this.getSpeed()));
 	}
 
 	protected float calculateLeftWingIncl() {
@@ -349,6 +371,8 @@ public class AutoPilot {
 		//nu alle benodigde waarden eruit halen
 		
 		this.setMaxThrust(autopilotConfig.getMaxThrust());
+		this.setGravity(autopilotConfig.getGravity());
+		this.setWingLiftSlope(autopilotConfig.getWingLiftSlope());
 		
 		this.setOldX(getX());
 		this.setOldY(getY());
@@ -369,6 +393,8 @@ public class AutoPilot {
 		this.setX(inputs.getX());
 		this.setY(inputs.getY());
 		this.setZ(inputs.getZ());
+		
+		this.setImageProcessor(new RedCubeLocator (this.getImage()));
 	}
 	
 	
