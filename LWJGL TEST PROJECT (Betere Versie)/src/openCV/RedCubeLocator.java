@@ -149,7 +149,7 @@ public class RedCubeLocator {
 		System.out.println("schermbreedte in meter: " + String.valueOf(W));
 		
 		double afstand = (W / 2) * (Math.cos(hoek/2) / Math.sin(hoek/2));
-		System.out.println("afstand: " + String.valueOf(afstand));
+		System.out.println("afstand: " + String.valueOf(afstand+0.5));
 		
 		W = 10*2 / (Math.cos(hoek/2) / Math.sin(hoek/2));
 		System.out.println(W);
