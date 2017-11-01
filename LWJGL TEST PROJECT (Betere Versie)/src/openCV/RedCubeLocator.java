@@ -149,7 +149,7 @@ public class RedCubeLocator {
 //		System.out.println("schermbreedte in meter: " + String.valueOf(W));
 		
 		double afstand = (W / 2) * (Math.cos(hoek/2) / Math.sin(hoek/2));
-		System.out.println("afstand: " + String.valueOf(afstand+0.5));
+		//System.out.println("afstand: " + String.valueOf(afstand+0.5));
 		
 		W = 10*2 / (Math.cos(hoek/2) / Math.sin(hoek/2));
 //		System.out.println(W);
@@ -183,7 +183,7 @@ public class RedCubeLocator {
 		}
 		
 		// data reads the given array as BGR
-		System.out.println(String.valueOf(width) + " " +  String.valueOf(height) + " " + String.valueOf(byteArray.length) );
+		//System.out.println(String.valueOf(width) + " " +  String.valueOf(height) + " " + String.valueOf(byteArray.length) );
 		Mat data = new Mat(height, width, CvType.CV_8UC3);
 		data.put(0, 0, byteArray);
 		

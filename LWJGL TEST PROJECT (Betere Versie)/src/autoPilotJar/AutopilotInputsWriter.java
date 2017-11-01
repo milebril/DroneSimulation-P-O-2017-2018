@@ -2,8 +2,6 @@ package autoPilotJar;
 
 public class AutopilotInputsWriter {
     private static void writeByteArray(java.io.DataOutputStream stream, byte[] array) throws java.io.IOException {
-        System.out.println(array);
-        // array geeft nullpointerexception
     	stream.writeInt(array.length);
         stream.write(array);
     }

@@ -106,9 +106,6 @@ public class Camera {
 		        image.setRGB(x, snapshotHeight - (y + 1), (0xFF << 24) | (r << 16) | (g << 8) | b);
 		    }
 		}
-		//Cropping the image
-		/*BufferedImage dest = image.getSubimage(image.getWidth()/2 - 100, image.getHeight()/2 - 100,
-				this.snapshotWidth, this.snapshotHeight); */
 		
 		try {
 		    ImageIO.write(image, format, file);
@@ -141,7 +138,6 @@ public class Camera {
 	}
 
 	public void roam() {
-		//TODO FREEROAM in world
 		if(Keyboard.isKeyDown(Keyboard.KEY_Z) || Keyboard.isKeyDown(Keyboard.KEY_W)){
 	      position.x += distance * (float)Math.sin(pitch);
 	      position.z -= distance * (float)Math.cos(pitch);

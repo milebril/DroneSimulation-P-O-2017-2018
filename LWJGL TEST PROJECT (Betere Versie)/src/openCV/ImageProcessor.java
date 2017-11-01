@@ -9,61 +9,53 @@ import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-import autoPilotJar.AutoPilot;
+import autoPilotJar.Autopilot;
 
 public class ImageProcessor {
 	
 	/* ImageProcessor constructor */
 	
-	public ImageProcessor(AutoPilot autoPilot) {
-		this.autoPilot = autoPilot;
+	public ImageProcessor(Autopilot autopilot) {
+		this.autopilot = autopilot;
 	}
 	
+	private final Autopilot autopilot;
 	
-	/* The AutoPilot related to this ImageProcessor */
-	
-	private final AutoPilot autoPilot;
-	
-	public AutoPilot getAutoPilot() {
-		return this.autoPilot;
-	}
-	
-	
-	/* Getters for the AutoPilot config */
+	 //Getters for the AutoPilot config 
 	
 	public float getHorizontalAngleOfView() {
-		return getAutoPilot().getHorizontalAngleOfView();
+		return autopilot.getConfig().getHorizontalAngleOfView();
 	}
 	
 	public float getVerticalAngleOfView() {
-		return getAutoPilot().getVerticalAngleOfView();
+		return autopilot.getConfig().getVerticalAngleOfView();
 	}
 	
 	public int getImageWidth() {
-		return getAutoPilot().getNbColumns();
+		return autopilot.getConfig().getNbColumns();
 	}
 	
 	public int getImageHeight() {
-		return getAutoPilot().getNbRows();
+		return autopilot.getConfig().getNbRows();
 	}
 	
 	
-	/* Getters for the AutoPilot input */
+	 //Getters for the AutoPilot input 
 	
 	public byte[] getImage() {
-		return getAutoPilot().getImage();
+		return autopilot.getInput().getImage();
 	}
 	
 	public float getHeading() {
-		return getAutoPilot().getHeading();
+		return autopilot.getInput().getHeading();
 	}
 	
 	public float getPitch() {
-		return getAutoPilot().getPitch();
+		return autopilot.getInput().getPitch();
 	}
 	
 	public float getRoll() {
-		return getAutoPilot().getRoll();
+		return autopilot.getInput().getRoll();
 	}
 	
 	

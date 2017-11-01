@@ -14,7 +14,7 @@ import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
-import autoPilotJar.AutoPilot;
+import autoPilotJar.Autopilot;
 import autoPilotJar.AutopilotInputs;
 import autoPilotJar.AutopilotInputsWriter;
 import autoPilotJar.AutopilotOutputs;
@@ -54,8 +54,6 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	private Vector3f rotationAcceleration;
 	
 	private static final float GRAVITY = -9.81f;
-	private static final float SPEED_SCALE = 10.0f;
-	
 	
 	/*
 	 * DEBUG VARS
@@ -67,7 +65,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 
 		super(model, position, rotX, rotY, rotZ, scale);
 		
-		this.speedVector = new Vector3f(0.0f,0.0f, -15.0f);
+		this.speedVector = new Vector3f(0.0f,0.0f, -30.0f);
 		this.speedChangeVector = new Vector3f(0.0f,0.0f,0.0f);
 		this.speedVectorOld = new Vector3f(0.0f,0.0f,0.0f);
 		this.headingVector = new Vector3f(0.0f,0.0f,-1.0f);
@@ -210,8 +208,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		super.setRotation(0, -this.getCamera().getPitch(), 0);
 	}
 	
-	// wrm argument dt???????????????????????????????????????????????????????????????????????????????
-	public void sendToAutopilot(float dt) throws IOException {
+	public void sendToAutopilot() throws IOException {
 		DataOutputStream s = new DataOutputStream(new FileOutputStream("res/APInputs.cfg"));
 		
 		AutopilotInputs value = new AutopilotInputs() {
@@ -233,7 +230,6 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		s.close();
 	}
 	
-	//inputstream niet sluiten?
 	public void getFromAutopilot() throws IOException {
 		DataInputStream i = new DataInputStream(new FileInputStream("res/APOutputs.cfg"));
 		

@@ -21,7 +21,7 @@ import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.opencv.core.Core;
 
-import autoPilotJar.AutoPilot;
+import autoPilotJar.Autopilot;
 import autopilot.AutopilotConfig;
 import autopilot.AutopilotConfigReader;
 import autopilot.AutopilotConfigValues;
@@ -61,12 +61,11 @@ public class MainGameLoop {
 		File config = new File("res/AutopilotConfig.cfg");
 		
 		try {
-			
-			//Create new config file with Values from AutopilotConfigValues
+			/*//Create new config file with Values from AutopilotConfigValues
 			if (!config.exists()) {
 				DataOutputStream s = new DataOutputStream(new FileOutputStream(config));
 				AutopilotConfigWriter.write(s, new AutopilotConfigValues());
-			}
+			}*/
 			
 			//Read the config file
 			DataInputStream inputStream = new DataInputStream(new FileInputStream(config));
@@ -119,7 +118,7 @@ public class MainGameLoop {
 		Cuboid droneCube = new Cuboid(0, 0, 0);
 		drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
 				new Vector3f(0, 30, 0), 0, 0, 0, 1, autopilotConfig);
-		AutoPilot ap = new AutoPilot();
+		Autopilot ap = new Autopilot();
 		
 		//FreeRoam Camera
 		freeRoamCamera = new Camera();
@@ -152,9 +151,9 @@ public class MainGameLoop {
 			shaderFreeCam.loadViewMatrix(freeRoamCamera);
 			
 			/* 3rd person */
-/*			for (Entity entity : entities) {
+			for (Entity entity : entities) {
 				rendererFreeCam.render(entity,shaderFreeCam);
-			} */
+			} 
 			rendererFreeCam.render(e, shaderFreeCam);
 			rendererFreeCam.render(drone, shaderFreeCam);
 			
@@ -183,9 +182,8 @@ public class MainGameLoop {
 					Math.pow(drone.getPosition().y - e.getPosition().y, 2) +
 					Math.pow(drone.getPosition().z - e.getPosition().z, 2))) < 4)) {
 				drone.increasePosition(dt);
-				drone.sendToAutopilot(dt);
-				ap.getFromDrone();
-				ap.sendToDrone();
+				drone.sendToAutopilot();
+				ap.communicateWithDrone();
 				drone.getFromAutopilot();
 				drone.applyForces(dt);
 			}
