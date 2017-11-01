@@ -46,6 +46,12 @@ public class Renderer {
 		GL11.glClearColor(0, 0.3f, 0.0f, 1);
 	}
 	
+	public void prepareDroneCamera() {
+		GL11.glEnable(GL11.GL_DEPTH_TEST);
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT|GL11.GL_DEPTH_BUFFER_BIT);
+		GL11.glClearColor(0, 0.3f, 0.0f, 1);
+	}
+	
 	public void prepareText() {
 		//GL11.glEnable(GL11.GL_DEPTH_TEST);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT|GL11.GL_DEPTH_BUFFER_BIT);

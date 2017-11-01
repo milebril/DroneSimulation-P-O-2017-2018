@@ -22,8 +22,7 @@ public class Camera {
 	private float roll;
 	
 	private float distance = 0.2f;
-
-	private float mouseSensitivity = 0.1f;
+	private float mouseSensitivity = 0.001f;
 	
 	private int snapshotWidth;
 	private int snapshotHeight;
@@ -127,5 +126,50 @@ public class Camera {
 	
 	public void setPosition(Vector3f position) {
 		this.position = position;
+	}
+	
+	/**
+	 * Angles to rotate the camera in radians
+	 * @param rx
+	 * @param ry
+	 * @param rz
+	 */
+	public void setRotation(float rx, float ry, float rz){
+		this.yaw = rx;
+		this.pitch = ry;
+		this.roll = rz;
+	}
+
+	public void roam() {
+		//TODO FREEROAM in world
+		if(Keyboard.isKeyDown(Keyboard.KEY_Z) || Keyboard.isKeyDown(Keyboard.KEY_W)){
+	      position.x += distance * (float)Math.sin(pitch);
+	      position.z -= distance * (float)Math.cos(pitch);
+		}
+	    if(Keyboard.isKeyDown(Keyboard.KEY_S)){
+	      position.x -= distance * (float)Math.sin((pitch));
+	      position.z += distance * (float)Math.cos((pitch));
+	    }
+	    if(Keyboard.isKeyDown(Keyboard.KEY_D)){
+	      position.x += distance * (float)Math.sin((pitch+90));
+	      //position.z -= distance * (float)Math.cos((pitch+90));
+	    }
+	    if(Keyboard.isKeyDown(Keyboard.KEY_Q) || Keyboard.isKeyDown(Keyboard.KEY_A)){
+	      position.x += distance * (float)Math.sin((pitch-90));
+	      //position.z -= distance * (float)Math.cos((pitch-90));
+	    }
+	    if(Keyboard.isKeyDown(Keyboard.KEY_SPACE)){
+	      position.y+=0.2f;
+	    }
+	    if(Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)){
+	      position.y-=0.2f;
+	    }
+	    
+	    if (Mouse.isButtonDown(0)) {
+	      int dx = Mouse.getDX();
+          int dy = Mouse.getDY();
+          pitch -= (dx * mouseSensitivity);
+          yaw -= (dy * mouseSensitivity);
+	    }  
 	}
 }

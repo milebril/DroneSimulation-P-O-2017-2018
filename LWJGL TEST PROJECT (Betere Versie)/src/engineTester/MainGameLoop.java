@@ -45,9 +45,11 @@ public class MainGameLoop {
 
 	public static AutopilotConfig autopilotConfig;
 	
-	public static List<Renderer> renderers = new ArrayList<Renderer>();
+	private static Drone drone;
 	
-	public static long elapsedTime = 0;
+	private static Camera freeRoamCamera;
+	private static boolean freeRoamCameraLocked = true;
+	private static boolean lLock = false;
 	
 	public static void main(String[] args) throws IOException {
 		
@@ -91,8 +93,6 @@ public class MainGameLoop {
 		Renderer renderer = new Renderer(shader, autopilotConfig.getHorizontalAngleOfView(), autopilotConfig.getVerticalAngleOfView());
 		Renderer rendererFreeCam = new Renderer(shaderFreeCam, 50, 50);
 		Renderer rendererText = new Renderer(shaderText, 120, 120);
-		renderers.add(renderer);
-		renderers.add(rendererFreeCam);
 		
 		//Creating 1000 test cubes
 		Random r = new Random();
@@ -117,16 +117,14 @@ public class MainGameLoop {
 				new Vector3f(-10,30,-50),0, 0, 0, 1);
 		
 		Cuboid droneCube = new Cuboid(0, 0, 0);
-		Drone drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
+		drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
 				new Vector3f(0, 30, 0), 0, 0, 0, 1, autopilotConfig);
 		AutoPilot ap = new AutoPilot();
 		
-		//kak
-		Camera camera = new Camera();
-		camera.setPosition(new Vector3f(0, 100, 0));
-		camera.setYaw(-45);
-		
-		Camera camera2 = new Camera();
+		//FreeRoam Camera
+		freeRoamCamera = new Camera();
+		freeRoamCamera.setPosition(new Vector3f(0, 100, 0));
+		freeRoamCamera.setYaw(-45);
 		
 		while(!Display.isCloseRequested()){
 			GL11.glViewport(0, 0, 200, 200);
@@ -136,9 +134,9 @@ public class MainGameLoop {
 			shader.start();
 			shader.loadViewMatrix(drone.getCamera());
 			
-//			for (Entity entity : entities) {
-//				renderer.render(entity,shader);
-//			} 
+			for (Entity entity : entities) {
+				renderer.render(entity,shader);
+			} 
 			renderer.render(e, shader);
 			renderer.render(drone, shader);
 			
@@ -146,40 +144,24 @@ public class MainGameLoop {
 				drone.getCamera().takeSnapshot();
 			}
 			
-			
 			GL11.glViewport(200, 0, Display.getWidth() - 200, Display.getHeight());
 			GL11.glScissor(200, 0, Display.getWidth() - 200, Display.getHeight());
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			rendererFreeCam.prepareText();
 			shaderFreeCam.start();
-			shaderFreeCam.loadViewMatrix(camera);
-			/* 3rd person */
-
-
+			shaderFreeCam.loadViewMatrix(freeRoamCamera);
 			
-//			for (Entity entity : entities) {
-//				rendererFreeCam.render(entity,shaderFreeCam);
-//			} 
+			/* 3rd person */
+/*			for (Entity entity : entities) {
+				rendererFreeCam.render(entity,shaderFreeCam);
+			} */
 			rendererFreeCam.render(e, shaderFreeCam);
 			rendererFreeCam.render(drone, shaderFreeCam);
 			
 			GL11.glViewport(0, 200, 200, Display.getHeight() - 200);
 			GL11.glScissor(0, 200, 200, Display.getHeight() - 200);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
-			rendererText.prepare();
-			shaderText.start();
-			shaderText.loadViewMatrix(camera2);
-			
-			rendererText.render(e, shaderText);
-			
-			/* GUI */
-			// GUIText: 1ste argument is de string die geprint moet worden
-			// 2de argument is de fontsize
-			// 3de argument is het font
-			// 4de argument is de positie (x,y) tussen 0 en 1, (0,0) is links van boven
-			// 5de argument is de lengte van een regel (tussen 0 en 1), 1 wilt zeggen dat de tekst over heel de lengte van het 
-			// 		beeld mag
-			// 6de argument is gecentreerd (true) of niet (false)
+			rendererText.prepareDroneCamera();
 			
 			// snelheid van de drone
 			String speed = String.valueOf(Math.round(drone.getSpeed()));
@@ -197,14 +179,6 @@ public class MainGameLoop {
 			
 			float dt = DisplayManager.getFrameTimeSeconds();
 			
-//			drone.increasePosition(dt);
-//			drone.sendToAutopilot(dt);
-//			ap.getFromDrone();
-//			ap.sendToDrone();
-//			drone.getFromAutopilot();
-//			drone.applyForces(dt);
-//			
-			
 			if(!( Math.abs(Math.sqrt(Math.pow(drone.getPosition().x - e.getPosition().x, 2) +
 					Math.pow(drone.getPosition().y - e.getPosition().y, 2) +
 					Math.pow(drone.getPosition().z - e.getPosition().z, 2))) < 4)) {
@@ -216,8 +190,9 @@ public class MainGameLoop {
 				drone.applyForces(dt);
 			}
 			
+			
 			/* Drone Debug */
-			drone.moveHeadingVector();
+			//drone.moveHeadingVector();
 			
 			if (drone.getPosition().z < -1000) {
 				break;
@@ -228,6 +203,10 @@ public class MainGameLoop {
 			// de tekst moet telkens worden verwijderd, anders wordt er elke loop nieuwe tekst overgeprint (=> onleesbaar)
 			TextMaster.removeText(textSpeed);
 			TextMaster.removeText(textPosition);
+			
+			
+			keyInputs();
+			
 			shader.stop();
 			DisplayManager.updateDisplay();
 			
@@ -239,6 +218,31 @@ public class MainGameLoop {
 		loader.cleanUp();
 		DisplayManager.closeDisplay();
 
+	}
+	
+	public static void keyInputs() {
+		if (Keyboard.isKeyDown(Keyboard.KEY_Y)) {
+			Vector3f.add(drone.getPosition(), new Vector3f(0, 100, 0), freeRoamCamera.getPosition());
+			freeRoamCamera.setRotation((float) -(Math.PI / 2), 0, 0);
+		} else if (Keyboard.isKeyDown(Keyboard.KEY_X)) {
+			Vector3f.add(drone.getPosition(), new Vector3f(100, 0, 0), freeRoamCamera.getPosition());
+			freeRoamCamera.setRotation(0, (float) -(Math.PI / 2), 0);
+		} else if(Keyboard.isKeyDown(Keyboard.KEY_L)) {
+			/* Lock/Unlock on Third Person Camera */
+			if (!lLock) {
+				freeRoamCameraLocked = !freeRoamCameraLocked;
+			}
+			lLock = true;
+		} else {
+			if (freeRoamCameraLocked) {
+				Vector3f.add(drone.getPosition(), new Vector3f(0, 30, 30), freeRoamCamera.getPosition());
+				freeRoamCamera.setRotation((float) -(Math.PI/6), 0, 0);
+			} else {
+				freeRoamCamera.roam();
+			}
+			
+			lLock = false;
+		}
 	}
 
 }

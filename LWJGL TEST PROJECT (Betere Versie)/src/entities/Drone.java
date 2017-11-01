@@ -242,7 +242,6 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		setThrustForce(settings.getThrust());
 		
 		getLeftWing().setInclination(settings.getLeftWingInclination());
-		System.out.println("hoek: " + settings.getLeftWingInclination());
 		getRightWing().setInclination(settings.getRightWingInclination());
 		
 		getHorizontalStabilizer().setInclination(settings.getHorStabInclination());
@@ -268,7 +267,6 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		applyLiftForces(dt);
 		applyTorqueForces(dt);
 		
-		System.out.println("headingVector: " + this.getHeadingVector());
 		/*
 		if (!flying) {
 			getLeftWing().setInclination(0);
