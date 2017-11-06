@@ -9,29 +9,34 @@ public class Entity {
 
 	private RawModel model;
 	private Vector3f position;
-	private float rotX, rotY, rotZ;
+	private Vector3f orientation;
 	private float scale;
 
-	public Entity(RawModel model, Vector3f position, float rotX, float rotY, float rotZ,
-			float scale) {
+	public Entity(RawModel model, Vector3f position, Vector3f orientation, float scale) {
 		this.model = model;
 		this.position = position;
-		this.rotX = rotX;
-		this.rotY = rotY;
-		this.rotZ = rotZ;
+		this.orientation = orientation;
 		this.scale = scale;
 	}
 
-	public void increasePosition(float dx, float dy, float dz) {
-		this.position.x += dx;
-		this.position.y += dy;
-		this.position.z += dz;
+	public void increasePosition(Vector3f increment) {
+		Vector3f newPosition = new Vector3f();
+		Vector3f.add(this.getPosition(), increment, newPosition);
+		setPosition(newPosition);
+	}
+	
+	public void increaseOrientation(Vector3f increment) {
+		Vector3f newOrientation = new Vector3f();
+		Vector3f.add(this.getOrientation(), increment, newOrientation);
+		setOrientation(newOrientation);
+	}
+	
+	public Vector3f getOrientation() {
+		return orientation;
 	}
 
-	public void increaseRotation(float dx, float dy, float dz) {
-		this.rotX += dx;
-		this.rotY += dy;
-		this.rotZ += dz;
+	public void setOrientation(Vector3f orientation) {
+		this.orientation = orientation;
 	}
 
 	public RawModel getModel() {
@@ -50,42 +55,12 @@ public class Entity {
 		this.position = position;
 	}
 
-	public float getRotX() {
-		return rotX;
-	}
-
-	public void setRotX(float rotX) {
-		this.rotX = rotX;
-	}
-
-	public float getRotY() {
-		return rotY;
-	}
-
-	public void setRotY(float rotY) {
-		this.rotY = rotY;
-	}
-
-	public float getRotZ() {
-		return rotZ;
-	}
-
-	public void setRotZ(float rotZ) {
-		this.rotZ = rotZ;
-	}
-
 	public float getScale() {
 		return scale;
 	}
 
 	public void setScale(float scale) {
 		this.scale = scale;
-	}
-
-	public void setRotation(float yaw, float pitch, float roll) {
-		this.rotX = yaw;
-		this.rotY = pitch;
-		this.rotZ = roll;
 	}
 
 }
