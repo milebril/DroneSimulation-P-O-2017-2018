@@ -88,36 +88,35 @@ public class MainGameLoop {
 		StaticShader shader = new StaticShader();
 		StaticShader shaderFreeCam = new StaticShader();
 		StaticShader shaderText = new StaticShader();
+		StaticShader shaderTopDown = new StaticShader();
+		StaticShader shaderSideView = new StaticShader();
 		// Renderer based on FOVX and FOVY
 		Renderer renderer = new Renderer(shader, autopilotConfig.getHorizontalAngleOfView(), autopilotConfig.getVerticalAngleOfView());
 		Renderer rendererFreeCam = new Renderer(shaderFreeCam, 50, 50);
 		Renderer rendererText = new Renderer(shaderText, 120, 120);
+		Renderer renderTopDown = new Renderer(shaderTopDown, 50, 50);
+		Renderer renderSideView = new Renderer(shaderSideView, 50, 50);
 		
 		//Creating 1000 test cubes
 		Random r = new Random();
 		List<Entity> entities = new ArrayList<>();
-		for (int i = 0; i < 2000; i++) {
-			Cuboid c = new Cuboid(r.nextFloat(), r.nextFloat(), r.nextFloat());
+		for (int i = 0; i < 10; i++) {
+			Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
 			RawModel model = loader.loadToVAO(c.positions, c.colors, null);
 			//TexturedModel staticModel = new TexturedModel(model,new ModelTexture(loader.loadTexture("image")));
 			entities.add(new cubeTestPlayer(model, 
-					new Vector3f(r.nextFloat()*200-100,r.nextFloat()*200-100,r.nextFloat()*-1000),0, 0, 0, 1));
+					new Vector3f(r.nextFloat()*20-10,r.nextFloat()*10,r.nextFloat()*-90-10),0, 0, 0, 1));
 		}
 		
 		Cube c = new Cube(1, 0, 0);
 		RawModel model = loader.loadToVAO(c.positions, c.colors, null);
-		//Entity e = new Entity(model, 
-			//	new Vector3f(10,30,-50),0, 0, 0, 1);
-		
-		//Entity e = new Entity(model, 
-			//	new Vector3f(0,30,-50),0, 0, 0, 1);
-		
+
 		Entity e = new Entity(model, 
-				new Vector3f(-10,30,-50),0, 0, 0, 1);
+				new Vector3f(0,0,-10),0, 0, 0, 1);
 		
 		Cuboid droneCube = new Cuboid(0, 0, 0);
 		drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
-				new Vector3f(0, 30, 0), 0, 0, 0, 1, autopilotConfig);
+				new Vector3f(0, 0, 0), 0, 0, 0, 1, autopilotConfig);
 		Autopilot ap = new Autopilot();
 		
 		//FreeRoam Camera
@@ -125,16 +124,24 @@ public class MainGameLoop {
 		freeRoamCamera.setPosition(new Vector3f(0, 100, 0));
 		freeRoamCamera.setYaw(-45);
 		
+		Camera topDownCamera = new Camera();
+		topDownCamera.setPosition(new Vector3f(0, 150, -50));
+		topDownCamera.setRotation((float) -(Math.PI / 2), 0, 0);
+		
+		Camera sideViewCamera = new Camera();
+		sideViewCamera.setPosition(new Vector3f(150,5,-50));
+		sideViewCamera.setRotation(0, (float) -(Math.PI / 2), 0);
+		
 		while(!Display.isCloseRequested()){
-			GL11.glViewport(0, 0, 200, 200);
-			GL11.glScissor(0,0,200,200);
+			GL11.glViewport(0, 0, 200-1, 200);
+			GL11.glScissor(0,0,200-1,200);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			renderer.prepare();
 			shader.start();
 			shader.loadViewMatrix(drone.getCamera());
 			
 			for (Entity entity : entities) {
-				renderer.render(entity,shader);
+				rendererFreeCam.render(entity,shaderFreeCam);
 			} 
 			renderer.render(e, shader);
 			renderer.render(drone, shader);
@@ -143,10 +150,10 @@ public class MainGameLoop {
 				drone.getCamera().takeSnapshot();
 			}
 			
-			GL11.glViewport(200, 0, Display.getWidth() - 200, Display.getHeight());
-			GL11.glScissor(200, 0, Display.getWidth() - 200, Display.getHeight());
+			GL11.glViewport(200, 0, Display.getWidth() - 700, Display.getHeight());
+			GL11.glScissor(200, 0, Display.getWidth() - 700, Display.getHeight());
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
-			rendererFreeCam.prepareText();
+			rendererFreeCam.prepare();
 			shaderFreeCam.start();
 			shaderFreeCam.loadViewMatrix(freeRoamCamera);
 			
@@ -156,6 +163,34 @@ public class MainGameLoop {
 			} 
 			rendererFreeCam.render(e, shaderFreeCam);
 			rendererFreeCam.render(drone, shaderFreeCam);
+			
+			GL11.glViewport(Display.getWidth() - 499, Display.getHeight()/2 + 1 ,500 , Display.getHeight()/2);
+			GL11.glScissor(Display.getWidth() - 499, Display.getHeight()/2  + 1,500 , Display.getHeight()/2);
+			GL11.glEnable(GL11.GL_SCISSOR_TEST);
+			renderTopDown.prepare();
+			shaderTopDown.start();
+			shaderTopDown.loadViewMatrix(topDownCamera);
+			
+			for (Entity entity : entities) {
+				rendererFreeCam.render(entity,shaderFreeCam);
+			} 
+			
+			renderTopDown.render(e, shaderTopDown);
+			renderTopDown.render(drone, shaderTopDown);
+			
+			GL11.glViewport(Display.getWidth() - 499, 0 ,500 , Display.getHeight()/2);
+			GL11.glScissor(Display.getWidth() - 499, 0 ,500 , Display.getHeight()/2);
+			GL11.glEnable(GL11.GL_SCISSOR_TEST);
+			renderSideView.prepareText();
+			shaderSideView.start();
+			shaderSideView.loadViewMatrix(sideViewCamera);
+			
+			for (Entity entity : entities) {
+				rendererFreeCam.render(entity,shaderFreeCam);
+			} 
+			
+			renderSideView.render(e, shaderSideView);
+			renderSideView.render(drone, shaderSideView);
 			
 			GL11.glViewport(0, 200, 200, Display.getHeight() - 200);
 			GL11.glScissor(0, 200, 200, Display.getHeight() - 200);
@@ -181,11 +216,12 @@ public class MainGameLoop {
 			if(!( Math.abs(Math.sqrt(Math.pow(drone.getPosition().x - e.getPosition().x, 2) +
 					Math.pow(drone.getPosition().y - e.getPosition().y, 2) +
 					Math.pow(drone.getPosition().z - e.getPosition().z, 2))) < 4)) {
-				drone.increasePosition(dt);
+				//drone.increasePosition(dt);
+				System.out.println("Position " + drone.getPosition());
 				drone.sendToAutopilot();
 				ap.communicateWithDrone();
 				drone.getFromAutopilot();
-				drone.applyForces(dt);
+				//drone.applyForces(dt);
 			}
 			
 			
@@ -220,7 +256,7 @@ public class MainGameLoop {
 	
 	public static void keyInputs() {
 		if (Keyboard.isKeyDown(Keyboard.KEY_Y)) {
-			Vector3f.add(drone.getPosition(), new Vector3f(0, 100, 0), freeRoamCamera.getPosition());
+			Vector3f.add(drone.getPosition(), new Vector3f(0, 150, -50), freeRoamCamera.getPosition());
 			freeRoamCamera.setRotation((float) -(Math.PI / 2), 0, 0);
 		} else if (Keyboard.isKeyDown(Keyboard.KEY_X)) {
 			Vector3f.add(drone.getPosition(), new Vector3f(100, 0, 0), freeRoamCamera.getPosition());

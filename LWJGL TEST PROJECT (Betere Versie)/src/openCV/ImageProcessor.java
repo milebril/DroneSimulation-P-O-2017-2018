@@ -2,6 +2,7 @@ package openCV;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -68,7 +69,28 @@ public class ImageProcessor {
 	 */
 	public int[] get2DCenterOfMassCoordinates() {
 		Mat rgbMat = byteArrayToRGBMat(getImageWidth(), getImageHeight(), getImage());
-		return getFilterCenterOfMass(getRedFilter(rgbMat));
+		int[] i = getFilterCenterOfMass(getRedFilter(rgbMat));
+		if (i == null) {
+			i = new int[] { 100 ,100 };
+		}
+		return i;
+	}
+	
+	public float getPixelsPerMeter() {
+		Mat rgbMat = byteArrayToRGBMat(this.getImageWidth(), this.getImageHeight(), this.getImage());
+		
+		Mat totalFilter = getRedFilter(rgbMat);
+		
+		// Get 2D perspective size
+		int perspectiveSize = Core.countNonZero(totalFilter);
+
+		// 2D straight size
+		double ratio = getAreaRatio(0,0,0);
+		double size = perspectiveSize / ratio;
+
+		float pixelsPerMeter = (float) Math.sqrt(size);
+		
+		return pixelsPerMeter;
 	}
 	
 	/**
@@ -199,7 +221,7 @@ public class ImageProcessor {
 				}
 			}
 		}
-		
+		System.out.println();
 		// if the amount is 0, the filter contains no nonzero values
 		if (amount == 0) return null;
 		
@@ -208,6 +230,107 @@ public class ImageProcessor {
 										(int) Math.round(yCoord / (float) amount)};
 		
 		return coordinates;
+		
+	}
+	
+	static double d = 2;
+	static double f = 1;
+	
+	private double getAreaRatio(double heading, double pitch, double roll) {
+		int factor = 1000000;
+		double originalArea = 4.0/9;
+		double rotatedArea;
+
+		List<double[]> points = setRotatedPoints(d, heading, pitch, roll);
+
+		// project all points
+		List<java.awt.Point> projectedPoints = new ArrayList<>();
+		int i;
+		double x; double newX;
+		double y; double newY;
+		double z;
+		for (i = 0; i < points.size(); i++) {
+			x = points.get(i)[0]; y = points.get(i)[1]; z = points.get(i)[2];
+			newX = (f / z) * x;
+			newY = (f / z) * y;
+			projectedPoints.add(new java.awt.Point((int) Math.round(newX * factor), (int) Math.round(newY * factor)));
+			points.set(i, new double[]{newX, newY});
+		}
+		
+		// get convex hull
+		List<java.awt.Point> convexHullPoints = GrahamScan.getConvexHull(projectedPoints);
+		ArrayList<double[]> convexHullCoordinates = new ArrayList<double[]>();
+		for (i = 0; i < convexHullPoints.size(); i++) {
+			convexHullCoordinates.add(new double[]{0,0});
+		}
+		
+		for (i = 0; i < convexHullPoints.size(); i++) {
+			for (double[] originalPoint : points) {
+				if (Math.round(originalPoint[0] * factor) == convexHullPoints.get(i).x
+						&& Math.round(originalPoint[1] * factor) == convexHullPoints.get(i).y) {
+					convexHullCoordinates.set(i, originalPoint);
+					// geprojeteerde hull coordinaat:
+					//System.out.println(String.valueOf(originalPoint[0]) + "," +String.valueOf(originalPoint[1]));
+				}
+			}
+		}
+		
+		
+		// get 2D area
+		double totaal = 0;
+		for (i = 0; i < convexHullCoordinates.size() - 1; i++) {
+			totaal += convexHullCoordinates.get(i)[0] * convexHullCoordinates.get(i+1)[1];
+			totaal -= convexHullCoordinates.get(i)[1] * convexHullCoordinates.get(i+1)[0];
+		}
+		rotatedArea = Math.abs(totaal/2);
+		
+		//System.out.println(rotatedArea);
+		return rotatedArea/originalArea;
+	}
+	
+	/**
+	 * Returns points
+	 * @return geroteerde punten via transformatiematrices (heading, pitch en roll)
+	 */
+	
+	private List<double[]> setRotatedPoints(double d, double heading, double pitch, double roll) {
+		
+		
+		int i;
+		double x; double newX;
+		double y; double newY;
+		double z; double newZ;
+		List<double[]> points = setPositionCube();
+		
+		for (i = 0; i < points.size(); i++) {
+			x = points.get(i)[0]; y = points.get(i)[1]; z = points.get(i)[2];
+			newX = x * (Math.cos(heading)*Math.cos(roll) - Math.sin(heading)*Math.sin(pitch)*Math.sin(roll))  + y * (-Math.cos(pitch)*Math.sin(roll)) + z * (Math.cos(roll)*Math.sin(heading) + Math.cos(heading)*Math.sin(pitch)*Math.sin(roll));
+			newY = x* (Math.cos(heading)*Math.sin(roll) + Math.cos(roll)*Math.sin(heading)*Math.sin(pitch)) + y * (Math.cos(pitch)*Math.cos(roll)) + z * (Math.sin(heading)*Math.sin(roll) - Math.cos(heading)*Math.cos(roll)*Math.sin(pitch));
+			newZ = x * (-Math.cos(pitch)*Math.sin(heading)) + y * (Math.sin(pitch))+ z * (Math.cos(heading) * Math.cos(pitch));
+			points.set(i, new double[]{newX, newY, newZ + d});
+		}
+		return points;
+		
+		
+	}
+	
+	private List<double[]> setPositionCube() {
+
+		
+		int x = 0;
+		int y = 0;
+
+		double[] A = new double[]{x-0.5, y+0.5, -0.5};
+		double[] B = new double[]{x-0.5, y+0.5,  0.5};
+		double[] C = new double[]{x+0.5, y+0.5,  0.5};
+		double[] D = new double[]{x+0.5, y+0.5, -0.5};
+		double[] E = new double[]{x-0.5, y-0.5, -0.5};
+		double[] F = new double[]{x-0.5, y-0.5,  0.5};
+		double[] G = new double[]{x+0.5, y-0.5,  0.5};
+		double[] H = new double[]{x+0.5, y-0.5, -0.5};
+		
+		List<double[]> points = Arrays.asList(A, B, C, D, E, F, G, H);
+		return points;
 		
 	}
 	

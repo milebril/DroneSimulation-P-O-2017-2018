@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.lwjgl.util.vector.Vector3f;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -113,6 +114,16 @@ public class RedCubeLocator {
 		return coords;
 	}
 	
+	public Vector3f makeVector() {
+		//dx = pixelsX/pixelspermeter
+		return new Vector3f(0, 0, -getDistance());
+	}
+	
+	private float getDistance() {
+		return (float) this.afstand;
+	}
+
+	private double afstand;
 	
 	
 	
@@ -130,6 +141,7 @@ public class RedCubeLocator {
 		int[] centerOfMass = getType0CenterOfMass(combineMatArray(matArray));
 		this.xCoordInImage = (centerOfMass[0] + 1) / (0.5 * getImageWidth()) - 1; 
 		this.yCoordInImage = -1 * ((centerOfMass[1] + 1) / (0.5 * getImageHeight()) - 1);
+		System.out.println("xCoord: " + centerOfMass[0]);
 		
 		// Get 2D perspective size
 		int perspectiveSize = Core.countNonZero(totalFilter);
@@ -149,8 +161,10 @@ public class RedCubeLocator {
 		double hoek = (120.0 / 180) * Math.PI;
 //		System.out.println("schermbreedte in meter: " + String.valueOf(W));
 		
-		double afstand = (W / 2) * (Math.cos(hoek/2) / Math.sin(hoek/2));
-		//System.out.println("afstand: " + String.valueOf(afstand+0.5));
+		//loodrecht
+		this.afstand = (W / 2) * (Math.cos(hoek/2) / Math.sin(hoek/2)) + 0.5;
+		
+		
 		
 		W = 10*2 / (Math.cos(hoek/2) / Math.sin(hoek/2));
 //		System.out.println(W);
@@ -324,7 +338,7 @@ public class RedCubeLocator {
 		coordinates[0] = coordinates[0] - s;
 		coordinates[1] = (int) Math.round(yCoord / (float) amount);
 		coordinates[1] = s - coordinates[1] ;
-		System.out.println(coordinates[0] + " " +  coordinates[1]);
+		//System.out.println(coordinates[0] + " " +  coordinates[1]);
 		return coordinates;
 	}
 	

@@ -12,6 +12,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 import autopilot.AutopilotConfig;
 import autopilot.AutopilotConfigReader;
+import openCV.ImageProcessor;
 import openCV.RedCubeLocator;
 
 public class Autopilot {	
@@ -27,7 +28,7 @@ public class Autopilot {
 	private float prevElapsedTime;
 	private float dt;
 	
-	private RedCubeLocator cubeLocator;
+	private ImageProcessor cubeLocator;
 	
 	/* Variables to send back to drone	 */
 	private float newThrust;
@@ -44,6 +45,10 @@ public class Autopilot {
 		newRightWingInclination = 0;
 		newHorStabInclination = 0;
 		newVerStabInclination = 0;
+		
+		//Set initial Positions
+		currentPosition = new Vector3f(0,0,0);
+		prevPosition = new Vector3f(0,0,0);
 		
 		//Initialiwe AP with configfile
 		initialize();
@@ -65,17 +70,51 @@ public class Autopilot {
 		getFromDrone();
 		
 		//Set Variables for this iteration
-		cubeLocator = new RedCubeLocator(inputAP.getImage());
+		cubeLocator = new ImageProcessor(this);
 		currentPosition = new Vector3f(inputAP.getX(), inputAP.getY(), inputAP.getZ());
 		//TODO Heading?
 		elapsedTime = inputAP.getElapsedTime();
 		dt = elapsedTime - prevElapsedTime;
+		
+		System.out.println(cubeLocator.getNormalized2DCenterOfMassCoordinates()[0] * 100);
+		System.out.println(cubeLocator.getPixelsPerMeter());
+		
+		makeData();
 		
 		//Save droneData we need in nextIteration
 		saveData();
 		
 		//When finished send data back to the drone;
 		sendToDrone();
+	}
+	
+	private void makeData() {
+		newHorStabInclination = 0;
+		newVerStabInclination = 0;
+		newThrust = 0;
+		Vector3f difference = calculateDiffVector();
+		
+		if(difference.getY() > 0.3f){
+			newLeftWingInclination = newLeftWingInclination - 0.1f;
+			newRightWingInclination = newRightWingInclination - 0.1f;
+		}
+		else if(difference.getY() < -0.3f){
+			newLeftWingInclination = newLeftWingInclination + 0.1f;
+			newRightWingInclination = newRightWingInclination + 0.1f;
+		}
+		//System.out.println("Inclination LeftWing :" + newLeftWingInclination);
+		
+		
+		//TODO ctrl c + ctrl v fysica voor setThrust = vertraging
+	}
+	
+	private Vector3f calculateDiffVector(){
+		Vector3f diff = new Vector3f(0,0,0);
+		Vector3f speedVector = new Vector3f(0.0f,0.0f,0.0f);
+		Vector3f.sub(currentPosition, prevPosition, speedVector);
+		//TODO Vector3f.sub(cubeLocator.makeVector(), speedVector, diff);
+		//System.out.println("Diff " + diff);
+		return diff;
 	}
 	
 	private void getFromDrone() {
@@ -114,7 +153,7 @@ public class Autopilot {
 	 * Saves data in old... Variables
 	 * 
 	 * Position
-	 * Elepsed Time
+	 * Elapsed Time
 	 * Heading?
 	 */
 	private void saveData() {
