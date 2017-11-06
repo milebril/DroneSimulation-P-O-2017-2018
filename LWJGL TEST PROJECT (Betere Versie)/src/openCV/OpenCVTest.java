@@ -30,7 +30,7 @@ public class OpenCVTest {
 		
 		// file locations
 		String imageMap = "res/";
-		String fileLocation = imageMap + "image.png";
+		String fileLocation = imageMap + "image-3.png";
 		
 		
 		
@@ -394,7 +394,9 @@ public class OpenCVTest {
 			y = Math.round(y / (float) contour.length);
 			contourCenters.add(new int[]{x, y});
 		}
+	
 		return contourCenters;
+		
 	}
 
 
