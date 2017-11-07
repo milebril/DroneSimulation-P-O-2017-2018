@@ -1,5 +1,6 @@
 package openCV;
 import java.util.ArrayList;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.lwjgl.util.vector.Vector3f;
 
 public class RedCubeLocator {
 	
@@ -113,24 +115,23 @@ public class RedCubeLocator {
 		return coords;
 	}
 	
-	
-	
-	
-	/** Processes the data of this object. */
-	private void process() throws IllegalArgumentException {
-		
+	/** 
+	 * Returns the co�rdinates of the center of mass of the cube in the given image 
+	 * The origin of the coordinate is in the top left corner with the leftmost and topmost
+	 * pixel having co�rdinates (0, 0) 
+	*/
+	public Vector3f getCoordinatesOfCube() {
 		// byteArra --> Mat object
 		Mat rgbMat = byteArrayToRGBMat(this.getImageWidth(), this.getImageHeight(), this.getImageByteArray());
-		
+				
 		// Filter RGB Mat for 6 different red Hue's
 		Mat[] matArray = redRGBMatFilter(rgbMat);
 		Mat totalFilter = combineMatArray(matArray);
-		
+				
 		// Get center of mass of the 6 filters
 		int[] centerOfMass = getType0CenterOfMass(combineMatArray(matArray));
 		this.xCoordInImage = (centerOfMass[0] + 1) / (0.5 * getImageWidth()) - 1; 
 		this.yCoordInImage = -1 * ((centerOfMass[1] + 1) / (0.5 * getImageHeight()) - 1);
-		
 		// Get 2D perspective size
 		int perspectiveSize = Core.countNonZero(totalFilter);
 		//System.out.println("perspective Size: " + String.valueOf(perspectiveSize));
@@ -142,17 +143,40 @@ public class RedCubeLocator {
 //		System.out.println("size: " + String.valueOf(size));
 		
 		// 2D pixels for 1 meter
-		double pixelsPerMeter = Math.sqrt(size);
-		System.out.println("pixels per meter: " + String.valueOf(pixelsPerMeter));
-		
+		float pixelsPerMeter = (float) Math.sqrt(size);
+		//System.out.println("pixels per meter: " + String.valueOf(pixelsPerMeter));
+		//System.out.println("center " + centerOfMass[0]);
+
 		double W = 200 / pixelsPerMeter;
 		double hoek = (120.0 / 180) * Math.PI;
 //		System.out.println("schermbreedte in meter: " + String.valueOf(W));
 		
-		double afstand = (W / 2) * (Math.cos(hoek/2) / Math.sin(hoek/2));
-		System.out.println("afstand: " + String.valueOf(afstand+0.5));
+		double afstand = (W / 2) * (Math.cos(hoek/2) / Math.sin(hoek/2))+0.5;
+		return new Vector3f(centerOfMass[0]/pixelsPerMeter,centerOfMass[1]/pixelsPerMeter,(float) -afstand);
 		
-		W = 10*2 / (Math.cos(hoek/2) / Math.sin(hoek/2));
+	}
+	
+	
+	
+	
+	/** Processes the data of this object. */
+	private void process() throws IllegalArgumentException {
+		
+		// byteArra --> Mat object
+		//Mat rgbMat = byteArrayToRGBMat(this.getImageWidth(), this.getImageHeight(), this.getImageByteArray());
+		
+		// Filter RGB Mat for 6 different red Hue's
+		//Mat[] matArray = redRGBMatFilter(rgbMat);
+		//Mat totalFilter = combineMatArray(matArray);
+		
+		// Get center of mass of the 6 filters
+		//int[] centerOfMass = getType0CenterOfMass(combineMatArray(matArray));
+		//this.xCoordInImage = (centerOfMass[0] + 1) / (0.5 * getImageWidth()) - 1; 
+		//this.yCoordInImage = -1 * ((centerOfMass[1] + 1) / (0.5 * getImageHeight()) - 1);
+		
+
+		System.out.println(getCoordinatesOfCube());
+		//W = 10*2 / (Math.cos(hoek/2) / Math.sin(hoek/2));
 //		System.out.println(W);
 //		System.out.println(200 / pixelsPerMeter);
 		
