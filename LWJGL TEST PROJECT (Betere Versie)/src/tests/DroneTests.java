@@ -78,7 +78,7 @@ public class DroneTests {
 		//Drone Setup
 		Vector3f position = new Vector3f(0,0,0);
 		Vector3f speedVector = new Vector3f(5,5,5);
-		drone.setSpeedVector(speedVector);
+		drone.setLinearVelocity(speedVector);
 		
 		//Testing
 		Vector3f expectedPosition = new Vector3f(5,5,5);
@@ -121,7 +121,7 @@ public class DroneTests {
 	
 	@Test
 	public void testLeftAndRightWingSameForce() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException{
-		drone.setSpeedVector(new Vector3f(10,10,10));
+		drone.setLinearVelocity(new Vector3f(10,10,10));
 		drone.getLeftWing().setInclination(pi/4);
 		drone.getRightWing().setInclination(pi/4);
 		
@@ -152,7 +152,7 @@ public class DroneTests {
 	
 	public void resetDrone(){
 		Vector3f nulVector = new Vector3f(0,0,0);
-		drone.setSpeedVector(nulVector);
+		drone.setLinearVelocity(nulVector);
 		drone.setHeadingVector();
 		drone.setSpeedChangeVector(nulVector);
 		drone.setPosition(nulVector);

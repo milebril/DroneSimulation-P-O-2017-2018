@@ -182,7 +182,7 @@ public class MainGameLoop {
 			// 6de argument is gecentreerd (true) of niet (false)
 			
 			// snelheid van de drone
-			String speed = String.valueOf(Math.round(drone.getSpeed()));
+			String speed = String.valueOf(Math.round(drone.getAbsVelocity()));
 			FontType font = new FontType(loader.loadTexture("verdana"), new File("res/verdana.fnt"));
 			GUIText textSpeed = new GUIText("Speed = " + speed + "m/s", 5, font, new Vector2f(0.01f,0), 1, true);
 			textSpeed.setColour(1, 1, 1);
