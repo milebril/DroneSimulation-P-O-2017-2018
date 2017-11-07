@@ -23,7 +23,7 @@ public class PhysicsEngine {
 		drone.setAngularVelocity(drone.transformToWorldFrame(velocities[1]));
 		
 		// calculate and set the new position and orientation
-		Vector3f[] positions = calculatePositions(drone, velocities);
+		Vector3f[] positions = calculatePositions(drone, velocities, dt);
 		drone.setPosition(positions[0]);
 		drone.setOrientation(positions[1]);
 		
@@ -178,7 +178,13 @@ public class PhysicsEngine {
 		return new Vector3f[]{force, torque};
 		
 	}
-
+	
+	/**
+	 * Calculates and returns the linear and angular accelerations of the drone
+	 * @param drone
+	 * @param forces
+	 * @return
+	 */
 	private static Vector3f[] calculateAccelerations(Drone drone, Vector3f[] forces) {
 		// TODO Auto-generated method stub
 		return null;
@@ -189,7 +195,7 @@ public class PhysicsEngine {
 		return null;
 	}
 
-	private static Vector3f[] calculatePositions(Drone drone, Vector3f[] accelerations) {
+	private static Vector3f[] calculatePositions(Drone drone, Vector3f[] accelerations, double dt) {
 		// TODO Auto-generated method stub
 		return null;
 	}

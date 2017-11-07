@@ -10,7 +10,7 @@ import org.lwjgl.util.vector.Vector3f;
 public class AirFoil {
 	
 	public AirFoil(Vector3f centerOfMass, float wingMass, float wingLiftSlope, Vector3f rotAx) {
-		this.centerOfMass = centerOfMass;
+		this.centerOfMassD = centerOfMass;
 		this.airFoilMass = wingMass;
 		this.airFoilLiftSlope = wingLiftSlope;
 		this.rotAx = rotAx;		
