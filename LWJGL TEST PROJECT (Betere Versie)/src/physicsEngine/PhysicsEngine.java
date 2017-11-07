@@ -6,49 +6,141 @@ import org.lwjgl.util.vector.Vector3f;
 import entities.AirFoil;
 import entities.Drone;
 
-public class PhysicsEngine {	
+public class PhysicsEngine {
 	
-
-	private Vector3f speedVector;
-	private Vector3f speedChangeVector;
-	
-	public static void applyPhysics (Drone drone, double dt){
+	public static void applyPhysics (Drone drone, double dt) {
+		// get force and torque
 		Vector3f[] forces = calculateForces(drone);
+		
+		// calculate linear and angular accelarations
 		Vector3f[] accelerations = calculateAccelerations(drone, forces);
-		Vector3f[] velocities = calculateVelocities(drone, accelerations);
-		drone.setVelocities(velocities);
+		
+		// calculate linear and angular velocities
+		Vector3f[] velocities = calculateVelocities(drone, accelerations, dt);
+		
+		// calculate position and orientation
 		Vector3f[] positions = calculatePositions(drone, accelerations);
-		drone.setPos
+		
+		// set new linear and angular velocities
+		// drone.setVelocityVector(velocities[0]);
+		// drone.setRotationVector(velocities[1]);
+		
+		// set new position and orientation
+		// drone.setPos
 		
 		
 		
 	}
 	
-	private static Vector3f[] calculatePositions(Drone drone, Vector3f[] accelerations) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	private static Vector3f[] calculateVelocities(Drone drone, Vector3f[] accelerations) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	private static Vector3f[] calculateAccelerations(Drone drone, Vector3f[] forces) {
-		// TODO Auto-generated method stub
-		return null;
+	/**
+	 * Returns the wind velocity.
+	 */
+	private static Vector3f getWindVelocity(){
+		return new Vector3f(0,0,0);
 	}
 
 	/**
-	 * 
-	 * @param drone
-	 * @return array with force and torque on the drone
+	 * All the forces and torques exercised on the drone are calculated, added together and then
+	 * returned in an array.
+	 * uses: the AirFoils liftForce and gravitational force, the engine thrust and gravitational force,
+	 * the tail mass gravitational force
+	 * @return array with force and torque on the drone (in drone frame)
+	 * 		 | Vector3f[]{total force, total torque}
 	 */
 	private static Vector3f[] calculateForces(Drone drone){
-		//TODO torque 
 		
-		Vector3f force = new Vector3f();
-		Vector3f torque = new Vector3f();
+		// The total force and torque that are exercised on the given Drone (in drone frame)
+		Vector3f force = new Vector3f(0, 0, 0);
+		Vector3f torque = new Vector3f(0, 0, 0);
+		
+		
+		// calculate the forces applied by the airFoils (liftForce + gravity)
+		for (int i = 0; i < drone.getAirFoils().length; i++) {
+			
+			// get the current AirFoil
+			AirFoil currentAirFoil = drone.getAirFoils()[i];
+			
+			
+			
+			// wind experienced by the airfoil
+			// !!! hier heb ik airspeed = wind - velocity gedaan ipv airspeed = velocity - wind !!!
+			Vector3f airSpeedW = new Vector3f();
+			Vector3f.sub(getWindVelocity(), drone.getLinearVelocity(), airSpeedW);
+			
+			// transform the airSpeed vector to the drone frame
+			Vector3f airSpeedD = drone.transformToDroneFrame(airSpeedW);
+			
+			// project airSpeedD on the surface, perpendicular to the rotationAxis of the AirFoil
+			Vector3f rotationAxisD = currentAirFoil.getRotAxis();
+			Vector3f projectedAirspeedVectorD = new Vector3f(0, 0, 0);
+			Vector3f.sub(airSpeedD, (Vector3f) rotationAxisD.scale(Vector3f.dot(airSpeedD, rotationAxisD)), projectedAirspeedVectorD);
+			
+			// calculate the angle of attack, defined as -atan2(S . N, S . A), where S
+			// is the projected airspeed vector, N is the normal, and A is the attack vector
+			Vector3f normalD = currentAirFoil.calculateNormal(); // N
+			Vector3f attackVectorD = currentAirFoil.calculateAttackVector(); // A
+			float aoa = (float) - Math.atan2(Vector3f.dot(projectedAirspeedVectorD, normalD), 
+												Vector3f.dot(projectedAirspeedVectorD, attackVectorD));					
+			
+			// calculate the lift force N . liftSlope . AOA . s^2, where N is the
+			// normal, AOA is the angle of attack, and s is the projected airspeed
+			float airspeedSquared = projectedAirspeedVectorD.lengthSquared();
+			Vector3f liftForceD = (Vector3f) normalD.scale(currentAirFoil.getLiftSlope() * aoa * airspeedSquared);
+			
+			
+			// calculate the gravitational force exercised on the AirFoil
+			Vector3f gravitationalForceW = new Vector3f(0, -drone.getGravity() * currentAirFoil.getMass(), 0);
+			Vector3f gravitationalForceD = drone.transformToDroneFrame(gravitationalForceW);
+			
+			
+			// total force exercised on the AirFoil
+			Vector3f currentAirFoilForceD = new Vector3f(0, 0, 0);
+			Vector3f.add(liftForceD, gravitationalForceD, currentAirFoilForceD);
+			
+			
+			// calculate torque
+			Vector3f currentAirFoilTorqueD = new Vector3f(0, 0, 0);
+			Vector3f.cross(currentAirFoil.getCenterOfMass(), currentAirFoilForceD, currentAirFoilTorqueD);
+			
+			
+			// add the calculated force and torque to the total force and torque
+			Vector3f.add(force, currentAirFoilForceD, force);
+			Vector3f.add(torque, currentAirFoilTorqueD, torque);
+		}
+		
+		
+		// The force exercised by the engine
+		Vector3f gravitationalEngineForceW = new Vector3f(0, -drone.getGravity() * drone.getEngineMass(), 0);
+		Vector3f gravitationalEngineForceD = drone.transformToDroneFrame(gravitationalEngineForceW);
+		Vector3f thrustForceD = new Vector3f(0, 0, drone.getThrustForce());
+		Vector3f totalEngineForceD = new Vector3f(0, 0, 0);
+		Vector3f.add(gravitationalEngineForceD, thrustForceD, totalEngineForceD);
+		
+		Vector3f.add(force, totalEngineForceD, force);
+		
+		// The torque exercised by the engine
+		Vector3f engineTorqueD = new Vector3f(0, 0, 0);
+		Vector3f.cross(drone.getEnginePosition(), totalEngineForceD, engineTorqueD);
+		
+		Vector3f.add(torque, engineTorqueD, torque);
+		
+		
+		// The force exercised by the tail mass
+		Vector3f gravitationalTailForceW = new Vector3f(0, -drone.getGravity() * drone.getTailMass(), 0);
+		Vector3f gravitationalTailForceD = drone.transformToDroneFrame(gravitationalTailForceW);
+		
+		Vector3f.add(force, gravitationalTailForceD, force);
+		
+		// The torque exercised by the tail mass
+		Vector3f tailTorqueD = new Vector3f(0, 0, 0);
+		Vector3f.cross(drone.getTailMassPosition(), gravitationalTailForceD, tailTorqueD);
+		
+		Vector3f.add(torque, tailTorqueD, torque);
+		
+		
+		
+		/*	oude loop (hield geen rekening met de zwaartekracht en deed airspeed = velocity - wind (ipv airspeed = wind - velocity) 
+		
 		//loopen over alle airfoils en bij elke de kracht uitrekenen en optellen bij force
 		//idem vr torque
 		for(AirFoil currentWing : drone.getAirFoils() ){
@@ -64,9 +156,11 @@ public class PhysicsEngine {
 			Vector3f attackVectorD = currentWing.calculateAttackVector();			
 
 			//difference between speedvector of drone and windspeed
-			Vector3f.sub(drone.getSpeedVector(), getWindVelocity(), airspeedVectorW);
+			Vector3f.sub(drone.getLinearVelocity(), getWindVelocity(), airspeedVectorW);
+			
 			//transformation of airspeedvector to drone fraem
 			airspeedVectorD = drone.transformToDroneFrame(airspeedVectorW);
+			
 			//projection of airpseed vector to surface perpendicular to rotation axis, stored to projectedairspeedvector
 			Vector3f.sub(airspeedVectorD, (Vector3f) rotationAxisD.scale(Vector3f.dot(airspeedVectorD, rotationAxisD)), projectedAirspeedVectorD);
 			
@@ -81,296 +175,26 @@ public class PhysicsEngine {
 			currentWingLiftForceD = (Vector3f) normalD.scale(liftSlope * aoa * airspeed);
 			Vector3f.add(currentWingLiftForceD, force, force);
 		}
+		*/
 		
 		return new Vector3f[]{force, torque};
 		
 	}
-	
-	private static Vector3f getWindVelocity(){
-		return new Vector3f(0,0,0);
-	}
-	
-	
-//	public float getSpeed() {
-//		return this.getSpeedVector().length(); 
-//	}
-//	
-//	public void setSpeedVector(Vector3f speedVector) {
-//		this.speedVector = speedVector;
-//	}
-//
-//	public Vector3f getSpeedVector(){
-//		return this.speedVector;
-//	}
-//	
-//	public void setSpeedChangeVector(Vector3f vector){
-//		this.speedChangeVector = vector;
-//	}
-//	
-//	public Vector3f getSpeedChangeVector(){
-//		return this.speedChangeVector;
-//	}
-//	
-//}
-//	
-//	
-//	
-////Calculates vertical stabilizer liftforce
-//private Vector3f calculateVerStabLift(){
-//	Vector3f normal = new Vector3f(0,0,0);
-//		
-//	// The vertical stabilizer's attack vector is (-sin(verStabInclination), 0, -cos(verStabInclination)).
-//	Vector3f attackVector = new Vector3f((float) -Math.sin(this.getVerticalStabilizer().getInclination()), 0, (float) -Math.cos(this.verticalStabilizer.getInclination()));
-//	
-//	Vector3f.cross(this.getVerticalStabilizer().getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
-//	float liftSlope = this.getVerticalStabilizer().getLiftSlope();
-//		
-//	//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
-//	float AoA = (float) - Math.atan2(Vector3f.dot(this.getSpeedVector(),normal), Vector3f.dot(this.getSpeedVector(),attackVector)); 
-//	float speed = (float) Math.pow(this.getSpeed(),2);
-//	Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*speed),
-//								   (float)(normal.y*liftSlope*AoA*speed),
-//			
-//								   
-//								   (float)(normal.z*liftSlope*AoA*speed));
-//	return result;
-//}		
-//	
-//	
-////Calculates left wing liftforce
-//private Vector3f calculateLeftWingLift(){
-//	//TODO: normal wordt gedeclareerd als een 0 vector omdat Vector3f.cross iets moet opslaan in vector.
-//	//alternatief is mss vector declareren in Vector3f.cross?
-//	Vector3f normal = new Vector3f(0,0,0);
-//	
-//	// The left wing's attack vector is (0, sin(leftWingInclination), -cos(leftWingInclination)).
-//	Vector3f attackVector = new Vector3f(0,(float)Math.sin(this.getLeftWing().getInclination()), (float) -Math.cos(this.getLeftWing().getInclination()));
-//	Vector3f.cross(this.getLeftWing().getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
-//
-//	float liftSlope = this.getLeftWing().getLiftSlope();
-//	
-//	//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
-//	
-//	float AoA = (float) - Math.atan2(Vector3f.dot(this.getSpeedVector(),normal), Vector3f.dot(this.getSpeedVector(),attackVector)); 
-//	float speed = (float) Math.pow(this.getSpeed(),2);
-//	Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*speed),
-//								   (float)(normal.y*liftSlope*AoA*speed),
-//								   (float)(normal.z*liftSlope*AoA*speed));
-//	
-//	return result;
-//}
-//
-////Calculates right wing liftforce
-//private Vector3f calculateRightWingLift(){
-//	Vector3f normal = new Vector3f(0,0,0);
-//	
-//	// The right wing's attack vector is (0, sin(rightWingInclination), -cos(rightWingInclination)).
-//	Vector3f attackVector = new Vector3f(0,(float)Math.sin(this.getRightWing().getInclination()), (float) -Math.cos(this.getRightWing().getInclination()));
-//	Vector3f.cross(this.getRightWing().getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
-//	
-//	float liftSlope = this.getRightWing().getLiftSlope();
-//	
-//	//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
-//	float AoA = (float) - Math.atan2(Vector3f.dot(this.getSpeedVector(),normal), Vector3f.dot(this.getSpeedVector(),attackVector)); 
-//	float speed = (float) Math.pow(this.getSpeed(),2);
-//	
-//	Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*speed),
-//								   (float)(normal.y*liftSlope*AoA*speed),
-//								   (float)(normal.z*liftSlope*AoA*speed));
-//	return result;
-//}
-//
-////Calculates horizontal stabilizer liftforce
-//private Vector3f calculateHorStabLift(){
-//	Vector3f normal = new Vector3f(0,0,0);
-//	
-//	// The horizontal stabilizer's attack vector is (0, sin(horStabInclination), -cos(horStabInclination)).
-//	Vector3f attackVector = new Vector3f(0,(float)Math.sin(this.getHorizontalStabilizer().getInclination()), (float) -Math.cos(this.horizontalStabilizer.getInclination()));
-//	
-//	Vector3f.cross(this.getHorizontalStabilizer().getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
-//	float liftSlope = this.getHorizontalStabilizer().getLiftSlope();
-//	
-//	//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
-//	float AoA = (float) -Math.atan2(Vector3f.dot(this.getSpeedVector(),normal), Vector3f.dot(this.getSpeedVector(),attackVector)); 
-//	float speed = (float) Math.pow(this.getSpeed(),2);
-//	
-//	Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*speed),
-//								   (float)(normal.y*liftSlope*AoA*speed),
-//								   (float)(normal.z*liftSlope*AoA*speed));
-//	
-//	return result;
-//}
-//
-////Calculates vertical stabilizer liftforce
-//private Vector3f calculateVerStabLift(){
-//	Vector3f normal = new Vector3f(0,0,0);
-//		
-//	// The vertical stabilizer's attack vector is (-sin(verStabInclination), 0, -cos(verStabInclination)).
-//	Vector3f attackVector = new Vector3f((float) -Math.sin(this.getVerticalStabilizer().getInclination()), 0, (float) -Math.cos(this.verticalStabilizer.getInclination()));
-//	
-//	Vector3f.cross(this.getVerticalStabilizer().getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
-//	float liftSlope = this.getVerticalStabilizer().getLiftSlope();
-//		
-//	//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
-//	float AoA = (float) - Math.atan2(Vector3f.dot(this.getSpeedVector(),normal), Vector3f.dot(this.getSpeedVector(),attackVector)); 
-//	float speed = (float) Math.pow(this.getSpeed(),2);
-//	Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*speed),
-//								   (float)(normal.y*liftSlope*AoA*speed),
-//								   (float)(normal.z*liftSlope*AoA*speed));
-//	return result;
-//}	
-//
-//private Vector3f calculateVerStabTorque() {
-//	Vector3f lift = calculateVerStabLift();
-//	Vector3f torque = new Vector3f(0,0,0);
-//	Vector3f.cross(getVerticalStabilizer().getCenterOfMass(), lift, torque);
-//	return torque;
-//}
-//
-//public void increasePosition(float dt) {
-//	float dx = dt * this.getSpeedVector().x;
-//	float dy = dt * this.getSpeedVector().y;
-//	float dz = dt * this.getSpeedVector().z;
-//	
-//	super.increasePosition(dx, dy, dz);
-//
-//	this.getCamera().increasePosition(dx, dy, dz);
-//	this.getCamera().increaseRotation(this.getHeadingVector());
-//	super.setRotation(0, -this.getCamera().getPitch(), 0);
-//}
-//
-//public void applyForces(float dt) {
-//	//Checks:
-////	if (this.getThrustForce() > this.getMaxThrust()) { //TODO: deze check is overbodig omdat de setter van Thrust deze check doet?
-////		this.setThrustForce(this.getMaxThrust());
-////	}
-//	
-//	//Gravity
-//	//Check voor maximale valversnelling
-//	if (Math.abs(this.getSpeedVector().y) < 200) {
-//		this.getSpeedChangeVector().y += gravity * dt; // v = v0 + a*t, a = F/m
-//	}
-//	
-//	//Engine = Speed
-////	if (this.getSpeed() < 100)
-//	
-//	applyEngineForce(dt);		
-//	applyLiftForces(dt);
-//	applyTorqueForces(dt);
-//	
-//	System.out.println("headingVector: " + this.getHeadingVector());
-//	/*
-//	if (!flying) {
-//		getLeftWing().setInclination(0);
-//		getRightWing().setInclination(0);
-//		getVerticalStabilizer().setInclination(0);
-//	}
-//	**/
-//	
-//	/*if (Math.abs(this.getHeadingVector().y) > 0.1 && !flying) {
-//		if (this.getHeadingVector().y > 0) {
-//			getLeftWing().setInclination(getLeftWing().getInclination() - 0.01f);
-//			getRightWing().setInclination(getRightWing().getInclination() - 0.01f);
-//		} else if (this.getHeadingVector().y < 0) {
-//			getLeftWing().setInclination(getLeftWing().getInclination() + 0.01f);
-//			getRightWing().setInclination(getRightWing().getInclination() + 0.01f);
-//		} else {
-//			//Do nothing
-//		}
-//	} 	*/	
-//	
-////	flyMode();
-//	
-//	Vector3f.add(this.getSpeedVector(), this.getSpeedChangeVector(), this.getSpeedVector());
-//	Vector3f.add(rotationSpeedVectorW, rotationAccelerationW, rotationSpeedVectorW);
-//	
-//	deepCopySpeedVector();
-//	this.setSpeedChangeVector(new Vector3f(0,0,0));
-//	rotationAccelerationW = new Vector3f(0,0,0);
-//
-//	//setHeadingVector();
-//	this.forwardVectorW = rotate(rotationSpeedVectorW.y);
-//	
-//	getHeadingVector().normalise();
-//	
-//	updateTailPosition();
-//}
-//
-//private void updateTailPosition() {
-//	Vector3f centerOfMass = new Vector3f(0,0,0);
-//	
-//	centerOfMass.x = -forwardVectorW.x * tailSize;
-//	centerOfMass.y = -forwardVectorW.y * tailSize;
-//	centerOfMass.z = -forwardVectorW.z * tailSize;
-//	
-//	getVerticalStabilizer().setCenterOfMass(centerOfMass);
-//}
-//
-//private Vector3f rotate(float angles) {
-//	Vector3f newH = new Vector3f(0,0,0);
-//	float angle = (float) Math.toRadians(angles);
-//	
-//	Matrix3f matrix = new Matrix3f();
-//	
-//	matrix.m00 = (float) Math.cos(angle);
-//	matrix.m11 = 1;
-//	matrix.m22 = (float) Math.cos(angle);
-//	matrix.m12 = (float) Math.sin(angle);
-//	matrix.m21 = - (float) Math.sin(angle);
-//	
-//	newH.x = (float) (this.forwardVectorW.x * Math.cos(angle) - this.forwardVectorW.z * Math.sin(angle));
-//	newH.y = this.forwardVectorW.y;
-//	newH.z = (float) (+this.forwardVectorW.x * Math.sin(angle) + this.forwardVectorW.z * Math.cos(angle));
-//	
-//	//Matrix3f.mul(matrix, getHeadingVector(), newH);
-//	
-//	return newH;
-//}
-//
-//private void deepCopySpeedVector() {
-//	//DeepCopy the vector!!!
-//	this.speedVectorOld.x = this.speedVectorW.x;
-//	this.speedVectorOld.y = this.speedVectorW.y;
-//	this.speedVectorOld.z = this.speedVectorW.z;
-//}
-//
-//private void applyEngineForce(float dt) {
-//	//v = v0 + a*t -> a = thrustForce / droneMass
-//	//speedVectorNew = speedVectorOld + (thrustForce / droneMass)*dt
-//	Vector3f engineVector = new Vector3f(this.getHeadingVector().x*(this.getThrustForce() / this.getDroneMass())*dt,
-//										 this.getHeadingVector().y*(this.getThrustForce() / this.getDroneMass())*dt,
-//										 this.getHeadingVector().z*(this.getThrustForce() / this.getDroneMass())*dt);
-//	Vector3f.add(engineVector, this.getSpeedChangeVector(), this.getSpeedChangeVector());
-//}
-//
-//private void applyLiftForces(float dt){
-//	//Left Wing
-//	Vector3f leftWingLiftForce = calculateLeftWingLift(); 			// = F
-//	leftWingLiftForce.scale(1/getDroneMass() * dt); 			  			// = a = F/Mass
-//	this.getSpeedChangeVector().y += leftWingLiftForce.y;
-//	
-//	//Right Wing
-//	Vector3f rightWing = calculateRightWingLift(); 		 // = F
-//	rightWing.scale(1/getDroneMass() * dt); 			  		 // = a = F/Mass
-//	this.getSpeedChangeVector().y += rightWing.y;
-//	
-////	Vector3f horStab= calculateHorStabLift();
-////	horStab.scale(1/getDroneMass() * dt);
-////	this.getSpeedChangeVector().y += horStab.y;
-//	
-//	Vector3f verStab= calculateVerStabLift();
-//	verStab.scale(1/getDroneMass() * dt);
-//	Vector3f.add(verStab, this.accelerationVectorW, this.accelerationVectorW);
-//}
-//
-//private void applyTorqueForces(float dt) {
-//	Vector3f verStabTorque = null;
-//	verStabTorque = calculateVerStabTorque();
-//	verStabTorque.scale(1/getInertionY() * dt);
-//	Vector3f.add(verStabTorque, rotationAccelerationW, rotationAccelerationW);
-//	
-//}
 
+	private static Vector3f[] calculateAccelerations(Drone drone, Vector3f[] forces) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private static Vector3f[] calculateVelocities(Drone drone, Vector3f[] accelerations, double dt) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private static Vector3f[] calculatePositions(Drone drone, Vector3f[] accelerations) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }
 	
