@@ -12,22 +12,20 @@ public class PhysicsEngine {
 		// get force and torque
 		Vector3f[] forces = calculateForces(drone);
 		
-		// calculate linear and angular accelarations
-		Vector3f[] accelerations = calculateAccelerations(drone, forces);
+		// calculate and set the new linear and angular accelerations
+		Vector3f[] accelerations = calculateAccelerations(drone, forces); // (in drone frame)
+		drone.setLinearAcceleration(drone.transformToWorldFrame(accelerations[0]));
+		drone.setAngularAcceleration(drone.transformToWorldFrame(accelerations[1]));
 		
-		// calculate linear and angular velocities
-		Vector3f[] velocities = calculateVelocities(drone, accelerations, dt);
+		// calculate and set the new linear and angular velocities
+		Vector3f[] velocities = calculateVelocities(drone, accelerations, dt); // (in drone frame)
+		drone.setLinearVelocity(drone.transformToWorldFrame(velocities[0]));
+		drone.setAngularVelocity(drone.transformToWorldFrame(velocities[1]));
 		
-		// calculate position and orientation
-		Vector3f[] positions = calculatePositions(drone, accelerations);
-		
-		// set new linear and angular velocities
-		// drone.setVelocityVector(velocities[0]);
-		// drone.setRotationVector(velocities[1]);
-		
-		// set new position and orientation
-		// drone.setPos
-		
+		// calculate and set the new position and orientation
+		Vector3f[] positions = calculatePositions(drone, velocities);
+		drone.setPosition(positions[0]);
+		drone.setOrientation(positions[1]);
 		
 		
 	}

@@ -325,7 +325,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	private final Vector3f enginePosition;
 	
 	/**
-	 * Returns the Drones engine position.
+	 * Returns the Drones engine position. (in drone frame)
 	 */
 	public Vector3f getEnginePosition() {
 		return new Vector3f(this.enginePosition.x, this.enginePosition.y, this.enginePosition.z);

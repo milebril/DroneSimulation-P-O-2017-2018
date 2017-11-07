@@ -26,14 +26,14 @@ public class AirFoil {
 	
 	
 	// The center of mass of the AirFoil (in drone coordinates)
-	private Vector3f centerOfMass;
+	private Vector3f centerOfMassD;
 	
 	public Vector3f getCenterOfMass() {
-		return new Vector3f(this.centerOfMass.x, this.centerOfMass.y, this.centerOfMass.z);
+		return new Vector3f(this.centerOfMassD.x, this.centerOfMassD.y, this.centerOfMassD.z);
 	}
 
 	public void setCenterOfMass(Vector3f vector) {
-		this.centerOfMass.set(vector.x, vector.y, vector.z);
+		this.centerOfMassD.set(vector.x, vector.y, vector.z);
 	}
 	
 	
