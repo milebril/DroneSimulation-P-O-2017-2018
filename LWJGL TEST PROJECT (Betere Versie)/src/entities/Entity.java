@@ -1,16 +1,10 @@
 package entities;
 
 import models.RawModel;
-import models.TexturedModel;
 
 import org.lwjgl.util.vector.Vector3f;
 
 public class Entity {
-
-	private RawModel model;
-	private Vector3f position;
-	private Vector3f orientation;
-	private float scale;
 
 	public Entity(RawModel model, Vector3f position, Vector3f orientation, float scale) {
 		this.model = model;
@@ -18,27 +12,11 @@ public class Entity {
 		this.orientation = orientation;
 		this.scale = scale;
 	}
-
-	public void increasePosition(Vector3f increment) {
-		Vector3f newPosition = new Vector3f();
-		Vector3f.add(this.getPosition(), increment, newPosition);
-		setPosition(newPosition);
-	}
 	
-	public void increaseOrientation(Vector3f increment) {
-		Vector3f newOrientation = new Vector3f();
-		Vector3f.add(this.getOrientation(), increment, newOrientation);
-		setOrientation(newOrientation);
-	}
 	
-	public Vector3f getOrientation() {
-		return orientation;
-	}
-
-	public void setOrientation(Vector3f orientation) {
-		this.orientation = orientation;
-	}
-
+	// The model of the entity
+	private RawModel model;
+	
 	public RawModel getModel() {
 		return model;
 	}
@@ -47,13 +25,45 @@ public class Entity {
 		this.model = model;
 	}
 
+	
+	// the position of the entity
+	private Vector3f position;
+	
 	public Vector3f getPosition() {
-		return position;
+		return new Vector3f(this.position.x, this.position.y, this.position.z);
 	}
 
-	public void setPosition(Vector3f position) {
-		this.position = position;
+	public void setPosition(Vector3f vector) {
+		this.position.set(vector.x, vector.y, vector.z);
 	}
+
+	public void increasePosition(Vector3f increment) {
+		Vector3f newPosition = new Vector3f();
+		Vector3f.add(this.getPosition(), increment, newPosition);
+		setPosition(newPosition);
+	}
+	
+	
+	// the orientation of the entity
+	private Vector3f orientation;
+	
+	public Vector3f getOrientation() {
+		return new Vector3f(this.orientation.x, this.orientation.y, this.orientation.z);
+	}
+
+	public void setOrientation(Vector3f vector) {
+		this.orientation.set(vector.x, vector.y, vector.z);
+	}
+	
+	public void increaseOrientation(Vector3f increment) {
+		Vector3f newOrientation = new Vector3f();
+		Vector3f.add(this.getOrientation(), increment, newOrientation);
+		setOrientation(newOrientation);
+	}
+	
+	
+	// the scale of the entity
+	private float scale;
 
 	public float getScale() {
 		return scale;
