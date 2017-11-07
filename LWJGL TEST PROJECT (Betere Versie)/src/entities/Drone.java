@@ -364,7 +364,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	 * Returns the total mass of the Drone.
 	 */
 	// mass of the drone
-	public float getDroneMass() {
+	public float getMass() {
 		return getEngineMass() + getTailMass() + getLeftWing().getMass() + getRightWing().getMass();
 	}
 	

@@ -8,24 +8,25 @@ import entities.Drone;
 
 public class PhysicsEngine {
 	
-	public static void applyPhysics (Drone drone, double dt) {
+	public static void applyPhysics (Drone drone, float dt) {
+		
 		// get force and torque
 		Vector3f[] forces = calculateForces(drone);
 		
-		// calculate and set the new linear and angular accelerations
-		Vector3f[] accelerations = calculateAccelerations(drone, forces); // (in drone frame)
-		drone.setLinearAcceleration(drone.transformToWorldFrame(accelerations[0]));
-		drone.setAngularAcceleration(drone.transformToWorldFrame(accelerations[1]));
+		// calculate the new properties
+		Vector3f[] newAccelerations = calculateAccelerations(drone, forces); // (in drone frame)
+		Vector3f[] newVelocities = calculateVelocities(drone, newAccelerations, dt); // (in drone frame)
+		Vector3f[] newPositions = calculatePositions(drone, newVelocities, dt); // (in world frame)
 		
-		// calculate and set the new linear and angular velocities
-		Vector3f[] velocities = calculateVelocities(drone, accelerations, dt); // (in drone frame)
-		drone.setLinearVelocity(drone.transformToWorldFrame(velocities[0]));
-		drone.setAngularVelocity(drone.transformToWorldFrame(velocities[1]));
+		// set the new properties
+		drone.setLinearAcceleration(drone.transformToWorldFrame(newAccelerations[0]));
+		drone.setAngularAcceleration(drone.transformToWorldFrame(newVelocities[1]));
 		
-		// calculate and set the new position and orientation
-		Vector3f[] positions = calculatePositions(drone, velocities, dt);
-		drone.setPosition(positions[0]);
-		drone.setOrientation(positions[1]);
+		drone.setLinearVelocity(drone.transformToWorldFrame(newVelocities[0]));
+		drone.setAngularVelocity(drone.transformToWorldFrame(newVelocities[1]));
+		
+		drone.setPosition(newPositions[0]);
+		drone.setOrientation(newPositions[1]);
 		
 		
 	}
@@ -57,7 +58,6 @@ public class PhysicsEngine {
 			
 			// get the current AirFoil
 			AirFoil currentAirFoil = drone.getAirFoils()[i];
-			
 			
 			
 			// wind experienced by the airfoil
@@ -136,74 +136,99 @@ public class PhysicsEngine {
 		Vector3f.add(torque, tailTorqueD, torque);
 		
 		
-		
-		/*	oude loop (hield geen rekening met de zwaartekracht en deed airspeed = velocity - wind (ipv airspeed = wind - velocity) 
-		
-		//loopen over alle airfoils en bij elke de kracht uitrekenen en optellen bij force
-		//idem vr torque
-		for(AirFoil currentWing : drone.getAirFoils() ){
-			Vector3f currentWingLiftForceD = new Vector3f();
-			
-			Vector3f centerOfMassVectorD = currentWing.getCenterOfMass();
-			float liftSlope = currentWing.getLiftSlope();
-			Vector3f projectedAirspeedVectorD = new Vector3f();
-			Vector3f airspeedVectorW = new Vector3f();
-			Vector3f airspeedVectorD = new Vector3f();
-			Vector3f rotationAxisD = currentWing.getRotAxis();
-			Vector3f normalD = currentWing.calculateNormal();
-			Vector3f attackVectorD = currentWing.calculateAttackVector();			
-
-			//difference between speedvector of drone and windspeed
-			Vector3f.sub(drone.getLinearVelocity(), getWindVelocity(), airspeedVectorW);
-			
-			//transformation of airspeedvector to drone fraem
-			airspeedVectorD = drone.transformToDroneFrame(airspeedVectorW);
-			
-			//projection of airpseed vector to surface perpendicular to rotation axis, stored to projectedairspeedvector
-			Vector3f.sub(airspeedVectorD, (Vector3f) rotationAxisD.scale(Vector3f.dot(airspeedVectorD, rotationAxisD)), projectedAirspeedVectorD);
-			
-			float airspeed = projectedAirspeedVectorD.lengthSquared();
-//			We define its angle of attack as -atan2(S . N, S . A), where S
-//			is the projected airspeed vector, N is the normal, and A is the attack vector
-			float aoa = (float) - Math.atan2(Vector3f.dot(projectedAirspeedVectorD, normalD), Vector3f.dot(projectedAirspeedVectorD, attackVectorD));					
-			
-			//Each airfoil generates a lift force N . liftSlope . AOA . s^2, where N is the
-//			  normal, AOA is the angle of attack, and s is the projected airspeed.  No
-//			  other forces operate on the drone; in particular, there is no drag.
-			currentWingLiftForceD = (Vector3f) normalD.scale(liftSlope * aoa * airspeed);
-			Vector3f.add(currentWingLiftForceD, force, force);
-		}
-		*/
-		
 		return new Vector3f[]{force, torque};
-		
 	}
 	
 	/**
-	 * Calculates and returns the linear and angular accelerations of the drone
-	 * @param drone
-	 * @param forces
-	 * @return
+	 * Calculates and returns the linear and angular accelerations of the drone (in drone frame). 
+	 * The given forces Vector3f[] array is assumed to contain the forces at index 0 and 
+	 * torque at index 1, both in drone frame.
+	 * @return The linear and angular accelerations of the drone (in drone frame)
 	 */
 	private static Vector3f[] calculateAccelerations(Drone drone, Vector3f[] forces) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	private static Vector3f[] calculateVelocities(Drone drone, Vector3f[] accelerations, double dt) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	private static Vector3f[] calculatePositions(Drone drone, Vector3f[] accelerations, double dt) {
-		// TODO Auto-generated method stub
-		return null;
+		// linear acceleration (F = m.a -> a = F/m)
+		Vector3f linearAccelerationD = new Vector3f(forces[0].x / drone.getMass(), 
+				forces[0].y / drone.getMass(), forces[0].z / drone.getMass());
+		
+		// TODO: angular acceleration
+		Vector3f angularAccelerationD = new Vector3f(0, 0, 0);
+		
+		return new Vector3f[]{linearAccelerationD, angularAccelerationD};
 	}
 	
+	/**
+	 * Calculates and returns the linear and angular velocities of the drone (in drone frame).
+	 * The given newAcclerations Vector3f[] array is assumed to contain the linear at index 0 and 
+	 * angular at index 1, both in drone frame.
+	 * Note that this function also uses the previous accelerations of the drone and thus should
+	 * be called before the given newAcclerations are saved in the drone.
+	 * @return the linear and angular velocities of the drone (in drone frame)
+	 */
+	private static Vector3f[] calculateVelocities(Drone drone, Vector3f[] newAccelerations, float dt) {
+		// save current and previous linear accelerations in local variables
+		Vector3f prevLinearAccelerationD = drone.transformToDroneFrame(drone.getLinearAcceleration());
+		Vector3f newLinearAccelerationD = new Vector3f(newAccelerations[0].x, newAccelerations[0].y, newAccelerations[0].z);
+		
+		// get the average linear acceleration
+		Vector3f avgLinearAccelerationD = average(prevLinearAccelerationD, newLinearAccelerationD);
+		
+		// calculate the linear velocity difference
+		Vector3f deltaLinearVelocityD = (Vector3f) avgLinearAccelerationD.scale(dt);
+		
+		// add the linear velocity difference to the current velocity
+		Vector3f linearVelocityD = drone.transformToDroneFrame(drone.getLinearVelocity());
+		Vector3f.add(deltaLinearVelocityD, linearVelocityD, linearVelocityD);
+		
+		
+		
+		// TODO: angular velocity
+		Vector3f angularVelocity = new Vector3f(0, 0, 0);
+		
+		return new Vector3f[]{linearVelocityD, angularVelocity};
+	}
+	
+	/**
+	 * Calculates and returns the position and orientation of the drone (in world frame).
+	 * The given newVelocities Vector3f[] array is assumed to contain the linear at index 0 and
+	 * the angular velocity at index 1, both in drone frame.
+	 * Note that this function also uses the previous velocities of the drone and thus should
+	 * be called before the given newVelocities are saved in the drone.
+	 * @return the new position and orientation of the drone (in world frame)
+	 */
+	private static Vector3f[] calculatePositions(Drone drone, Vector3f[] newVelocities, float dt) {
+		// save current and previous linear velocities in local variables
+		Vector3f prevLinearVelocityD = drone.transformToDroneFrame(drone.getLinearAcceleration());
+		Vector3f newLinearVelocityD = new Vector3f(newVelocities[0].x, newVelocities[0].y, newVelocities[0].z);
+		
+		// calculate the average linear velocity
+		Vector3f avgLinearVelocityD = average(prevLinearVelocityD, newLinearVelocityD);
+		
+		// calculate the position difference
+		Vector3f deltaPositionW = drone.transformToWorldFrame((Vector3f) avgLinearVelocityD.scale(dt));
+		
+		// add the position difference to the current position
+		Vector3f positionW = drone.getPosition();
+		Vector3f.add(deltaPositionW, positionW, positionW);
+		
+		
+		
+		// TODO: orientation
+		Vector3f orientationW = new Vector3f(0, 0, 0);
+		
+		return new Vector3f[]{positionW, orientationW};
+	}
+	
+	/**
+	 * Returns the average of the two given vectors.
+	 * @return the average of the two given vectors
+	 */
+	private static Vector3f average(Vector3f a, Vector3f b) {
+		return new Vector3f(a.x + (b.x - a.x) / 2, a.y + (b.y - a.y) / 2, a.z + (b.z - a.z) / 2);
+	}
 }
 	
 	
-	
+
 	
 	
 	
