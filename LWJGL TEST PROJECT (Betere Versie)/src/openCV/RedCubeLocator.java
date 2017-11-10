@@ -19,7 +19,7 @@ public class RedCubeLocator {
 	private static final Mat Mat = null;
 	/**
 	 * Creates a RedCubeLocator object which processes the given image data to locate the red cubes
-	 * co�rdinates relative to the drone.
+	 * coordinates relative to the drone.
 	 * @param image
 	 * 		  a byte array of the image data (from the pinhole camera) in RGB format
 	 * @param nbColumns
@@ -347,7 +347,7 @@ public class RedCubeLocator {
 		coordinates[0] = (int) Math.round(xCoord / (float) amount);
 		coordinates[0] = coordinates[0] - s;
 		coordinates[1] = (int) Math.round(yCoord / (float) amount);
-		coordinates[1] = s - coordinates[1] ;
+		coordinates[1] = s - coordinates[1];
 		System.out.println(coordinates[0] + " " +  coordinates[1]);
 		return coordinates;
 	}
