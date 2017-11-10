@@ -30,7 +30,7 @@ public class OpenCVTest {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
 		
-		process("image-9", (float) Math.PI/5, (float) Math.PI/3, (float) Math.PI/8);
+		process("image-13", (float) Math.PI/5, (float) Math.PI/3, (float) Math.PI/8);
 		
 		
 		
@@ -66,7 +66,7 @@ public class OpenCVTest {
 	
 	
 	private static void process(String imageName, float heading, float pitch, float roll) {
-		
+		long startTime = System.nanoTime();
 		// file locations
 		String imageMap = "res/";
 		String fileLocation = imageMap + imageName + ".png";
@@ -96,7 +96,6 @@ public class OpenCVTest {
 		
 		// Combine the 6 filtered Mats
 		Mat filterMat = combineMatArray(matArray);
-		Imgcodecs.imwrite(imageMap + imageName + " (0) filter.png", filterMat);
 		
 		
 		// Get center of mass (of the 2D red cube)
@@ -112,43 +111,39 @@ public class OpenCVTest {
 		
 		
 		
+		// create imaginary cube
+		ImaginaryCube imaginaryCube = new ImaginaryCube(Math.PI/5, Math.PI/3, Math.PI/8);
+		
+		double[] imCenterOfMass; double deltaX=10; double deltaY=10;
+		double imPercentage; double ratio = 10;
+		int iterations = 0;
 		
 		
-		// Print data
-		System.out.println("~ ~ " + imageName + " ~ ~");
-		System.out.println("Percentage: " + String.valueOf(percentage));
-		System.out.println("Center of mass: (" + String.valueOf(centerOfMass[0]) 
-											+ "," + String.valueOf(centerOfMass[1]) + ")");
-		System.out.println();
-		
-		
-		boolean finished = false;
-		ImaginaryCube imaginaryCube = new ImaginaryCube(heading, pitch, -roll);
-		
-		double[] com; double perc; double verhouding;
-		float deltaX=0; float deltaY=0;
-		int teller = 0;
-		while (! finished && teller < 10) {
-			com = imaginaryCube.getProjectedAreaCenterOfMass((float) (120.0 / 180 * Math.PI), (float) (120.0 / 180 * Math.PI));
+		while (deltaX > 0.005 || deltaY > 0.005 || ratio > 1.025 || ratio < 0.975) {
+			iterations++;
 			
-			deltaX = (float) ((float) (centerOfMass[0] - com[0]) * 0.01);
-			deltaY = (float) ((float) (centerOfMass[1] - com[1]) * 0.01);
-			System.out.println(String.valueOf(deltaX) + "," + String.valueOf(deltaY));
-			imaginaryCube.translate(-deltaX, -deltaY, 0);
+			// get difference between the centers of mass
+			imCenterOfMass = imaginaryCube.getProjectedAreaCenterOfMass((float) (120.0 / 180 * Math.PI), (float) (120.0 / 180 * Math.PI));
+			deltaX =  (centerOfMass[0] - imCenterOfMass[0]);
+			deltaY =  (centerOfMass[1] - imCenterOfMass[1]);
 			
-			perc = imaginaryCube.getProjectedAreaPercentage((float) (120.0 / 180 * Math.PI), (float) (120.0 / 180 * Math.PI));
-			verhouding = perc / percentage;
-			imaginaryCube.translate(0, 0, (float) (-(verhouding - 1)*0.3));
-			System.out.println(verhouding);
+			imaginaryCube.translate(deltaX * 3, deltaY * 3, 0);
 			
-			//imaginaryCube.translate((float) -0.2, (float) -0.2, 0);
-			teller++;
-			imaginaryCube.saveAsImage("test " + String.valueOf(teller));
+			// get the ration between the projected areas
+			imPercentage = imaginaryCube.getProjectedAreaPercentage((float) (120.0 / 180 * Math.PI), (float) (120.0 / 180 * Math.PI));
+			ratio = imPercentage / percentage;
 			
+			imaginaryCube.translate(0, 0, (1 - ratio)*0.1);
+			
+			//imaginaryCube.saveAsImage("result " + String.valueOf(iterations * 2 - 1), rgbMat);
 		}
 		
+		long duration = (System.nanoTime() - startTime) / 1000000;
 		
-		
+		System.out.println("~ ~ " + imageName + " ~ ~");
+		System.out.println("Algorithm ended in " + String.valueOf(iterations) + " iterations (" + String.valueOf(duration) + "ms)");
+		System.out.println("estimated location: (" + String.valueOf(imaginaryCube.getPosition()[0]) + ", " + String.valueOf(imaginaryCube.getPosition()[1]) + ", " + String.valueOf(imaginaryCube.getPosition()[2]) + ")");
+		System.out.println("estimated distance: " + String.valueOf(imaginaryCube.getDistance()));
 	}
 	
 	
