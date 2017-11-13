@@ -28,10 +28,11 @@ import toolbox.ImageConverter;
  */
 public class Drone extends Entity /* implements AutopilotConfig */ {
 
-	public Drone(RawModel model, Vector3f position, Vector3f orientation, float scale,
+	public Drone(RawModel model, Matrix4f pose, float scale,
 				AutopilotConfig cfg) {
-		super(model, position, orientation, scale);
+		super(model, pose, scale);
 
+		//TODO snelheid mee in constructor opnemen
 		this.forwardVectorW = new Vector3f(0.0f,0.0f,-1.0f);
 		
 		this.linearVelocityW = new Vector3f(0.0f,0.0f, -15.0f);
@@ -541,16 +542,15 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		DataOutputStream s = new DataOutputStream(new FileOutputStream("res/APInputs.cfg"));
 		
 		AutopilotInputs value = new AutopilotInputs() {
-			public byte[] getImage() { return ImageConverter.bufferedImageToByteArray(camera.takeSnapshot()); /* TODO !!!!*/}
+			public byte[] getImage() { return ImageConverter.bufferedImageToByteArray(camera.takeSnapshot());}
 			
 			public float getX() { return getPosition().x; }
 			public float getY() { return getPosition().y; }
 			public float getZ() { return getPosition().z; }
 			
-			// TODO: zie getHeadingVector()
-			public float getHeading() { return getHeadingVector().x; }
-			public float getPitch() { return getHeadingVector().y; }
-			public float getRoll() { return getHeadingVector().z; }
+			public float getHeading() { return this.getHeading(); }
+			public float getPitch() { return this.getPitch(); }
+			public float getRoll() { return this.getRoll(); }
 			
 			public float getElapsedTime() { return DisplayManager.getElapsedTime(); }
 		};
@@ -593,7 +593,6 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	 * Transforms the given vector from the world frame to the drone frame.
 	 */
 	public Vector3f transformToDroneFrame(Vector3f originalW){
-		//TODO zie ook sendToautopilot
 		Matrix3f transformationMatrix = calculateWToDTransformationMatrix();
 		
 		Vector3f resultD = new Vector3f();
@@ -640,29 +639,32 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	}
 
 	private float getRoll() {
-		//  /** atan2(R . U0, R . R0), where R is the drone's right direction ((1, 0, 0) in drone coordinates), R0 = H x (0, 1, 0), and U0 = R0 x F. */
-	    // float roll;
-		// TODO Auto-generated method stub
-		return 0;
+		Vector3f r0 = new Vector3f();
+		Vector3f u0 = new Vector3f();
+		Vector3f headingVector = this.getHeadingVector();
+		Vector3f forwardVector = this.getForwardVector();
+		Vector3f.cross(headingVector, new Vector3f(0,1,0), r0);
+		Vector3f.cross(r0, forwardVector, u0);
+		Vector3f r = this.transformToWorldFrame(new Vector3f(1,0,0));
+	
+		return (float) Math.atan2(Vector3f.dot(r, u0), Vector3f.dot(r, r0));
 	}
 
 	private float getPitch() {
-		// TODO Auto-generated method stub
-		// /** atan2(F . (0, 1, 0), F . H), where F is the drone's forward vector and H is the drone's heading vector. */
-	    // float pitch;
-		return 0;
+		
+		Vector3f headingVector = this.getHeadingVector();
+		Vector3f forwardVector = this.getForwardVector();
+		return (float) Math.atan2(forwardVector.y, Vector3f.dot(headingVector, forwardVector));
 	}
 
 	/**
 	 * 
-	 * @return
+	 * @return atan2(H . (-1, 0, 0), H . (0, 0, -1)), where H is the drone's heading vector (which we define as H0/||H0|| where H0 is the drone's forward vector ((0, 0, -1) in drone coordinates) projected onto the world XZ plane.
 	 */
 	private float getHeading() {
-		///** atan2(H . (-1, 0, 0), H . (0, 0, -1)), where H is the drone's heading vector (which we define as H0/||H0|| where H0 is the drone's forward vector ((0, 0, -1) in drone coordinates) projected onto the world XZ plane. */
-	    //float heading;
-		 
-		// TODO Auto-generated method stub
-		return 0;
+
+		Vector3f headingVector = this.getHeadingVector(); 
+		return (float) Math.atan2(-headingVector.x, - headingVector.z);
 	}
 	
 	
