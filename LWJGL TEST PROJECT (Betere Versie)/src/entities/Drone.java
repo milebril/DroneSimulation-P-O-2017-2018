@@ -516,7 +516,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	 * Increase the roll of the Drones camera.
 	 */
 	public void increaseCameraRoll(float roll) {
-		this.getCamera().increaseRoll(roll);
+		this.getCamera().increaseRoll(roll);	
 	}
 
 	
@@ -582,9 +582,11 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	 * Transforms the given vector from the drone frame to the world frame.
 	 */
 	public Vector3f transformToWorldFrame(Vector3f originalD){
-		//TODO
-		return null;
+		Matrix3f transformationMatrix = (Matrix3f) calculateWToDTransformationMatrix().transpose();
+		Vector3f resultW = new Vector3f();
 		
+		Matrix3f.transform(transformationMatrix, originalD, resultW);
+		return resultW;		
 	}
 	
 	/**
@@ -592,39 +594,75 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	 */
 	public Vector3f transformToDroneFrame(Vector3f originalW){
 		//TODO zie ook sendToautopilot
+		Matrix3f transformationMatrix = calculateWToDTransformationMatrix();
+		
+		Vector3f resultD = new Vector3f();
+		
+		Matrix3f.transform(transformationMatrix, originalW, resultD);
+		return resultD;
+	}
+
+	public Matrix3f calculateWToDTransformationMatrix() {
+		
 		float heading = this.getHeading();
 		float pitch = this.getPitch();
 		float roll = this.getRoll();
 		
-		Matrix4f rotationMatrix = new Matrix4f();
+//		Matrix4f rotationMatrix = new Matrix4f();
 		//!!!!!!!!!!!!!!!!!!!matrices worden getransponeerd tov de normale conventie opgeslagen!!!!!!!!!!
 		
 		// de afzonderlijke rotatiematrices opstellen
-//		Matrix3f headingTransform = new Matrix3f();
-//		headingTransform.m00 = (float) Math.cos(heading); 
-//		headingTransform.m02 = (float) Math.sin(heading); 
-//		headingTransform.m20 = (float) - Math.sin(heading); 
-//		headingTransform.m22 = (float) Math.cos(heading); 
-//		
-//		Matrix3f pitchTransform = new Matrix3f();
-//		pitchTransform.m11 = (float) Math.cos(pitch);
-//		pitchTransform.m12 = (float) - Math.sin(pitch);
-//		pitchTransform.m21 = (float) Math.sin(pitch);
-//		pitchTransform.m22 = (float) Math.cos(pitch);
-//		
-//		Matrix3f rollTransform = new Matrix3f();
-//		rollTransform.m00 = (float) Math.cos(roll);
-//		rollTransform.m01 = (float) - Math.sin(roll);
-//		rollTransform.m10 = (float) Math.sin(roll);
-//		rollTransform.m11 = (float) Math.cos(roll);
-//		
-//		//het product berekenen om de totale transformatie te bepalen
-//		Matrix3f transformationMatrix = new Matrix3f();
-//		Matrix3f temp = new Matrix3f();
-//		Matrix3f.mul(pitchTransform, rollTransform, temp);
-//		Matrix3f.mul(headingTransform, temp, transformationMatrix);
-//		
-		return result;
+		Matrix3f headingTransform = new Matrix3f();
+		headingTransform.m00 = (float) Math.cos(heading); 
+		headingTransform.m20 = (float) Math.sin(heading); 
+		headingTransform.m02 = (float) - Math.sin(heading); 
+		headingTransform.m22 = (float) Math.cos(heading); 
+		
+		Matrix3f pitchTransform = new Matrix3f();
+		pitchTransform.m11 = (float) Math.cos(pitch);
+		pitchTransform.m21 = (float) - Math.sin(pitch);
+		pitchTransform.m12 = (float) Math.sin(pitch);
+		pitchTransform.m22 = (float) Math.cos(pitch);
+		
+		Matrix3f rollTransform = new Matrix3f();
+		rollTransform.m00 = (float) Math.cos(roll);
+		rollTransform.m10 = (float) - Math.sin(roll);
+		rollTransform.m01 = (float) Math.sin(roll);
+		rollTransform.m11 = (float) Math.cos(roll);
+		
+		//het product berekenen om de totale transformatie te bepalen
+		Matrix3f transformationMatrix = new Matrix3f();
+		Matrix3f temp = new Matrix3f();
+		Matrix3f.mul(pitchTransform, rollTransform, temp);
+		Matrix3f.mul(headingTransform, temp, transformationMatrix);
+		
+		return transformationMatrix;
+	}
+
+	private float getRoll() {
+		//  /** atan2(R . U0, R . R0), where R is the drone's right direction ((1, 0, 0) in drone coordinates), R0 = H x (0, 1, 0), and U0 = R0 x F. */
+	    // float roll;
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	private float getPitch() {
+		// TODO Auto-generated method stub
+		// /** atan2(F . (0, 1, 0), F . H), where F is the drone's forward vector and H is the drone's heading vector. */
+	    // float pitch;
+		return 0;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	private float getHeading() {
+		///** atan2(H . (-1, 0, 0), H . (0, 0, -1)), where H is the drone's heading vector (which we define as H0/||H0|| where H0 is the drone's forward vector ((0, 0, -1) in drone coordinates) projected onto the world XZ plane. */
+	    //float heading;
+		 
+		// TODO Auto-generated method stub
+		return 0;
 	}
 	
 	
