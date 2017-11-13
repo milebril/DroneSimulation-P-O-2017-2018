@@ -447,8 +447,6 @@ public class ImageProcessor {
 		
 		public Vector3f getCoordinatesOfCube() {
 			
-			
-			
 			// byteArray --> Mat object
 			Mat rgbMat = byteArrayToRGBMat(getImageWidth(), getImageHeight(), getImage());
 			
@@ -462,7 +460,12 @@ public class ImageProcessor {
 			
 			
 			// Get center of mass (of the 2D red cube)
-			int[] centerOfMass = getFilterCenterOfMass(filterMat);
+			double[] centerOfMass = getType0CenterOfMass(filterMat);
+			
+			if (centerOfMass == null) {
+				System.out.println("hier");
+				return new Vector3f(0,0,0);
+			}
 			
 			
 			// Get red area in image
@@ -500,18 +503,51 @@ public class ImageProcessor {
 			}
 			
 
-			return Vector3f(imaginaryCube.getPosition()[0],imaginaryCube.getPosition()[1],imaginaryCube.getPosition()[2]);
-		}
-
-
-		private Vector3f Vector3f(double d, double e, double g) {
-			return Vector3f(d,e,g);
+			return new Vector3f((float) (imaginaryCube.getPosition()[0]), 
+					(float) (imaginaryCube.getPosition()[1]) , 
+					(float) (imaginaryCube.getPosition()[2]));
 		}
 		
+		/**
+		 * Returns the center of mass of the given type 0 Mat object
+		 * @throws IllegalArgumentException if the type of the mat is not 0
+		 * @throws IllegalArgumentException if the total sum of x or y coordinates overflows.
+		 */
+		public static double[] getType0CenterOfMass(Mat mat) {
+			// check wether the Mat type is 0
+			if (mat.type() != 0) throw new IllegalArgumentException("given mat must be of type 0!");
+			// variables to store the total x and y coordinates
+			long xCoord = 0; long yCoord= 0; int amount = 0;
+			// iterate over every x,y coordinate and add the coordinates if their value equals 255
+			int x; int y;
+			for (x = 0; x < mat.width(); x++) {
+				for (y = 0; y < mat.height(); y++) {
+					if (mat.get(y, x)[0] == 255) {
+						if (Long.MAX_VALUE - xCoord < x || Long.MAX_VALUE - yCoord < y)
+							throw new IllegalArgumentException("total sum of x or y coordinates overflows!");
+						xCoord += x; yCoord += y; amount++;
+					}
+				}
+			}
+			// calculate the coordinates
+			double[] coordinates = new double[2];
+			coordinates[0] = (int) Math.round(xCoord / (float) amount);
+			coordinates[0] = (coordinates[0] - 100.0) / 100.0;
+			coordinates[1] = (int) Math.round(yCoord / (float) amount);
+			coordinates[1] = (100.0 - coordinates[1]) / 100.0;
+			
+			if (coordinates[0] == -1 && coordinates[1] == 1) {
+				return null;
+			}
+			
+			return coordinates;
+		}
 		
-	
-	
-		
+
+
+//		private Vector3f Vector3f(double d, double e, double g) {
+//			return Vector3f(d,e,g);
+//		}
 	}
 	
 

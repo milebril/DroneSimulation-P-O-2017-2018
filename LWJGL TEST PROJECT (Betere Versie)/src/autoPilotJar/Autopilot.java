@@ -33,7 +33,7 @@ public class Autopilot {
 	private float prevElapsedTime;
 	private float dt;
 	
-	private RedCubeLocator cubeLocator;
+	private ImageProcessor cubeLocator;
 	
 	/* Variables to send back to drone	 */
 	private float newThrust;
@@ -78,7 +78,7 @@ public class Autopilot {
 		
 		//Set Variables for this iteration
 		//cubeLocator = new ImageProcessor(this);
-		cubeLocator = new RedCubeLocator(inputAP.getImage());
+		cubeLocator = new ImageProcessor(this);
 		
 		currentPosition = new Vector3f(inputAP.getX(), inputAP.getY(), inputAP.getZ());
 		//TODO Heading?
@@ -87,7 +87,7 @@ public class Autopilot {
 		
 		makeData();
 		
-		
+		System.out.println("Cube: " + cubeLocator.getCoordinatesOfCube());
 		
 		//Save droneData we need in nextIteration
 		saveData();

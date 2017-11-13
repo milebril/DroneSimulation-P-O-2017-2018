@@ -30,7 +30,7 @@ public class OpenCVTest {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
 		
-		process("image-13", (float) Math.PI/5, (float) Math.PI/3, (float) Math.PI/8);
+		process("image", (float) Math.PI/5, (float) Math.PI/3, (float) Math.PI/8);
 		
 		
 		

@@ -152,8 +152,8 @@ public class MainGameLoop {
 				drone.getCamera().takeSnapshot();
 			}
 			
-			GL11.glViewport(200+1, 0, Display.getWidth() - 699, Display.getHeight());
-			GL11.glScissor(200+1, 0, Display.getWidth() - 699, Display.getHeight());
+			GL11.glViewport(200+1, 0, Display.getWidth() - 700, Display.getHeight());
+			GL11.glScissor(200+1, 0, Display.getWidth() - 700, Display.getHeight());
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			rendererFreeCam.prepare();
 			shaderFreeCam.start();
@@ -166,8 +166,8 @@ public class MainGameLoop {
 			rendererFreeCam.render(e, shaderFreeCam);
 			rendererFreeCam.render(drone, shaderFreeCam);
 			
-			GL11.glViewport(Display.getWidth() - 499, Display.getHeight()/2 + 1 ,500 , Display.getHeight()/2);
-			GL11.glScissor(Display.getWidth() - 499, Display.getHeight()/2  + 1,500 , Display.getHeight()/2);
+			GL11.glViewport(Display.getWidth() - 498, Display.getHeight()/2 + 1 ,499 , Display.getHeight()/2);
+			GL11.glScissor(Display.getWidth() - 498, Display.getHeight()/2  + 1, 499 , Display.getHeight()/2);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			renderTopDown.prepare();
 			shaderTopDown.start();
@@ -180,8 +180,8 @@ public class MainGameLoop {
 			renderTopDown.render(e, shaderTopDown);
 			renderTopDown.render(drone, shaderTopDown);
 			
-			GL11.glViewport(Display.getWidth() - 499, 0 ,500 , Display.getHeight()/2);
-			GL11.glScissor(Display.getWidth() - 499, 0 ,500 , Display.getHeight()/2);
+			GL11.glViewport(Display.getWidth() - 498, 0 ,500 , Display.getHeight()/2);
+			GL11.glScissor(Display.getWidth() - 498, 0 ,500 , Display.getHeight()/2);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			renderSideView.prepareText();
 			shaderSideView.start();
@@ -218,12 +218,11 @@ public class MainGameLoop {
 			if(!( Math.abs(Math.sqrt(Math.pow(drone.getPosition().x - e.getPosition().x, 2) +
 					Math.pow(drone.getPosition().y - e.getPosition().y, 2) +
 					Math.pow(drone.getPosition().z - e.getPosition().z, 2))) < 4)) {
-				//drone.increasePosition(dt);
-				System.out.println("Position " + drone.getPosition());
+				drone.increasePosition(dt);
 				drone.sendToAutopilot();
 				ap.communicateWithDrone();
 				drone.getFromAutopilot();
-				//drone.applyForces(dt);
+				drone.applyForces(dt);
 			}
 			
 			
