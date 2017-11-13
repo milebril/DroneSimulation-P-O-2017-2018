@@ -202,7 +202,8 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		float dz = dt * this.getSpeedVector().z;
 		
 		super.increasePosition(dx, dy, dz);
-
+		System.out.println("inclination: " + this.getLeftWing().getInclination());
+		System.out.println("speed: " + this.getSpeed());
 		this.getCamera().increasePosition(dx, dy, dz);
 		this.getCamera().increaseRotation(this.getHeadingVector());
 		super.setRotation(0, -this.getCamera().getPitch(), 0);
@@ -261,7 +262,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		
 		applyEngineForce(dt);		
 		applyLiftForces(dt);
-		applyTorqueForces(dt);
+		//applyTorqueForces(dt);
 		
 		/*
 		if (!flying) {
@@ -362,9 +363,9 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 //		horStab.scale(1/getDroneMass() * dt);
 //		this.getSpeedChangeVector().y += horStab.y;
 		
-		Vector3f verStab= calculateVerStabLift();
-		verStab.scale(1/getDroneMass() * dt);
-		Vector3f.add(verStab, this.speedChangeVector, this.speedChangeVector);
+//		Vector3f verStab= calculateVerStabLift();
+//		verStab.scale(1/getDroneMass() * dt);
+//		Vector3f.add(verStab, this.speedChangeVector, this.speedChangeVector);
 	}
 	
 	private void applyTorqueForces(float dt) {

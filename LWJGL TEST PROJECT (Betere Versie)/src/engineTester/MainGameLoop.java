@@ -112,7 +112,7 @@ public class MainGameLoop {
 		RawModel model = loader.loadToVAO(c.positions, c.colors, null);
 
 		Entity e = new Entity(model, 
-				new Vector3f(0,3,-10),0, 0, 0, 1);
+				new Vector3f(0,3,-400),0, 0, 0, 1);
 		//e.setRotation((float) (0.3f*Math.PI), (float) (0.2f*Math.PI),(float) (0.4f*Math.PI));
 		
 		Cuboid droneCube = new Cuboid(0, 0, 0);

@@ -463,7 +463,6 @@ public class ImageProcessor {
 			double[] centerOfMass = getType0CenterOfMass(filterMat);
 			
 			if (centerOfMass == null) {
-				System.out.println("hier");
 				return new Vector3f(0,0,0);
 			}
 			

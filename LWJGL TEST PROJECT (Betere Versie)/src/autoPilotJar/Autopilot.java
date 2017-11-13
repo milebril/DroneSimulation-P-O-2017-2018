@@ -23,6 +23,8 @@ public class Autopilot {
 	private Vector3f currentPosition;
 	private Vector3f prevPosition;
 	
+	private Vector3f oldSpeed;
+	
 	//Aanpassen als we naar nieuwe cubus moeten gaan
 	private Vector3f stablePosition;
 	private Vector3f cubePos = new Vector3f(0,3,-10);
@@ -34,6 +36,7 @@ public class Autopilot {
 	private float dt;
 	
 	private ImageProcessor cubeLocator;
+	private PIController piController;
 	
 	/* Variables to send back to drone	 */
 	private float newThrust;
@@ -55,7 +58,10 @@ public class Autopilot {
 		currentPosition = new Vector3f(0,0,0);
 		prevPosition = new Vector3f(0,0,0);
 		
-		//Initialiwe AP with configfile
+		//Initialize PIController
+		piController = new PIController();
+		
+		//Initialize AP with configfile
 		initialize();
 		
 		stablePosition = new Vector3f(0, 0, 0);
@@ -86,8 +92,24 @@ public class Autopilot {
 		dt = elapsedTime - prevElapsedTime;
 		
 		makeData();
+//		
+//		System.out.println("Cube: " + cubeLocator.getCoordinatesOfCube());
+//		if (cubeLocator.getCoordinatesOfCube().y > currentPosition.y) {
+//			newLeftWingInclination += 0.1f;
+//			newRightWingInclination += 0.1f;
+//		} else {
+//			newLeftWingInclination -= 0.1f;
+//			newRightWingInclination += 0.1f;
+//		}
 		
-		System.out.println("Cube: " + cubeLocator.getCoordinatesOfCube());
+		float[] newHorizontalInclinations = piController.calculateHorizontalFactor(calculateLeftWingLift().y, 
+				calculateRightWingLift().y,10,currentPosition.y, calculateGravity());
+		
+		//float[] newHorizontalInclinations = piController.calculateHorizontalFactor(5, currentPosition.y);
+		//System.out.println(newHorizontalInclinations[0] + "," + newHorizontalInclinations[1]);
+		
+		newLeftWingInclination += newHorizontalInclinations[0];
+		newRightWingInclination += newHorizontalInclinations[1];
 		
 		//Save droneData we need in nextIteration
 		saveData();
@@ -100,20 +122,18 @@ public class Autopilot {
 		newHorStabInclination = 0;
 		newVerStabInclination = 0;
 		newThrust = 0;
-		Vector3f difference = calculateDiffVector();
-			
-		
-		
+		//Vector3f difference = calculateDiffVector();
 		
 		//TODO ctrl c + ctrl v fysica voor setThrust = vertraging
 	}
 	
-	private Vector3f calculateDiffVector(){
-		Vector3f diff = new Vector3f(0,0,0);
-		Vector3f speedVector = new Vector3f(0.0f,0.0f,0.0f);
-		Vector3f.sub(currentPosition, prevPosition, speedVector);
-		//TODO Vector3f.sub(cubeLocator.makeVector(), speedVector, diff);
-		return diff;
+	private Vector3f calculateSpeedVector(){
+		//Vector3f diff = new Vector3f(0,0,0);
+		Vector3f posChange = new Vector3f(0.0f,0.0f,0.0f);
+		Vector3f.sub(currentPosition, prevPosition, posChange);
+		if (dt != 0)
+			posChange.scale(1/this.dt);
+		return posChange;
 	}
 	
 	private void getFromDrone() {
@@ -174,26 +194,6 @@ public class Autopilot {
 	public AutopilotInputs getInput() {
 		return this.inputAP;
 	}
-
-	private Vector3f calculateProportionalError() {
-		float dx, dy, dz = 0;
-		
-		Vector3f maxError = new Vector3f(0,0,0);
-		Vector3f currentError = new Vector3f(0,0,0);
-		Vector3f.sub(cubePos, stablePosition, maxError);
-		Vector3f.sub(cubePos, currentPosition, currentError);
-		
-		if (maxError.x == 0 || maxError.y == 0) {
-			dx = currentError.x / maxError.x;
-			dy = currentError.y / maxError.y;
-		} else {
-			dx = currentError.x;
-			dy = currentError.y;
-		}
-		
-		return new Vector3f(dx, dy, dz);
-		
-	}
 	
 	/* TODO
 	private float getDroneMass(){
@@ -203,4 +203,38 @@ public class Autopilot {
 	private float getSpeed(){ 
 		return (float) Math.sqrt(Math.pow((getX()-getOldX()), 2) + Math.pow((getY()-getOldY()), 2) + Math.pow((getZ()-getOldZ()), 2)) / this.getDt(); 
 	}*/
+	
+	//Calculates left wing liftforce
+	private Vector3f calculateLeftWingLift(){
+		Vector3f normal = new Vector3f(0,0,0);
+		Vector3f attackVector = new Vector3f(0,(float)Math.sin(newLeftWingInclination), (float) -Math.cos(newLeftWingInclination));
+		Vector3f.cross(new Vector3f(1,0,0), attackVector, normal); // normal = rotationAxis x attackVector
+		float liftSlope = configAP.getWingLiftSlope();
+		float AoA = (float) - Math.atan2(Vector3f.dot(calculateSpeedVector(),normal), Vector3f.dot(calculateSpeedVector(),attackVector));
+		float speed = (float) Math.pow(calculateSpeedVector().length(), 2);
+		Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*speed),
+									   (float)(normal.y*liftSlope*AoA*speed),
+									   (float)(normal.z*liftSlope*AoA*speed));
+		return result;
+	}
+	
+	//Calculates right wing liftforce
+	private Vector3f calculateRightWingLift(){
+		Vector3f normal = new Vector3f(0,0,0);
+		Vector3f attackVector = new Vector3f(0,(float)Math.sin(newRightWingInclination), (float) -Math.cos(newRightWingInclination));
+		Vector3f.cross(new Vector3f(1,0,0), attackVector, normal); // normal = rotationAxis x attackVector
+		float liftSlope = configAP.getWingLiftSlope();
+		float AoA = (float) - Math.atan2(Vector3f.dot(calculateSpeedVector(),normal), Vector3f.dot(calculateSpeedVector(),attackVector)); 
+		float speed = (float) Math.pow(calculateSpeedVector().length(), 2);
+		Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*speed),
+									   (float)(normal.y*liftSlope*AoA*speed),
+									   (float)(normal.z*liftSlope*AoA*speed));
+		return result;
+	}
+	
+	private float calculateGravity() {
+		float totalMass = configAP.getEngineMass() + configAP.getTailMass() + configAP.getWingMass() * 2;
+		return totalMass * configAP.getGravity();
+	}
+	
 }
