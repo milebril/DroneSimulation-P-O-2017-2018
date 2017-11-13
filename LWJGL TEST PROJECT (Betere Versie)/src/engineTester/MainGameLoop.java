@@ -112,7 +112,8 @@ public class MainGameLoop {
 		RawModel model = loader.loadToVAO(c.positions, c.colors, null);
 
 		Entity e = new Entity(model, 
-				new Vector3f(0,0,-10),0, 0, 0, 1);
+				new Vector3f(0,3,-10),0, 0, 0, 1);
+		//e.setRotation((float) (0.3f*Math.PI), (float) (0.2f*Math.PI),(float) (0.4f*Math.PI));
 		
 		Cuboid droneCube = new Cuboid(0, 0, 0);
 		drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
@@ -133,16 +134,17 @@ public class MainGameLoop {
 		sideViewCamera.setRotation(0, (float) -(Math.PI / 2), 0);
 		
 		while(!Display.isCloseRequested()){
-			GL11.glViewport(0, 0, 200-1, 200);
-			GL11.glScissor(0,0,200-1,200);
+			//Camera
+			GL11.glViewport(0, 0, 200, 200);
+			GL11.glScissor(0,0,200,200);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			renderer.prepare();
 			shader.start();
 			shader.loadViewMatrix(drone.getCamera());
 			
-			for (Entity entity : entities) {
-				rendererFreeCam.render(entity,shaderFreeCam);
-			} 
+//			for (Entity entity : entities) {
+//				rendererFreeCam.render(entity,shaderFreeCam);
+//			} 
 			renderer.render(e, shader);
 			renderer.render(drone, shader);
 			
@@ -150,8 +152,8 @@ public class MainGameLoop {
 				drone.getCamera().takeSnapshot();
 			}
 			
-			GL11.glViewport(200, 0, Display.getWidth() - 700, Display.getHeight());
-			GL11.glScissor(200, 0, Display.getWidth() - 700, Display.getHeight());
+			GL11.glViewport(200+1, 0, Display.getWidth() - 699, Display.getHeight());
+			GL11.glScissor(200+1, 0, Display.getWidth() - 699, Display.getHeight());
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			rendererFreeCam.prepare();
 			shaderFreeCam.start();

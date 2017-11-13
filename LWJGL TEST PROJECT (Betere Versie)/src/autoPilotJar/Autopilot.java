@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import org.lwjgl.opengl.AMDBlendMinmaxFactor;
 import org.lwjgl.util.vector.Vector3f;
 
 import autopilot.AutopilotConfig;
@@ -22,13 +23,17 @@ public class Autopilot {
 	private Vector3f currentPosition;
 	private Vector3f prevPosition;
 	
+	//Aanpassen als we naar nieuwe cubus moeten gaan
+	private Vector3f stablePosition;
+	private Vector3f cubePos = new Vector3f(0,3,-10);
+	
 	//TODO ook heading bijhouden?.	
 	
 	private float elapsedTime;
 	private float prevElapsedTime;
 	private float dt;
 	
-	private ImageProcessor cubeLocator;
+	private RedCubeLocator cubeLocator;
 	
 	/* Variables to send back to drone	 */
 	private float newThrust;
@@ -52,6 +57,8 @@ public class Autopilot {
 		
 		//Initialiwe AP with configfile
 		initialize();
+		
+		stablePosition = new Vector3f(0, 0, 0);
 	}
 	
 	private void initialize() {
@@ -70,16 +77,17 @@ public class Autopilot {
 		getFromDrone();
 		
 		//Set Variables for this iteration
-		cubeLocator = new ImageProcessor(this);
+		//cubeLocator = new ImageProcessor(this);
+		cubeLocator = new RedCubeLocator(inputAP.getImage());
+		
 		currentPosition = new Vector3f(inputAP.getX(), inputAP.getY(), inputAP.getZ());
 		//TODO Heading?
 		elapsedTime = inputAP.getElapsedTime();
 		dt = elapsedTime - prevElapsedTime;
 		
-		System.out.println(cubeLocator.getNormalized2DCenterOfMassCoordinates()[0] * 100);
-		System.out.println(cubeLocator.getPixelsPerMeter());
-		
 		makeData();
+		
+		
 		
 		//Save droneData we need in nextIteration
 		saveData();
@@ -93,16 +101,8 @@ public class Autopilot {
 		newVerStabInclination = 0;
 		newThrust = 0;
 		Vector3f difference = calculateDiffVector();
+			
 		
-		if(difference.getY() > 0.3f){
-			newLeftWingInclination = newLeftWingInclination - 0.1f;
-			newRightWingInclination = newRightWingInclination - 0.1f;
-		}
-		else if(difference.getY() < -0.3f){
-			newLeftWingInclination = newLeftWingInclination + 0.1f;
-			newRightWingInclination = newRightWingInclination + 0.1f;
-		}
-		//System.out.println("Inclination LeftWing :" + newLeftWingInclination);
 		
 		
 		//TODO ctrl c + ctrl v fysica voor setThrust = vertraging
@@ -113,7 +113,6 @@ public class Autopilot {
 		Vector3f speedVector = new Vector3f(0.0f,0.0f,0.0f);
 		Vector3f.sub(currentPosition, prevPosition, speedVector);
 		//TODO Vector3f.sub(cubeLocator.makeVector(), speedVector, diff);
-		//System.out.println("Diff " + diff);
 		return diff;
 	}
 	
@@ -176,6 +175,26 @@ public class Autopilot {
 		return this.inputAP;
 	}
 
+	private Vector3f calculateProportionalError() {
+		float dx, dy, dz = 0;
+		
+		Vector3f maxError = new Vector3f(0,0,0);
+		Vector3f currentError = new Vector3f(0,0,0);
+		Vector3f.sub(cubePos, stablePosition, maxError);
+		Vector3f.sub(cubePos, currentPosition, currentError);
+		
+		if (maxError.x == 0 || maxError.y == 0) {
+			dx = currentError.x / maxError.x;
+			dy = currentError.y / maxError.y;
+		} else {
+			dx = currentError.x;
+			dy = currentError.y;
+		}
+		
+		return new Vector3f(dx, dy, dz);
+		
+	}
+	
 	/* TODO
 	private float getDroneMass(){
 		return configAP.getEngineMass()+ configAP.getTailMass() + 2* configAP.getWingMass();

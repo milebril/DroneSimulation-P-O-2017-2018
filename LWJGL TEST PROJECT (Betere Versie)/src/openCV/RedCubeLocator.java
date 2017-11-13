@@ -176,7 +176,7 @@ public class RedCubeLocator {
 		//this.yCoordInImage = -1 * ((centerOfMass[1] + 1) / (0.5 * getImageHeight()) - 1);
 		
 
-		System.out.println(getCoordinatesOfCube());
+		//System.out.println(getCoordinatesOfCube());
 		//W = 10*2 / (Math.cos(hoek/2) / Math.sin(hoek/2));
 //		System.out.println(W);
 //		System.out.println(200 / pixelsPerMeter);

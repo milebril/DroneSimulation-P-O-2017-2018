@@ -221,7 +221,6 @@ public class ImageProcessor {
 				}
 			}
 		}
-		System.out.println();
 		// if the amount is 0, the filter contains no nonzero values
 		if (amount == 0) return null;
 		
