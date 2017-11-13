@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.lang.Math;
 
 import org.lwjgl.util.vector.Matrix3f;
+import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
 import autoPilotJar.AutopilotInputs;
@@ -574,18 +575,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		this.getRightWing().setInclination(settings.getRightWingInclination());		
 		this.getHorizStabilizer().setInclination(settings.getHorStabInclination());
 		this.getVertStabilizer().setInclination(settings.getVerStabInclination());
-	}
-	
-
-	
-	
-	
-	
-	
-
-	
-	
-	
+	}	
 	
 	
 	/**
@@ -601,8 +591,40 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	 * Transforms the given vector from the world frame to the drone frame.
 	 */
 	public Vector3f transformToDroneFrame(Vector3f originalW){
-		//TODO
-		return null;
+		//TODO zie ook sendToautopilot
+		float heading = this.getHeading();
+		float pitch = this.getPitch();
+		float roll = this.getRoll();
+		
+		Matrix4f rotationMatrix = new Matrix4f();
+		//!!!!!!!!!!!!!!!!!!!matrices worden getransponeerd tov de normale conventie opgeslagen!!!!!!!!!!
+		
+		// de afzonderlijke rotatiematrices opstellen
+//		Matrix3f headingTransform = new Matrix3f();
+//		headingTransform.m00 = (float) Math.cos(heading); 
+//		headingTransform.m02 = (float) Math.sin(heading); 
+//		headingTransform.m20 = (float) - Math.sin(heading); 
+//		headingTransform.m22 = (float) Math.cos(heading); 
+//		
+//		Matrix3f pitchTransform = new Matrix3f();
+//		pitchTransform.m11 = (float) Math.cos(pitch);
+//		pitchTransform.m12 = (float) - Math.sin(pitch);
+//		pitchTransform.m21 = (float) Math.sin(pitch);
+//		pitchTransform.m22 = (float) Math.cos(pitch);
+//		
+//		Matrix3f rollTransform = new Matrix3f();
+//		rollTransform.m00 = (float) Math.cos(roll);
+//		rollTransform.m01 = (float) - Math.sin(roll);
+//		rollTransform.m10 = (float) Math.sin(roll);
+//		rollTransform.m11 = (float) Math.cos(roll);
+//		
+//		//het product berekenen om de totale transformatie te bepalen
+//		Matrix3f transformationMatrix = new Matrix3f();
+//		Matrix3f temp = new Matrix3f();
+//		Matrix3f.mul(pitchTransform, rollTransform, temp);
+//		Matrix3f.mul(headingTransform, temp, transformationMatrix);
+//		
+		return result;
 	}
 	
 	
