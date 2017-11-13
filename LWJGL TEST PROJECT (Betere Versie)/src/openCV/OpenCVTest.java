@@ -25,39 +25,12 @@ import org.opencv.objdetect.CascadeClassifier;
 public class OpenCVTest {
 	
 	public static void main(String[] args) {
+		
 		// load library
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
-		// file locations
-		String imageMap = "res/";
-		String fileLocation = imageMap + "image-3.png";
 		
-		
-		
-		// attempt to load image, return if failed
-		BufferedImage image = null;
-		try {
-			image = ImageIO.read(new File(fileLocation));
-		} catch (IOException e) {
-			e.printStackTrace();
-			return;
-		}
-		
-		
-		
-		// bufferedImage --> byteArray --> rgbMat
-		byte[] byteArray = bufferedImageToByteArray(image);
-		Mat rgbMat = byteArrayToRGBMat(image.getWidth(), image.getHeight(), byteArray);
-		
-		
-		// create RedCubeLocator
-		RedCubeLocator redCubeLocator = new RedCubeLocator(byteArray);
-		
-
-		
-		
-		//process("imageA");
-		//process("imageB");
+		process("image-13", (float) Math.PI/5, (float) Math.PI/3, (float) Math.PI/8);
 		
 		
 		
@@ -92,15 +65,11 @@ public class OpenCVTest {
     }
 	
 	
-	private static void process(String imageName) {
-		
-		
-		
-		
+	private static void process(String imageName, float heading, float pitch, float roll) {
+		long startTime = System.nanoTime();
 		// file locations
-		String imageMap = "res/images/";
+		String imageMap = "res/";
 		String fileLocation = imageMap + imageName + ".png";
-		
 		
 		
 		// attempt to load image, return if failed
@@ -113,67 +82,68 @@ public class OpenCVTest {
 		}
 		
 		
-		
 		// bufferedImage --> byteArray
 		byte[] byteArray = bufferedImageToByteArray(image);
-		
 		
 		
 		// byteArra --> Mat object
 		Mat rgbMat = byteArrayToRGBMat(image.getWidth(), image.getHeight(), byteArray);
 		
 		
-		
 		// Filter RGB Mat for 6 different red Hue's
 		Mat[] matArray = redRGBMatFilter(rgbMat);
 		
 		
-		
 		// Combine the 6 filtered Mats
 		Mat filterMat = combineMatArray(matArray);
-		Imgcodecs.imwrite(imageMap + imageName + " 0 - filter.png", filterMat);
+		
+		
+		// Get center of mass (of the 2D red cube)
+		double[] centerOfMass = getType0CenterOfMass(filterMat);
+		
+		
+		// Get red area in image
+		int redArea = Core.countNonZero(filterMat);
+		
+		
+		// Get red area percentage
+		double percentage = redArea / ((float) image.getHeight()*image.getWidth());
 		
 		
 		
-		// Get center of mass
-		int[] centerOfMass = getType0CenterOfMass(filterMat);
+		// create imaginary cube
+		ImaginaryCube imaginaryCube = new ImaginaryCube(Math.PI/5, Math.PI/3, Math.PI/8);
+		
+		double[] imCenterOfMass; double deltaX=10; double deltaY=10;
+		double imPercentage; double ratio = 10;
+		int iterations = 0;
 		
 		
+		while (deltaX > 0.005 || deltaY > 0.005 || ratio > 1.025 || ratio < 0.975) {
+			iterations++;
+			
+			// get difference between the centers of mass
+			imCenterOfMass = imaginaryCube.getProjectedAreaCenterOfMass((float) (120.0 / 180 * Math.PI), (float) (120.0 / 180 * Math.PI));
+			deltaX =  (centerOfMass[0] - imCenterOfMass[0]);
+			deltaY =  (centerOfMass[1] - imCenterOfMass[1]);
+			
+			imaginaryCube.translate(deltaX * 3, deltaY * 3, 0);
+			
+			// get the ration between the projected areas
+			imPercentage = imaginaryCube.getProjectedAreaPercentage((float) (120.0 / 180 * Math.PI), (float) (120.0 / 180 * Math.PI));
+			ratio = imPercentage / percentage;
+			
+			imaginaryCube.translate(0, 0, (1 - ratio)*0.1);
+			
+			//imaginaryCube.saveAsImage("result " + String.valueOf(iterations * 2 - 1), rgbMat);
+		}
 		
-		// Filter background from RGB Mat
-		Mat filteredrgbMat = applyFilterMat(rgbMat, filterMat);
-		Imgcodecs.imwrite(imageMap + imageName + " 1 - filtered.png", filteredrgbMat);
+		long duration = (System.nanoTime() - startTime) / 1000000;
 		
-		
-		
-		// RGB Mat to blurred grayscale Mat
-		Mat blurredGrayMat = rgbToBlurredGrayScaleMat(filteredrgbMat);
-		Imgcodecs.imwrite(imageMap + imageName + " 2 - blurred grayscale.png", blurredGrayMat);
-		
-		
-		
-		// Get corner contours of the blurred grayscale Mat
-		List<int[]> corners = getCornerList(blurredGrayMat);
-		
-		
-		
-		// Mark corners on image
-		Mat rgbCornerMat = addPointsToMat(rgbMat, corners);
-		Imgcodecs.imwrite(imageMap + imageName + " 3 - corners.png", rgbCornerMat);
-		
-		
-		
-		// Print data
 		System.out.println("~ ~ " + imageName + " ~ ~");
-		System.out.println("dimensions: " + String.valueOf(image.getWidth()) + "x"
-								+ String.valueOf(image.getHeight()) + " (= " 
-								+ String.valueOf(image.getHeight()*image.getWidth()) + " pixels)");
-		System.out.println("Red area: " + String.valueOf(Core.countNonZero(filterMat)) + " pixels");
-		System.out.println("Center of mass: (" + String.valueOf(centerOfMass[0]) 
-											+ "," + String.valueOf(centerOfMass[1]) + ")");
-		System.out.println();
-		
-		
+		System.out.println("Algorithm ended in " + String.valueOf(iterations) + " iterations (" + String.valueOf(duration) + "ms)");
+		System.out.println("estimated location: (" + String.valueOf(imaginaryCube.getPosition()[0]) + ", " + String.valueOf(imaginaryCube.getPosition()[1]) + ", " + String.valueOf(imaginaryCube.getPosition()[2]) + ")");
+		System.out.println("estimated distance: " + String.valueOf(imaginaryCube.getDistance()));
 	}
 	
 	
@@ -315,7 +285,7 @@ public class OpenCVTest {
 	 * @throws IllegalArgumentException if the type of the mat is not 0
 	 * @throws IllegalArgumentException if the total sum of x or y coordinates overflows.
 	 */
-	public static int[] getType0CenterOfMass(Mat mat) {
+	public static double[] getType0CenterOfMass(Mat mat) {
 		// check wether the Mat type is 0
 		if (mat.type() != 0) throw new IllegalArgumentException("given mat must be of type 0!");
 		// variables to store the total x and y coordinates
@@ -332,12 +302,15 @@ public class OpenCVTest {
 			}
 		}
 		// calculate the coordinates
-		int[] coordinates = new int[2];
+		double[] coordinates = new double[2];
 		coordinates[0] = (int) Math.round(xCoord / (float) amount);
+		coordinates[0] = (coordinates[0] - 100.0) / 100.0;
 		coordinates[1] = (int) Math.round(yCoord / (float) amount);
+		coordinates[1] = (100.0 - coordinates[1]) / 100.0;
 		
 		return coordinates;
 	}
+	
 	
 	/**
 	 * Returns a Mat object on which the given filter is applied.

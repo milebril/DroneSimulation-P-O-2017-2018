@@ -1,5 +1,6 @@
 package openCV;
 import java.util.ArrayList;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -12,13 +13,14 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.lwjgl.util.vector.Vector3f;
 
 public class RedCubeLocator {
 	
 	private static final Mat Mat = null;
 	/**
 	 * Creates a RedCubeLocator object which processes the given image data to locate the red cubes
-	 * co�rdinates relative to the drone.
+	 * coordinates relative to the drone.
 	 * @param image
 	 * 		  a byte array of the image data (from the pinhole camera) in RGB format
 	 * @param nbColumns
@@ -114,35 +116,23 @@ public class RedCubeLocator {
 		return coords;
 	}
 	
-	public Vector3f makeVector() {
-		//dx = pixelsX/pixelspermeter
-		return new Vector3f(0, 0, -getDistance());
-	}
-	
-	private float getDistance() {
-		return (float) this.afstand;
-	}
-
-	private double afstand;
-	
-	
-	
-	/** Processes the data of this object. */
-	private void process() throws IllegalArgumentException {
-		
+	/** 
+	 * Returns the co�rdinates of the center of mass of the cube in the given image 
+	 * The origin of the coordinate is in the top left corner with the leftmost and topmost
+	 * pixel having co�rdinates (0, 0) 
+	*/
+	public Vector3f getCoordinatesOfCube() {
 		// byteArra --> Mat object
 		Mat rgbMat = byteArrayToRGBMat(this.getImageWidth(), this.getImageHeight(), this.getImageByteArray());
-		
+				
 		// Filter RGB Mat for 6 different red Hue's
 		Mat[] matArray = redRGBMatFilter(rgbMat);
 		Mat totalFilter = combineMatArray(matArray);
-		
+				
 		// Get center of mass of the 6 filters
 		int[] centerOfMass = getType0CenterOfMass(combineMatArray(matArray));
 		this.xCoordInImage = (centerOfMass[0] + 1) / (0.5 * getImageWidth()) - 1; 
 		this.yCoordInImage = -1 * ((centerOfMass[1] + 1) / (0.5 * getImageHeight()) - 1);
-		System.out.println("xCoord: " + centerOfMass[0]);
-		
 		// Get 2D perspective size
 		int perspectiveSize = Core.countNonZero(totalFilter);
 		//System.out.println("perspective Size: " + String.valueOf(perspectiveSize));
@@ -154,19 +144,40 @@ public class RedCubeLocator {
 //		System.out.println("size: " + String.valueOf(size));
 		
 		// 2D pixels for 1 meter
-		double pixelsPerMeter = Math.sqrt(size);
-		System.out.println("pixels per meter: " + String.valueOf(pixelsPerMeter));
-		
+		float pixelsPerMeter = (float) Math.sqrt(size);
+		//System.out.println("pixels per meter: " + String.valueOf(pixelsPerMeter));
+		//System.out.println("center " + centerOfMass[0]);
+
 		double W = 200 / pixelsPerMeter;
 		double hoek = (120.0 / 180) * Math.PI;
 //		System.out.println("schermbreedte in meter: " + String.valueOf(W));
 		
-		//loodrecht
-		this.afstand = (W / 2) * (Math.cos(hoek/2) / Math.sin(hoek/2)) + 0.5;
+		double afstand = (W / 2) * (Math.cos(hoek/2) / Math.sin(hoek/2))+0.5;
+		return new Vector3f(centerOfMass[0]/pixelsPerMeter,centerOfMass[1]/pixelsPerMeter,(float) -afstand);
 		
+	}
+	
+	
+	
+	
+	/** Processes the data of this object. */
+	private void process() throws IllegalArgumentException {
 		
+		// byteArra --> Mat object
+		//Mat rgbMat = byteArrayToRGBMat(this.getImageWidth(), this.getImageHeight(), this.getImageByteArray());
 		
-		W = 10*2 / (Math.cos(hoek/2) / Math.sin(hoek/2));
+		// Filter RGB Mat for 6 different red Hue's
+		//Mat[] matArray = redRGBMatFilter(rgbMat);
+		//Mat totalFilter = combineMatArray(matArray);
+		
+		// Get center of mass of the 6 filters
+		//int[] centerOfMass = getType0CenterOfMass(combineMatArray(matArray));
+		//this.xCoordInImage = (centerOfMass[0] + 1) / (0.5 * getImageWidth()) - 1; 
+		//this.yCoordInImage = -1 * ((centerOfMass[1] + 1) / (0.5 * getImageHeight()) - 1);
+		
+
+		System.out.println(getCoordinatesOfCube());
+		//W = 10*2 / (Math.cos(hoek/2) / Math.sin(hoek/2));
 //		System.out.println(W);
 //		System.out.println(200 / pixelsPerMeter);
 		
@@ -337,8 +348,8 @@ public class RedCubeLocator {
 		coordinates[0] = (int) Math.round(xCoord / (float) amount);
 		coordinates[0] = coordinates[0] - s;
 		coordinates[1] = (int) Math.round(yCoord / (float) amount);
-		coordinates[1] = s - coordinates[1] ;
-		//System.out.println(coordinates[0] + " " +  coordinates[1]);
+		coordinates[1] = s - coordinates[1];
+		System.out.println(coordinates[0] + " " +  coordinates[1]);
 		return coordinates;
 	}
 	
