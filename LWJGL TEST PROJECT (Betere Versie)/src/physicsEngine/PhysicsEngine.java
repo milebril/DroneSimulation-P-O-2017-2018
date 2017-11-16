@@ -59,14 +59,27 @@ public class PhysicsEngine {
 			AirFoil currentAirFoil = drone.getAirFoils()[i];
 			
 			
-			// wind experienced by the airfoil
-			// !!! hier heb ik airspeed = wind - velocity gedaan ipv airspeed = velocity - wind !!!
-			//TODO rotatiesnelheid van het drone incalculeren bij airfoilsnelheid
-			Vector3f airSpeedW = new Vector3f();
-			Vector3f.sub(getWindVelocity(), drone.getLinearVelocity(), airSpeedW);
+			// calculate the airspeed the airfoil experiences
+			Vector3f airSpeedW = new Vector3f(0, 0, 0);
+			
+			// velocity of the airfoil caused by the drones rotation (omega x r = v)
+			Vector3f rotationalVelocityW = new Vector3f();
+			Vector3f.cross(drone.getAngularVelocity(), drone.transformToWorldFrame(currentAirFoil.getCenterOfMass()), rotationalVelocityW);
+			
+			// velocity of the airfoil caused by the drones linear velocity
+			Vector3f linearVelocityW = drone.getLinearVelocity();
+			
+			// wind velocity in the world
+			Vector3f windW = getWindVelocity();
+			
+			// airspeed = wind - airfoil velocity
+			Vector3f.sub(airSpeedW, rotationalVelocityW, airSpeedW);
+			Vector3f.sub(airSpeedW, linearVelocityW, airSpeedW);
+			Vector3f.add(airSpeedW, windW, airSpeedW);
 			
 			// transform the airSpeed vector to the drone frame
 			Vector3f airSpeedD = drone.transformToDroneFrame(airSpeedW);
+			
 			
 			// project airSpeedD on the surface, perpendicular to the rotationAxis of the AirFoil
 			Vector3f rotationAxisD = currentAirFoil.getRotAxis();
