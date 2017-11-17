@@ -75,8 +75,9 @@ public class Renderer {
 	}
 	
 	private void prepareInstance(Entity entity) {
-		Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(),
-				entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
+//		Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(),
+//				entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
+		Matrix4f transformationMatrix = entity.getPose();
 		shader.loadTransformationMatrix(transformationMatrix);
 	}
 
@@ -85,8 +86,9 @@ public class Renderer {
 		GL30.glBindVertexArray(rawModel.getVaoID());
 		GL20.glEnableVertexAttribArray(0);
 		GL20.glEnableVertexAttribArray(1);
-		Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(),
-				entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
+//		Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(),
+//				entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
+		Matrix4f transformationMatrix = entity.getPose();
 		shader.loadTransformationMatrix(transformationMatrix);
 		//GL13.glActiveTexture(GL13.GL_TEXTURE0);
 		//GL11.glBindTexture(GL11.GL_TEXTURE_2D, model.getTexture().getID());

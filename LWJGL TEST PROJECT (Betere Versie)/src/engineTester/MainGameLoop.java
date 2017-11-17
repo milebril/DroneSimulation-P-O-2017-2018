@@ -2,6 +2,7 @@ package engineTester;
 
 import models.RawModel;
 import models.TexturedModel;
+import physicsEngine.PhysicsEngine;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -17,6 +18,7 @@ import java.util.Random;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.opencv.core.Core;
@@ -48,6 +50,8 @@ public class MainGameLoop {
 	public static List<Renderer> renderers = new ArrayList<Renderer>();
 	
 	public static long elapsedTime = 0;
+	
+	//TODO main opruimen, code eruit halen
 	
 	public static void main(String[] args) throws IOException {
 		
@@ -102,7 +106,7 @@ public class MainGameLoop {
 			RawModel model = loader.loadToVAO(c.positions, c.colors, null);
 			//TexturedModel staticModel = new TexturedModel(model,new ModelTexture(loader.loadTexture("image")));
 			entities.add(new cubeTestPlayer(model, 
-					new Vector3f(r.nextFloat()*200-100,r.nextFloat()*200-100,r.nextFloat()*-1000),0, 0, 0, 1));
+					new Matrix4f().translate(new Vector3f(r.nextFloat()*200-100,r.nextFloat()*200-100,r.nextFloat()*-1000)),1));
 		}
 		
 		Cube c = new Cube(1, 0, 0);
@@ -113,12 +117,11 @@ public class MainGameLoop {
 		//Entity e = new Entity(model, 
 			//	new Vector3f(0,30,-50),0, 0, 0, 1);
 		
-		Entity e = new Entity(model, 
-				new Vector3f(-10,30,-50),0, 0, 0, 1);
+		Entity e = new Entity(model, new Matrix4f().translate(new Vector3f(-10,30,-50)) , 1);
 		
 		Cuboid droneCube = new Cuboid(0, 0, 0);
 		Drone drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
-				new Vector3f(0, 30, 0), 0, 0, 0, 1, autopilotConfig);
+				new Matrix4f().translate(new Vector3f(0, 30, 0)), 1, autopilotConfig);
 		AutoPilot ap = new AutoPilot();
 		
 		//kak
@@ -208,16 +211,19 @@ public class MainGameLoop {
 			if(!( Math.abs(Math.sqrt(Math.pow(drone.getPosition().x - e.getPosition().x, 2) +
 					Math.pow(drone.getPosition().y - e.getPosition().y, 2) +
 					Math.pow(drone.getPosition().z - e.getPosition().z, 2))) < 4)) {
-				drone.increasePosition(dt);
-				drone.sendToAutopilot(dt);
+				//applyphysics rekent de krachten uit en gaat dan de kinematische waarden van de drone
+				// aanpassen op basis daarvan 
+				PhysicsEngine.applyPhysics(drone, dt);
+//				drone.increasePosition(dt);
+				drone.sendToAutopilot();
 				ap.getFromDrone();
 				ap.sendToDrone();
 				drone.getFromAutopilot();
-				drone.applyForces(dt);
+//				drone.applyForces(dt);
 			}
 			
 			/* Drone Debug */
-			drone.moveHeadingVector();
+//			drone.moveHeadingVector();
 			
 			if (drone.getPosition().z < -1000) {
 				break;

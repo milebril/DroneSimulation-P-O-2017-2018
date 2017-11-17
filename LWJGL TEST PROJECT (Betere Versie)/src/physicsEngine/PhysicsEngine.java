@@ -197,7 +197,6 @@ public class PhysicsEngine {
 		Vector3f linearVelocityD = drone.transformToDroneFrame(drone.getLinearVelocity());
 		Vector3f.add(deltaLinearVelocityD, linearVelocityD, linearVelocityD);		
 		
-		// TODO: angular velocity
 		Vector3f deltaAngularVelocityD = (Vector3f) accelerations[1].scale(dt);
 		Vector3f angularVelocityD = drone.transformToDroneFrame(drone.getAngularVelocity());
 		Vector3f.add(deltaAngularVelocityD, angularVelocityD, angularVelocityD);
@@ -228,7 +227,6 @@ public class PhysicsEngine {
 //		Vector3f positionW = drone.getPosition();
 //		Vector3f.add(deltaPositionW, positionW, positionW);		
 		
-		// TODO: orientation
 		Vector3f prevAngularVelocityD = drone.transformToDroneFrame(drone.getAngularVelocity());
 		Vector3f newAngularVelocityD = newVelocities[1];
 		Vector3f avgAngularVelocityD = average(prevAngularVelocityD, newAngularVelocityD);

@@ -10,6 +10,7 @@ import java.lang.Math;
 import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
+import org.lwjgl.util.vector.Vector4f;
 
 import autoPilotJar.AutopilotInputs;
 import autoPilotJar.AutopilotInputsWriter;
@@ -23,6 +24,7 @@ import toolbox.ImageConverter;
 /**
  * Vectornames gevolgd door een D staan in het drone assenstelsel, gevolgd door een W staan in het wereld
  * uitgedrukt
+ * alle vectoren bestaan uit 3 elementen omdat het crossproduct voor 4 niet gedefinieerd is in de library
  * @author Jakob
  *
  */
@@ -541,6 +543,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	public void sendToAutopilot() throws IOException {
 		DataOutputStream s = new DataOutputStream(new FileOutputStream("res/APInputs.cfg"));
 		
+		//nieuwe klasse maken als de interpretatie van de generic interface autopilotsinput
 		AutopilotInputs value = new AutopilotInputs() {
 			public byte[] getImage() { return ImageConverter.bufferedImageToByteArray(camera.takeSnapshot());}
 			
@@ -548,9 +551,9 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 			public float getY() { return getPosition().y; }
 			public float getZ() { return getPosition().z; }
 			
-			public float getHeading() { return this.getHeading(); }
-			public float getPitch() { return this.getPitch(); }
-			public float getRoll() { return this.getRoll(); }
+			public float getHeading() { return getHeadingFloat(); }
+			public float getPitch() { return getPitchFloat(); }
+			public float getRoll() { return getRollFloat(); }
 			
 			public float getElapsedTime() { return DisplayManager.getElapsedTime(); }
 		};
@@ -582,18 +585,23 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	 * Transforms the given vector from the drone frame to the world frame.
 	 */
 	public Vector3f transformToWorldFrame(Vector3f originalD){
-		Matrix3f transformationMatrix = (Matrix3f) calculateWToDTransformationMatrix().transpose();
+//		Matrix4f transformationMatrix = this.getPose();
+//		Vector4f vectorToTransform = new Vector4f(0, originalD.x, originalD.y, originalD.z);
+		Matrix3f transformationMatrix = (Matrix3f) calculateDtoWTransformationMatrix();
 		Vector3f resultW = new Vector3f();
-		
+//		Matrix4f.transform(transformationMatrix, vectorToTransform, resultW);
+
 		Matrix3f.transform(transformationMatrix, originalD, resultW);
-		return resultW;		
+//		return new Vector3f(resultW.x, resultW.y, resultW.z);
+		return resultW;
 	}
 	
 	/**
 	 * Transforms the given vector from the world frame to the drone frame.
 	 */
 	public Vector3f transformToDroneFrame(Vector3f originalW){
-		Matrix3f transformationMatrix = calculateWToDTransformationMatrix();
+		Matrix3f transformationMatrix = new Matrix3f();
+		calculateDtoWTransformationMatrix().transpose(transformationMatrix);
 		
 		Vector3f resultD = new Vector3f();
 		
@@ -601,44 +609,61 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		return resultD;
 	}
 
-	public Matrix3f calculateWToDTransformationMatrix() {
+	public Matrix3f calculateDtoWTransformationMatrix(){
+		Matrix4f matrix4 = this.getPose();
+		Matrix3f result = new Matrix3f();
+		result.m00 = matrix4.m00;
+		result.m01 = matrix4.m01;
+		result.m02 = matrix4.m02;
+		result.m10 = matrix4.m10;
+		result.m11 = matrix4.m11;
+		result.m12 = matrix4.m12;
+		result.m20 = matrix4.m20;
+		result.m21 = matrix4.m21;
+		result.m22 = matrix4.m22;
 		
-		float heading = this.getHeading();
-		float pitch = this.getPitch();
-		float roll = this.getRoll();
-		
-//		Matrix4f rotationMatrix = new Matrix4f();
-		//!!!!!!!!!!!!!!!!!!!matrices worden getransponeerd tov de normale conventie opgeslagen!!!!!!!!!!
-		
-		// de afzonderlijke rotatiematrices opstellen
-		Matrix3f headingTransform = new Matrix3f();
-		headingTransform.m00 = (float) Math.cos(heading); 
-		headingTransform.m20 = (float) Math.sin(heading); 
-		headingTransform.m02 = (float) - Math.sin(heading); 
-		headingTransform.m22 = (float) Math.cos(heading); 
-		
-		Matrix3f pitchTransform = new Matrix3f();
-		pitchTransform.m11 = (float) Math.cos(pitch);
-		pitchTransform.m21 = (float) - Math.sin(pitch);
-		pitchTransform.m12 = (float) Math.sin(pitch);
-		pitchTransform.m22 = (float) Math.cos(pitch);
-		
-		Matrix3f rollTransform = new Matrix3f();
-		rollTransform.m00 = (float) Math.cos(roll);
-		rollTransform.m10 = (float) - Math.sin(roll);
-		rollTransform.m01 = (float) Math.sin(roll);
-		rollTransform.m11 = (float) Math.cos(roll);
-		
-		//het product berekenen om de totale transformatie te bepalen
-		Matrix3f transformationMatrix = new Matrix3f();
-		Matrix3f temp = new Matrix3f();
-		Matrix3f.mul(pitchTransform, rollTransform, temp);
-		Matrix3f.mul(headingTransform, temp, transformationMatrix);
-		
-		return transformationMatrix;
+		return result;
 	}
+//	public Matrix3f calculateWToDTransformationMatrix() {
+//		
+//		
+//		
+//		float heading = this.getHeading();
+//		float pitch = this.getPitch();
+//		float roll = this.getRoll();
+//		
+////		Matrix4f rotationMatrix = new Matrix4f();
+//		//!!!!!!!!!!!!!!!!!!!matrices worden getransponeerd tov de normale conventie opgeslagen!!!!!!!!!!
+//		
+//		// de afzonderlijke rotatiematrices opstellen
+//		Matrix3f headingTransform = new Matrix3f();
+//		headingTransform.m00 = (float) Math.cos(heading); 
+//		headingTransform.m20 = (float) Math.sin(heading); 
+//		headingTransform.m02 = (float) - Math.sin(heading); 
+//		headingTransform.m22 = (float) Math.cos(heading); 
+//		
+//		Matrix3f pitchTransform = new Matrix3f();
+//		pitchTransform.m11 = (float) Math.cos(pitch);
+//		pitchTransform.m21 = (float) - Math.sin(pitch);
+//		pitchTransform.m12 = (float) Math.sin(pitch);
+//		pitchTransform.m22 = (float) Math.cos(pitch);
+//		
+//		Matrix3f rollTransform = new Matrix3f();
+//		rollTransform.m00 = (float) Math.cos(roll);
+//		rollTransform.m10 = (float) - Math.sin(roll);
+//		rollTransform.m01 = (float) Math.sin(roll);
+//		rollTransform.m11 = (float) Math.cos(roll);
+//		
+//		//het product berekenen om de totale transformatie te bepalen
+//		Matrix3f transformationMatrix = new Matrix3f();
+//		Matrix3f temp = new Matrix3f();
+//		Matrix3f.mul(pitchTransform, rollTransform, temp);
+//		Matrix3f.mul(headingTransform, temp, transformationMatrix);
+//		
+//		return transformationMatrix;
+//	}
 
-	private float getRoll() {
+	private float getRollFloat() {
 		Vector3f r0 = new Vector3f();
 		Vector3f u0 = new Vector3f();
 		Vector3f headingVector = this.getHeadingVector();
@@ -650,7 +675,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		return (float) Math.atan2(Vector3f.dot(r, u0), Vector3f.dot(r, r0));
 	}
 
-	private float getPitch() {
+	private float getPitchFloat() {
 		
 		Vector3f headingVector = this.getHeadingVector();
 		Vector3f forwardVector = this.getForwardVector();
@@ -661,7 +686,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	 * 
 	 * @return atan2(H . (-1, 0, 0), H . (0, 0, -1)), where H is the drone's heading vector (which we define as H0/||H0|| where H0 is the drone's forward vector ((0, 0, -1) in drone coordinates) projected onto the world XZ plane.
 	 */
-	private float getHeading() {
+	private float getHeadingFloat() {
 
 		Vector3f headingVector = this.getHeadingVector(); 
 		return (float) Math.atan2(-headingVector.x, - headingVector.z);

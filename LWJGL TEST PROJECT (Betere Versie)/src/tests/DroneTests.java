@@ -16,6 +16,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.lwjgl.opengl.GLContext;
+import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
 import autopilot.AutopilotConfig;
@@ -24,6 +25,7 @@ import autopilot.AutopilotConfigValues;
 import autopilot.AutopilotConfigWriter;
 import entities.*;
 import models.RawModel;
+import physicsEngine.PhysicsEngine;
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
 import testObjects.Cube;
@@ -65,7 +67,7 @@ public class DroneTests {
 			e.printStackTrace();
 		}
 
-		this.drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null), new Vector3f(0,0,0), 0, 0, 0, 0, autopilotConfig);
+		this.drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null), new Matrix4f(), 1, autopilotConfig);
 	}
 	
 	/**
@@ -85,7 +87,7 @@ public class DroneTests {
 		
 		assertEquals(position, drone.getPosition());
 		
-		drone.increasePosition(1);
+		PhysicsEngine.applyPhysics(drone, 1);;
 		
 		assertEquals(expectedPosition, drone.getPosition());
 		
@@ -152,16 +154,17 @@ public class DroneTests {
 	
 	public void resetDrone(){
 		Vector3f nulVector = new Vector3f(0,0,0);
+		Matrix4f identityMatrix = new Matrix4f();
 		drone.setLinearVelocity(nulVector);
-		drone.setHeadingVector();
-		drone.setSpeedChangeVector(nulVector);
-		drone.setPosition(nulVector);
+//		drone.setHeadingVector();
+		drone.setLinearAcceleration(nulVector);
+		drone.setPose(identityMatrix);;
 		drone.getCamera().setPosition(nulVector);
 		drone.setThrustForce(0);
 		drone.getLeftWing().setInclination(0);
 		drone.getRightWing().setInclination(0);
-		drone.getHorizontalStabilizer().setInclination(0);
-		drone.getVerticalStabilizer().setInclination(0);
+		drone.getHorizStabilizer().setInclination(0);
+		drone.getVertStabilizer().setInclination(0);
 	}
 	
 }
