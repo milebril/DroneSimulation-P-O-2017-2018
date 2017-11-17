@@ -33,7 +33,7 @@ public class Autopilot {
 	
 	private float elapsedTime;
 	private float prevElapsedTime;
-	private float dt;
+	private float dt = 0;
 	
 	private ImageProcessor cubeLocator;
 	private PIController piController;
@@ -103,7 +103,7 @@ public class Autopilot {
 //		}
 		
 		float[] newHorizontalInclinations = piController.calculateHorizontalFactor(calculateLeftWingLift().y, 
-				calculateRightWingLift().y,10,currentPosition.y, calculateGravity());
+				calculateRightWingLift().y,10,currentPosition.y, calculateGravity(), this.dt);
 		
 		//float[] newHorizontalInclinations = piController.calculateHorizontalFactor(5, currentPosition.y);
 		//System.out.println(newHorizontalInclinations[0] + "," + newHorizontalInclinations[1]);
