@@ -103,13 +103,13 @@ public class Autopilot {
 //		}
 		
 		float[] newHorizontalInclinations = piController.calculateHorizontalFactor(calculateLeftWingLift().y, 
-				calculateRightWingLift().y,10,currentPosition.y, calculateGravity(), this.dt);
+				calculateRightWingLift().y,5,currentPosition.y, calculateGravity(), this.dt);
 		
 		//float[] newHorizontalInclinations = piController.calculateHorizontalFactor(5, currentPosition.y);
 		//System.out.println(newHorizontalInclinations[0] + "," + newHorizontalInclinations[1]);
 		
-		newLeftWingInclination += newHorizontalInclinations[0];
-		newRightWingInclination += newHorizontalInclinations[1];
+		newLeftWingInclination = newHorizontalInclinations[0];
+		newRightWingInclination = newHorizontalInclinations[1];
 		
 		//Save droneData we need in nextIteration
 		saveData();
