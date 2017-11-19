@@ -36,7 +36,8 @@ public class Autopilot {
 	private float dt = 0;
 	
 	private ImageProcessor cubeLocator;
-	private PIController piController;
+	private PIDController pidHorizontalStabilisation;
+	private PIDController pidThrust;
 	
 	/* Variables to send back to drone	 */
 	private float newThrust;
@@ -58,10 +59,14 @@ public class Autopilot {
 		currentPosition = new Vector3f(0,0,0);
 		prevPosition = new Vector3f(0,0,0);
 		
-		//Initialize PIController
-		piController = new PIController();
-		
+		//Initialize PIDController for horizontalflight
+		//PIDController(float K-Proportional, float K-Integral, float K-Derivative)
+		//this.pidHorizontalStabilisation = new PIDController(10.0f,1.0f,5.0f);
+		this.pidHorizontalStabilisation = new PIDController(5.0f,0.0f,3.0f);
 		//Initialize AP with configfile
+		
+		//Initialize PIDController for Thrust
+		this.pidThrust = new PIDController(1.0f, 0.0f, 3.0f);
 		initialize();
 		
 		stablePosition = new Vector3f(0, 0, 0);
@@ -92,24 +97,10 @@ public class Autopilot {
 		dt = elapsedTime - prevElapsedTime;
 		
 		makeData();
-//		
-//		System.out.println("Cube: " + cubeLocator.getCoordinatesOfCube());
-//		if (cubeLocator.getCoordinatesOfCube().y > currentPosition.y) {
-//			newLeftWingInclination += 0.1f;
-//			newRightWingInclination += 0.1f;
-//		} else {
-//			newLeftWingInclination -= 0.1f;
-//			newRightWingInclination += 0.1f;
-//		}
 		
-		float[] newHorizontalInclinations = piController.calculateHorizontalFactor(calculateLeftWingLift().y, 
-				calculateRightWingLift().y,5,currentPosition.y, calculateGravity(), this.dt);
 		
-		//float[] newHorizontalInclinations = piController.calculateHorizontalFactor(5, currentPosition.y);
-		//System.out.println(newHorizontalInclinations[0] + "," + newHorizontalInclinations[1]);
-		
-		newLeftWingInclination = newHorizontalInclinations[0];
-		newRightWingInclination = newHorizontalInclinations[1];
+//		newLeftWingInclination = newHorizontalInclinations[0];
+//		newRightWingInclination = newHorizontalInclinations[1];
 		
 		//Save droneData we need in nextIteration
 		saveData();
@@ -119,9 +110,28 @@ public class Autopilot {
 	}
 	
 	private void makeData() {
+		//Horizontal Wings
+		float[] wingChange = this.pidHorizontalStabilisation.calculateHorizontalFactor(5, currentPosition.y, this.dt);
+		
+		if(newLeftWingInclination + wingChange[0] >= Math.PI/4) newLeftWingInclination = (float) (Math.PI/4);
+		else if(newLeftWingInclination + wingChange[0] <= -Math.PI/4) newLeftWingInclination = (float) -(Math.PI/4);	
+		else newLeftWingInclination += wingChange[0];
+		
+		if(newRightWingInclination + wingChange[1] >= Math.PI/4)  newRightWingInclination = (float) (Math.PI/4);
+		else if(newRightWingInclination + wingChange[1] <= -Math.PI/4) newRightWingInclination = (float) -(Math.PI/4);
+		else newRightWingInclination += wingChange[1];
+		
+		//NewThrust
+		float speed = this.calculateSpeedVector().length();
+		if(speed > 8.5 || speed < 7.5){
+			float thrustChange = this.pidThrust.calculateThrustChange(speed, 8, this.dt);
+			this.setThrust(this.getThrust() + thrustChange);
+			System.out.println("New Thrust: " + this.getThrust());
+		}
+		
+		
 		newHorStabInclination = 0;
 		newVerStabInclination = 0;
-		newThrust = 0;
 		//Vector3f difference = calculateDiffVector();
 		
 		//TODO ctrl c + ctrl v fysica voor setThrust = vertraging
@@ -235,6 +245,15 @@ public class Autopilot {
 	private float calculateGravity() {
 		float totalMass = configAP.getEngineMass() + configAP.getTailMass() + configAP.getWingMass() * 2;
 		return totalMass * configAP.getGravity();
+	}
+	
+	private float getThrust() {
+		return this.newThrust;
+	}
+	
+	private void setThrust(float newThrust) {
+		if(newThrust < 0) this.newThrust = 0;
+		else this.newThrust = newThrust;
 	}
 	
 }
