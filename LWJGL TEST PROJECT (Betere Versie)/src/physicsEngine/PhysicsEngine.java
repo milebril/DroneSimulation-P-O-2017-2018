@@ -123,7 +123,9 @@ public class PhysicsEngine {
 		// The force exercised by the engine
 		Vector3f gravitationalEngineForceW = new Vector3f(0, -drone.getGravity() * drone.getEngineMass(), 0);
 		Vector3f gravitationalEngineForceD = drone.transformToDroneFrame(gravitationalEngineForceW);
-		Vector3f thrustForceD = new Vector3f(0, 0, drone.getThrustForce());
+		// TODO is thrust niet negatief?
+		System.out.println("PE.calculateforces: thrustforce: " + drone.getThrustForce());
+		Vector3f thrustForceD = new Vector3f(0, 0, - drone.getThrustForce());
 		Vector3f totalEngineForceD = new Vector3f(0, 0, 0);
 		Vector3f.add(gravitationalEngineForceD, thrustForceD, totalEngineForceD);
 		
@@ -162,7 +164,9 @@ public class PhysicsEngine {
 		// linear acceleration (F = m.a -> a = F/m)
 		Vector3f linearAccelerationD = new Vector3f(forces[0].x / drone.getMass(), 
 				forces[0].y / drone.getMass(), forces[0].z / drone.getMass());
-		
+		System.out.println("PE.calculateAccel dronemass: " + drone.getMass());
+		System.out.println("PE.calculateAccel forces: " + forces[0]);
+		System.out.println("PE.calculateAccel linearaccel: " + linearAccelerationD);
 		Vector3f angularAccelerationD = new Vector3f(0, 0, 0);
 		float iXx = drone.getInertiaMatrix().m00;
 		float iYy = drone.getInertiaMatrix().m11;

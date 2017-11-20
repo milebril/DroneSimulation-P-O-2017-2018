@@ -462,7 +462,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	private float thrustForce;
 	
 	/**
-	 * Returns the current thrust force of the Drones engine.
+	 * Returns the absolute value of current thrust force of the Drones engine.
 	 */
 	public float getThrustForce() {
 		return this.thrustForce;

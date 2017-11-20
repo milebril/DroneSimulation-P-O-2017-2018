@@ -413,14 +413,15 @@ public class AutoPilot {
 	}
 
 	private float getSpeed(){
-		System.out.println("speed: " + Math.sqrt(Math.pow((getX()-getOldX()), 2) + Math.pow((getY()-getOldY()), 2) + Math.pow((getZ()-getOldZ()), 2)) / this.getDt());
-		System.out.println("time" + this.getDt());
+		System.out.println("AP getSpeed, speed: " + Math.sqrt(Math.pow((getX()-getOldX()), 2) + Math.pow((getY()-getOldY()), 2) + Math.pow((getZ()-getOldZ()), 2)) / this.getDt());
+		System.out.println("AP getSpeed, time" + this.getDt());
 		return (float) Math.sqrt(Math.pow((getX()-getOldX()), 2) + Math.pow((getY()-getOldY()), 2) + Math.pow((getZ()-getOldZ()), 2)) / this.getDt();
 	}
 	
 	private float calculateThrust(){
 		if (this.getSpeed() < CRUISING_SPEED){
-			return this.getMaxThrust();
+			return 1f;
+//			return this.getMaxThrust();
 		}
 		return 0f;
 	}
