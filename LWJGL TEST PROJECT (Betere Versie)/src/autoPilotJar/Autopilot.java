@@ -60,13 +60,14 @@ public class Autopilot {
 		prevPosition = new Vector3f(0,0,0);
 		
 		//Initialize PIDController for horizontalflight
-		//PIDController(float K-Proportional, float K-Integral, float K-Derivative)
+		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
 		//this.pidHorizontalStabilisation = new PIDController(10.0f,1.0f,5.0f);
-		this.pidHorizontalStabilisation = new PIDController(5.0f,0.0f,3.0f);
+		this.pidHorizontalStabilisation = new PIDController(5.0f,0.0f,3.0f, (float) -(Math.PI / 180), 0);
 		//Initialize AP with configfile
 		
 		//Initialize PIDController for Thrust
-		this.pidThrust = new PIDController(1.0f, 0.0f, 3.0f);
+		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
+		this.pidThrust = new PIDController(1.0f, 0.0f, 3.0f, -10, 10);
 		initialize();
 		
 		stablePosition = new Vector3f(0, 0, 0);
@@ -111,7 +112,8 @@ public class Autopilot {
 	
 	private void makeData() {
 		//Horizontal Wings
-		float[] wingChange = this.pidHorizontalStabilisation.calculateHorizontalFactor(5, currentPosition.y, this.dt);
+		float incChange = this.pidHorizontalStabilisation.calculateChange(currentPosition.y, this.dt);
+		float[] wingChange = new float[] {incChange,incChange};
 		
 		if(newLeftWingInclination + wingChange[0] >= Math.PI/4) newLeftWingInclination = (float) (Math.PI/4);
 		else if(newLeftWingInclination + wingChange[0] <= -Math.PI/4) newLeftWingInclination = (float) -(Math.PI/4);	
@@ -124,7 +126,7 @@ public class Autopilot {
 		//NewThrust
 		float speed = this.calculateSpeedVector().length();
 		if(speed > 8.5 || speed < 7.5){
-			float thrustChange = this.pidThrust.calculateThrustChange(speed, 8, this.dt);
+			float thrustChange = this.pidThrust.calculateChange(speed, this.dt);
 			this.setThrust(this.getThrust() + thrustChange);
 			System.out.println("New Thrust: " + this.getThrust());
 		}

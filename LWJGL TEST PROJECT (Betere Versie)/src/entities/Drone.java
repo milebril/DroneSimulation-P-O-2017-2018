@@ -65,7 +65,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 
 		super(model, position, rotX, rotY, rotZ, scale);
 		
-		this.speedVector = new Vector3f(0.0f,0.0f, -12.0f);
+		this.speedVector = new Vector3f(0.0f,0.0f, -8.0f);
 		this.speedChangeVector = new Vector3f(0.0f,0.0f,0.0f);
 		this.speedVectorOld = new Vector3f(0.0f,0.0f,0.0f);
 		this.headingVector = new Vector3f(0.0f,0.0f,-1.0f);
@@ -202,7 +202,6 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		float dz = dt * this.getSpeedVector().z;
 		
 		super.increasePosition(dx, dy, dz);
-		System.out.println("inclination: " + this.getLeftWing().getInclination());
 		System.out.println("speed: " + this.getSpeed());
 		this.getCamera().increasePosition(dx, dy, dz);
 		this.getCamera().increaseRotation(this.getHeadingVector());

@@ -41,7 +41,7 @@ public class generateColors {
 				0.15f*r, 0.15f*g, 0.15f*b,
 				0.15f*r, 0.15f*g, 0.15f*b,
 				0.15f*r, 0.15f*g, 0.15f*b,
-				//goven
+				//Boven
 				1.0f*r, 1.0f*g, 1.0f*b,
 				1.0f*r, 1.0f*g, 1.0f*b,
 				1.0f*r, 1.0f*g, 1.0f*b,

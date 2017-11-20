@@ -97,20 +97,40 @@ public class MainGameLoop {
 		Renderer renderTopDown = new Renderer(shaderTopDown, 50, 50);
 		Renderer renderSideView = new Renderer(shaderSideView, 50, 50);
 		
-		//Creating 1000 test cubes
-		Random r = new Random();
+		//Creating 10 test cubes
+		//Random r = new Random();
 		List<Entity> entities = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
-			Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
-			RawModel model = loader.loadToVAO(c.positions, c.colors, null);
-			//TexturedModel staticModel = new TexturedModel(model,new ModelTexture(loader.loadTexture("image")));
-			entities.add(new cubeTestPlayer(model, 
-					new Vector3f(r.nextFloat()*20-10,r.nextFloat()*10,r.nextFloat()*-90-10),0, 0, 0, 1));
-		}
+//		for (int i = 0; i < 10; i++) {
+//			Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
+//			RawModel model = loader.loadToVAO(c.positions, c.colors, null);
+//			//TexturedModel staticModel = new TexturedModel(model,new ModelTexture(loader.loadTexture("image")));
+//			entities.add(new cubeTestPlayer(model, 
+//					new Vector3f(r.nextFloat()*20-10,r.nextFloat()*10,r.nextFloat()*-90-10),0, 0, 0, 1));
+//		}
+		Cube c1 = new Cube(0.5f,0.5f,0.5f);
+		RawModel model1 = loader.loadToVAO(c1.positions, c1.colors, null);
+		entities.add(new cubeTestPlayer(model1,new Vector3f(2,0,-4),0, 0, 0, 1));
+	
+		Cube c2 = new Cube(0.2f,0.2f,0.0f);
+		RawModel model2 = loader.loadToVAO(c2.positions, c2.colors, null);
+		entities.add(new cubeTestPlayer(model2,new Vector3f(5,-4,-4),0, 0, 0, 1));
+		
+		Cube c3 = new Cube(0.1f,0.3f,0.8f);
+		RawModel model3 = loader.loadToVAO(c3.positions, c3.colors, null);
+		entities.add(new cubeTestPlayer(model3,new Vector3f(4,5,-10),0, 0, 0, 1));
+
+		
+		Cube c4 = new Cube(1.0f,0.0f,0.7f);
+		RawModel model4 = loader.loadToVAO(c4.positions, c4.colors, null);
+		entities.add(new cubeTestPlayer(model4,new Vector3f(-3,0,-4),0, 0, 0, 1));
+
+
+		Cube c5 = new Cube(0.8f,0.5f,0.1f);
+		RawModel model5 = loader.loadToVAO(c5.positions, c5.colors, null);
+		entities.add(new cubeTestPlayer(model5,new Vector3f(-2,2,-6),0, 0, 0, 1));
 		
 		Cube c = new Cube(1, 0, 0);
 		RawModel model = loader.loadToVAO(c.positions, c.colors, null);
-
 		Entity e = new Entity(model, 
 				new Vector3f(0,3,-400),0, 0, 0, 1);
 		//e.setRotation((float) (0.3f*Math.PI), (float) (0.2f*Math.PI),(float) (0.4f*Math.PI));
@@ -142,9 +162,9 @@ public class MainGameLoop {
 			shader.start();
 			shader.loadViewMatrix(drone.getCamera());
 			
-//			for (Entity entity : entities) {
-//				rendererFreeCam.render(entity,shaderFreeCam);
-//			} 
+			for (Entity entity : entities) {
+				rendererFreeCam.render(entity,shaderFreeCam);
+			} 
 			renderer.render(e, shader);
 			renderer.render(drone, shader);
 			
@@ -214,15 +234,14 @@ public class MainGameLoop {
 			textPosition.setColour(1, 1, 1);
 			
 			float dt = DisplayManager.getFrameTimeSeconds();
-			System.out.println("position: " + drone.getPosition());
 			if(!( Math.abs(Math.sqrt(Math.pow(drone.getPosition().x - e.getPosition().x, 2) +
 					Math.pow(drone.getPosition().y - e.getPosition().y, 2) +
 					Math.pow(drone.getPosition().z - e.getPosition().z, 2))) < 4)) {
-				drone.increasePosition(dt);
+				//drone.increasePosition(dt);
 				drone.sendToAutopilot();
 				ap.communicateWithDrone();
 				drone.getFromAutopilot();
-				drone.applyForces(dt);
+				//drone.applyForces(dt);
 			}
 			
 			
