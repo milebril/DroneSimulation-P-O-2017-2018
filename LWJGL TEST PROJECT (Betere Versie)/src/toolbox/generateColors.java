@@ -5,6 +5,7 @@ public class generateColors {
 	 * Cube Colors
 	 */
 	public static float[] generateColors(float r, float g, float b) {
+		System.out.println("r - value:" + r);
 		float[] colours = new float[] {
 				//Links
 				0.3f*r, 0.3f*g, 0.3f*b,

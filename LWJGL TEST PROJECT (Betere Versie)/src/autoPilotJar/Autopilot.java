@@ -128,7 +128,7 @@ public class Autopilot {
 		if(speed > 8.5 || speed < 7.5){
 			float thrustChange = this.pidThrust.calculateChange(speed, this.dt);
 			this.setThrust(this.getThrust() + thrustChange);
-			System.out.println("New Thrust: " + this.getThrust());
+			//System.out.println("New Thrust: " + this.getThrust());
 		}
 		
 		
