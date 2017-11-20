@@ -5,7 +5,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 
@@ -30,7 +34,8 @@ public class OpenCVTest {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
 		
-		process("image", (float) Math.PI/5, (float) Math.PI/3, (float) Math.PI/8);
+		process("image", (float) 0.0, (float) 0.0, (float) 0.0);
+		
 		
 		
 		
@@ -88,69 +93,78 @@ public class OpenCVTest {
 		
 		// byteArra --> Mat object
 		Mat rgbMat = byteArrayToRGBMat(image.getWidth(), image.getHeight(), byteArray);
-		
-		
-		// Filter RGB Mat for 6 different red Hue's
-		Mat[] matArray = redRGBMatFilter(rgbMat);
-		
-		
-		// Combine the 6 filtered Mats
-		Mat filterMat = combineMatArray(matArray);
-		
-		
-		// Get center of mass (of the 2D red cube)
-		double[] centerOfMass = getType0CenterOfMass(filterMat);
-		
-		
-		// Get red area in image
-		int redArea = Core.countNonZero(filterMat);
-		
-		
-		// Get red area percentage
-		double percentage = redArea / ((float) image.getHeight()*image.getWidth());
-		
-		
-		
-		// create imaginary cube
-		ImaginaryCube imaginaryCube = new ImaginaryCube(Math.PI/5, Math.PI/3, Math.PI/8);
-		
-		double[] imCenterOfMass; double deltaX=10; double deltaY=10;
-		double imPercentage; double ratio = 10;
-		int iterations = 0;
-		
-		
-		while (deltaX > 0.005 || deltaY > 0.005 || ratio > 1.025 || ratio < 0.975) {
-			iterations++;
-			
-			// get difference between the centers of mass
-			imCenterOfMass = imaginaryCube.getProjectedAreaCenterOfMass((float) (120.0 / 180 * Math.PI), (float) (120.0 / 180 * Math.PI));
-			deltaX =  (centerOfMass[0] - imCenterOfMass[0]);
-			deltaY =  (centerOfMass[1] - imCenterOfMass[1]);
-			
-			imaginaryCube.translate(deltaX * 3, deltaY * 3, 0);
-			
-			// get the ration between the projected areas
-			imPercentage = imaginaryCube.getProjectedAreaPercentage((float) (120.0 / 180 * Math.PI), (float) (120.0 / 180 * Math.PI));
-			ratio = imPercentage / percentage;
-			
-			imaginaryCube.translate(0, 0, (1 - ratio)*0.1);
-			
-			//imaginaryCube.saveAsImage("result " + String.valueOf(iterations * 2 - 1), rgbMat);
+		List<double[]> colorHSVList = getAllHSVColors(rgbMat);
+		List<double[]> colorList = getAllDifferentHSColors(colorHSVList);
+		List<double[]> colorHSList = getAllDifferentHSVColors(colorHSVList);
+		List<double[]> colorVList = getValuesOfV(colorHSList);
+		for (int i = 0; i<colorList.size(); i++){
+			System.out.println("kleur"+ i + "=" +colorList.get(i)[0] + " " + colorList.get(i)[1] );
 		}
 		
-		long duration = (System.nanoTime() - startTime) / 1000000;
+		for (int i = 0; i < colorList.size(); i++){
+			
+			double[] color ={colorList.get(i)[0],colorList.get(i)[1]};
+			// Filter RGB Mat for 6 different red Hue's
+			Mat[] matArray = redRGBMatFilter(rgbMat, color, colorVList);
+
+
+			// Combine the 6 filtered Mats
+			Mat filterMat = combineMatArray(matArray);
+
+
+			// Get center of mass (of the 2D red cube)
+			double[] centerOfMass = getType0CenterOfMass(filterMat);
+
+
+			// Get red area in image
+			int redArea = Core.countNonZero(filterMat);
+
+
+			// Get red area percentage
+			double percentage = redArea / ((float) image.getHeight()*image.getWidth());
+
+
+
+			// create imaginary cube
+			ImaginaryCube imaginaryCube = new ImaginaryCube(0.0, 0.0, 0.0);
+
+			double[] imCenterOfMass; double deltaX=10; double deltaY=10;
+			double imPercentage; double ratio = 10;
+			int iterations = 0;
+
+
+			while (deltaX > 0.005 || deltaY > 0.005 || ratio > 1.025 || ratio < 0.975) {
+				iterations++;
+
+				// get difference between the centers of mass
+				imCenterOfMass = imaginaryCube.getProjectedAreaCenterOfMass((float) (120.0 / 180 * Math.PI), (float) (120.0 / 180 * Math.PI));
+				deltaX =  (centerOfMass[0] - imCenterOfMass[0]);
+				deltaY =  (centerOfMass[1] - imCenterOfMass[1]);
+
+				imaginaryCube.translate(deltaX * 3, deltaY * 3, 0);
+
+				// get the ration between the projected areas
+				imPercentage = imaginaryCube.getProjectedAreaPercentage((float) (120.0 / 180 * Math.PI), (float) (120.0 / 180 * Math.PI));
+				ratio = imPercentage / percentage;
+
+				imaginaryCube.translate(0, 0, (1 - ratio)*0.1);
+
+				//imaginaryCube.saveAsImage("result " + String.valueOf(iterations * 2 - 1), rgbMat);
+			}
+
+			long duration = (System.nanoTime() - startTime) / 1000000;
+
+			System.out.println("~ ~ " + imageName + " ~ ~");
+			System.out.println("Algorithm ended in " + String.valueOf(iterations) + " iterations (" + String.valueOf(duration) + "ms)");
+			System.out.println("estimated location: (" + String.valueOf(imaginaryCube.getPosition()[0]) + ", " + String.valueOf(imaginaryCube.getPosition()[1]) + ", " + String.valueOf(imaginaryCube.getPosition()[2]) + ")");
+			System.out.println("estimated distance: " + String.valueOf(imaginaryCube.getDistance()));
+		}
 		
-		System.out.println("~ ~ " + imageName + " ~ ~");
-		System.out.println("Algorithm ended in " + String.valueOf(iterations) + " iterations (" + String.valueOf(duration) + "ms)");
-		System.out.println("estimated location: (" + String.valueOf(imaginaryCube.getPosition()[0]) + ", " + String.valueOf(imaginaryCube.getPosition()[1]) + ", " + String.valueOf(imaginaryCube.getPosition()[2]) + ")");
-		System.out.println("estimated distance: " + String.valueOf(imaginaryCube.getDistance()));
 	}
 	
 	
-	
-	
-	
-	
+
+
 	/**
 	 * Returns a byte[] array of the RGB values of the given BufferedImage.
 	 */
@@ -195,38 +209,38 @@ public class OpenCVTest {
 		
 		// the input was RGB instead of BGR so transform...
 		Imgproc.cvtColor(data, data, Imgproc.COLOR_BGR2RGB);
-		
+	
 		return data;
 	}
 	
 	/**
 	 * Returns a Mat[] array of the 6 different red cube hue's filtered from the given RGB Mat object.
 	 * Order: pos x, neg x, pos y, neg y, pos z, neg z
+	 * @param colorVList 
 	 */
-	public static Mat[] redRGBMatFilter(Mat rgbMat) {
+	public static Mat[] redRGBMatFilter(Mat rgbMat, double[] color, List<double[]> colorVList) {
 		
-		// turn the rgb Mat into a hsv Mat
-		// (vreemd genoeg heeft BGR 2 HSV hier het gewenste effect en RGB 2 HSV niet)
-		Mat hsvMat = new Mat();
-		Imgproc.cvtColor(rgbMat, hsvMat, Imgproc.COLOR_BGR2HSV);
+			// turn the rgb Mat into a hsv Mat
+			// (vreemd genoeg heeft BGR 2 HSV hier het gewenste effect en RGB 2 HSV niet)
+			Mat hsvMat = new Mat();
+			Imgproc.cvtColor(rgbMat, hsvMat, Imgproc.COLOR_BGR2HSV);
 		
-		// filter the 6 different red hue's
-		// Red Hue range: [0,10] & [160,179] Saturation is 255 and Value range depends on the surface
-		// Values: pos x: 216, neg x: 76, pos y: 255, neg y: 38, pos z: 178, neg z: 114
-		Mat[] matArray = new Mat[6];
-		ArrayList<Integer> vValues = new ArrayList<>(Arrays.asList(216, 76, 255, 38, 178, 114));
-		Mat tempMat1 = new Mat(hsvMat.height(), hsvMat.width(), 0, new Scalar(0));
-		Mat tempMat2 = new Mat(hsvMat.height(), hsvMat.width(), 0, new Scalar(0));
-		int i;
-		for (i = 0; i < 6; i++) {
-			// filter the hsv Mat
-			Core.inRange(hsvMat, new Scalar(0,   255, vValues.get(i) - 3), new Scalar(10,  255, vValues.get(i) + 3), tempMat1);
-			Core.inRange(hsvMat, new Scalar(160, 255, vValues.get(i) - 3), new Scalar(179, 255, vValues.get(i) + 3), tempMat2);
-			// combine the 2 filtered Mat objects into 1
-			Core.addWeighted(tempMat1, 1, tempMat2, 1, 0, tempMat1);
-			// save the Mat object in the array
-			matArray[i] = tempMat1.clone();
-		}
+			// filter the 6 different red hue's
+			// Red Hue range: [0,10] & [160,179] Saturation is 255 and Value range depends on the surface
+			// Values: pos x: 216, neg x: 76, pos y: 255, neg y: 38, pos z: 178, neg z: 114
+			Mat[] matArray = new Mat[colorVList.size()];
+			Mat tempMat1 = new Mat(hsvMat.height(), hsvMat.width(), 0, new Scalar(0));
+		
+
+		
+			for (int i = 0; i < colorVList.size(); i++) {
+				
+				// filter the hsv Mat
+				Core.inRange(hsvMat, new Scalar(color[0],   color[1], colorVList.get(i)[0]-5), new Scalar(color[0],   color[1], colorVList.get(i)[0]+5), tempMat1);
+			
+				// save the Mat object in the array
+				matArray[i] = tempMat1.clone();
+			}
 		
 		return matArray;
 	}
@@ -381,4 +395,92 @@ public class OpenCVTest {
 		}
 		return returnMat;
 	}
-}
+	
+	
+	public static List<double[]> getAllHSVColors(Mat rgbMat){
+		List<double[]> colorHSVList = new ArrayList<double[]>();
+		Mat hsvMat = new Mat();
+		Imgproc.cvtColor(rgbMat, hsvMat, Imgproc.COLOR_BGR2HSV);
+		for (int x = 0; x < 200; x++) {
+			for (int y = 0; y < 200; y++) {
+				if ( !(rgbMat.get(y, x)[0] == 255.0 && rgbMat.get(y, x)[1] == 255.0 && rgbMat.get(y, x)[2] == 255.0 )) {
+					colorHSVList.add(new double[]{hsvMat.get(y, x)[0], hsvMat.get(y, x)[1],hsvMat.get(y, x)[2]});
+				}
+				
+			}
+		}
+		
+
+    return colorHSVList;
+   
+	}
+	public static List<double[]> getAllDifferentHSColors(List<double[]> colorHSVList){
+		List<double[]> colorHSList = new ArrayList<double[]>();
+		colorHSList.add(new double[]{colorHSVList.get(0)[0],colorHSVList.get(0)[1], colorHSVList.get(0)[2]});
+		
+		for (int i = 1; i < colorHSVList.size(); i++) {
+			int teller = 0;
+			int size = colorHSList.size();
+			for (int j = 0; j < size; j++) {
+				
+				if ( (colorHSVList.get(i)[0] <= colorHSList.get(j)[0]+3 && colorHSVList.get(i)[0] >= colorHSList.get(j)[0]-3 ) && (colorHSVList.get(i)[1] <= colorHSList.get(j)[1]+3 &&colorHSVList.get(i)[1] >= colorHSList.get(j)[1]-3 )) {
+					teller+=1;
+					}
+			}
+			if ( teller == 0 ) {
+				colorHSList.add(new double[]{colorHSVList.get(i)[0],colorHSVList.get(i)[1]} );	
+			}	
+			
+		}
+	
+		return colorHSList;	
+		}
+	
+	public static List<double[]> getAllDifferentHSVColors(List<double[]> colorHSVList){
+		List<double[]> colorHSList = new ArrayList<double[]>();
+		colorHSList.add(new double[]{colorHSVList.get(0)[0],colorHSVList.get(0)[1], colorHSVList.get(0)[2]});
+		
+		for (int i = 1; i < colorHSVList.size(); i++) {
+			int teller = 0;
+			int size = colorHSList.size();
+			for (int j = 0; j < size; j++) {
+				
+				if ( (colorHSVList.get(i)[0] == colorHSList.get(j)[0]) && (colorHSVList.get(i)[1] == colorHSList.get(j)[1]) && (colorHSVList.get(i)[2] == colorHSList.get(j)[2])) {
+					teller+=1;
+					}
+			}
+			if ( teller == 0 ) {
+				colorHSList.add(new double[]{colorHSVList.get(i)[0],colorHSVList.get(i)[1],colorHSVList.get(i)[2]} );	
+			}	
+			
+		}
+	
+		return colorHSList;	
+		}
+			
+	public static List<double[]> getValuesOfV(List<double[]> colorHSList){
+		List<double[]> colorVList = new ArrayList<double[]>();
+		
+		colorVList.add(new double[]{colorHSList.get(0)[2]});
+		
+		for (int i = 1; i < colorHSList.size(); i++) {
+			int teller = 0;
+			int size = colorVList.size();
+			for (int j = 0; j < size; j++) {
+				if ((colorHSList.get(i)[2] == colorVList.get(j)[0])) {
+					teller+=1;
+					}
+			}
+			if ( teller == 0 ) {
+				
+				colorVList.add(new double[]{colorHSList.get(i)[2]} );	
+			}	
+			
+		}
+
+		return colorVList;	
+		}
+			
+		}
+		
+	
