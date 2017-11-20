@@ -9,7 +9,8 @@ import org.lwjgl.util.vector.Vector3f;
  */
 public class AirFoil {
 	
-	public AirFoil(Vector3f centerOfMass, float wingMass, float wingLiftSlope, Vector3f rotAx) {
+	public AirFoil(Drone drone, Vector3f centerOfMass, float wingMass, float wingLiftSlope, Vector3f rotAx) {
+		this.drone = drone;
 		this.centerOfMassD = centerOfMass;
 		this.airFoilMass = wingMass;
 		this.airFoilLiftSlope = wingLiftSlope;
@@ -76,6 +77,7 @@ public class AirFoil {
 	 * can be shortcut without matrices.
 	 */
 	public Vector3f calculateAttackVector(){
+//		System.out.println("Airfoil.calculateATtackvector: inclination: " + this.getInclination());
 		Vector3f result =  new Vector3f();
 		if( this.getRotAxis().x == 1){
 			result.x = 0;
@@ -88,6 +90,7 @@ public class AirFoil {
 			result.z = (float) - Math.cos(this.getInclination());			
 		}
 		
+//		System.out.println("Airfoil.ccalculateATtackvector attacvecor: " + result);
 		return result;		
 	}
 	
@@ -98,8 +101,85 @@ public class AirFoil {
 	 */
 	public Vector3f calculateNormal(){
 		Vector3f result = new Vector3f();
-		Vector3f.cross(this.getRotAxis(), this.calculateAttackVector(), result);
+		Vector3f.cross(this.getRotAxis(), this.calculateAttackVector(),  result);
 		return result;	
+	}
+	
+	public Vector3f calculateAirFoilLiftForce(){
+		return this.calculateAirfoilLiftForce(new Vector3f(0,0,0));
+	}
+	
+	public Vector3f calculateAirfoilLiftForce(Vector3f windW) {
+		// calculate the airspeed the airfoil experiences
+		Vector3f airSpeedW = new Vector3f(0, 0, 0);
+		
+		// velocity of the airfoil caused by the drones rotation (omega x r = v)
+		Vector3f rotationalVelocityW = new Vector3f();
+		Vector3f.cross(this.getDrone().getAngularVelocity(), this.getDrone().transformToWorldFrame(this.getCenterOfMass()), rotationalVelocityW);
+		
+		// velocity of the airfoil caused by the drones linear velocity
+		Vector3f linearVelocityW = this.getDrone().getLinearVelocity();
+		
+		// airspeed = wind - airfoil velocity
+		Vector3f.add(airSpeedW, rotationalVelocityW, airSpeedW);
+		Vector3f.add(airSpeedW, linearVelocityW, airSpeedW);
+		Vector3f.sub(airSpeedW, windW, airSpeedW);
+		
+		// transform the airSpeed vector to the drone frame
+		Vector3f airSpeedD = this.getDrone().transformToDroneFrame(airSpeedW);
+		
+//		System.out.println("Airfoil calculateAirfliff airspeedD: " + airSpeedD);
+		
+		// project airSpeedD on the surface, perpendicular to the rotationAxis of the AirFoil
+		Vector3f rotationAxisD = this.getRotAxis();
+		Vector3f projectedAirspeedVectorD = new Vector3f(0, 0, 0);
+		Vector3f.sub(airSpeedD, (Vector3f) rotationAxisD.scale(Vector3f.dot(airSpeedD, rotationAxisD)), projectedAirspeedVectorD);
+		
+//		System.out.println("Airfoil calculateAirfliff projectedairspeedD: " + projectedAirspeedVectorD);
+
+		
+		// calculate the angle of attack, defined as -atan2(S . N, S . A), where S
+		// is the projected airspeed vector, N is the normal, and A is the attack vector
+		
+		Vector3f normalD = this.calculateNormal(); // N
+		Vector3f attackVectorD = this.calculateAttackVector(); // A
+//		float aoa = this.calculateAOA(projectedAirspeedVectorD, normalD, attackVectorD);
+		float aoa = (float) - Math.atan2(Vector3f.dot(projectedAirspeedVectorD, normalD), 
+											Vector3f.dot(projectedAirspeedVectorD, attackVectorD));	
+
+//		System.out.println("Airfoil calculateAirfliff AOA: " + aoa);
+
+		// calculate the lift force N . liftSlope . AOA . s^2, where N is the
+		// normal, AOA is the angle of attack, and s is the projected airspeed
+		float airspeedSquared = projectedAirspeedVectorD.lengthSquared();
+		Vector3f liftForceD = (Vector3f) normalD.scale(this.getLiftSlope() * aoa * airspeedSquared);
+		return liftForceD;
+	}
+	
+
+	private float calculateAOA(Vector3f projectedAirspeedVectorD, Vector3f normalD, Vector3f attackVectorD) {
+		float currentAoa = (float) - Math.atan2(Vector3f.dot(projectedAirspeedVectorD, normalD), 
+				Vector3f.dot(projectedAirspeedVectorD, attackVectorD));	
+		
+		if(currentAoa > this.getDrone().getMaxAOA()){
+			while (currentAoa > this.getDrone().getMaxAOA()){
+				currentAoa -= Math.PI;
+			}
+		}
+		
+		if(currentAoa < (- this.getDrone().getMaxAOA())){
+			while (currentAoa < (- this.getDrone().getMaxAOA())){
+				currentAoa += Math.PI;
+			}
+		}
+		return currentAoa;
+	}
+
+
+	private final Drone drone;
+
+	public Drone getDrone() {
+		return this.drone;
 	}
 	
 	

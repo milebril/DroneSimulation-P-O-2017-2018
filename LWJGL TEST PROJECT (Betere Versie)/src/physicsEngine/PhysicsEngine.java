@@ -55,104 +55,41 @@ public class PhysicsEngine {
 		// calculate the forces applied by the airFoils (liftForce + gravity)
 		for (int i = 0; i < drone.getAirFoils().length; i++) {
 			
+			
 			// get the current AirFoil
 			AirFoil currentAirFoil = drone.getAirFoils()[i];
 			
 			
-			// calculate the airspeed the airfoil experiences
-			Vector3f airSpeedW = new Vector3f(0, 0, 0);
+			Vector3f liftForceD = currentAirFoil.calculateAirFoilLiftForce();	
 			
-			// velocity of the airfoil caused by the drones rotation (omega x r = v)
-			Vector3f rotationalVelocityW = new Vector3f();
-			Vector3f.cross(drone.getAngularVelocity(), drone.transformToWorldFrame(currentAirFoil.getCenterOfMass()), rotationalVelocityW);
-			
-			// velocity of the airfoil caused by the drones linear velocity
-			Vector3f linearVelocityW = drone.getLinearVelocity();
-			
-			// wind velocity in the world
-			Vector3f windW = getWindVelocity();
-			
-			// airspeed = wind - airfoil velocity
-			Vector3f.sub(airSpeedW, rotationalVelocityW, airSpeedW);
-			Vector3f.sub(airSpeedW, linearVelocityW, airSpeedW);
-			Vector3f.add(airSpeedW, windW, airSpeedW);
-			
-			// transform the airSpeed vector to the drone frame
-			Vector3f airSpeedD = drone.transformToDroneFrame(airSpeedW);
-			
-			
-			// project airSpeedD on the surface, perpendicular to the rotationAxis of the AirFoil
-			Vector3f rotationAxisD = currentAirFoil.getRotAxis();
-			Vector3f projectedAirspeedVectorD = new Vector3f(0, 0, 0);
-			Vector3f.sub(airSpeedD, (Vector3f) rotationAxisD.scale(Vector3f.dot(airSpeedD, rotationAxisD)), projectedAirspeedVectorD);
-			
-			// calculate the angle of attack, defined as -atan2(S . N, S . A), where S
-			// is the projected airspeed vector, N is the normal, and A is the attack vector
-			Vector3f normalD = currentAirFoil.calculateNormal(); // N
-			Vector3f attackVectorD = currentAirFoil.calculateAttackVector(); // A
-			float aoa = (float) - Math.atan2(Vector3f.dot(projectedAirspeedVectorD, normalD), 
-												Vector3f.dot(projectedAirspeedVectorD, attackVectorD));					
-			
-			// calculate the lift force N . liftSlope . AOA . s^2, where N is the
-			// normal, AOA is the angle of attack, and s is the projected airspeed
-			float airspeedSquared = projectedAirspeedVectorD.lengthSquared();
-			Vector3f liftForceD = (Vector3f) normalD.scale(currentAirFoil.getLiftSlope() * aoa * airspeedSquared);
-			
-			
-			// calculate the gravitational force exercised on the AirFoil
-			Vector3f gravitationalForceW = new Vector3f(0, -drone.getGravity() * currentAirFoil.getMass(), 0);
-			Vector3f gravitationalForceD = drone.transformToDroneFrame(gravitationalForceW);
-			
-			
-			// total force exercised on the AirFoil
-			Vector3f currentAirFoilForceD = new Vector3f(0, 0, 0);
-			Vector3f.add(liftForceD, gravitationalForceD, currentAirFoilForceD);
-			
-			
+//			System.out.println("PE.calculateForces : liftforceD: " + i + " " + liftForceD);
+
 			// calculate torque
 			Vector3f currentAirFoilTorqueD = new Vector3f(0, 0, 0);
-			Vector3f.cross(currentAirFoil.getCenterOfMass(), currentAirFoilForceD, currentAirFoilTorqueD);
+			Vector3f.cross(currentAirFoil.getCenterOfMass(), liftForceD, currentAirFoilTorqueD);
 			
 			
 			// add the calculated force and torque to the total force and torque
-			Vector3f.add(force, currentAirFoilForceD, force);
+			Vector3f.add(force, liftForceD, force);
 			Vector3f.add(torque, currentAirFoilTorqueD, torque);
 		}
 		
 		
 		// The force exercised by the engine
-		Vector3f gravitationalEngineForceW = new Vector3f(0, -drone.getGravity() * drone.getEngineMass(), 0);
-		Vector3f gravitationalEngineForceD = drone.transformToDroneFrame(gravitationalEngineForceW);
-		// TODO is thrust niet negatief?
-		System.out.println("PE.calculateforces: thrustforce: " + drone.getThrustForce());
+//		System.out.println("PE.calculateforces: thrustforce: " + drone.getThrustForce());
 		Vector3f thrustForceD = new Vector3f(0, 0, - drone.getThrustForce());
-		Vector3f totalEngineForceD = new Vector3f(0, 0, 0);
-		Vector3f.add(gravitationalEngineForceD, thrustForceD, totalEngineForceD);
+		Vector3f.add(force, thrustForceD, force);
+
 		
-		Vector3f.add(force, totalEngineForceD, force);
+		// The gravitational force exercised by the mass
+		Vector3f gravitationD = drone.transformToDroneFrame(new Vector3f(0, - drone.getMass()*drone.getGravity(), 0));
+		Vector3f.add(force, gravitationD, force);
 		
-		// The torque exercised by the engine
-		Vector3f engineTorqueD = new Vector3f(0, 0, 0);
-		Vector3f.cross(drone.getEnginePosition(), totalEngineForceD, engineTorqueD);
-		
-		Vector3f.add(torque, engineTorqueD, torque);
-		
-		
-		// The force exercised by the tail mass
-		Vector3f gravitationalTailForceW = new Vector3f(0, -drone.getGravity() * drone.getTailMass(), 0);
-		Vector3f gravitationalTailForceD = drone.transformToDroneFrame(gravitationalTailForceW);
-		
-		Vector3f.add(force, gravitationalTailForceD, force);
-		
-		// The torque exercised by the tail mass
-		Vector3f tailTorqueD = new Vector3f(0, 0, 0);
-		Vector3f.cross(drone.getTailMassPosition(), gravitationalTailForceD, tailTorqueD);
-		
-		Vector3f.add(torque, tailTorqueD, torque);
-		
-		
+//		System.out.println("PE.calcforces gravitational: " + drone.getMass()*drone.getGravity());
+
 		return new Vector3f[]{force, torque};
 	}
+
 	
 	/**
 	 * Calculates and returns the linear and angular accelerations of the drone (in drone frame). 
@@ -164,9 +101,9 @@ public class PhysicsEngine {
 		// linear acceleration (F = m.a -> a = F/m)
 		Vector3f linearAccelerationD = new Vector3f(forces[0].x / drone.getMass(), 
 				forces[0].y / drone.getMass(), forces[0].z / drone.getMass());
-		System.out.println("PE.calculateAccel dronemass: " + drone.getMass());
-		System.out.println("PE.calculateAccel forces: " + forces[0]);
-		System.out.println("PE.calculateAccel linearaccel: " + linearAccelerationD);
+//		System.out.println("PE.calculateAccel dronemass: " + drone.getMass());
+//		System.out.println("PE.calculateAccel forces: " + forces[0]);
+//		System.out.println("PE.calculateAccel linearaccel: " + linearAccelerationD);
 		Vector3f angularAccelerationD = new Vector3f(0, 0, 0);
 		float iXx = drone.getInertiaMatrix().m00;
 		float iYy = drone.getInertiaMatrix().m11;

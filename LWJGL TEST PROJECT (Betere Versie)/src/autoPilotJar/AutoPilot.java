@@ -332,9 +332,9 @@ public class AutoPilot {
 		}
 		
 		else{
-			System.out.println(this.getHorizDeviation());
-			System.out.println(this.getVertDeviation());
-			System.out.println(this.calculateHorStabIncl());
+//			System.out.println(this.getHorizDeviation());
+//			System.out.println(this.getVertDeviation());
+//			System.out.println(this.calculateHorStabIncl());
 			
 			AutopilotOutputs value = new AutopilotOutputs(){
 	
@@ -365,7 +365,7 @@ public class AutoPilot {
 	 * @return pos inclincation or negative inclination
 	 */
 	protected float calculateVertStabIncl() {
-		System.out.println("hor:" + this.getHorizDeviation());
+//		System.out.println("hor:" + this.getHorizDeviation());
 		
 		if (Math.abs(this.getHorizDeviation()) >= 0.95) {
 			return 0;
@@ -413,8 +413,8 @@ public class AutoPilot {
 	}
 
 	private float getSpeed(){
-		System.out.println("AP getSpeed, speed: " + Math.sqrt(Math.pow((getX()-getOldX()), 2) + Math.pow((getY()-getOldY()), 2) + Math.pow((getZ()-getOldZ()), 2)) / this.getDt());
-		System.out.println("AP getSpeed, time" + this.getDt());
+//		System.out.println("AP getSpeed, speed: " + Math.sqrt(Math.pow((getX()-getOldX()), 2) + Math.pow((getY()-getOldY()), 2) + Math.pow((getZ()-getOldZ()), 2)) / this.getDt());
+//		System.out.println("AP getSpeed, time" + this.getDt());
 		return (float) Math.sqrt(Math.pow((getX()-getOldX()), 2) + Math.pow((getY()-getOldY()), 2) + Math.pow((getZ()-getOldZ()), 2)) / this.getDt();
 	}
 	
