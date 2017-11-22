@@ -2,6 +2,7 @@ package engineTester;
 
 import models.RawModel;
 import models.TexturedModel;
+import physicsEngine.PhysicsEngine;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -17,6 +18,7 @@ import java.util.Random;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.opencv.core.Core;
@@ -50,6 +52,8 @@ public class MainGameLoop {
 	private static Camera freeRoamCamera;
 	private static boolean freeRoamCameraLocked = true;
 	private static boolean lLock = false;
+	
+	//TODO main opruimen, code eruit halen
 	
 	public static void main(String[] args) throws IOException {
 		
@@ -100,20 +104,13 @@ public class MainGameLoop {
 		//Creating 10 test cubes
 		//Random r = new Random();
 		List<Entity> entities = new ArrayList<>();
-//		for (int i = 0; i < 10; i++) {
-//			Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
-//			RawModel model = loader.loadToVAO(c.positions, c.colors, null);
-//			//TexturedModel staticModel = new TexturedModel(model,new ModelTexture(loader.loadTexture("image")));
-//			entities.add(new cubeTestPlayer(model, 
-//					new Vector3f(r.nextFloat()*20-10,r.nextFloat()*10,r.nextFloat()*-90-10),0, 0, 0, 1));
-//		}
-		Cube c1 = new Cube(0.5f,0.5f,0.5f);
-		RawModel model1 = loader.loadToVAO(c1.positions, c1.colors, null);
-		entities.add(new cubeTestPlayer(model1,new Vector3f(2,0,-4),0, 0, 0, 1));
-	
-		Cube c2 = new Cube(0.2f,0.2f,0.0f);
-		RawModel model2 = loader.loadToVAO(c2.positions, c2.colors, null);
-		entities.add(new cubeTestPlayer(model2,new Vector3f(5,-4,-4),0, 0, 0, 1));
+		for (int i = 0; i < 2000; i++) {
+			Cuboid c = new Cuboid(r.nextFloat(), r.nextFloat(), r.nextFloat());
+			RawModel model = loader.loadToVAO(c.positions, c.colors, null);
+			//TexturedModel staticModel = new TexturedModel(model,new ModelTexture(loader.loadTexture("image")));
+			entities.add(new cubeTestPlayer(model, 
+					new Matrix4f().translate(new Vector3f(r.nextFloat()*200-100,r.nextFloat()*200-100,r.nextFloat()*-1000)),1));
+		}
 		
 		Cube c3 = new Cube(0.1f,0.3f,0.8f);
 		RawModel model3 = loader.loadToVAO(c3.positions, c3.colors, null);
@@ -131,14 +128,18 @@ public class MainGameLoop {
 		
 		Cube c = new Cube(1, 0, 0);
 		RawModel model = loader.loadToVAO(c.positions, c.colors, null);
-		Entity e = new Entity(model, 
-				new Vector3f(0,3,-400),0, 0, 0, 1);
-		//e.setRotation((float) (0.3f*Math.PI), (float) (0.2f*Math.PI),(float) (0.4f*Math.PI));
+		//Entity e = new Entity(model, 
+			//	new Vector3f(10,30,-50),0, 0, 0, 1);
+		
+		//Entity e = new Entity(model, 
+			//	new Vector3f(0,30,-50),0, 0, 0, 1);
+		
+		Entity e = new Entity(model, new Matrix4f().translate(new Vector3f(-10,30,-50)) , 1);
 		
 		Cuboid droneCube = new Cuboid(0, 0, 0);
-		drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
-				new Vector3f(0, 0, 0), 0, 0, 0, 1, autopilotConfig);
-		Autopilot ap = new Autopilot();
+		Drone drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
+				new Matrix4f().translate(new Vector3f(0, 30, 0)), 1, autopilotConfig);
+		AutoPilot ap = new AutoPilot();
 		
 		//FreeRoam Camera
 		freeRoamCamera = new Camera();
@@ -220,7 +221,7 @@ public class MainGameLoop {
 			rendererText.prepareDroneCamera();
 			
 			// snelheid van de drone
-			String speed = String.valueOf(Math.round(drone.getSpeed()));
+			String speed = String.valueOf(Math.round(drone.getAbsVelocity()));
 			FontType font = new FontType(loader.loadTexture("verdana"), new File("res/verdana.fnt"));
 			GUIText textSpeed = new GUIText("Speed = " + speed + "m/s", 5, font, new Vector2f(0.01f,0), 1, true);
 			textSpeed.setColour(1, 1, 1);
@@ -237,16 +238,20 @@ public class MainGameLoop {
 			if(!( Math.abs(Math.sqrt(Math.pow(drone.getPosition().x - e.getPosition().x, 2) +
 					Math.pow(drone.getPosition().y - e.getPosition().y, 2) +
 					Math.pow(drone.getPosition().z - e.getPosition().z, 2))) < 4)) {
-				//drone.increasePosition(dt);
+				//applyphysics rekent de krachten uit en gaat dan de kinematische waarden van de drone
+				// aanpassen op basis daarvan 
+				PhysicsEngine.applyPhysics(drone, dt);
+//				drone.increasePosition(dt);
 				drone.sendToAutopilot();
-				ap.communicateWithDrone();
+				ap.getFromDrone();
+				ap.sendToDrone();
 				drone.getFromAutopilot();
-				//drone.applyForces(dt);
+//				drone.applyForces(dt);
 			}
 			
 			
 			/* Drone Debug */
-			//drone.moveHeadingVector();
+//			drone.moveHeadingVector();
 			
 			if (drone.getPosition().z < -1000) {
 				break;

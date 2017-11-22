@@ -1,5 +1,6 @@
 package entities;
 
+import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
 import models.RawModel;
@@ -14,18 +15,18 @@ public class cubeTestPlayer extends Entity{
 	
 	private float downSpeed = 0;
 	
-	public cubeTestPlayer(RawModel model, Vector3f position, float rotX, float rotY, float rotZ, float scale) {
-		super(model, position, rotX, rotY, rotZ, scale);
+	public cubeTestPlayer(RawModel model, Matrix4f pose, float scale) {
+		super(model, pose, scale);
 	}
 
-	public void applyGravity() {
-		downSpeed += GRAVITY * DisplayManager.getFrameTimeSeconds(); // v = v + a*t
-		super.increasePosition(0, downSpeed * DisplayManager.getFrameTimeSeconds(), 0);
-		if (super.getPosition().y <= TERRAIN_HEIGHT) {
-			downSpeed = 0;
-			super.getPosition().y = TERRAIN_HEIGHT;
-		}
-	}
+//	public void applyGravity() {
+//		downSpeed += GRAVITY * DisplayManager.getFrameTimeSeconds(); // v = v + a*t
+//		super.increasePosition(0, downSpeed * DisplayManager.getFrameTimeSeconds(), 0);
+//		if (super.getPosition().y <= TERRAIN_HEIGHT) {
+//			downSpeed = 0;
+//			super.getPosition().y = TERRAIN_HEIGHT;
+//		}
+//	}
 
 	public float getDownSpeed() {
 		// TODO Auto-generated method stub
