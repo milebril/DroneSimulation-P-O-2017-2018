@@ -104,27 +104,13 @@ public class MainGameLoop {
 		//Creating 10 test cubes
 		//Random r = new Random();
 		List<Entity> entities = new ArrayList<>();
-		for (int i = 0; i < 2000; i++) {
-			Cuboid c = new Cuboid(r.nextFloat(), r.nextFloat(), r.nextFloat());
-			RawModel model = loader.loadToVAO(c.positions, c.colors, null);
-			//TexturedModel staticModel = new TexturedModel(model,new ModelTexture(loader.loadTexture("image")));
-			entities.add(new cubeTestPlayer(model, 
-					new Matrix4f().translate(new Vector3f(r.nextFloat()*200-100,r.nextFloat()*200-100,r.nextFloat()*-1000)),1));
-		}
-		
-		Cube c3 = new Cube(0.1f,0.3f,0.8f);
-		RawModel model3 = loader.loadToVAO(c3.positions, c3.colors, null);
-		entities.add(new cubeTestPlayer(model3,new Vector3f(4,5,-10),0, 0, 0, 1));
-
-		
-		Cube c4 = new Cube(1.0f,0.0f,0.7f);
-		RawModel model4 = loader.loadToVAO(c4.positions, c4.colors, null);
-		entities.add(new cubeTestPlayer(model4,new Vector3f(-3,0,-4),0, 0, 0, 1));
-
-
-		Cube c5 = new Cube(0.8f,0.5f,0.1f);
-		RawModel model5 = loader.loadToVAO(c5.positions, c5.colors, null);
-		entities.add(new cubeTestPlayer(model5,new Vector3f(-2,2,-6),0, 0, 0, 1));
+//		for (int i = 0; i < 10; i++) {
+//			Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
+//			RawModel model = loader.loadToVAO(c.positions, c.colors, null);
+//			//TexturedModel staticModel = new TexturedModel(model,new ModelTexture(loader.loadTexture("image")));
+//			entities.add(new cubeTestPlayer(model, 
+//					new Vector3f(r.nextFloat()*20-10,r.nextFloat()*10,r.nextFloat()*-90-10),0, 0, 0, 1));
+//		}
 		
 		Cube c = new Cube(1, 0, 0);
 		RawModel model = loader.loadToVAO(c.positions, c.colors, null);
@@ -137,9 +123,9 @@ public class MainGameLoop {
 		Entity e = new Entity(model, new Matrix4f().translate(new Vector3f(-10,30,-50)) , 1);
 		
 		Cuboid droneCube = new Cuboid(0, 0, 0);
-		Drone drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
+		drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
 				new Matrix4f().translate(new Vector3f(0, 30, 0)), 1, autopilotConfig);
-		AutoPilot ap = new AutoPilot();
+		Autopilot ap = new Autopilot();
 		
 		//FreeRoam Camera
 		freeRoamCamera = new Camera();
