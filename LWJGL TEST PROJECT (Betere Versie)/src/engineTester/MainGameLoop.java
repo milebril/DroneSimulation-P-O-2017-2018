@@ -229,8 +229,7 @@ public class MainGameLoop {
 				PhysicsEngine.applyPhysics(drone, dt);
 //				drone.increasePosition(dt);
 				drone.sendToAutopilot();
-				ap.getFromDrone();
-				ap.sendToDrone();
+				ap.communicateWithDrone(); 
 				drone.getFromAutopilot();
 //				drone.applyForces(dt);
 			}
