@@ -124,7 +124,7 @@ public class MainGameLoop {
 		
 		Cuboid droneCube = new Cuboid(0, 0, 0);
 		drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
-				new Matrix4f().translate(new Vector3f(0, 30, 0)), 1, autopilotConfig);
+				new Matrix4f().translate(new Vector3f(0, 10, 0)), 1, autopilotConfig);
 		Autopilot ap = new Autopilot();
 		
 		//FreeRoam Camera
@@ -227,6 +227,9 @@ public class MainGameLoop {
 				//applyphysics rekent de krachten uit en gaat dan de kinematische waarden van de drone
 				// aanpassen op basis daarvan 
 				PhysicsEngine.applyPhysics(drone, dt);
+				System.out.println("inclination" + drone.getLeftWing().getInclination());
+				System.out.println("Speed" + drone.getAbsVelocity());
+				System.out.println("Thrustforce" + drone.getThrustForce());
 //				drone.increasePosition(dt);
 				drone.sendToAutopilot();
 				ap.communicateWithDrone(); 

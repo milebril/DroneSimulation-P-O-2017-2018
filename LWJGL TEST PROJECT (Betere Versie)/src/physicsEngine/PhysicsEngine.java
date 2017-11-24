@@ -12,9 +12,13 @@ public class PhysicsEngine {
 		
 		// get force and torque
 		Vector3f[] forces = calculateForces(drone);
-		
+		for(int i = 0; i < forces.length; i++)
+			System.out.println("Forces " + forces[i]);
 		// calculate the new properties
 		Vector3f[] newAccelerations = calculateAccelerations(drone, forces); // (in drone frame)
+		for(int i = 0; i < newAccelerations.length; i++)
+			System.out.println("Accelerations: " + newAccelerations[i]);
+		System.out.println();
 		Vector3f[] newVelocities = calculateVelocities(drone, newAccelerations, dt); // (in drone frame)
 		Vector3f[] newPositions = calculatePositions(drone, newVelocities, dt); // (in world frame)
 		
@@ -61,7 +65,7 @@ public class PhysicsEngine {
 			
 			
 			Vector3f liftForceD = currentAirFoil.calculateAirFoilLiftForce();	
-			
+			System.out.println("liftForceD" + liftForceD);
 //			System.out.println("PE.calculateForces : liftforceD: " + i + " " + liftForceD);
 
 			// calculate torque

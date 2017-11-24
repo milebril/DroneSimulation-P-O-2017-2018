@@ -124,12 +124,12 @@ public class Autopilot {
 		else newRightWingInclination += wingChange[1];
 		
 		//NewThrust
-		float speed = this.calculateSpeedVector().length();
-		if(speed > 8.5 || speed < 7.5){
-			float thrustChange = this.pidThrust.calculateChange(speed, this.dt);
-			this.setThrust(this.getThrust() + thrustChange);
-			//System.out.println("New Thrust: " + this.getThrust());
-		}
+//		float speed = this.calculateSpeedVector().length();
+//		if(speed > 8.5 || speed < 7.5){
+//			float thrustChange = this.pidThrust.calculateChange(speed, this.dt);
+//			this.setThrust(this.getThrust() + thrustChange);
+//			//System.out.println("New Thrust: " + this.getThrust());
+//		}
 		
 		
 		newHorStabInclination = 0;
