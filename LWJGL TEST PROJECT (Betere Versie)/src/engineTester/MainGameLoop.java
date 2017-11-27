@@ -23,8 +23,7 @@ import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.opencv.core.Core;
 
-import autoPilotJar.Autopilot;
-import autopilot.AutopilotConfig;
+import autoPilotJar.SimpleAutopilot;
 import autopilot.AutopilotConfigReader;
 import autopilot.AutopilotConfigValues;
 import autopilot.AutopilotConfigWriter;
@@ -42,6 +41,7 @@ import entities.cubeTestPlayer;
 import fontMeshCreator.FontType;
 import fontMeshCreator.GUIText;
 import fontRendering.TextMaster;
+import interfaces.AutopilotConfig;
 
 public class MainGameLoop {
 
@@ -125,7 +125,7 @@ public class MainGameLoop {
 		Cuboid droneCube = new Cuboid(0, 0, 0);
 		drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
 				new Matrix4f().translate(new Vector3f(0, 30, 0)), 1, autopilotConfig);
-		Autopilot ap = new Autopilot();
+		SimpleAutopilot ap = new SimpleAutopilot();
 		
 		//FreeRoam Camera
 		freeRoamCamera = new Camera();

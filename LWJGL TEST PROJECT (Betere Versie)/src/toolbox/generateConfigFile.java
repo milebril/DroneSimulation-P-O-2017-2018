@@ -19,10 +19,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import autopilot.AutopilotConfig;
 import autopilot.AutopilotConfigReader;
 import autopilot.AutopilotConfigValues;
 import autopilot.AutopilotConfigWriter;
+import interfaces.AutopilotConfig;
 
 public class generateConfigFile extends JFrame{
 

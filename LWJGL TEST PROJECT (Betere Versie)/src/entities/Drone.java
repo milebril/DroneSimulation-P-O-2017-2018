@@ -12,11 +12,11 @@ import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
-import autoPilotJar.AutopilotInputs;
 import autoPilotJar.AutopilotInputsWriter;
-import autoPilotJar.AutopilotOutputs;
 import autoPilotJar.AutopilotOutputsReader;
-import autopilot.AutopilotConfig;
+import interfaces.AutopilotConfig;
+import interfaces.AutopilotInputs;
+import interfaces.AutopilotOutputs;
 import models.RawModel;
 import renderEngine.DisplayManager;
 import toolbox.ImageConverter;

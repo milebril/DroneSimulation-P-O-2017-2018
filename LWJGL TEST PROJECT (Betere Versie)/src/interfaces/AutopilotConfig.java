@@ -1,4 +1,4 @@
-package autopilot;
+package interfaces;
 
 public interface AutopilotConfig {
     float getGravity();

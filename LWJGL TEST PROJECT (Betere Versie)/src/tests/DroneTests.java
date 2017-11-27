@@ -19,11 +19,11 @@ import org.lwjgl.opengl.GLContext;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
-import autopilot.AutopilotConfig;
 import autopilot.AutopilotConfigReader;
 import autopilot.AutopilotConfigValues;
 import autopilot.AutopilotConfigWriter;
 import entities.*;
+import interfaces.AutopilotConfig;
 import models.RawModel;
 import physicsEngine.PhysicsEngine;
 import renderEngine.DisplayManager;

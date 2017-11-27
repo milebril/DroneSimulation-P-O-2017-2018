@@ -1,4 +1,4 @@
-package autoPilotJar;
+package interfaces;
 
 public interface AutopilotInputs {
     byte[] getImage();

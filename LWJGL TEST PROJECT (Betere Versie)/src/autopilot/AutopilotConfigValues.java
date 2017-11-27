@@ -1,5 +1,7 @@
 package autopilot;
 
+import interfaces.AutopilotConfig;
+
 public class AutopilotConfigValues implements AutopilotConfig{
 
 	private float gravity = 9.81f;

@@ -16,13 +16,13 @@ import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-import autoPilotJar.Autopilot;
+import autoPilotJar.SimpleAutopilot;
 
 public class ImageProcessor {
 	
 	/* ImageProcessor constructor */
 	
-	public ImageProcessor(Autopilot autopilot) {
+	public ImageProcessor(SimpleAutopilot autopilot) {
 		this.autopilot = autopilot;
 		// rotate the cube to be in alignment with the world frame
 		alignCube();
@@ -31,7 +31,7 @@ public class ImageProcessor {
 		translate(0, 0, -5);
 	}
 	
-	private final Autopilot autopilot;
+	private final SimpleAutopilot autopilot;
 	
 	 //Getters for the AutoPilot config 
 	

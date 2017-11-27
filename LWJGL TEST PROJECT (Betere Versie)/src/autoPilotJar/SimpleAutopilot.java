@@ -11,12 +11,15 @@ import java.io.IOException;
 import org.lwjgl.opengl.AMDBlendMinmaxFactor;
 import org.lwjgl.util.vector.Vector3f;
 
-import autopilot.AutopilotConfig;
 import autopilot.AutopilotConfigReader;
+import interfaces.Autopilot;
+import interfaces.AutopilotConfig;
+import interfaces.AutopilotInputs;
+import interfaces.AutopilotOutputs;
 import openCV.ImageProcessor;
 import openCV.RedCubeLocator;
 
-public class Autopilot {	
+public class SimpleAutopilot implements Autopilot, AutopilotOutputs{	
 	private AutopilotConfig configAP;
 	private AutopilotInputs inputAP;
 	
@@ -46,7 +49,7 @@ public class Autopilot {
 	private float newHorStabInclination;
 	private float newVerStabInclination;
 	
-	public Autopilot() {
+	public SimpleAutopilot() {
 		
 		//Set initial inclination to 0
 		newThrust = 0;
@@ -68,7 +71,7 @@ public class Autopilot {
 		//Initialize PIDController for Thrust
 		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
 		this.pidThrust = new PIDController(1.0f, 0.0f, 3.0f, -10, 10);
-		initialize();
+		//initialize();
 		
 		stablePosition = new Vector3f(0, 0, 0);
 	}
@@ -249,13 +252,68 @@ public class Autopilot {
 		return totalMass * configAP.getGravity();
 	}
 	
-	private float getThrust() {
-		return this.newThrust;
-	}
-	
 	private void setThrust(float newThrust) {
 		if(newThrust < 0) this.newThrust = 0;
 		else this.newThrust = newThrust;
+	}
+	
+	
+	
+	
+
+	@Override
+	public AutopilotOutputs simulationStarted(AutopilotConfig config, AutopilotInputs inputs) {
+		this.configAP = config;
+		this.inputAP = inputs;
+		
+		return this;
+	}
+
+	@Override
+	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
+		this.inputAP = inputs;
+		if (this.inputAP.getElapsedTime() > 0.0000001) {
+			//TODO Doe berekeningen hier?
+		}
+		
+		return this;
+	}
+
+	@Override
+	public void simulationEnded() {
+		//Do nothing?
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see interfaces.AutopilotOutputs
+	 * 
+	 * Zo kunnen we this returnen ipv altijd new AutopilotOutputs
+	 */
+	
+	@Override
+	public float getThrust() {
+		return newThrust;
+	}
+
+	@Override
+	public float getLeftWingInclination() {
+		return newLeftWingInclination;
+	}
+
+	@Override
+	public float getRightWingInclination() {
+		return newRightWingInclination;
+	}
+
+	@Override
+	public float getHorStabInclination() {
+		return newHorStabInclination;
+	}
+
+	@Override
+	public float getVerStabInclination() {
+		return newVerStabInclination;
 	}
 	
 }
