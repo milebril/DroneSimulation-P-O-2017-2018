@@ -7,7 +7,7 @@ public abstract class PredictionMethod {
 	/**
 	 * A prediction method can be used to get an approximation of the linear and angular velocities,
 	 * a given amount of seconds into the future
-	 * @param stepSize The step size used by the prediction method.
+	 * @param stepSize The default step size to be used by the prediction method.
 	 */
 	public PredictionMethod(float stepSize) {
 		this.stepSize = stepSize;
