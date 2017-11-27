@@ -18,6 +18,7 @@ import autoPilotJar.AutopilotOutputs;
 import autoPilotJar.AutopilotOutputsReader;
 import autopilot.AutopilotConfig;
 import models.RawModel;
+import physicsEngine.approximationMethods.PredictionMethod;
 import renderEngine.DisplayManager;
 import toolbox.ImageConverter;
 
@@ -30,8 +31,10 @@ import toolbox.ImageConverter;
  */
 public class Drone extends Entity /* implements AutopilotConfig */ {
 
+	private final PredictionMethod predictionMethod;
+
 	public Drone(RawModel model, Matrix4f pose, float scale,
-				AutopilotConfig cfg) {
+				AutopilotConfig cfg, PredictionMethod predictionMethod) {
 		super(model, pose, scale);
 
 		//TODO snelheid mee in constructor opnemen
@@ -74,11 +77,18 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		
 		camera = new Camera(cfg.getNbColumns(), cfg.getNbRows());
 		camera.increasePosition(this.getPosition().x, this.getPosition().y, this.getPosition().z);
+		
+		this.predictionMethod = predictionMethod;
 	}
 
 
 	// AIRFOILS
 	
+	public PredictionMethod getPredictionMethod() {
+		return predictionMethod;
+	}
+
+
 	/**
 	 * The airFoils of the drone (in order [leftwing, rightwing, hor. stabilizer, vert. stabilizer])
 	 */

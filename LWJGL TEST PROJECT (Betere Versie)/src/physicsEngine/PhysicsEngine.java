@@ -9,36 +9,47 @@ import entities.Drone;
 public class PhysicsEngine {
 	
 	public static void applyPhysics (Drone drone, float dt) {
+		float h;
 		
-		// get force and torque
+		if(dt - drone.getPredictionMethod().getStepSize() >= 0){
+			h = drone.getPredictionMethod().getStepSize();
+		} else if (dt > 0) {
+			h = dt;
+		} else {
+			return;
+		}
+			
+			
+		// eerst de snelheden voorspellen met de huidige snelheden en versnelling en positie
+		// dan de posities voorspellen 
+		Vector3f[] newVelocities = drone.getPredictionMethod().predictVelocity(drone.getLinearVelocity(), drone.getAngularVelocity(), drone.getLinearAcceleration(), drone.getAngularAcceleration(), h);
+		Vector3f[] deltaPositions = calculatePositions(drone, newVelocities, h);
+		
+		drone.setLinearVelocity(drone.transformToWorldFrame(newVelocities[0]));
+		drone.setAngularVelocity(drone.transformToWorldFrame(newVelocities[1]));	
+		
+		// posities updaten
+		Vector3f rotationAxis = new Vector3f();
+		deltaPositions[1].normalise(rotationAxis);
+		drone.translate(deltaPositions[0]);
+		drone.rotate(deltaPositions[1].length(), rotationAxis );
+		
+		// get force and torque voor de nieuw berekende situatie n bijhouden van de versnelling in de drone
 		Vector3f[] forces = calculateForces(drone);
 		
 		// calculate the new properties
 		Vector3f[] newAccelerations = calculateAccelerations(drone, forces); // (in drone frame)
-		Vector3f[] newVelocities = calculateVelocities(drone, newAccelerations, dt); // (in drone frame)
-		Vector3f[] newPositions = calculatePositions(drone, newVelocities, dt); // (in world frame)
 		
 		// set the new properties
 		drone.setLinearAcceleration(drone.transformToWorldFrame(newAccelerations[0]));
-		drone.setAngularAcceleration(drone.transformToWorldFrame(newAccelerations[1]));
+		drone.setAngularAcceleration(drone.transformToWorldFrame(newAccelerations[1]));		
 		
-		drone.setLinearVelocity(drone.transformToWorldFrame(newVelocities[0]));
-		drone.setAngularVelocity(drone.transformToWorldFrame(newVelocities[1]));
+		//recursieve oproep
+		PhysicsEngine.applyPhysics(drone, (dt - h));
 		
-		//de positie wordt opgeslagen in een posematrix
-		Vector3f rotationAxis = new Vector3f();
-		newPositions[1].normalise(rotationAxis);
-		drone.translate(newPositions[0]);
-		drone.rotate(newPositions[1].length(), rotationAxis );
 	}
 	
 	
-	/**
-	 * Returns the wind velocity.
-	 */
-	private static Vector3f getWindVelocity(){
-		return new Vector3f(0,0,0);
-	}
 
 	/**
 	 * All the forces and torques exercised on the drone are calculated, added together and then
@@ -129,7 +140,6 @@ public class PhysicsEngine {
 	 * @return the linear and angular velocities of the drone (in drone frame)
 	 */
 	private static Vector3f[] calculateVelocities(Drone drone, Vector3f[] accelerations, float dt) {
-
 		// save current and previous linear accelerations in local variables
 //		Vector3f prevLinearAccelerationD = drone.transformToDroneFrame(drone.getLinearAcceleration());
 //		Vector3f newLinearAccelerationD = new Vector3f(newAccelerations[0].x, newAccelerations[0].y, newAccelerations[0].z);
@@ -151,31 +161,29 @@ public class PhysicsEngine {
 	/**
 	 * Calculates and returns the change in position and orientation of the drone (in world frame).
 	 * The given newVelocities Vector3f[] array is assumed to contain the linear at index 0 and
-	 * the angular velocity at index 1, both in drone frame.
+	 * the angular velocity at index 1, both in world frame.
 	 * Note that this function also uses the previous velocities of the drone and thus should
 	 * be called before the given newVelocities are saved in the drone.
 	 * @return the new position and orientation of the drone (in world frame)
 	 */
 	private static Vector3f[] calculatePositions(Drone drone, Vector3f[] newVelocities, float dt) {
 		// save current and previous linear velocities in local variables
-		Vector3f prevLinearVelocityD = drone.transformToDroneFrame(drone.getLinearVelocity());
-		Vector3f newLinearVelocityD = new Vector3f(newVelocities[0].x, newVelocities[0].y, newVelocities[0].z);
+		Vector3f prevLinearVelocityW= drone.getLinearVelocity();
+		Vector3f newLinearVelocityW = new Vector3f(newVelocities[0].x, newVelocities[0].y, newVelocities[0].z);
 		
 		// calculate the average linear velocity
-		Vector3f avgLinearVelocityD = average(prevLinearVelocityD, newLinearVelocityD);
+		Vector3f avgLinearVelocityW = average(prevLinearVelocityW, newLinearVelocityW);
 		
 		// calculate the position difference
-		Vector3f deltaPositionW = drone.transformToWorldFrame((Vector3f) avgLinearVelocityD.scale(dt));
+		Vector3f deltaPositionW = (Vector3f) avgLinearVelocityW.scale(dt);
 		
-		// add the position difference to the current position
-//		Vector3f positionW = drone.getPosition();
-//		Vector3f.add(deltaPositionW, positionW, positionW);		
+		// add the position difference to the current position	
 		
-		Vector3f prevAngularVelocityD = drone.transformToDroneFrame(drone.getAngularVelocity());
-		Vector3f newAngularVelocityD = newVelocities[1];
-		Vector3f avgAngularVelocityD = average(prevAngularVelocityD, newAngularVelocityD);
+		Vector3f prevAngularVelocityW = (drone.getAngularVelocity());
+		Vector3f newAngularVelocityW = newVelocities[1];
+		Vector3f avgAngularVelocityW = average(prevAngularVelocityW, newAngularVelocityW);
 		// lengte van omega maal de tijd is  
-		Vector3f deltarotationW = drone.transformToWorldFrame((Vector3f) avgAngularVelocityD.scale(dt));
+		Vector3f deltarotationW = ((Vector3f) avgAngularVelocityW.scale(dt));
 		
 		return new Vector3f[]{deltaPositionW, deltarotationW};
 	}
@@ -188,30 +196,6 @@ public class PhysicsEngine {
 		return new Vector3f(a.x + (b.x - a.x) / 2, a.y + (b.y - a.y) / 2, a.z + (b.z - a.z) / 2);
 	}
 }
-	
-	
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
 
 
 
