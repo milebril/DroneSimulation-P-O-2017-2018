@@ -11,6 +11,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+
 import javax.imageio.ImageIO;
 
 import org.opencv.core.Core;
@@ -93,24 +94,23 @@ public class OpenCVTest {
 		
 		// byteArra --> Mat object
 		Mat rgbMat = byteArrayToRGBMat(image.getWidth(), image.getHeight(), byteArray);
-		List<double[]> colorHSVList = getAllHSVColors(rgbMat);
-		List<double[]> colorList = getAllDifferentHSColors(colorHSVList);
-		List<double[]> colorHSList = getAllDifferentHSVColors(colorHSVList);
-		List<double[]> colorVList = getValuesOfV(colorHSList);
-		for (int i = 0; i<colorList.size(); i++){
-			System.out.println("kleur"+ i + "=" +colorList.get(i)[0] + " " + colorList.get(i)[1] );
-		}
 		
-		for (int i = 0; i < colorList.size(); i++){
+		List<double[]> colorHSVList = getAllDifferentHSVColors(rgbMat);
+		List<double[]> colorHSList = getHSValuesofCubes(colorHSVList);
+		List<double[]> colorVList = getValuesOfV(colorHSVList);
+
+		
+		for (int i = 0; i < colorHSList.size(); i++){
 			
-			double[] color ={colorList.get(i)[0],colorList.get(i)[1]};
+			double[] color ={colorHSList.get(i)[0],colorHSList.get(i)[1]};
 			// Filter RGB Mat for 6 different red Hue's
 			Mat[] matArray = redRGBMatFilter(rgbMat, color, colorVList);
 
 
 			// Combine the 6 filtered Mats
 			Mat filterMat = combineMatArray(matArray);
-
+			
+		
 
 			// Get center of mass (of the 2D red cube)
 			double[] centerOfMass = getType0CenterOfMass(filterMat);
@@ -121,7 +121,8 @@ public class OpenCVTest {
 
 
 			// Get red area percentage
-			double percentage = redArea / ((float) image.getHeight()*image.getWidth());
+			double 
+			percentage = redArea / ((float) image.getHeight()*image.getWidth());
 
 
 
@@ -132,7 +133,7 @@ public class OpenCVTest {
 			double imPercentage; double ratio = 10;
 			int iterations = 0;
 
-
+			Imgcodecs.imwrite("res/" + "Test" + ".png", filterMat);
 			while (deltaX > 0.005 || deltaY > 0.005 || ratio > 1.025 || ratio < 0.975) {
 				iterations++;
 
@@ -146,12 +147,11 @@ public class OpenCVTest {
 				// get the ration between the projected areas
 				imPercentage = imaginaryCube.getProjectedAreaPercentage((float) (120.0 / 180 * Math.PI), (float) (120.0 / 180 * Math.PI));
 				ratio = imPercentage / percentage;
-
 				imaginaryCube.translate(0, 0, (1 - ratio)*0.1);
-
-				//imaginaryCube.saveAsImage("result " + String.valueOf(iterations * 2 - 1), rgbMat);
+				imaginaryCube.saveAsImage("result " + String.valueOf(iterations * 2 - 1), rgbMat);
+				
 			}
-
+			
 			long duration = (System.nanoTime() - startTime) / 1000000;
 
 			System.out.println("~ ~ " + imageName + " ~ ~");
@@ -163,6 +163,9 @@ public class OpenCVTest {
 	}
 	
 	
+
+
+
 
 
 	/**
@@ -205,11 +208,13 @@ public class OpenCVTest {
 		
 		// data reads the given array as BGR
 		Mat data = new Mat(height, width, CvType.CV_8UC3);
+		
 		data.put(0, 0, byteArray);
+		
 		
 		// the input was RGB instead of BGR so transform...
 		Imgproc.cvtColor(data, data, Imgproc.COLOR_BGR2RGB);
-	
+		
 		return data;
 	}
 	
@@ -223,8 +228,8 @@ public class OpenCVTest {
 			// turn the rgb Mat into a hsv Mat
 			// (vreemd genoeg heeft BGR 2 HSV hier het gewenste effect en RGB 2 HSV niet)
 			Mat hsvMat = new Mat();
+			
 			Imgproc.cvtColor(rgbMat, hsvMat, Imgproc.COLOR_BGR2HSV);
-		
 			// filter the 6 different red hue's
 			// Red Hue range: [0,10] & [160,179] Saturation is 255 and Value range depends on the surface
 			// Values: pos x: 216, neg x: 76, pos y: 255, neg y: 38, pos z: 178, neg z: 114
@@ -236,12 +241,13 @@ public class OpenCVTest {
 			for (int i = 0; i < colorVList.size(); i++) {
 				
 				// filter the hsv Mat
-				Core.inRange(hsvMat, new Scalar(color[0],   color[1], colorVList.get(i)[0]-5), new Scalar(color[0],   color[1], colorVList.get(i)[0]+5), tempMat1);
+				Core.inRange(hsvMat, new Scalar(color[0]-5,   color[1]-5, colorVList.get(i)[0]-5), new Scalar(color[0]+5,   color[1]+5, colorVList.get(i)[0]+5), tempMat1);
 			
 				// save the Mat object in the array
 				matArray[i] = tempMat1.clone();
-			}
 		
+			}
+			
 		return matArray;
 	}
 	
@@ -397,14 +403,24 @@ public class OpenCVTest {
 	}
 	
 	
-	public static List<double[]> getAllHSVColors(Mat rgbMat){
+	public static List<double[]> getAllDifferentHSVColors(Mat rgbMat){
 		List<double[]> colorHSVList = new ArrayList<double[]>();
 		Mat hsvMat = new Mat();
 		Imgproc.cvtColor(rgbMat, hsvMat, Imgproc.COLOR_BGR2HSV);
-		for (int x = 0; x < 200; x++) {
-			for (int y = 0; y < 200; y++) {
+		for (int x = 0; x < 200; x+=2) {
+			for (int y = 0; y < 200; y+=2) {
 				if ( !(rgbMat.get(y, x)[0] == 255.0 && rgbMat.get(y, x)[1] == 255.0 && rgbMat.get(y, x)[2] == 255.0 )) {
-					colorHSVList.add(new double[]{hsvMat.get(y, x)[0], hsvMat.get(y, x)[1],hsvMat.get(y, x)[2]});
+					int teller = 0;
+					for (int j = 0; j < colorHSVList.size(); j++) {
+						if ( (colorHSVList.get(j)[0] <= hsvMat.get(y, x)[0]+3 && colorHSVList.get(j)[0] >= hsvMat.get(y, x)[0]-3 ) && (colorHSVList.get(j)[1] <= hsvMat.get(y, x)[1]+3 &&colorHSVList.get(j)[1] >= hsvMat.get(y, x)[1]-3 ) && (colorHSVList.get(j)[2] <= hsvMat.get(y, x)[2]+3 &&colorHSVList.get(j)[2] >= hsvMat.get(y, x)[2]-3 )) {
+							teller+=1;
+							}
+					}
+					if ( teller == 0 ) {
+						colorHSVList.add(new double[]{hsvMat.get(y, x)[0], hsvMat.get(y, x)[1],hsvMat.get(y, x)[2]});
+					}
+
+					
 				}
 				
 			}
@@ -414,66 +430,47 @@ public class OpenCVTest {
     return colorHSVList;
    
 	}
-	public static List<double[]> getAllDifferentHSColors(List<double[]> colorHSVList){
+
+	public static List<double[]> getHSValuesofCubes(List<double[]> colorHSVList){
 		List<double[]> colorHSList = new ArrayList<double[]>();
-		colorHSList.add(new double[]{colorHSVList.get(0)[0],colorHSVList.get(0)[1], colorHSVList.get(0)[2]});
+		
+		colorHSList.add(new double[]{colorHSVList.get(0)[0],colorHSVList.get(0)[1]});
 		
 		for (int i = 1; i < colorHSVList.size(); i++) {
 			int teller = 0;
 			int size = colorHSList.size();
 			for (int j = 0; j < size; j++) {
-				
-				if ( (colorHSVList.get(i)[0] <= colorHSList.get(j)[0]+3 && colorHSVList.get(i)[0] >= colorHSList.get(j)[0]-3 ) && (colorHSVList.get(i)[1] <= colorHSList.get(j)[1]+3 &&colorHSVList.get(i)[1] >= colorHSList.get(j)[1]-3 )) {
+				if ((colorHSVList.get(i)[0] >= colorHSList.get(j)[0]-3 && colorHSVList.get(i)[0] <= colorHSList.get(j)[0]+3 ) && (colorHSVList.get(i)[1] >= colorHSList.get(j)[1]-3 && colorHSVList.get(i)[1] <= colorHSList.get(j)[1]+3 )) {
 					teller+=1;
 					}
 			}
 			if ( teller == 0 ) {
+				
 				colorHSList.add(new double[]{colorHSVList.get(i)[0],colorHSVList.get(i)[1]} );	
 			}	
 			
 		}
-	
+
 		return colorHSList;	
 		}
-	
-	public static List<double[]> getAllDifferentHSVColors(List<double[]> colorHSVList){
-		List<double[]> colorHSList = new ArrayList<double[]>();
-		colorHSList.add(new double[]{colorHSVList.get(0)[0],colorHSVList.get(0)[1], colorHSVList.get(0)[2]});
+
+			
+	public static List<double[]> getValuesOfV(List<double[]> colorHSVList){
+		List<double[]> colorVList = new ArrayList<double[]>();
+		
+		colorVList.add(new double[]{colorHSVList.get(0)[2]});
 		
 		for (int i = 1; i < colorHSVList.size(); i++) {
 			int teller = 0;
-			int size = colorHSList.size();
-			for (int j = 0; j < size; j++) {
-				
-				if ( (colorHSVList.get(i)[0] == colorHSList.get(j)[0]) && (colorHSVList.get(i)[1] == colorHSList.get(j)[1]) && (colorHSVList.get(i)[2] == colorHSList.get(j)[2])) {
-					teller+=1;
-					}
-			}
-			if ( teller == 0 ) {
-				colorHSList.add(new double[]{colorHSVList.get(i)[0],colorHSVList.get(i)[1],colorHSVList.get(i)[2]} );	
-			}	
-			
-		}
-	
-		return colorHSList;	
-		}
-			
-	public static List<double[]> getValuesOfV(List<double[]> colorHSList){
-		List<double[]> colorVList = new ArrayList<double[]>();
-		
-		colorVList.add(new double[]{colorHSList.get(0)[2]});
-		
-		for (int i = 1; i < colorHSList.size(); i++) {
-			int teller = 0;
 			int size = colorVList.size();
 			for (int j = 0; j < size; j++) {
-				if ((colorHSList.get(i)[2] == colorVList.get(j)[0])) {
+				if ((colorHSVList.get(i)[2] == colorVList.get(j)[0])) {
 					teller+=1;
 					}
 			}
 			if ( teller == 0 ) {
 				
-				colorVList.add(new double[]{colorHSList.get(i)[2]} );	
+				colorVList.add(new double[]{colorHSVList.get(i)[2]} );	
 			}	
 			
 		}
@@ -481,6 +478,7 @@ public class OpenCVTest {
 		return colorVList;	
 		}
 			
+	
 		}
 		
 	
