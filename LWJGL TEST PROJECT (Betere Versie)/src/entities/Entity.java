@@ -84,10 +84,8 @@ public class Entity {
 	 * rotates the entity given angles around the x- y- z axis of the world frame
 	 * @param angles
 	 */
-	public void rotate(Vector3f angles){
-		this.getPose().rotate(angles.x, new Vector3f(1,0,0));
-		this.getPose().rotate(angles.y, new Vector3f(0,1,0));
-		this.getPose().rotate(angles.z, new Vector3f(0,0,1));	
+	public void rotate(float angle, Vector3f axis){
+		this.getPose().rotate(angle , axis);	
 	}
 
 	public void setPose(Matrix4f pose) {

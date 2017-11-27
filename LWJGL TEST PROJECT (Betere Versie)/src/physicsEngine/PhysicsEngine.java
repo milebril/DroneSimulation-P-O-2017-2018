@@ -26,8 +26,10 @@ public class PhysicsEngine {
 		drone.setAngularVelocity(drone.transformToWorldFrame(newVelocities[1]));
 		
 		//de positie wordt opgeslagen in een posematrix
+		Vector3f rotationAxis = new Vector3f();
+		newPositions[1].normalise(rotationAxis);
 		drone.translate(newPositions[0]);
-		drone.rotate(newPositions[1]);
+		drone.rotate(newPositions[1].length(), rotationAxis );
 	}
 	
 	/**
@@ -171,7 +173,7 @@ public class PhysicsEngine {
 		Vector3f prevAngularVelocityD = drone.transformToDroneFrame(drone.getAngularVelocity());
 		Vector3f newAngularVelocityD = newVelocities[1];
 		Vector3f avgAngularVelocityD = average(prevAngularVelocityD, newAngularVelocityD);
-		
+		// lengte van omega maal de tijd is  
 		Vector3f deltarotationW = drone.transformToWorldFrame((Vector3f) avgAngularVelocityD.scale(dt));
 		
 		return new Vector3f[]{deltaPositionW, deltarotationW};
