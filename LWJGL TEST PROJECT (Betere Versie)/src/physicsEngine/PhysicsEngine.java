@@ -32,6 +32,7 @@ public class PhysicsEngine {
 		drone.rotate(newPositions[1].length(), rotationAxis );
 	}
 	
+	
 	/**
 	 * Returns the wind velocity.
 	 */
