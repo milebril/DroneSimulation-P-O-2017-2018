@@ -119,23 +119,23 @@ public class AirFoil {
 		
 		// velocity of the airfoil caused by the drones linear velocity
 		Vector3f linearVelocityW = this.getDrone().getLinearVelocity();
-		
 		// airspeed = wind - airfoil velocity
 		Vector3f.add(airSpeedW, rotationalVelocityW, airSpeedW);
 		Vector3f.add(airSpeedW, linearVelocityW, airSpeedW);
 		Vector3f.sub(airSpeedW, windW, airSpeedW);
+
 		
 		// transform the airSpeed vector to the drone frame
 		Vector3f airSpeedD = this.getDrone().transformToDroneFrame(airSpeedW);
 		
-//		System.out.println("Airfoil calculateAirfliff airspeedD: " + airSpeedD);
+		//System.out.println("Airfoil calculateAirfliff airspeedD: " + airSpeedD);
 		
 		// project airSpeedD on the surface, perpendicular to the rotationAxis of the AirFoil
 		Vector3f rotationAxisD = this.getRotAxis();
 		Vector3f projectedAirspeedVectorD = new Vector3f(0, 0, 0);
 		Vector3f.sub(airSpeedD, (Vector3f) rotationAxisD.scale(Vector3f.dot(airSpeedD, rotationAxisD)), projectedAirspeedVectorD);
 		
-//		System.out.println("Airfoil calculateAirfliff projectedairspeedD: " + projectedAirspeedVectorD);
+		//System.out.println("Airfoil calculateAirfliff projectedairspeedD: " + projectedAirspeedVectorD);
 
 		
 		// calculate the angle of attack, defined as -atan2(S . N, S . A), where S
@@ -152,7 +152,12 @@ public class AirFoil {
 		// calculate the lift force N . liftSlope . AOA . s^2, where N is the
 		// normal, AOA is the angle of attack, and s is the projected airspeed
 		float airspeedSquared = projectedAirspeedVectorD.lengthSquared();
+		System.out.println("Liftslope: " + this.getLiftSlope());
+		System.out.println("aoa : " + aoa);
+		System.out.println("airspeedSquared: " + airspeedSquared);
+		System.out.println("normalD: " + normalD);
 		Vector3f liftForceD = (Vector3f) normalD.scale(this.getLiftSlope() * aoa * airspeedSquared);
+		System.out.println("liftforce: "  + liftForceD);
 		return liftForceD;
 	}
 	
