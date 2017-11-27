@@ -70,10 +70,10 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		//Initialize PIDController for horizontalflight
 		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
 		//this.pidHorStab = new PIDController(10.0f,1.0f,5.0f);
-		this.pidHorWing = new PIDController(1.0f,0.0f,10.0f, (float) -(Math.PI / 180), heightGoal);
+		this.pidHorWing = new PIDController(1.0f,0.0f,10.0f, (float) -(Math.PI / 180), 0);
 		
 		this.pidHorStab = new PIDController(2.0f,1.0f,10.0f, (float) (Math.PI / 180), 0);
-		this.pidHorGoal = new PIDController(0.1f,0.0f,0.0f, (float) (Math.PI / 180), heightGoal + 3);
+		this.pidHorGoal = new PIDController(2.0f,0.0f,1.0f, (float) (Math.PI / 180), 0);
 		//Initialize AP with configfile
 		
 		//Initialize PIDController for Thrust
@@ -290,7 +290,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			
 			currentPosition = new Vector3f(inputAP.getX(), inputAP.getY(), inputAP.getZ());
 			
-			newHorStabInclination += pidHorGoal.calculateChange(getAngle() - inputAP.getPitch(), dt);
+			newHorStabInclination += pidHorGoal.calculateChange(inputAP.getPitch() - getAngle(), dt);
 			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
 			else if(newHorStabInclination < - Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
 			System.out.println("pitch : " + inputAP.getPitch());
