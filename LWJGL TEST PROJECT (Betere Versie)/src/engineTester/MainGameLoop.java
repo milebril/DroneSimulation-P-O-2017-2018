@@ -57,6 +57,9 @@ public class MainGameLoop {
 	private static boolean freeRoamCameraLocked = true;
 	private static boolean lLock = false;
 	
+	private static Entity redCube;
+	private static List<Entity> entities;
+	
 	//TODO main opruimen, code eruit halen
 	
 	public static void main(String[] args) throws IOException {
@@ -69,12 +72,6 @@ public class MainGameLoop {
 		File config = new File("res/AutopilotConfig.cfg");
 		
 		try {
-			/*//Create new config file with Values from AutopilotConfigValues
-			if (!config.exists()) {
-				DataOutputStream s = new DataOutputStream(new FileOutputStream(config));
-				AutopilotConfigWriter.write(s, new AutopilotConfigValues());
-			}*/
-			
 			//Read the config file
 			DataInputStream inputStream = new DataInputStream(new FileInputStream(config));
 			autopilotConfig = AutopilotConfigReader.read(inputStream);
@@ -88,10 +85,7 @@ public class MainGameLoop {
 		DisplayManager.createDisplay();
 		//Loader is used to load models using VAO's and VBO's
 		Loader loader = new Loader();
-		//
 		TextMaster.init(loader);
-		
-		
 		
 		StaticShader shader = new StaticShader();
 		StaticShader shaderFreeCam = new StaticShader();
@@ -105,9 +99,24 @@ public class MainGameLoop {
 		Renderer renderTopDown = new Renderer(shaderTopDown, 50, 50);
 		Renderer renderSideView = new Renderer(shaderSideView, 50, 50);
 		
+		//FreeRoam Camera
+		freeRoamCamera = new Camera();
+		freeRoamCamera.setPosition(new Vector3f(0, 100, 0));
+		freeRoamCamera.setYaw(-45);
+		
+		//TopDown camera
+		Camera topDownCamera = new Camera();
+		topDownCamera.setPosition(new Vector3f(0, 150, -50));
+		topDownCamera.setRotation((float) -(Math.PI / 2), 0, 0);
+		
+		//Sideview Camera
+		Camera sideViewCamera = new Camera();
+		sideViewCamera.setPosition(new Vector3f(150,5,-50));
+		sideViewCamera.setRotation(0, (float) -(Math.PI / 2), 0);
+		
 		//Creating 10 test cubes
-		//Random r = new Random();
-		List<Entity> entities = new ArrayList<>();
+		entities = new ArrayList<>();
+//		Random r = new Random();
 //		for (int i = 0; i < 10; i++) {
 //			Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
 //			RawModel model = loader.loadToVAO(c.positions, c.colors, null);
@@ -117,98 +126,60 @@ public class MainGameLoop {
 //		}
 		
 		Cube c = new Cube(1, 0, 0);
-		RawModel model = loader.loadToVAO(c.positions, c.colors, null);
-		//Entity e = new Entity(model, 
-			//	new Vector3f(10,30,-50),0, 0, 0, 1);
-		
-		//Entity e = new Entity(model, 
-			//	new Vector3f(0,30,-50),0, 0, 0, 1);
-		
-		Entity e = new Entity(model, new Matrix4f().translate(new Vector3f(-10,30,-50)) , 1);
+		RawModel redCubeModel = loader.loadToVAO(c.positions, c.colors, null);
+		redCube = new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(-10,30,-50)) , 1);
 		
 		Cuboid droneCube = new Cuboid(0, 0, 0);
 		drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
 				new Matrix4f().translate(new Vector3f(0, 30, 0)), 1, autopilotConfig);
-		
-		//FreeRoam Camera
-		freeRoamCamera = new Camera();
-		freeRoamCamera.setPosition(new Vector3f(0, 100, 0));
-		freeRoamCamera.setYaw(-45);
-		
-		Camera topDownCamera = new Camera();
-		topDownCamera.setPosition(new Vector3f(0, 150, -50));
-		topDownCamera.setRotation((float) -(Math.PI / 2), 0, 0);
-		
-		Camera sideViewCamera = new Camera();
-		sideViewCamera.setPosition(new Vector3f(150,5,-50));
-		sideViewCamera.setRotation(0, (float) -(Math.PI / 2), 0);
-		
 		
 		//Autopilot stuff
 		Autopilot autopilot = AutopilotFactory.createAutopilot();
 		autopilot.simulationStarted(autopilotConfig, drone.getAutoPilotInpus());
 		
 		while(!Display.isCloseRequested()){
-			//Camera
+			//Drone Camera View
+			drone.getCamera().setPosition(drone.getPosition());	
 			GL11.glViewport(0, 0, 200, 200);
 			GL11.glScissor(0,0,200,200);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			renderer.prepare();
 			shader.start();
 			shader.loadViewMatrix(drone.getCamera());
-			
-			for (Entity entity : entities) {
-				rendererFreeCam.render(entity,shaderFreeCam);
-			} 
-			renderer.render(e, shader);
-			renderer.render(drone, shader);
+			renderView(renderer, shader);
 			
 			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
 				drone.getCamera().takeSnapshot();
 			}
 			
+			//3rd Person View (FreeCam)
 			GL11.glViewport(200+1, 0, Display.getWidth() - 700, Display.getHeight());
 			GL11.glScissor(200+1, 0, Display.getWidth() - 700, Display.getHeight());
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			rendererFreeCam.prepare();
 			shaderFreeCam.start();
 			shaderFreeCam.loadViewMatrix(freeRoamCamera);
+			renderView(rendererFreeCam, shaderFreeCam);
 			
-			/* 3rd person */
-			for (Entity entity : entities) {
-				rendererFreeCam.render(entity,shaderFreeCam);
-			} 
-			rendererFreeCam.render(e, shaderFreeCam);
-			rendererFreeCam.render(drone, shaderFreeCam);
-			
+			//TopDown View
 			GL11.glViewport(Display.getWidth() - 498, Display.getHeight()/2 + 1 ,499 , Display.getHeight()/2);
 			GL11.glScissor(Display.getWidth() - 498, Display.getHeight()/2  + 1, 499 , Display.getHeight()/2);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			renderTopDown.prepare();
 			shaderTopDown.start();
 			shaderTopDown.loadViewMatrix(topDownCamera);
+			renderView(renderTopDown, shaderTopDown);
 			
-			for (Entity entity : entities) {
-				rendererFreeCam.render(entity,shaderFreeCam);
-			} 
-			
-			renderTopDown.render(e, shaderTopDown);
-			renderTopDown.render(drone, shaderTopDown);
-			
+			//SideView
 			GL11.glViewport(Display.getWidth() - 498, 0 ,500 , Display.getHeight()/2);
 			GL11.glScissor(Display.getWidth() - 498, 0 ,500 , Display.getHeight()/2);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			renderSideView.prepareText();
 			shaderSideView.start();
 			shaderSideView.loadViewMatrix(sideViewCamera);
+			renderView(renderSideView, shaderSideView);
 			
-			for (Entity entity : entities) {
-				rendererFreeCam.render(entity,shaderFreeCam);
-			} 
-			
-			renderSideView.render(e, shaderSideView);
-			renderSideView.render(drone, shaderSideView);
-			
+			//GUI View
 			GL11.glViewport(0, 200, 200, Display.getHeight() - 200);
 			GL11.glScissor(0, 200, 200, Display.getHeight() - 200);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
@@ -229,16 +200,16 @@ public class MainGameLoop {
 			textPosition.setColour(1, 1, 1);
 			
 			float dt = DisplayManager.getFrameTimeSeconds();
-			if(!( Math.abs(Math.sqrt(Math.pow(drone.getPosition().x - e.getPosition().x, 2) +
-					Math.pow(drone.getPosition().y - e.getPosition().y, 2) +
-					Math.pow(drone.getPosition().z - e.getPosition().z, 2))) < 4)) {
+			if(!( Math.abs(Math.sqrt(Math.pow(drone.getPosition().x - redCube.getPosition().x, 2) +
+					Math.pow(drone.getPosition().y - redCube.getPosition().y, 2) +
+					Math.pow(drone.getPosition().z - redCube.getPosition().z, 2))) < 4)) {
+				
 				//applyphysics rekent de krachten uit en gaat dan de kinematische waarden van de drone
 				// aanpassen op basis daarvan 
 				PhysicsEngine.applyPhysics(drone, dt);
 				System.out.println("inclination" + drone.getLeftWing().getInclination());
 				System.out.println("Speed" + drone.getAbsVelocity());
 				System.out.println("Thrustforce" + drone.getThrustForce());
-
 				
 				//Autopilot stuff
 				AutopilotInputs inputs = drone.getAutoPilotInpus();
@@ -251,7 +222,6 @@ public class MainGameLoop {
 			// de tekst moet telkens worden verwijderd, anders wordt er elke loop nieuwe tekst overgeprint (=> onleesbaar)
 			TextMaster.removeText(textSpeed);
 			TextMaster.removeText(textPosition);
-			
 			
 			keyInputs();
 			
@@ -266,6 +236,15 @@ public class MainGameLoop {
 		loader.cleanUp();
 		DisplayManager.closeDisplay();
 
+	}
+	
+	public static void renderView(Renderer renderer, StaticShader shader) {
+		for (Entity entity : entities) {
+			renderer.render(entity,shader);
+		} 
+		
+		renderer.render(redCube, shader);
+		renderer.render(drone, shader);
 	}
 	
 	public static void keyInputs() {
