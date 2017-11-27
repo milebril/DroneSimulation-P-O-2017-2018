@@ -118,12 +118,12 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		float incChange = this.pidHorizontalStabilisation.calculateChange(currentPosition.y, this.dt);
 		float[] wingChange = new float[] {incChange,incChange};
 		
-		if(newLeftWingInclination + wingChange[0] >= Math.PI/4) newLeftWingInclination = (float) (Math.PI/4);
-		else if(newLeftWingInclination + wingChange[0] <= -Math.PI/4) newLeftWingInclination = (float) -(Math.PI/4);	
+		if(newLeftWingInclination + wingChange[0] >= 1) newLeftWingInclination = (float) (1);
+		else if(newLeftWingInclination + wingChange[0] <= -1) newLeftWingInclination = (float) -(1);	
 		else newLeftWingInclination += wingChange[0];
 		
-		if(newRightWingInclination + wingChange[1] >= Math.PI/4)  newRightWingInclination = (float) (Math.PI/4);
-		else if(newRightWingInclination + wingChange[1] <= -Math.PI/4) newRightWingInclination = (float) -(Math.PI/4);
+		if(newRightWingInclination + wingChange[1] >= 1)  newRightWingInclination = (float) (1);
+		else if(newRightWingInclination + wingChange[1] <= -1) newRightWingInclination = (float) -(1);
 		else newRightWingInclination += wingChange[1];
 		
 		//NewThrust
@@ -273,7 +273,32 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
 		this.inputAP = inputs;
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
-			//TODO Doe berekeningen hier?
+			//TODO Heb dit gekopieerd uit communicateWithDrone();
+			
+//			//Set Variables for this iteration
+//			//cubeLocator = new ImageProcessor(this);
+//			cubeLocator = new ImageProcessor(this);
+//			
+//			currentPosition = new Vector3f(inputAP.getX(), inputAP.getY(), inputAP.getZ());
+//			//TODO Heading?
+//			elapsedTime = inputAP.getElapsedTime();
+//			dt = elapsedTime - prevElapsedTime;
+//			
+//			makeData();
+//			
+//			
+////			newLeftWingInclination = newHorizontalInclinations[0];
+////			newRightWingInclination = newHorizontalInclinations[1];
+//			
+//			//Save droneData we need in nextIteration
+//			saveData();
+			
+			currentPosition = new Vector3f(inputAP.getX(), inputAP.getY(), inputAP.getZ());
+
+			newLeftWingInclination = (float) (Math.PI / 12);
+			newRightWingInclination = (float) (Math.PI / 12);
+			
+			newHorStabInclination = (float) -(Math.PI/10);
 		}
 		
 		return this;
