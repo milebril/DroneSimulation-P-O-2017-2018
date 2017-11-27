@@ -20,7 +20,7 @@ public class PhysicsEngine {
 		
 		// set the new properties
 		drone.setLinearAcceleration(drone.transformToWorldFrame(newAccelerations[0]));
-		drone.setAngularAcceleration(drone.transformToWorldFrame(newVelocities[1]));
+		drone.setAngularAcceleration(drone.transformToWorldFrame(newAccelerations[1]));
 		
 		drone.setLinearVelocity(drone.transformToWorldFrame(newVelocities[0]));
 		drone.setAngularVelocity(drone.transformToWorldFrame(newVelocities[1]));
