@@ -20,6 +20,7 @@ import openCV.ImageProcessor;
 import openCV.RedCubeLocator;
 
 public class SimpleAutopilot implements Autopilot, AutopilotOutputs{	
+	private boolean heightGoalReached = false;
 	private AutopilotConfig configAP;
 	private AutopilotInputs inputAP;
 	
@@ -38,9 +39,12 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	private float prevElapsedTime;
 	private float dt = 0;
 	
+	private float heightGoal = 1;
+	
 	private ImageProcessor cubeLocator;
 	private PIDController pidHorStab;
 	private PIDController pidHorWing;
+	private PIDController pidHorGoal;
 	private PIDController pidThrust;
 	
 	/* Variables to send back to drone	 */
@@ -66,8 +70,10 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		//Initialize PIDController for horizontalflight
 		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
 		//this.pidHorStab = new PIDController(10.0f,1.0f,5.0f);
-		this.pidHorWing = new PIDController(1.0f,0.0f,10.0f, (float) -(Math.PI / 180), 0);
-		this.pidHorStab = new PIDController(2.0f,0.0f,1.0f, (float) (Math.PI / 180), 0);
+		this.pidHorWing = new PIDController(1.0f,0.0f,10.0f, (float) -(Math.PI / 180), heightGoal);
+		
+		this.pidHorStab = new PIDController(2.0f,1.0f,10.0f, (float) (Math.PI / 180), 0);
+		this.pidHorGoal = new PIDController(1.0f,0.0f,0.5f, (float) (Math.PI / 180), heightGoal + 3);
 		//Initialize AP with configfile
 		
 		//Initialize PIDController for Thrust
@@ -314,11 +320,35 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			System.out.println("Hor Wing Inc: " + newRightWingInclination);
 			
 			//HORIZONTAL STABILISER
-			newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch(), dt);
-			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
-			else if(newHorStabInclination < -Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
-			System.out.println("Hor StabWing Inc: " + newHorStabInclination);
+			if(this.currentPosition.getY() < this.heightGoal + 0.1 && this.currentPosition.getY() > this.heightGoal - 0.1)
+				this.heightGoalReached = true;
+			//Stabilise
+			if(this.heightGoalReached == true){
+				newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch(), dt);
+				if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
+				else if(newHorStabInclination < -Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
 			
+//				float incChange = this.pidHorWing.calculateChange(currentPosition.y, this.dt);
+//				float[] wingChange = new float[] {incChange,incChange};	
+//			
+//				newLeftWingInclination += wingChange[0];
+//				if(newLeftWingInclination >= Math.PI/6) newLeftWingInclination = (float) (Math.PI/6);
+//				else if(newLeftWingInclination <= -Math.PI/6) newLeftWingInclination = (float) -(Math.PI/6);	
+//			
+//				newRightWingInclination += wingChange[1];
+//				if(newRightWingInclination >= Math.PI/6)  newRightWingInclination = (float) (Math.PI/6);
+//				else if(newRightWingInclination <= -Math.PI/6) newRightWingInclination = (float) -(Math.PI/6);
+//				
+//				System.out.println("Hor Wing Inc: " + newRightWingInclination);
+			}
+			//climb/fall
+			else{
+				this.heightGoalReached = false;
+				newHorStabInclination += pidHorGoal.calculateChange(this.currentPosition.getY(), dt);
+				if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
+				else if(newHorStabInclination < -Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
+			}
+			System.out.println("Hor StabWing Inc: " + newHorStabInclination);
 			System.out.println();
 			//THRUST FORCE
 			this.newThrust = 8;
