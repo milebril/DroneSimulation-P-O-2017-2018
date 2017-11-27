@@ -39,7 +39,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	private float dt = 0;
 	
 	private ImageProcessor cubeLocator;
-	private PIDController pidHorizontalStabilisation;
+	private PIDController pidHorStab;
+	private PIDController pidHorWing;
 	private PIDController pidThrust;
 	
 	/* Variables to send back to drone	 */
@@ -64,8 +65,9 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		
 		//Initialize PIDController for horizontalflight
 		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
-		//this.pidHorizontalStabilisation = new PIDController(10.0f,1.0f,5.0f);
-		this.pidHorizontalStabilisation = new PIDController(5.0f,0.0f,3.0f, (float) -(Math.PI / 180), 0);
+		//this.pidHorStab = new PIDController(10.0f,1.0f,5.0f);
+		this.pidHorWing = new PIDController(1.0f,0.0f,10.0f, (float) -(Math.PI / 180), 0);
+		this.pidHorStab = new PIDController(2.0f,0.0f,1.0f, (float) (Math.PI / 180), 0);
 		//Initialize AP with configfile
 		
 		//Initialize PIDController for Thrust
@@ -115,16 +117,16 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	
 	private void makeData() {
 		//Horizontal Wings
-		float incChange = this.pidHorizontalStabilisation.calculateChange(currentPosition.y, this.dt);
-		float[] wingChange = new float[] {incChange,incChange};
-		
-		if(newLeftWingInclination + wingChange[0] >= 1) newLeftWingInclination = (float) (1);
-		else if(newLeftWingInclination + wingChange[0] <= -1) newLeftWingInclination = (float) -(1);	
-		else newLeftWingInclination += wingChange[0];
-		
-		if(newRightWingInclination + wingChange[1] >= 1)  newRightWingInclination = (float) (1);
-		else if(newRightWingInclination + wingChange[1] <= -1) newRightWingInclination = (float) -(1);
-		else newRightWingInclination += wingChange[1];
+//		float incChange = this.pidHorStab.calculateChange(currentPosition.y, this.dt);
+//		float[] wingChange = new float[] {incChange,incChange};
+//		
+//		if(newLeftWingInclination + wingChange[0] >= 1) newLeftWingInclination = (float) (1);
+//		else if(newLeftWingInclination + wingChange[0] <= -1) newLeftWingInclination = (float) -(1);	
+//		else newLeftWingInclination += wingChange[0];
+//		
+//		if(newRightWingInclination + wingChange[1] >= 1)  newRightWingInclination = (float) (1);
+//		else if(newRightWingInclination + wingChange[1] <= -1) newRightWingInclination = (float) -(1);
+//		else newRightWingInclination += wingChange[1];
 		
 		//NewThrust
 //		float speed = this.calculateSpeedVector().length();
@@ -133,8 +135,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 //			this.setThrust(this.getThrust() + thrustChange);
 //			//System.out.println("New Thrust: " + this.getThrust());
 //		}
-		
-		
+		newRightWingInclination = (float) ((float) 10*(Math.PI/180));
+		newLeftWingInclination = (float) ((float) 10*(Math.PI/180));
 		newHorStabInclination = 0;
 		newVerStabInclination = 0;
 		//Vector3f difference = calculateDiffVector();
@@ -294,11 +296,32 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 //			saveData();
 			
 			currentPosition = new Vector3f(inputAP.getX(), inputAP.getY(), inputAP.getZ());
-
-			newLeftWingInclination = (float) (Math.PI / 12);
-			newRightWingInclination = (float) (Math.PI / 12);
 			
-			newHorStabInclination = (float) -(Math.PI/10);
+			//HORIZONTAL WINGPOSITION
+			float incChange = this.pidHorWing.calculateChange(currentPosition.y, this.dt);
+			float[] wingChange = new float[] {incChange,incChange};
+			
+			newLeftWingInclination += wingChange[0];
+//			newLeftWingInclination -= inputAP.getPitch();
+			if(newLeftWingInclination >= Math.PI/6) newLeftWingInclination = (float) (Math.PI/6);
+			else if(newLeftWingInclination <= -Math.PI/6) newLeftWingInclination = (float) -(Math.PI/6);	
+			
+			newRightWingInclination += wingChange[1];
+//			newRightWingInclination -= inputAP.getPitch();
+			if(newRightWingInclination >= Math.PI/6)  newRightWingInclination = (float) (Math.PI/6);
+			else if(newRightWingInclination <= -Math.PI/6) newRightWingInclination = (float) -(Math.PI/6);
+			
+			System.out.println("Hor Wing Inc: " + newRightWingInclination);
+			
+			//HORIZONTAL STABILISER
+			newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch(), dt);
+			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
+			else if(newHorStabInclination < -Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
+			System.out.println("Hor StabWing Inc: " + newHorStabInclination);
+			
+			System.out.println();
+			//THRUST FORCE
+			this.newThrust = 8;
 		}
 		
 		return this;
