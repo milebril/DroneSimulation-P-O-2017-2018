@@ -134,7 +134,7 @@ public class MainGameLoop {
 		redCube = new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(-10,30,-50)) , 1);
 		
 		Cuboid droneCube = new Cuboid(0, 0, 0);
-		Drone drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
+		drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
 				new Matrix4f().translate(new Vector3f(0, 30, 0)), 1, autopilotConfig, new EulerPrediction(STEP_TIME));
 		
 		//Autopilot stuff
