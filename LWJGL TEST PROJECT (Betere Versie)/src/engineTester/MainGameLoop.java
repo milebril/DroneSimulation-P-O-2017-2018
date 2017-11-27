@@ -3,6 +3,8 @@ package engineTester;
 import models.RawModel;
 import models.TexturedModel;
 import physicsEngine.PhysicsEngine;
+import physicsEngine.approximationMethods.EulerPrediction;
+import physicsEngine.approximationMethods.PredictionMethod;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -48,6 +50,8 @@ import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
 
 public class MainGameLoop {
+
+	private static final float STEP_TIME = 0.01f;
 
 	public static AutopilotConfig autopilotConfig;
 	
@@ -130,8 +134,8 @@ public class MainGameLoop {
 		redCube = new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(-10,30,-50)) , 1);
 		
 		Cuboid droneCube = new Cuboid(0, 0, 0);
-		drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
-				new Matrix4f().translate(new Vector3f(0, 30, 0)), 1, autopilotConfig);
+		Drone drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
+				new Matrix4f().translate(new Vector3f(0, 30, 0)), 1, autopilotConfig, new EulerPrediction(STEP_TIME));
 		
 		//Autopilot stuff
 		Autopilot autopilot = AutopilotFactory.createAutopilot();
