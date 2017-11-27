@@ -295,10 +295,11 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			
 			currentPosition = new Vector3f(inputAP.getX(), inputAP.getY(), inputAP.getZ());
 
-			newLeftWingInclination = (float) (Math.PI / 12);
-			newRightWingInclination = (float) (Math.PI / 12);
+			newLeftWingInclination = (float) ((float) 10*(Math.PI/180));
+			newRightWingInclination = (float) ((float) 10*(Math.PI/180));
 			
-			newHorStabInclination = (float) -(Math.PI/10);
+			newHorStabInclination = 0;
+			newVerStabInclination = 0;
 		}
 		
 		return this;

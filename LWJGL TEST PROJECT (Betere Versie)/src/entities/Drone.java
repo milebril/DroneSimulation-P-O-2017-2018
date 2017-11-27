@@ -522,29 +522,14 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		this.getCamera().increaseRoll(roll);	
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
 	// Autopilot communication
 	/**
-	 * Sends the properties of the drone to the Autopilot
+	 * Add drone data to Autopilots interface to send to the Autopilot
 	 * @throws IOException
 	 */
-	public void sendToAutopilot() throws IOException {
-		DataOutputStream s = new DataOutputStream(new FileOutputStream("res/APInputs.cfg"));
-		
-		//nieuwe klasse maken als de interpretatie van de generic interface autopilotsinput
-		AutopilotInputs value = new AutopilotInputs() {
+	public AutopilotInputs getAutoPilotInpus() {
+
+		return new AutopilotInputs() {
 			public byte[] getImage() { return ImageConverter.bufferedImageToByteArray(camera.takeSnapshot());}
 			
 			public float getX() { return getPosition().x; }
@@ -558,26 +543,18 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 			public float getElapsedTime() { return DisplayManager.getElapsedTime(); }
 		};
 		
-		AutopilotInputsWriter.write(s, value);
-		
-		s.close();
 	}
 	
 	/**
 	 * Receives the input controls from the Autopilot
-	 * @throws IOException
 	 */
-	public void getFromAutopilot() throws IOException {
-		DataInputStream i = new DataInputStream(new FileInputStream("res/APOutputs.cfg"));
+	public void setAutopilotOutouts(AutopilotOutputs outputs) {
+		setThrustForce(outputs.getThrust());
 		
-		AutopilotOutputs settings = AutopilotOutputsReader.read(i);
-		
-		setThrustForce(settings.getThrust());
-		
-		this.getLeftWing().setInclination(settings.getLeftWingInclination());
-		this.getRightWing().setInclination(settings.getRightWingInclination());		
-		this.getHorizStabilizer().setInclination(settings.getHorStabInclination());
-		this.getVertStabilizer().setInclination(settings.getVerStabInclination());
+		this.getLeftWing().setInclination(outputs.getLeftWingInclination());
+		this.getRightWing().setInclination(outputs.getRightWingInclination());		
+		this.getHorizStabilizer().setInclination(outputs.getHorStabInclination());
+		this.getVertStabilizer().setInclination(outputs.getVerStabInclination());
 	}	
 	
 	

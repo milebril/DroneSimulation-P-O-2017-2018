@@ -41,7 +41,11 @@ import entities.cubeTestPlayer;
 import fontMeshCreator.FontType;
 import fontMeshCreator.GUIText;
 import fontRendering.TextMaster;
+import interfaces.Autopilot;
 import interfaces.AutopilotConfig;
+import interfaces.AutopilotFactory;
+import interfaces.AutopilotInputs;
+import interfaces.AutopilotOutputs;
 
 public class MainGameLoop {
 
@@ -125,7 +129,6 @@ public class MainGameLoop {
 		Cuboid droneCube = new Cuboid(0, 0, 0);
 		drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
 				new Matrix4f().translate(new Vector3f(0, 30, 0)), 1, autopilotConfig);
-		SimpleAutopilot ap = new SimpleAutopilot();
 		
 		//FreeRoam Camera
 		freeRoamCamera = new Camera();
@@ -139,6 +142,10 @@ public class MainGameLoop {
 		Camera sideViewCamera = new Camera();
 		sideViewCamera.setPosition(new Vector3f(150,5,-50));
 		sideViewCamera.setRotation(0, (float) -(Math.PI / 2), 0);
+		
+		
+		//Autopilot stuff
+		Autopilot autopilot = AutopilotFactory.createAutopilot();
 		
 		while(!Display.isCloseRequested()){
 			//Camera
@@ -231,9 +238,15 @@ public class MainGameLoop {
 				System.out.println("Speed" + drone.getAbsVelocity());
 				System.out.println("Thrustforce" + drone.getThrustForce());
 //				drone.increasePosition(dt);
-				drone.sendToAutopilot();
-				ap.communicateWithDrone(); 
-				drone.getFromAutopilot();
+				
+				
+				
+				//Autopilot stuff
+				AutopilotInputs inputs = drone.getAutoPilotInpus();
+				AutopilotOutputs outputs = autopilot.timePassed(inputs);
+				drone.setAutopilotOutouts(outputs);
+				
+				
 //				drone.applyForces(dt);
 			}
 			
