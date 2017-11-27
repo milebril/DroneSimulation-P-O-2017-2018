@@ -146,6 +146,7 @@ public class MainGameLoop {
 		
 		//Autopilot stuff
 		Autopilot autopilot = AutopilotFactory.createAutopilot();
+		autopilot.simulationStarted(autopilotConfig, drone.getAutoPilotInpus());
 		
 		while(!Display.isCloseRequested()){
 			//Camera
@@ -237,25 +238,12 @@ public class MainGameLoop {
 				System.out.println("inclination" + drone.getLeftWing().getInclination());
 				System.out.println("Speed" + drone.getAbsVelocity());
 				System.out.println("Thrustforce" + drone.getThrustForce());
-//				drone.increasePosition(dt);
-				
-				
+
 				
 				//Autopilot stuff
 				AutopilotInputs inputs = drone.getAutoPilotInpus();
 				AutopilotOutputs outputs = autopilot.timePassed(inputs);
 				drone.setAutopilotOutouts(outputs);
-				
-				
-//				drone.applyForces(dt);
-			}
-			
-			
-			/* Drone Debug */
-//			drone.moveHeadingVector();
-			
-			if (drone.getPosition().z < -1000) {
-				break;
 			}
 			
 			TextMaster.render();
