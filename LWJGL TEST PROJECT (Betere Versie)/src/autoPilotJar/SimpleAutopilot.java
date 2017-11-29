@@ -7,6 +7,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.lwjgl.opengl.AMDBlendMinmaxFactor;
 import org.lwjgl.util.vector.Vector3f;
@@ -30,8 +32,9 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	private Vector3f oldSpeed;
 	
 	//Aanpassen als we naar nieuwe cubus moeten gaan
-	private Vector3f stablePosition;
-	private Vector3f cubePos = new Vector3f(0,5,-50);
+	private Vector3f cubePos;
+	private List<Vector3f> cubePositions = new ArrayList<>();
+	
 	
 	//TODO ook heading bijhouden?.	
 	
@@ -81,7 +84,14 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		this.pidThrust = new PIDController(1.0f, 0.0f, 3.0f, -10, 10);
 		//initialize();
 		
-		stablePosition = new Vector3f(0, 0, 0);
+		//ADD CUBES TO LIST
+		cubePositions.add(new Vector3f(0,-10,-40));
+		cubePositions.add(new Vector3f(0,-1,-80));
+		cubePositions.add(new Vector3f(0,-5,-120));
+		cubePositions.add(new Vector3f(0,8,-160));
+		cubePositions.add(new Vector3f(0,-2,-200));
+		
+		cubePos = cubePositions.remove(0);
 	}
 	
 	private void initialize() {
@@ -278,11 +288,16 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	}
 	
 	private float getAngle(){
-		float overstaande = Math.abs(cubePos.getY() - this.currentPosition.getY());
-		float aanliggende = Math.abs(cubePos.getZ() - this.currentPosition.getZ());
+		float overstaande = cubePos.getY() - this.currentPosition.getY();
+		float aanliggende = cubePos.getZ() - this.currentPosition.getZ();
 		return (float) Math.atan(overstaande/aanliggende);
 	}
 	
+	private float getEuclidDist(Vector3f vec1, Vector3f vec2){
+		Vector3f temp = new Vector3f(0,0,0);
+		Vector3f.sub(vec1, vec2, temp);
+		return temp.length();
+	}
 	@Override
 	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
 		this.inputAP = inputs;
@@ -290,16 +305,15 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			
 			currentPosition = new Vector3f(inputAP.getX(), inputAP.getY(), inputAP.getZ());
 			
-			newHorStabInclination += pidHorGoal.calculateChange(inputAP.getPitch() - getAngle(), dt);
+			newHorStabInclination += pidHorGoal.calculateChange(inputAP.getPitch() + getAngle(), dt);
 			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
 			else if(newHorStabInclination < - Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
-			System.out.println("pitch : " + inputAP.getPitch());
-			System.out.println("angle : " + getAngle());
-			System.out.println("stuff : " + (inputAP.getPitch() - getAngle()));
-			System.out.println("horizontal stabiliser: " + newHorStabInclination);
-			if(Math.abs(cubePos.getY() - this.currentPosition.getY()) < 1
-				&& Math.abs(cubePos.getZ() - this.currentPosition.getZ()) < 1){
-				this.cubePos = new Vector3f(0,5,-200);
+//			System.out.println("pitch : " + inputAP.getPitch());
+//			System.out.println("angle : " + getAngle());
+//			System.out.println("stuff : " + (inputAP.getPitch() - getAngle()));
+//			System.out.println("horizontal stabiliser: " + newHorStabInclination);
+			if(getEuclidDist(this.currentPosition,cubePos) <= 4){
+				this.cubePos = cubePositions.remove(0);
 				System.out.println("test");
 			}
 			
