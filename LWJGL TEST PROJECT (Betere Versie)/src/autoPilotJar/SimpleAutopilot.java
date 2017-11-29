@@ -88,94 +88,6 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		cubePos = cubePositions.remove(0);
 	}
 	
-	/**
-	 * Start of the simulation
-	 * Sets AutopilotConfig
-	 */
-	@Override
-	public AutopilotOutputs simulationStarted(AutopilotConfig config, AutopilotInputs inputs) {
-		this.configAP = config;
-		this.inputAP = inputs;
-		
-		return this;
-	}
-
-	/**
-	 * Function called by the Testbed to get instructions from the autopilot
-	 */
-	@Override
-	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
-		this.inputAP = inputs;
-		if (this.inputAP.getElapsedTime() > 0.0000001) {
-			//TODO Heb dit gekopieerd uit communicateWithDrone();
-			
-//			//Set Variables for this iteration
-//			//cubeLocator = new ImageProcessor(this);
-//			cubeLocator = new ImageProcessor(this);
-//			
-//			currentPosition = new Vector3f(inputAP.getX(), inputAP.getY(), inputAP.getZ());
-//			//TODO Heading?
-//			elapsedTime = inputAP.getElapsedTime();
-//			dt = elapsedTime - prevElapsedTime;
-//			
-//			makeData();
-//			
-//			
-////			newLeftWingInclination = newHorizontalInclinations[0];
-////			newRightWingInclination = newHorizontalInclinations[1];
-//			
-//			//Save droneData we need in nextIteration
-//			saveData();
-			
-			currentPosition = new Vector3f(inputAP.getX(), inputAP.getY(), inputAP.getZ());
-
-			newLeftWingInclination = (float) ((float) 10*(Math.PI/180));
-			newRightWingInclination = (float) ((float) 10*(Math.PI/180));
-			
-			newHorStabInclination = 0;
-			newVerStabInclination = 0;
-		}
-		
-		return this;
-	}
-
-	/**
-	 * is called when the simulation Stops
-	 */
-	@Override
-	public void simulationEnded() {
-		//Do nothing?
-	}
-	
-	private void makeData() {
-		//Horizontal Wings
-//		float incChange = this.pidHorStab.calculateChange(currentPosition.y, this.dt);
-//		float[] wingChange = new float[] {incChange,incChange};
-//		
-//		if(newLeftWingInclination + wingChange[0] >= 1) newLeftWingInclination = (float) (1);
-//		else if(newLeftWingInclination + wingChange[0] <= -1) newLeftWingInclination = (float) -(1);	
-//		else newLeftWingInclination += wingChange[0];
-//		
-//		if(newRightWingInclination + wingChange[1] >= 1)  newRightWingInclination = (float) (1);
-//		else if(newRightWingInclination + wingChange[1] <= -1) newRightWingInclination = (float) -(1);
-//		else newRightWingInclination += wingChange[1];
-		
-		//NewThrust
-//		float speed = this.calculateSpeedVector().length();
-//		if(speed > 8.5 || speed < 7.5){
-//			float thrustChange = this.pidThrust.calculateChange(speed, this.dt);
-//			this.setThrust(this.getThrust() + thrustChange);
-//			//System.out.println("New Thrust: " + this.getThrust());
-//		}
-		newRightWingInclination = (float) ((float) 10*(Math.PI/180));
-		newLeftWingInclination = (float) ((float) 10*(Math.PI/180));
-		newHorStabInclination = 0;
-		newVerStabInclination = 0;
-		//Vector3f difference = calculateDiffVector();
-		
-		//TODO ctrl c + ctrl v fysica voor setThrust = vertraging
-	}
-	
 	private Vector3f calculateSpeedVector(){
 		//Vector3f diff = new Vector3f(0,0,0);
 		Vector3f posChange = new Vector3f(0.0f,0.0f,0.0f);
@@ -249,27 +161,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 				System.out.println("test");
 			}
 			
-			System.out.println();
-			
-			//TODO Heb dit gekopieerd uit communicateWithDrone();
-			
-//			//Set Variables for this iteration
-//			//cubeLocator = new ImageProcessor(this);
-//			cubeLocator = new ImageProcessor(this);
-//			
-//			currentPosition = new Vector3f(inputAP.getX(), inputAP.getY(), inputAP.getZ());
-//			//TODO Heading?
-//			elapsedTime = inputAP.getElapsedTime();
-//			dt = elapsedTime - prevElapsedTime;
-//			
-//			makeData();
-//			
-//			
-////			newLeftWingInclination = newHorizontalInclinations[0];
-////			newRightWingInclination = newHorizontalInclinations[1];
-//			
-//			//Save droneData we need in nextIteration
-//			saveData();
+			//System.out.println();
 			
 			//HORIZONTAL WINGPOSITION
 //			float incChange = this.pidHorWing.calculateChange(currentPosition.y, this.dt);
@@ -348,32 +240,4 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	public float getVerStabInclination() {
 		return newVerStabInclination;
 	}
-	
-	/*
-	private Vector3f calculateLeftWingLift(){
-		Vector3f normal = new Vector3f(0,0,0);
-		Vector3f attackVector = new Vector3f(0,(float)Math.sin(newLeftWingInclination), (float) -Math.cos(newLeftWingInclination));
-		Vector3f.cross(new Vector3f(1,0,0), attackVector, normal); // normal = rotationAxis x attackVector
-		float liftSlope = configAP.getWingLiftSlope();
-		float AoA = (float) - Math.atan2(Vector3f.dot(calculateSpeedVector(),normal), Vector3f.dot(calculateSpeedVector(),attackVector));
-		float speed = (float) Math.pow(calculateSpeedVector().length(), 2);
-		Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*speed),
-									   (float)(normal.y*liftSlope*AoA*speed),
-									   (float)(normal.z*liftSlope*AoA*speed));
-		return result;
-	}
-	
-	private Vector3f calculateRightWingLift(){
-		Vector3f normal = new Vector3f(0,0,0);
-		Vector3f attackVector = new Vector3f(0,(float)Math.sin(newRightWingInclination), (float) -Math.cos(newRightWingInclination));
-		Vector3f.cross(new Vector3f(1,0,0), attackVector, normal); // normal = rotationAxis x attackVector
-		float liftSlope = configAP.getWingLiftSlope();
-		float AoA = (float) - Math.atan2(Vector3f.dot(calculateSpeedVector(),normal), Vector3f.dot(calculateSpeedVector(),attackVector)); 
-		float speed = (float) Math.pow(calculateSpeedVector().length(), 2);
-		Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*speed),
-									   (float)(normal.y*liftSlope*AoA*speed),
-									   (float)(normal.z*liftSlope*AoA*speed));
-		return result;
-	} 
-*/
 }
