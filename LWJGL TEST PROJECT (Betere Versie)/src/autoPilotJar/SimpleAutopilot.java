@@ -48,6 +48,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	private PIDController pidHorStab;
 	private PIDController pidHorWing;
 	private PIDController pidHorGoal;
+	private PIDController pidVerGoal;
 	private PIDController pidThrust;
 	
 	/* Variables to send back to drone	 
@@ -70,7 +71,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		this.pidHorWing = new PIDController(1.0f,0.0f,10.0f, (float) -(Math.PI / 180), 0);
 		
 		this.pidHorStab = new PIDController(2.0f,1.0f,10.0f, (float) (Math.PI / 180), 0);
-		this.pidHorGoal = new PIDController(2.0f,0.0f,1.0f, (float) (Math.PI / 180), 0);
+		this.pidHorGoal = new PIDController(2.0f,0.0f,0.0f, (float) (Math.PI / 180), 0);
+		this.pidVerGoal = new PIDController(2.0f,0.0f,1.0f, (float) (Math.PI / 180), 0);
 		//Initialize AP with configfile
 		
 		//Initialize PIDController for Thrust
@@ -79,11 +81,18 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		//initialize();
 		
 		//ADD CUBES TO LIST
-		cubePositions.add(new Vector3f(0,-10,-40));
-		cubePositions.add(new Vector3f(0,-1,-80));
-		cubePositions.add(new Vector3f(0,-5,-120));
-		cubePositions.add(new Vector3f(0,8,-160));
-		cubePositions.add(new Vector3f(0,-2,-200));
+		cubePositions.add(new Vector3f(2f,0, -40));
+		cubePositions.add(new Vector3f(0,0,-80));
+		cubePositions.add(new Vector3f(-2,0,-120));
+		cubePositions.add(new Vector3f(0,0,-160));
+//		cubePositions.add(new Vector3f(0, 0, -80));
+//		cubePositions.add(new Vector3f(-5,0,-40));
+//		cubePositions.add(new Vector3f(-2.5f,0,-60));
+//		cubePositions.add(new Vector3f(0,-10,-40));
+//		cubePositions.add(new Vector3f(0,0,-80));
+//		cubePositions.add(new Vector3f(0,-5,-120));
+//		cubePositions.add(new Vector3f(0,8,-160));
+//		cubePositions.add(new Vector3f(0,-2,-200));
 		
 		cubePos = cubePositions.remove(0);
 	}
@@ -131,8 +140,14 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		return this;
 	}
 	
-	private float getAngle(){
+	private float getVerAngle(){
 		float overstaande = cubePos.getY() - this.currentPosition.getY();
+		float aanliggende = cubePos.getZ() - this.currentPosition.getZ();
+		return (float) Math.atan(overstaande/aanliggende);
+	}
+	
+	private float getHorAngle(){
+		float overstaande = cubePos.getX() - this.currentPosition.getX();
 		float aanliggende = cubePos.getZ() - this.currentPosition.getZ();
 		return (float) Math.atan(overstaande/aanliggende);
 	}
@@ -148,8 +163,11 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
 			
 			currentPosition = new Vector3f(inputAP.getX(), inputAP.getY(), inputAP.getZ());
+			this.dt = inputs.getElapsedTime() - prevElapsedTime;
+			prevElapsedTime = inputs.getElapsedTime();
 			
-			newHorStabInclination += pidHorGoal.calculateChange(inputAP.getPitch() + getAngle(), dt);
+			
+			newHorStabInclination += pidHorGoal.calculateChange(inputAP.getPitch() + getVerAngle(), dt);
 			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
 			else if(newHorStabInclination < - Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
 //			System.out.println("pitch : " + inputAP.getPitch());
@@ -161,7 +179,12 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 				System.out.println("test");
 			}
 			
-			//System.out.println();
+			System.out.println("hoek: " + (inputAP.getHeading() - getHorAngle()));
+			newVerStabInclination += pidVerGoal.calculateChange(inputAP.getHeading() - getHorAngle(), dt);
+			if(newVerStabInclination > Math.PI/6) newVerStabInclination = (float) (Math.PI/6);
+			else if(newVerStabInclination < - Math.PI/6) newVerStabInclination = (float) -(Math.PI/6);
+			System.out.println("ver inc: " + newVerStabInclination);
+			System.out.println();
 			
 			//HORIZONTAL WINGPOSITION
 //			float incChange = this.pidHorWing.calculateChange(currentPosition.y, this.dt);

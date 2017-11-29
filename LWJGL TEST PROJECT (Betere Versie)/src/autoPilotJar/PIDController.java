@@ -33,9 +33,17 @@ public float calculateChange(float current, float dt){
 	float P = Kp * currentError;
 	float I = Ki * totalError;
 	float D = 0;
+	System.out.println(dt);
+	System.out.println("print Kp" + Kp);
 	if(dt > 0.00001){
 		D = Kd * (currentError - this.prevError)/dt;
 	this.prevError = currentError;
+	}
+	
+	if(this.Kp == 2.0f){
+		System.out.println("P: " + P);
+		System.out.println("I :" + I);
+		System.out.println("D: " + D);
 	}
 	float factor = P + I + D;
 	return factor * this.changeFactor;
