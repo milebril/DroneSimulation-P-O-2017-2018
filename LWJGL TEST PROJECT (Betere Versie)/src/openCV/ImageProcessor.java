@@ -27,13 +27,13 @@ public class ImageProcessor {
 		// rotate the cube to be in alignment with the world frame
 		alignCube();
 
-		// place the cube in front of the camera
+		// places the cube 5 meter in front of the camera 
 		translate(0, 0, -5);
 	}
 	
 	private final Autopilot autopilot;
 	
-	 //Getters for the AutoPilot config 
+	//Getters for the AutoPilot config 
 	
 	public float getHorizontalAngleOfView() {
 		return autopilot.getConfig().getHorizontalAngleOfView();
@@ -52,7 +52,7 @@ public class ImageProcessor {
 	}
 	
 	
-	 //Getters for the AutoPilot input 
+	//Getters for the AutoPilot input 
 	
 	public byte[] getImage() {
 		return autopilot.getInput().getImage();
@@ -79,7 +79,7 @@ public class ImageProcessor {
 	 * Returns a Mat object of given width and height containing the RGB values of the given byteArray.
 	 */
 	private static Mat byteArrayToRGBMat(int width, int height, byte[] byteArray) {
-		// reads the given array as BGR (while the array is in RGB formar)
+		// reads the given array as BGR (while the array is in RGB format)
 		Mat data = new Mat(height, width, CvType.CV_8UC3);
 		data.put(0, 0, byteArray);
 		
@@ -137,6 +137,12 @@ public class ImageProcessor {
 		return totalMat.clone();
 	}
 	
+	
+	
+	
+	/**
+	 * Returns a list containing the HSV values of all the different colors found in the image.
+	 */
 	public static List<double[]> getAllDifferentHSVColors(Mat rgbMat){
 		List<double[]> colorHSVList = new ArrayList<double[]>();
 		Mat hsvMat = new Mat();
@@ -164,7 +170,12 @@ public class ImageProcessor {
     return colorHSVList;
    
 	}
-
+	
+	
+	
+	/**
+	 * Returns a list containing the HS values of all the different cubes.
+	 */
 	public static List<double[]> getHSValuesofCubes(List<double[]> colorHSVList){
 		List<double[]> colorHSList = new ArrayList<double[]>();
 		
@@ -188,7 +199,11 @@ public class ImageProcessor {
 		return colorHSList;	
 		}
 
-			
+	
+	
+	/**
+	 * Returns a list containing the V values of all the different sides of the cubes.
+	 */
 	public static List<double[]> getValuesOfV(List<double[]> colorHSVList){
 		List<double[]> colorVList = new ArrayList<double[]>();
 		
@@ -211,6 +226,10 @@ public class ImageProcessor {
 
 		return colorVList;	
 		}
+	
+	
+	
+	
 	
 	/**
 	 * Returns a byte[] array of the RGB values of the given BufferedImage.
@@ -242,7 +261,7 @@ public class ImageProcessor {
 	 * Order: pos x, neg x, pos y, neg y, pos z, neg z
 	 * @param colorVList 
 	 */
-	public static Mat[] redRGBMatFilter(Mat rgbMat, double[] color, List<double[]> colorVList) {
+	public static Mat[] RGBMatFilter(Mat rgbMat, double[] color, List<double[]> colorVList) {
 		
 			// turn the rgb Mat into a hsv Mat
 			// (vreemd genoeg heeft BGR 2 HSV hier het gewenste effect en RGB 2 HSV niet)
@@ -534,7 +553,7 @@ public class ImageProcessor {
 				
 				double[] color ={colorHSList.get(i)[0],colorHSList.get(i)[1]};
 				// Filter RGB Mat for 6 different red Hue's
-				Mat[] matArray = redRGBMatFilter(rgbMat, color, colorVList);
+				Mat[] matArray = RGBMatFilter(rgbMat, color, colorVList);
 
 
 
