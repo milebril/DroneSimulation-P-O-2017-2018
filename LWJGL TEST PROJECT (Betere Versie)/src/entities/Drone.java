@@ -44,6 +44,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		this.linearAccelerationW = new Vector3f(0.0f,0.0f,0.0f);
 
 		this.angularVelocityW = new Vector3f(0f, 0f, 0f);
+		System.out.println("drone constructor angularvelocity set to [0,0,0] ");
 		this.angularAccelerationW = new Vector3f(0f, 0f, 0f);
 		
 		// Left wing, Right wing, Horizontal stabilizer, Vertical stabilizer
@@ -575,7 +576,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 //		Matrix4f transformationMatrix = this.getPose();
 //		Vector4f vectorToTransform = new Vector4f(0, originalD.x, originalD.y, originalD.z);
 		Matrix3f transformationMatrix = (Matrix3f) calculateDtoWTransformationMatrix();
-		Vector3f resultW = new Vector3f();
+		Vector3f resultW = new Vector3f(0,0,0);
 //		Matrix4f.transform(transformationMatrix, vectorToTransform, resultW);
 
 		Matrix3f.transform(transformationMatrix, originalD, resultW);
@@ -608,7 +609,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		result.m20 = matrix4.m20;
 		result.m21 = matrix4.m21;
 		result.m22 = matrix4.m22;
-		
+		System.out.println("Drone calculatedtowtransformationmatrix matrix: " + result);
 		return result;
 	}
 //	public Matrix3f calculateWToDTransformationMatrix() {

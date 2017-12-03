@@ -29,10 +29,20 @@ public class PhysicsEngine {
 		drone.setAngularVelocity(drone.transformToWorldFrame(newVelocities[1]));	
 		
 		// posities updaten
-		Vector3f rotationAxis = new Vector3f();
-		deltaPositions[1].normalise(rotationAxis);
+		Vector3f rotationAxis = new Vector3f(0,0,0);
+		boolean rotated = false;
+		
+		//als rotatievector de nulvector is, kan ze niet genormaliseerd worden
+		if(! deltaPositions[1].equals(new Vector3f(0,0,0))){
+			deltaPositions[1].normalise(rotationAxis);
+			rotated = true;
+		}		
+		
+		System.out.println("PE applyphysics neworientationvector: " + deltaPositions[1]);
+		System.out.println("PE applyphysics rotationaxis: " + rotationAxis);
+		
 		drone.translate(deltaPositions[0]);
-		drone.rotate(deltaPositions[1].length(), rotationAxis );
+		if (rotated){ drone.rotate(deltaPositions[1].length(), rotationAxis );}
 		
 		// get force and torque voor de nieuw berekende situatie n bijhouden van de versnelling in de drone
 		Vector3f[] forces = calculateForces(drone);
@@ -44,6 +54,13 @@ public class PhysicsEngine {
 		// set the new properties
 		drone.setLinearAcceleration(drone.transformToWorldFrame(newAccelerations[0]));
 		drone.setAngularAcceleration(drone.transformToWorldFrame(newAccelerations[1]));		
+		
+		try {
+			java.lang.Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		//recursieve oproep
 		PhysicsEngine.applyPhysics(drone, (dt - h));
@@ -182,9 +199,13 @@ public class PhysicsEngine {
 		
 		Vector3f prevAngularVelocityW = (drone.getAngularVelocity());
 		Vector3f newAngularVelocityW = newVelocities[1];
+		System.out.println("PE calcpos newAngularvel: " + newAngularVelocityW);
 		Vector3f avgAngularVelocityW = average(prevAngularVelocityW, newAngularVelocityW);
+		System.out.println("PE calcpos avgAngularvel: " + avgAngularVelocityW);
+
 		// lengte van omega maal de tijd is  
 		Vector3f deltarotationW = ((Vector3f) avgAngularVelocityW.scale(dt));
+		System.out.println("PE calcpos deltarotationW: " + deltarotationW);
 		
 		return new Vector3f[]{deltaPositionW, deltarotationW};
 	}
