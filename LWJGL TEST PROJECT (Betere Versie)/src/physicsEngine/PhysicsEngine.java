@@ -11,8 +11,9 @@ public class PhysicsEngine {
 	
 	
 	public static void applyPhysics (Drone drone, float dt) {
+		
+		// stepsize bepalen
 		float h;
-		System.out.println("dt: " + String.valueOf(dt));
 		if(dt - drone.getPredictionMethod().getStepSize() >= 0){
 			h = drone.getPredictionMethod().getStepSize();
 		} else if (dt > 0) {
@@ -20,19 +21,31 @@ public class PhysicsEngine {
 		} else {
 			return;
 		}
-		System.out.println("h: " + String.valueOf(h));
 		
+		// huidige versnellingen bepalen
+		Vector3f[] currentAccelerationsD = calculateAccelerations(drone);
+		System.out.println("Drone frame current lin. accelerations: " + currentAccelerationsD[0]);
+		System.out.println("World frame current lin. accelerations: " + drone.transformToWorldFrame(currentAccelerationsD[0]));
+		System.out.println("Drone frame current lin. velocities: " + drone.transformToDroneFrame(drone.getLinearVelocity()));
+		System.out.println("Wrold frame current lin. velocities: " + drone.getLinearVelocity());
 		
-		// eerst de snelheden voorspellen met de huidige snelheden en versnelling en positie
-		// dan de posities voorspellen 
-		Vector3f[] newVelocities = drone.getPredictionMethod().predictVelocity(drone.getLinearVelocity(), drone.getAngularVelocity(), drone.getLinearAcceleration(), drone.getAngularAcceleration(), h);
+		System.out.println("Drone frame current ang. accelerations: " + currentAccelerationsD[1]);
+		System.out.println("World frame current ang. accelerations: " + drone.transformToWorldFrame(currentAccelerationsD[1]));
+		System.out.println("Drone frame current ang. velocities: " + drone.transformToDroneFrame(drone.getAngularVelocity()));
+		System.out.println("Wrold frame current ang. velocities: " + drone.getAngularVelocity());
 		
+		System.out.println();
+		// snelheid voorspellen in functie van de huidige vernsellingen en posities
+		Vector3f[] newVelocities = drone.getPredictionMethod().predictVelocity(drone.getLinearVelocity(), drone.getAngularVelocity(), drone.transformToWorldFrame(currentAccelerationsD[0]), drone.transformToWorldFrame(currentAccelerationsD[1]), h);
+		
+		// nieuwe positie berekenen aan de hand van de nieuwe snelheid
 		Vector3f[] deltaPositions = calculatePositions(drone, newVelocities, h);
 		
+		// nieuwe snelheid opslaan
 		drone.setLinearVelocity(drone.transformToWorldFrame(newVelocities[0]));
 		drone.setAngularVelocity(drone.transformToWorldFrame(newVelocities[1]));	
 		
-		// posities updaten
+		// nieuwe positie opslaan
 		Vector3f rotationAxis = new Vector3f(0,0,0);
 		boolean rotated = false;
 		
@@ -47,18 +60,6 @@ public class PhysicsEngine {
 		
 		drone.translate(deltaPositions[0]);
 		if (rotated){ drone.rotate(deltaPositions[1].length(), rotationAxis );}
-		
-		
-		// get force and torque voor de nieuw berekende situatie n bijhouden van de versnelling in de drone
-		Vector3f[] forces = calculateForces(drone);
-		//for(int i = 0; i < forces.length; i++)
-			//System.out.println("Forces " + forces[i]);
-		// calculate the new properties
-		Vector3f[] newAccelerations = calculateAccelerations(drone, forces); // (in drone frame)
-		
-		// set the new properties
-		drone.setLinearAcceleration(drone.transformToWorldFrame(newAccelerations[0]));
-		drone.setAngularAcceleration(drone.transformToWorldFrame(newAccelerations[1]));		
 		
 		
 		//recursieve oproep
@@ -132,9 +133,7 @@ public class PhysicsEngine {
 		// linear acceleration (F = m.a -> a = F/m)
 		Vector3f linearAccelerationD = new Vector3f(forces[0].x / drone.getMass(), 
 				forces[0].y / drone.getMass(), forces[0].z / drone.getMass());
-//		System.out.println("PE.calculateAccel dronemass: " + drone.getMass());
-//		System.out.println("PE.calculateAccel forces: " + forces[0]);
-//		System.out.println("PE.calculateAccel linearaccel: " + linearAccelerationD);
+		
 		Vector3f angularAccelerationD = new Vector3f(0, 0, 0);
 		float iXx = drone.getInertiaMatrix().m00;
 		float iYy = drone.getInertiaMatrix().m11;
@@ -146,6 +145,11 @@ public class PhysicsEngine {
 		angularAccelerationD.z = (forces[1].z + (iXx - iYy)*omega.x*omega.y)/iZz;
 		
 		return new Vector3f[]{linearAccelerationD, angularAccelerationD};
+	}
+	
+	
+	private static Vector3f[] calculateAccelerations(Drone drone) {
+		return calculateAccelerations(drone, calculateForces(drone));
 	}
 	
 	/**

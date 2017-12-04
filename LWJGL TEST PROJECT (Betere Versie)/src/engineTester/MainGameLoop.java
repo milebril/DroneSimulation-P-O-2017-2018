@@ -139,7 +139,7 @@ public class MainGameLoop {
 		
 		//Autopilot stuff
 		Autopilot autopilot = AutopilotFactory.createAutopilot();
-		autopilot.simulationStarted(autopilotConfig, drone.getAutoPilotInpus());
+		autopilot.simulationStarted(autopilotConfig, drone.getAutoPilotInputs());
 		
 		while(!Display.isCloseRequested()){
 			//Drone Camera View
@@ -211,14 +211,14 @@ public class MainGameLoop {
 				//applyphysics rekent de krachten uit en gaat dan de kinematische waarden van de drone
 				// aanpassen op basis daarvan 
 				PhysicsEngine.applyPhysics(drone, dt);
-				System.out.println("inclination" + drone.getLeftWing().getInclination());
-				System.out.println("Speed" + drone.getAbsVelocity());
-				System.out.println("Thrustforce" + drone.getThrustForce());
+				//System.out.println("inclination" + drone.getLeftWing().getInclination());
+				//System.out.println("Speed" + drone.getAbsVelocity());
+				//System.out.println("Thrustforce" + drone.getThrustForce());
 				
 				//Autopilot stuff
-				AutopilotInputs inputs = drone.getAutoPilotInpus();
-				AutopilotOutputs outputs = autopilot.timePassed(inputs);
-				drone.setAutopilotOutouts(outputs);
+				//AutopilotInputs inputs = drone.getAutoPilotInputs();
+				//AutopilotOutputs outputs = autopilot.timePassed(inputs);
+				//drone.setAutopilotOutouts(outputs);
 			}
 			
 			TextMaster.render();

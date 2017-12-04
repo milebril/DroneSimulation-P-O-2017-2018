@@ -2,6 +2,7 @@ package entities;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -14,10 +15,12 @@ import org.lwjgl.util.vector.Vector4f;
 
 import autoPilotJar.AutopilotInputsWriter;
 import autoPilotJar.AutopilotOutputsReader;
+import autopilot.AutopilotConfigReader;
 import interfaces.AutopilotConfig;
 import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
 import models.RawModel;
+import physicsEngine.approximationMethods.EulerPrediction;
 import physicsEngine.approximationMethods.PredictionMethod;
 import renderEngine.DisplayManager;
 import toolbox.ImageConverter;
@@ -32,19 +35,21 @@ import toolbox.ImageConverter;
 public class Drone extends Entity /* implements AutopilotConfig */ {
 
 	private final PredictionMethod predictionMethod;
-
+	
+	
+	
+	
 	public Drone(RawModel model, Matrix4f pose, float scale,
 				AutopilotConfig cfg, PredictionMethod predictionMethod) {
 		super(model, pose, scale);
 
 		//TODO snelheid mee in constructor opnemen
-		this.forwardVectorW = new Vector3f(0.0f,0.0f,-1.0f);
 		
 		this.linearVelocityW = new Vector3f(0.0f,0.0f, -15.0f);
 		this.linearAccelerationW = new Vector3f(0.0f,0.0f,0.0f);
 
 		this.angularVelocityW = new Vector3f(0f, 0f, 0f);
-		System.out.println("drone constructor angularvelocity set to [0,0,0] ");
+		
 		this.angularAccelerationW = new Vector3f(0f, 0f, 0f);
 		
 		// Left wing, Right wing, Horizontal stabilizer, Vertical stabilizer
@@ -81,7 +86,13 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		
 		this.predictionMethod = predictionMethod;
 	}
-
+	
+	
+	public Drone(Matrix4f pose, AutopilotConfig autopilotConfig, Vector3f velocity, Vector3f rotVel) {
+		this(null, pose, 1f, autopilotConfig, (PredictionMethod) new EulerPrediction(0.01f));
+		this.setLinearVelocity(velocity);
+		this.setAngularVelocity(rotVel);
+	}
 
 	// AIRFOILS
 	
@@ -138,11 +149,13 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	/**
 	 * The forward vector of the drone in world frame.
 	 */
+	@Deprecated
 	private Vector3f forwardVectorW;
 	
 	/**
 	 * Returns the forward vector of the drone in world frame.
 	 */
+	@Deprecated
 	public Vector3f getForwardVector() {
 		return new Vector3f(this.forwardVectorW.x, this.forwardVectorW.y, this.forwardVectorW.z);
 	}
@@ -150,6 +163,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	/**
 	 * Set the forward vector of the drone.
 	 */
+	@Deprecated
 	public void setForwardVector(Vector3f vector) {
 		vector.normalise(this.forwardVectorW);
 	}
@@ -206,11 +220,13 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	/**
 	 * The linear acceleration of the drone in world frame.
 	 */
+	@Deprecated
 	private Vector3f linearAccelerationW;
 	
 	/**
 	 * Returns the linear acceleration vector of the drone in world frame.
 	 */
+	@Deprecated
 	public Vector3f getLinearAcceleration() {
 		return new Vector3f(this.linearAccelerationW.x, this.linearAccelerationW.y, this.linearAccelerationW.z);
 	}
@@ -218,6 +234,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	/**
 	 * Set the linear acceleration vector of the drone.
 	 */
+	@Deprecated
 	public void setLinearAcceleration(Vector3f vector) {
 		this.linearAccelerationW.set(vector.x, vector.y, vector.z);
 	}
@@ -250,11 +267,13 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	/**
 	 * The angular acceleration of the drone in world frame.
 	 */
+	@Deprecated
 	private Vector3f angularAccelerationW;
 	
 	/**
 	 * Returns the angular acceleration vector of the drone in world frame.
 	 */
+	@Deprecated
 	public Vector3f getAngularAcceleration() {
 		return new Vector3f(this.angularAccelerationW.x, this.angularAccelerationW.y, this.angularAccelerationW.z);
 	}
@@ -262,6 +281,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	/**
 	 * Set the angular acceleration vector of the drone.
 	 */
+	@Deprecated
 	public void setAngularAcceleration(Vector3f vector) {
 			this.angularAccelerationW.set(vector.x, vector.y, vector.z);
 		}
@@ -538,7 +558,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	 * Add drone data to Autopilots interface to send to the Autopilot
 	 * @throws IOException
 	 */
-	public AutopilotInputs getAutoPilotInpus() {
+	public AutopilotInputs getAutoPilotInputs() {
 
 		return new AutopilotInputs() {
 			public byte[] getImage() { return ImageConverter.bufferedImageToByteArray(camera.takeSnapshot());}
