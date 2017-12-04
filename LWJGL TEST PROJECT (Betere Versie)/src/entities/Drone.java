@@ -149,24 +149,15 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	/**
 	 * The forward vector of the drone in world frame.
 	 */
-	@Deprecated
 	private Vector3f forwardVectorW;
 	
 	/**
 	 * Returns the forward vector of the drone in world frame.
 	 */
-	@Deprecated
 	public Vector3f getForwardVector() {
-		return new Vector3f(this.forwardVectorW.x, this.forwardVectorW.y, this.forwardVectorW.z);
+		return this.transformToWorldFrame(new Vector3f(0, 0, -1));
 	}
 	
-	/**
-	 * Set the forward vector of the drone.
-	 */
-	@Deprecated
-	public void setForwardVector(Vector3f vector) {
-		vector.normalise(this.forwardVectorW);
-	}
 	
 	/** 
 	 * Returns the heading vector of the Drone in world frame.

@@ -216,9 +216,9 @@ public class MainGameLoop {
 				//System.out.println("Thrustforce" + drone.getThrustForce());
 				
 				//Autopilot stuff
-				//AutopilotInputs inputs = drone.getAutoPilotInputs();
-				//AutopilotOutputs outputs = autopilot.timePassed(inputs);
-				//drone.setAutopilotOutouts(outputs);
+				AutopilotInputs inputs = drone.getAutoPilotInputs();
+				AutopilotOutputs outputs = autopilot.timePassed(inputs);
+				drone.setAutopilotOutouts(outputs);
 			}
 			
 			TextMaster.render();

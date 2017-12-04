@@ -23,20 +23,25 @@ public class PhysicsEngine {
 		}
 		
 		// huidige versnellingen bepalen
+		System.out.println("_____________LOOP_____________");
+		
+		System.out.println("Drone frame previous lin. velocity: " + drone.transformToDroneFrame(drone.getLinearVelocity()));
+		System.out.println("calculate acceleration...");
 		Vector3f[] currentAccelerationsD = calculateAccelerations(drone);
 		System.out.println("Drone frame current lin. accelerations: " + currentAccelerationsD[0]);
-		System.out.println("World frame current lin. accelerations: " + drone.transformToWorldFrame(currentAccelerationsD[0]));
-		System.out.println("Drone frame current lin. velocities: " + drone.transformToDroneFrame(drone.getLinearVelocity()));
-		System.out.println("Wrold frame current lin. velocities: " + drone.getLinearVelocity());
+		//System.out.println("World frame current lin. accelerations: " + drone.transformToWorldFrame(currentAccelerationsD[0]));
 		
-		System.out.println("Drone frame current ang. accelerations: " + currentAccelerationsD[1]);
-		System.out.println("World frame current ang. accelerations: " + drone.transformToWorldFrame(currentAccelerationsD[1]));
-		System.out.println("Drone frame current ang. velocities: " + drone.transformToDroneFrame(drone.getAngularVelocity()));
-		System.out.println("Wrold frame current ang. velocities: " + drone.getAngularVelocity());
+		
+		// snelheid voorspellen in functie van de huidige vernsellingen en posities
+		Vector3f[] newVelocities = drone.getPredictionMethod().predictVelocity(
+				drone.transformToDroneFrame(drone.getLinearVelocity()), 
+				drone.transformToDroneFrame(drone.getAngularVelocity()), 
+				currentAccelerationsD[0], 
+				currentAccelerationsD[1], h);
+		
+		System.out.println("Drone frame predicted lin. velocity: " + newVelocities[0]);
 		
 		System.out.println();
-		// snelheid voorspellen in functie van de huidige vernsellingen en posities
-		Vector3f[] newVelocities = drone.getPredictionMethod().predictVelocity(drone.getLinearVelocity(), drone.getAngularVelocity(), drone.transformToWorldFrame(currentAccelerationsD[0]), drone.transformToWorldFrame(currentAccelerationsD[1]), h);
 		
 		// nieuwe positie berekenen aan de hand van de nieuwe snelheid
 		Vector3f[] deltaPositions = calculatePositions(drone, newVelocities, h);
@@ -118,7 +123,8 @@ public class PhysicsEngine {
 		Vector3f.add(force, gravitationD, force);
 		
 //		System.out.println("PE.calcforces gravitational: " + drone.getMass()*drone.getGravity());
-
+		
+		
 		return new Vector3f[]{force, torque};
 	}
 
