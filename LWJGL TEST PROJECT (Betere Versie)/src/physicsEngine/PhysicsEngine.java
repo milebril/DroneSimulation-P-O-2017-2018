@@ -8,9 +8,11 @@ import entities.Drone;
 
 public class PhysicsEngine {
 	
+	
+	
 	public static void applyPhysics (Drone drone, float dt) {
 		float h;
-		
+		System.out.println("dt: " + String.valueOf(dt));
 		if(dt - drone.getPredictionMethod().getStepSize() >= 0){
 			h = drone.getPredictionMethod().getStepSize();
 		} else if (dt > 0) {
@@ -18,11 +20,13 @@ public class PhysicsEngine {
 		} else {
 			return;
 		}
-			
-			
+		System.out.println("h: " + String.valueOf(h));
+		
+		
 		// eerst de snelheden voorspellen met de huidige snelheden en versnelling en positie
 		// dan de posities voorspellen 
 		Vector3f[] newVelocities = drone.getPredictionMethod().predictVelocity(drone.getLinearVelocity(), drone.getAngularVelocity(), drone.getLinearAcceleration(), drone.getAngularAcceleration(), h);
+		
 		Vector3f[] deltaPositions = calculatePositions(drone, newVelocities, h);
 		
 		drone.setLinearVelocity(drone.transformToWorldFrame(newVelocities[0]));
@@ -38,16 +42,17 @@ public class PhysicsEngine {
 			rotated = true;
 		}		
 		
-		System.out.println("PE applyphysics neworientationvector: " + deltaPositions[1]);
-		System.out.println("PE applyphysics rotationaxis: " + rotationAxis);
+		//System.out.println("PE applyphysics neworientationvector: " + deltaPositions[1]);
+		//System.out.println("PE applyphysics rotationaxis: " + rotationAxis);
 		
 		drone.translate(deltaPositions[0]);
 		if (rotated){ drone.rotate(deltaPositions[1].length(), rotationAxis );}
 		
+		
 		// get force and torque voor de nieuw berekende situatie n bijhouden van de versnelling in de drone
 		Vector3f[] forces = calculateForces(drone);
-		for(int i = 0; i < forces.length; i++)
-			System.out.println("Forces " + forces[i]);
+		//for(int i = 0; i < forces.length; i++)
+			//System.out.println("Forces " + forces[i]);
 		// calculate the new properties
 		Vector3f[] newAccelerations = calculateAccelerations(drone, forces); // (in drone frame)
 		
@@ -55,12 +60,6 @@ public class PhysicsEngine {
 		drone.setLinearAcceleration(drone.transformToWorldFrame(newAccelerations[0]));
 		drone.setAngularAcceleration(drone.transformToWorldFrame(newAccelerations[1]));		
 		
-		try {
-			java.lang.Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
 		//recursieve oproep
 		PhysicsEngine.applyPhysics(drone, (dt - h));
@@ -93,7 +92,7 @@ public class PhysicsEngine {
 			
 			
 			Vector3f liftForceD = currentAirFoil.calculateAirFoilLiftForce();	
-			System.out.println("liftForceD" + liftForceD);
+			//System.out.println("liftForceD" + liftForceD);
 //			System.out.println("PE.calculateForces : liftforceD: " + i + " " + liftForceD);
 
 			// calculate torque
@@ -199,13 +198,13 @@ public class PhysicsEngine {
 		
 		Vector3f prevAngularVelocityW = (drone.getAngularVelocity());
 		Vector3f newAngularVelocityW = newVelocities[1];
-		System.out.println("PE calcpos newAngularvel: " + newAngularVelocityW);
+		//System.out.println("PE calcpos newAngularvel: " + newAngularVelocityW);
 		Vector3f avgAngularVelocityW = average(prevAngularVelocityW, newAngularVelocityW);
-		System.out.println("PE calcpos avgAngularvel: " + avgAngularVelocityW);
+		//System.out.println("PE calcpos avgAngularvel: " + avgAngularVelocityW);
 
 		// lengte van omega maal de tijd is  
 		Vector3f deltarotationW = ((Vector3f) avgAngularVelocityW.scale(dt));
-		System.out.println("PE calcpos deltarotationW: " + deltarotationW);
+		//System.out.println("PE calcpos deltarotationW: " + deltarotationW);
 		
 		return new Vector3f[]{deltaPositionW, deltarotationW};
 	}

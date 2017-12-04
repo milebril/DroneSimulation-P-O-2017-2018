@@ -13,7 +13,11 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/OpenCvLib"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/OpenCV-3.3.0"/>
 	<classpathentry kind="lib" path="lib/jars/lwjgl_util.jar"/>
-	<classpathentry kind="lib" path="lib/jars/lwjgl.jar"/>
+	<classpathentry kind="lib" path="lib/jars/lwjgl.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="peno/lib/natives/windows"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="lib/jars/slick-util.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/OpenCV"/>

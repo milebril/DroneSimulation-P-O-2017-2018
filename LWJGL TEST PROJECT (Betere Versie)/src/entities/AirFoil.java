@@ -90,7 +90,7 @@ public class AirFoil {
 			result.z = (float) - Math.cos(this.getInclination());			
 		}
 		
-		System.out.println("Airfoil.ccalculateATtackvector attacvecor: " + result);
+		//System.out.println("Airfoil.ccalculateATtackvector attacvecor: " + result);
 		return result;		
 	}
 	
@@ -116,10 +116,10 @@ public class AirFoil {
 		
 		// velocity of the airfoil caused by the drones rotation (omega x r = v)
 		Vector3f rotationalVelocityW = new Vector3f(0,0,0);
-		System.out.println("Airfoil calculateAirfliff 119 rotationalVelocityinit: " + rotationalVelocityW);
-		System.out.println("Airfoil calculateAirfliff 119 droneangularvelocity: " + this.getDrone().getAngularVelocity());
-		System.out.println("Airfoil calculateAirfliff 120 centreofmass (hefboomW): " + this.getDrone().transformToWorldFrame(this.getCenterOfMass()));
-		System.out.println("Airfoil calculateAirfliff 120 centreofmass (hefboomD): " + this.getCenterOfMass());
+		//System.out.println("Airfoil calculateAirfliff 119 rotationalVelocityinit: " + rotationalVelocityW);
+		//System.out.println("Airfoil calculateAirfliff 119 droneangularvelocity: " + this.getDrone().getAngularVelocity());
+		//System.out.println("Airfoil calculateAirfliff 120 centreofmass (hefboomW): " + this.getDrone().transformToWorldFrame(this.getCenterOfMass()));
+		//System.out.println("Airfoil calculateAirfliff 120 centreofmass (hefboomD): " + this.getCenterOfMass());
 		Vector3f.cross(this.getDrone().getAngularVelocity(), this.getDrone().transformToWorldFrame(this.getCenterOfMass()), rotationalVelocityW);
 		
 //		System.out.println("Airfoil calculateAirfliff angularVelocity: " + this.getDrone().getAngularVelocity());

@@ -85,8 +85,8 @@ public class Entity {
 	 * @param angles
 	 */
 	public void rotate(float angle, Vector3f axis){
-		System.out.println("entity rotate angle: " + angle + " axis: " + axis);
-		System.out.println(this.getPose());
+		//System.out.println("entity rotate angle: " + angle + " axis: " + axis);
+		//System.out.println(this.getPose());
 		this.getPose().rotate(angle , axis);	
 	}
 

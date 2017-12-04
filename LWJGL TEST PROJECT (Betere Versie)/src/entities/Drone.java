@@ -609,7 +609,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		result.m20 = matrix4.m20;
 		result.m21 = matrix4.m21;
 		result.m22 = matrix4.m22;
-		System.out.println("Drone calculatedtowtransformationmatrix matrix: " + result);
+		//System.out.println("Drone calculatedtowtransformationmatrix matrix: " + result);
 		return result;
 	}
 //	public Matrix3f calculateWToDTransformationMatrix() {
