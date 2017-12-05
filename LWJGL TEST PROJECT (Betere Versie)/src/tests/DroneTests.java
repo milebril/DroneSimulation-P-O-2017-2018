@@ -158,7 +158,6 @@ public class DroneTests {
 		Matrix4f identityMatrix = new Matrix4f();
 		drone.setLinearVelocity(nulVector);
 //		drone.setHeadingVector();
-		drone.setLinearAcceleration(nulVector);
 		drone.setPose(identityMatrix);;
 		drone.getCamera().setPosition(nulVector);
 		drone.setThrustForce(0);

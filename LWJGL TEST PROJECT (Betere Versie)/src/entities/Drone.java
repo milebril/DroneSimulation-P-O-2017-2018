@@ -46,7 +46,6 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		//TODO snelheid mee in constructor opnemen
 		
 		this.linearVelocityW = new Vector3f(0.0f,0.0f, -15.0f);
-		this.linearAccelerationW = new Vector3f(0.0f,0.0f,0.0f);
 
 		this.angularVelocityW = new Vector3f(0f, 0f, 0f);
 		
@@ -89,7 +88,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	
 	
 	public Drone(Matrix4f pose, AutopilotConfig autopilotConfig, Vector3f velocity, Vector3f rotVel) {
-		this(null, pose, 1f, autopilotConfig, (PredictionMethod) new EulerPrediction(0.01f));
+		this(null, pose, 1f, autopilotConfig, new EulerPrediction(0.01f));
 		this.setLinearVelocity(velocity);
 		this.setAngularVelocity(rotVel);
 	}
@@ -204,32 +203,6 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	public float getAbsVelocity() {
 		return this.getLinearVelocity().length(); 
 	}
-
-
-	// LINEAR ACCELERATION
-	
-	/**
-	 * The linear acceleration of the drone in world frame.
-	 */
-	@Deprecated
-	private Vector3f linearAccelerationW;
-	
-	/**
-	 * Returns the linear acceleration vector of the drone in world frame.
-	 */
-	@Deprecated
-	public Vector3f getLinearAcceleration() {
-		return new Vector3f(this.linearAccelerationW.x, this.linearAccelerationW.y, this.linearAccelerationW.z);
-	}
-	
-	/**
-	 * Set the linear acceleration vector of the drone.
-	 */
-	@Deprecated
-	public void setLinearAcceleration(Vector3f vector) {
-		this.linearAccelerationW.set(vector.x, vector.y, vector.z);
-	}
-	
 	
 	// ANGULAR VELOCITY
 	
@@ -251,33 +224,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	public void setAngularVelocity(Vector3f vector) {
 		this.angularVelocityW.set(vector.x, vector.y, vector.z);
 	}
-	
-	
-	// ANGULAR ACCELERATION
-	
-	/**
-	 * The angular acceleration of the drone in world frame.
-	 */
-	@Deprecated
-	private Vector3f angularAccelerationW;
-	
-	/**
-	 * Returns the angular acceleration vector of the drone in world frame.
-	 */
-	@Deprecated
-	public Vector3f getAngularAcceleration() {
-		return new Vector3f(this.angularAccelerationW.x, this.angularAccelerationW.y, this.angularAccelerationW.z);
-	}
-	
-	/**
-	 * Set the angular acceleration vector of the drone.
-	 */
-	@Deprecated
-	public void setAngularAcceleration(Vector3f vector) {
-			this.angularAccelerationW.set(vector.x, vector.y, vector.z);
-		}
-		
-	
+
 	// TAILSIZE
 	
 	/**
