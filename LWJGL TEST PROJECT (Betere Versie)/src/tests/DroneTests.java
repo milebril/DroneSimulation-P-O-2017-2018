@@ -26,6 +26,7 @@ import entities.*;
 import interfaces.AutopilotConfig;
 import models.RawModel;
 import physicsEngine.PhysicsEngine;
+import physicsEngine.approximationMethods.EulerPrediction;
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
 import testObjects.Cube;
@@ -67,7 +68,7 @@ public class DroneTests {
 			e.printStackTrace();
 		}
 
-		this.drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null), new Matrix4f(), 1, autopilotConfig);
+		this.drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null), new Matrix4f(), 1f, autopilotConfig, new EulerPrediction(0.01f));
 	}
 	
 	/**
