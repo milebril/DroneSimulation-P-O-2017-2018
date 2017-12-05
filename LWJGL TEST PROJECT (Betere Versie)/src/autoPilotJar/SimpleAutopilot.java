@@ -81,10 +81,10 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		//initialize();
 		
 		//ADD CUBES TO LIST
-		cubePositions.add(new Vector3f(2f,0, -40));
-		cubePositions.add(new Vector3f(0,0,-80));
-		cubePositions.add(new Vector3f(-2,0,-120));
-		cubePositions.add(new Vector3f(0,0,-160));
+		cubePositions.add(new Vector3f(0,0, -200));
+//		cubePositions.add(new Vector3f(0,0,-80));
+//		cubePositions.add(new Vector3f(-2,0,-120));
+//		cubePositions.add(new Vector3f(0,0,-160));
 //		cubePositions.add(new Vector3f(0, 0, -80));
 //		cubePositions.add(new Vector3f(-5,0,-40));
 //		cubePositions.add(new Vector3f(-2.5f,0,-60));

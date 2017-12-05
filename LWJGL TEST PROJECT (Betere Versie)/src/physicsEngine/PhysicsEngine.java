@@ -23,25 +23,13 @@ public class PhysicsEngine {
 		}
 		
 		// huidige versnellingen bepalen
-		System.out.println("_____________LOOP_____________");
-		
-		System.out.println("Drone frame previous lin. velocity: " + drone.transformToDroneFrame(drone.getLinearVelocity()));
-		System.out.println("calculate acceleration...");
 		Vector3f[] currentAccelerationsD = calculateAccelerations(drone);
-		System.out.println("Drone frame current lin. accelerations: " + currentAccelerationsD[0]);
-		//System.out.println("World frame current lin. accelerations: " + drone.transformToWorldFrame(currentAccelerationsD[0]));
-		
 		
 		// snelheid voorspellen in functie van de huidige vernsellingen en posities
 		Vector3f[] newVelocities = drone.getPredictionMethod().predictVelocity(
 				drone.transformToDroneFrame(drone.getLinearVelocity()), 
 				drone.transformToDroneFrame(drone.getAngularVelocity()), 
-				currentAccelerationsD[0], 
-				currentAccelerationsD[1], h);
-		
-		System.out.println("Drone frame predicted lin. velocity: " + newVelocities[0]);
-		
-		System.out.println();
+				currentAccelerationsD[0], currentAccelerationsD[1], h);
 		
 		// nieuwe positie berekenen aan de hand van de nieuwe snelheid
 		Vector3f[] deltaPositions = calculatePositions(drone, newVelocities, h);
@@ -50,21 +38,14 @@ public class PhysicsEngine {
 		drone.setLinearVelocity(drone.transformToWorldFrame(newVelocities[0]));
 		drone.setAngularVelocity(drone.transformToWorldFrame(newVelocities[1]));	
 		
-		// nieuwe positie opslaan
-		Vector3f rotationAxis = new Vector3f(0,0,0);
-		boolean rotated = false;
-		
-		//als rotatievector de nulvector is, kan ze niet genormaliseerd worden
-		if(! deltaPositions[1].equals(new Vector3f(0,0,0))){
-			deltaPositions[1].normalise(rotationAxis);
-			rotated = true;
-		}		
-		
-		//System.out.println("PE applyphysics neworientationvector: " + deltaPositions[1]);
-		//System.out.println("PE applyphysics rotationaxis: " + rotationAxis);
-		
+		// translatie en rotatie uitvoeren
 		drone.translate(deltaPositions[0]);
-		if (rotated){ drone.rotate(deltaPositions[1].length(), rotationAxis );}
+		
+		if (!deltaPositions[1].equals(new Vector3f(0,0,0))) {
+			Vector3f rotationAxis = new Vector3f(0,0,0);
+			deltaPositions[1].normalise(rotationAxis);
+			drone.rotate(deltaPositions[1].length(), rotationAxis);
+		}
 		
 		
 		//recursieve oproep
