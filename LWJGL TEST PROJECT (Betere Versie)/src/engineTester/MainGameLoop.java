@@ -100,25 +100,47 @@ public class MainGameLoop {
 		//Creating 1000 test cubes
 		Random r = new Random();
 		List<Entity> entities = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 5; i++) {
 			Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
 			RawModel model = loader.loadToVAO(c.positions, c.colors, null);
 			//TexturedModel staticModel = new TexturedModel(model,new ModelTexture(loader.loadTexture("image")));
+			float x = 0;
+			float y = 0;
+			float z = 0;
+			float j = (float)1.5;
+			if (i == 0) {
+				x = 0; y = 0; z = -10*j;
+			}
+			if (i==1) {
+				x = 10*j; y = 10*j; z = -10*j;
+			}
+			if (i==2) {
+				x = 10*j; y = -10*j; z = -10*j;
+			}
+			if (i==3) {
+				x = -10*j; y = 10*j; z = -10*j;
+			}
+			if (i==4) {
+				x = -10*j; y = -10*j; z = -10*j;
+			}
 			entities.add(new cubeTestPlayer(model, 
-					new Vector3f(r.nextFloat()*20-10,r.nextFloat()*10,r.nextFloat()*-90-10),0, 0, 0, 1));
+					new Vector3f(x,y,z),0, 0, 0, 1));
 		}
 		
-		Cube c = new Cube(1, 0, 0);
+		Cube c = new Cube((float)0.5, 0, (float)0.007843137255);
 		RawModel model = loader.loadToVAO(c.positions, c.colors, null);
 
 		Entity e = new Entity(model, 
-				new Vector3f(0,3,-10),0, 0, 0, 1);
+				new Vector3f(0,0,-55),0, 0, 0, 1);
 		//e.setRotation((float) (0.3f*Math.PI), (float) (0.2f*Math.PI),(float) (0.4f*Math.PI));
 		
 		Cuboid droneCube = new Cuboid(0, 0, 0);
 		drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
 				new Vector3f(0, 0, 0), 0, 0, 0, 1, autopilotConfig);
 		Autopilot ap = new Autopilot();
+		//drone.getCamera().setPitch((float)1);
+		
+		//drone.getCamera().setPitch((float)0.5);
 		
 		//FreeRoam Camera
 		freeRoamCamera = new Camera();
@@ -142,9 +164,9 @@ public class MainGameLoop {
 			shader.start();
 			shader.loadViewMatrix(drone.getCamera());
 			
-//			for (Entity entity : entities) {
-//				rendererFreeCam.render(entity,shaderFreeCam);
-//			} 
+			for (Entity entity : entities) {
+				rendererFreeCam.render(entity,shaderFreeCam);
+			} 
 			renderer.render(e, shader);
 			renderer.render(drone, shader);
 			
@@ -218,11 +240,11 @@ public class MainGameLoop {
 			if(!( Math.abs(Math.sqrt(Math.pow(drone.getPosition().x - e.getPosition().x, 2) +
 					Math.pow(drone.getPosition().y - e.getPosition().y, 2) +
 					Math.pow(drone.getPosition().z - e.getPosition().z, 2))) < 4)) {
-				drone.increasePosition(dt);
+				//drone.increasePosition(dt);
 				drone.sendToAutopilot();
 				ap.communicateWithDrone();
 				drone.getFromAutopilot();
-				drone.applyForces(dt);
+				//drone.applyForces(dt);
 			}
 			
 			
