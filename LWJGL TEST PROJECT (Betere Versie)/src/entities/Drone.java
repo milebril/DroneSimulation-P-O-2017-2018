@@ -42,14 +42,11 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	public Drone(RawModel model, Matrix4f pose, float scale,
 				AutopilotConfig cfg, PredictionMethod predictionMethod) {
 		super(model, pose, scale);
-
-		//TODO snelheid mee in constructor opnemen
 		
 		this.linearVelocityW = new Vector3f(0.0f,0.0f, -15.0f);
 
 		this.angularVelocityW = new Vector3f(0f, 0f, 0f);
 		
-		this.angularAccelerationW = new Vector3f(0f, 0f, 0f);
 		
 		// Left wing, Right wing, Horizontal stabilizer, Vertical stabilizer
 		// vertical rotation axis: (0,1,0) (= y-axis) // horizontal rotation axis: (1,0,0) (= x-axis)

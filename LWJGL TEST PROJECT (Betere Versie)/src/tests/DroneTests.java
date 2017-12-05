@@ -68,7 +68,7 @@ public class DroneTests {
 			e.printStackTrace();
 		}
 
-		this.drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null), new Matrix4f(), 1f, autopilotConfig, new EulerPrediction(0.01f));
+		this.drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null), new Matrix4f(), 1, autopilotConfig, new EulerPrediction(0.01f));
 	}
 	
 	/**
