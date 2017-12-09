@@ -111,8 +111,8 @@ public class MainGameLoop {
 		Renderer renderer = new Renderer(shader, autopilotConfig.getHorizontalAngleOfView(), autopilotConfig.getVerticalAngleOfView());
 		Renderer rendererFreeCam = new Renderer(shaderFreeCam, 50, 50);
 		Renderer rendererText = new Renderer(shaderText, 50, 50);
-		Renderer renderTopDown = new Renderer(shaderTopDown, 50, 50);
-		Renderer renderSideView = new Renderer(shaderSideView, 50, 50);
+		Renderer renderTopDown = new Renderer(shaderTopDown, 40, 40);
+		Renderer renderSideView = new Renderer(shaderSideView, 40, 40);
 		
 		//FreeRoam Camera
 		freeRoamCamera = new Camera();
@@ -121,12 +121,12 @@ public class MainGameLoop {
 		
 		//TopDown camera
 		Camera topDownCamera = new Camera();
-		topDownCamera.setPosition(new Vector3f(0, 150, -50));
+		topDownCamera.setPosition(new Vector3f(0, 300, -100));
 		topDownCamera.setRotation((float) -(Math.PI / 2), 0, 0);
 		
 		//Sideview Camera
 		Camera sideViewCamera = new Camera();
-		sideViewCamera.setPosition(new Vector3f(150,5,-50));
+		sideViewCamera.setPosition(new Vector3f(300,0,-100));
 		sideViewCamera.setRotation(0, (float) -(Math.PI / 2), 0);
 		
 		//Creating 10 test cubes
@@ -205,9 +205,15 @@ public class MainGameLoop {
 				renderTopDown.prepare();
 				shaderTopDown.start();
 				shaderTopDown.loadViewMatrix(topDownCamera);
+				
+				GL11.glMatrixMode(GL11.GL_PROJECTION);
+				GL11.glLoadIdentity();
+				GL11.glOrtho(200+1, Display.getWidth(), Display.getHeight(), Display.getHeight()/2 + 1, 1, -1);
+				GL11.glMatrixMode(GL11.GL_MODELVIEW);
+
 				renderView(renderTopDown, shaderTopDown);
 				
-				topDownCamera.setPosition(new Vector3f(0, 150, drone.getPosition().z));
+				//topDownCamera.setPosition(new Vector3f(0, 150, drone.getPosition().z));
 				
 				//SideView
 				GL11.glViewport(200 + 1, 0,Display.getWidth() - 201, Display.getHeight()/2);
@@ -216,9 +222,15 @@ public class MainGameLoop {
 				renderSideView.prepareText();
 				shaderSideView.start();
 				shaderSideView.loadViewMatrix(sideViewCamera);
+				
+				GL11.glMatrixMode(GL11.GL_PROJECTION);
+				GL11.glLoadIdentity();
+				GL11.glOrtho(200+1, Display.getWidth(), Display.getHeight()/2, 0, 1, -1);
+				GL11.glMatrixMode(GL11.GL_MODELVIEW);
+				
 				renderView(renderSideView, shaderSideView);
 				
-				sideViewCamera.setPosition(new Vector3f(150, 0, drone.getPosition().z));
+				//sideViewCamera.setPosition(new Vector3f(150, 0, drone.getPosition().z));
 				break;
 				default:
 					System.out.println("ERROR");
@@ -248,7 +260,7 @@ public class MainGameLoop {
 			
 			float dt = DisplayManager.getFrameTimeSeconds();
 			System.out.println(dt);
-			if(drone.getPosition().z < 200) {
+			if(!entities.isEmpty()) {
 				
 				//applyphysics rekent de krachten uit en gaat dan de kinematische waarden van de drone
 				// aanpassen op basis daarvan 

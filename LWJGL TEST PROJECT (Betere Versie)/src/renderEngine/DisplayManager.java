@@ -21,17 +21,35 @@ public class DisplayManager {
 	private static boolean started = true;
 	
 	public static void createDisplay(){		
-		ContextAttribs attribs = new ContextAttribs(3,2)
-		.withForwardCompatible(true)
-		.withProfileCore(true);
+//		ContextAttribs attribs = new ContextAttribs(3,2)
+//		.withForwardCompatible(true)
+//		.withProfileCore(true);
+//		
+//		try {
+//			Display.setDisplayMode(new DisplayMode(WIDTH,HEIGHT));
+//			Display.create(new PixelFormat(), attribs);
+//			Display.setTitle("Our First Display!");
+//		} catch (LWJGLException e) {
+//			e.printStackTrace();
+//		}
 		
+		Display.setTitle("Basic Game");
 		try {
-			Display.setDisplayMode(new DisplayMode(WIDTH,HEIGHT));
-			Display.create(new PixelFormat(), attribs);
-			Display.setTitle("Our First Display!");
+			Display.setDisplayMode(new DisplayMode(WIDTH, HEIGHT));
+			Display.create();
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 		}
+		
+//		GL11.glMatrixMode(GL11.GL_PROJECTION);
+//		GL11.glLoadIdentity();
+//		GL11.glOrtho(0, WIDTH, HEIGHT, 0, 1, -1);
+//		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+//		GL11.glEnable(GL11.GL_TEXTURE_2D);
+//		GL11.glEnable(GL11.GL_BLEND);
+//		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+//		
+		
 		GL11.glViewport(0, 0, WIDTH, HEIGHT);
 		lastFrameTime = getCurrentTime();
 	}
