@@ -81,18 +81,23 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		//initialize();
 		
 		//ADD CUBES TO LIST
-		cubePositions.add(new Vector3f(0,0, -200));
+		//cubePositions.add(new Vector3f(0,0, -200));
 //		cubePositions.add(new Vector3f(0,0,-80));
 //		cubePositions.add(new Vector3f(-2,0,-120));
 //		cubePositions.add(new Vector3f(0,0,-160));
 //		cubePositions.add(new Vector3f(0, 0, -80));
 //		cubePositions.add(new Vector3f(-5,0,-40));
 //		cubePositions.add(new Vector3f(-2.5f,0,-60));
-//		cubePositions.add(new Vector3f(0,-10,-40));
-//		cubePositions.add(new Vector3f(0,0,-80));
-//		cubePositions.add(new Vector3f(0,-5,-120));
-//		cubePositions.add(new Vector3f(0,8,-160));
-//		cubePositions.add(new Vector3f(0,-2,-200));
+		
+		
+		//cubePositions.add(new Vector3f(-5,0,-40));
+		
+		//WORKING DEMO UP/DOWN
+		cubePositions.add(new Vector3f(0,-10,-40));
+		cubePositions.add(new Vector3f(0,0,-80));
+		cubePositions.add(new Vector3f(0,-5,-120));
+		cubePositions.add(new Vector3f(0,8,-160));
+		cubePositions.add(new Vector3f(0,-2,-200));
 		
 		cubePos = cubePositions.remove(0);
 	}
@@ -157,6 +162,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		Vector3f.sub(vec1, vec2, temp);
 		return temp.length();
 	}
+	
 	@Override
 	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
 		this.inputAP = inputs;
@@ -170,58 +176,29 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			newHorStabInclination += pidHorGoal.calculateChange(inputAP.getPitch() + getVerAngle(), dt);
 			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
 			else if(newHorStabInclination < - Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
-//			System.out.println("pitch : " + inputAP.getPitch());
-//			System.out.println("angle : " + getAngle());
-//			System.out.println("stuff : " + (inputAP.getPitch() - getAngle()));
-//			System.out.println("horizontal stabiliser: " + newHorStabInclination);
-			if(getEuclidDist(this.currentPosition,cubePos) <= 4){
-				this.cubePos = cubePositions.remove(0);
-				System.out.println("test");
-			}
-			
-			System.out.println("hoek: " + (inputAP.getHeading() - getHorAngle()));
+
 			newVerStabInclination += pidVerGoal.calculateChange(inputAP.getHeading() - getHorAngle(), dt);
 			if(newVerStabInclination > Math.PI/6) newVerStabInclination = (float) (Math.PI/6);
 			else if(newVerStabInclination < - Math.PI/6) newVerStabInclination = (float) -(Math.PI/6);
-			System.out.println("ver inc: " + newVerStabInclination);
-			System.out.println();
 			
-			//HORIZONTAL WINGPOSITION
-//			float incChange = this.pidHorWing.calculateChange(currentPosition.y, this.dt);
-//			float[] wingChange = new float[] {incChange,incChange};
-//			
-//			newLeftWingInclination += wingChange[0];
-////			newLeftWingInclination -= inputAP.getPitch();
-//			if(newLeftWingInclination >= Math.PI/6) newLeftWingInclination = (float) (Math.PI/6);
-//			else if(newLeftWingInclination <= -Math.PI/6) newLeftWingInclination = (float) -(Math.PI/6);	
-//			
-//			newRightWingInclination += wingChange[1];
-////			newRightWingInclination -= inputAP.getPitch();
-//			if(newRightWingInclination >= Math.PI/6)  newRightWingInclination = (float) (Math.PI/6);
-//			else if(newRightWingInclination <= -Math.PI/6) newRightWingInclination = (float) -(Math.PI/6);
-//			
-//			System.out.println("Hor Wing Inc: " + newRightWingInclination);
+			//CUBE REACHED
+			if(getEuclidDist(this.currentPosition,cubePos) <= 4 && !cubePositions.isEmpty()){
+				this.cubePos = cubePositions.remove(0);
+			}
 			
-			//HORIZONTAL STABILISER
-//			if(this.currentPosition.getY() < this.heightGoal + 0.1 && this.currentPosition.getY() > this.heightGoal - 0.1)
-//				this.heightGoalReached = true;
-//			//Stabilise
-//			if(this.heightGoalReached == true){
-//				newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch(), dt);
-//				if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
-//				else if(newHorStabInclination < -Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
-//			}
-//			//climb/fall
-//			else{
-//				this.heightGoalReached = false;
-//				newHorStabInclination += pidHorGoal.calculateChange(this.currentPosition.getY(), dt);
-//				if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
-//				else if(newHorStabInclination < -Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
-//			}
-//			System.out.println("Hor StabWing Inc: " + newHorStabInclination);
-//			System.out.println();
 			//THRUST FORCE
-			this.newThrust = 8;
+		      if (this.calculateSpeedVector().length() > 20) { 
+		          newThrust = 0; 
+		      } else { 
+		          if (Math.abs(newVerStabInclination) > 0.1) { 
+		        	  newThrust = configAP.getMaxThrust() / 4; 
+		          } else { 
+		        	  this.newThrust = configAP.getMaxThrust(); 
+		          } 
+		      } 
+			
+		      //SAVE DATA
+		      this.prevPosition = new Vector3f(currentPosition.x, currentPosition.y, currentPosition.z); 
 		}
 		
 		return this;

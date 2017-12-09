@@ -90,8 +90,8 @@ public class Renderer {
 	public void render(Entity entity, StaticShader shader) {
 		RawModel rawModel = entity.getModel();
 		GL30.glBindVertexArray(rawModel.getVaoID());
-		GL20.glEnableVertexAttribArray(0);
-		GL20.glEnableVertexAttribArray(1);
+		GL20.glEnableVertexAttribArray(0); //Vertices
+		GL20.glEnableVertexAttribArray(1); //Colors
 //		Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(),
 //				entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
 		Matrix4f transformationMatrix = entity.getPose();
@@ -103,6 +103,14 @@ public class Renderer {
 		//		GL11.GL_UNSIGNED_INT, 0);
 		GL20.glDisableVertexAttribArray(0);
 		GL20.glDisableVertexAttribArray(1);
+		GL30.glBindVertexArray(0);
+	}
+	
+	public void render(RawModel model) {
+		GL30.glBindVertexArray(model.getVaoID());
+		GL20.glEnableVertexAttribArray(0);
+		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, model.getVertexCount());
+		GL20.glDisableVertexAttribArray(0);
 		GL30.glBindVertexArray(0);
 	}
 	
@@ -120,6 +128,10 @@ public class Renderer {
 		projectionMatrix.m23 = -1;
 		projectionMatrix.m32 = -((2 * NEAR_PLANE * FAR_PLANE) / frustum_length);
 		projectionMatrix.m33 = 0;
+	}
+	
+	public void renderQuad() {
+		GL11.glBegin(GL11.GL_QUADS);
 	}
 
 }

@@ -10,15 +10,15 @@ import org.lwjgl.opengl.PixelFormat;
 
 public class DisplayManager {
 	
-	private static final int WIDTH = 1920;
-	private static final int HEIGHT = 1080;
-	//private static final int WIDTH = 200;
-	//private static final int HEIGHT = 200;
+	private static final int WIDTH = 1280;
+	private static final int HEIGHT = 700;
 	private static final int FPS_CAP = 120;
 	
 	public static float elapsedTime;
 	private static long lastFrameTime;
 	private static float delta;
+	
+	private static boolean started = false;
 	
 	public static void createDisplay(){		
 		ContextAttribs attribs = new ContextAttribs(3,2)
@@ -48,7 +48,11 @@ public class DisplayManager {
 	}
 	
 	public static float getFrameTimeSeconds() {
-		return delta;
+		if (started) {
+			return (float) (delta);
+		} else {
+			return 0;
+		}
 	}
 	
 	public static void closeDisplay(){
@@ -61,5 +65,9 @@ public class DisplayManager {
 
 	public static float getElapsedTime() {
 		return elapsedTime;
+	}
+
+	public static void start() {
+		started = true;
 	}
 }
