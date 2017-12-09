@@ -19,7 +19,6 @@ public class EulerPrediction extends PredictionMethod {
 		// linear prediction
 		Vector3f linPrediction = new Vector3f();
 		Vector3f.add(linVelocity, (Vector3f) linAcceleration.scale(getStepSize()), linPrediction);
-		System.out.println("euler: " + linVelocity + " + " + getStepSize() + "*" + linAcceleration);
 		
 		// angular prediction
 		Vector3f angPrediction = new Vector3f();
@@ -35,7 +34,6 @@ public class EulerPrediction extends PredictionMethod {
 		// linear prediction
 		Vector3f linPrediction = new Vector3f();
 		Vector3f.add(linVelocity, (Vector3f) linAcceleration.scale(stepSize), linPrediction);
-		System.out.println("euler: " + linVelocity + " + " + getStepSize() + "*" + linAcceleration);
 		
 		// angular prediction
 		Vector3f angPrediction = new Vector3f();

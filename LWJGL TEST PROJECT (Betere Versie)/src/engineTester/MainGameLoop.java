@@ -37,7 +37,6 @@ import shaders.StaticShader;
 import testObjects.Cube;
 import testObjects.Cuboid;
 import textures.ModelTexture;
-import toolbox.Button;
 import entities.Camera;
 import entities.Drone;
 import entities.Entity;
@@ -78,8 +77,6 @@ public class MainGameLoop {
 			CHASE, ORTHO
 	};
 	
-	private static Button b;
-
 	public static void main(String[] args) throws IOException {
 		
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -104,9 +101,6 @@ public class MainGameLoop {
 		//Loader is used to load models using VAO's and VBO's
 		loader = new Loader();
 		TextMaster.init(loader);
-		
-		//BUTTONS
-		b = new Button(40, Display.getHeight() - 10, 40,40);
 		
 		StaticShader shader = new StaticShader();
 		StaticShader shaderFreeCam = new StaticShader();
@@ -226,6 +220,9 @@ public class MainGameLoop {
 				
 				sideViewCamera.setPosition(new Vector3f(150, 0, drone.getPosition().z));
 				break;
+				default:
+					System.out.println("ERROR");
+					break;
 			}
 			
 			
@@ -250,6 +247,7 @@ public class MainGameLoop {
 			textPosition.setColour(1, 1, 1);
 			
 			float dt = DisplayManager.getFrameTimeSeconds();
+			System.out.println(dt);
 			if(drone.getPosition().z < 200) {
 				
 				//applyphysics rekent de krachten uit en gaat dan de kinematische waarden van de drone
@@ -263,9 +261,6 @@ public class MainGameLoop {
 			}
 			
 			TextMaster.render();
-
-			//BUTTON
-			//b.render();
 			
 			// de tekst moet telkens worden verwijderd, anders wordt er elke loop nieuwe tekst overgeprint (=> onleesbaar)
 			TextMaster.removeText(textSpeed);
