@@ -7,6 +7,7 @@ import physicsEngine.PhysicsEngine;
 import physicsEngine.approximationMethods.EulerPrediction;
 import physicsEngine.approximationMethods.PredictionMethod;
 
+import java.awt.Font;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -24,6 +25,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
+import org.newdawn.slick.TrueTypeFont;
 import org.opencv.core.Core;
 
 import autoPilotJar.SimpleAutopilot;
@@ -169,6 +171,16 @@ public class MainGameLoop {
 		
 		GuiRenderer guiRenderer = new GuiRenderer(loader);
 		
+		//GUI Text
+		String speed = String.valueOf(Math.round(drone.getAbsVelocity()));
+		FontType font = new FontType(loader.loadTexture("verdana"), new File("res/verdana.fnt"));
+		GUIText textSpeed = new GUIText("Speed = " + speed + "m/s", 5, font, new Vector2f(0.01f,0), 1, true);
+		textSpeed.setColour(1, 1, 1);
+		
+		String xpos, ypos, zpos;
+		GUIText textPosition = new GUIText("" , 5, font, new Vector2f(0.01f,0.2f), 1, true);
+		textPosition.setColour(1, 1, 1);
+		
 		while(!Display.isCloseRequested()){
 			//RENDER BUTTONS
 
@@ -186,8 +198,7 @@ public class MainGameLoop {
 				drone.getCamera().takeSnapshot();
 			}
 			
-			switch (viewState) {
-			case CHASE:
+			if (viewState == ViewStates.CHASE) {
 				//3rd Person View (FreeCam)
 				GL11.glViewport(200+1, 0, Display.getWidth() - 201, Display.getHeight());
 				GL11.glScissor(200+1, 0, Display.getWidth()- 201, Display.getHeight());
@@ -197,9 +208,7 @@ public class MainGameLoop {
 				shaderFreeCam.loadViewMatrix(freeRoamCamera);
 				renderView(rendererFreeCam, shaderFreeCam);
 				guiRenderer.render(guis);
-
-				break;
-			case ORTHO:
+			} else {
 				GL11.glViewport(200+1, 0, Display.getWidth() - 201, Display.getHeight());
 				GL11.glScissor(200+1, 0, Display.getWidth()- 201, Display.getHeight());
 				GL11.glEnable(GL11.GL_SCISSOR_TEST);
@@ -235,10 +244,6 @@ public class MainGameLoop {
 				GL11.glMatrixMode(GL11.GL_MODELVIEW);
 				
 				renderView(renderSideView, shaderSideView);
-				break;
-				default:
-					System.out.println("ERROR");
-					break;
 			}
 			
 			
@@ -249,21 +254,18 @@ public class MainGameLoop {
 			rendererText.prepareDroneCamera();
 			
 			// snelheid van de drone
-			String speed = String.valueOf(Math.round(drone.getAbsVelocity()));
-			FontType font = new FontType(loader.loadTexture("verdana"), new File("res/verdana.fnt"));
-			GUIText textSpeed = new GUIText("Speed = " + speed + "m/s", 5, font, new Vector2f(0.01f,0), 1, true);
-			textSpeed.setColour(1, 1, 1);
+			speed = String.valueOf(Math.round(drone.getAbsVelocity()));
+			textSpeed .setString("Speed = " + speed + "m/s");
+			TextMaster.loadText(textSpeed);
 			
 			// positie van de drone
-			Vector3f Dposition = drone.getPosition();
-			String xpos = String.valueOf(Math.round(Dposition.x));
-			String ypos = String.valueOf(Math.round(Dposition.y));
-			String zpos = String.valueOf(Math.round(Dposition.z));
-			GUIText textPosition = new GUIText("Position = ("+xpos+" , "+ypos+" , "+zpos +")" , 5, font, new Vector2f(0.01f,0.2f), 1, true);
-			textPosition.setColour(1, 1, 1);
+			xpos = String.valueOf(Math.round(drone.getPosition().x));
+			ypos = String.valueOf(Math.round(drone.getPosition().y));
+			zpos = String.valueOf(Math.round(drone.getPosition().z));
+			textPosition.setString("Position = ("+xpos+" , "+ypos+" , "+zpos +")");
+			TextMaster.loadText(textPosition);
 			
 			float dt = DisplayManager.getFrameTimeSeconds();
-			System.out.println(DisplayManager.getElapsedTime());
 			if(!entities.isEmpty()) {
 				
 				//applyphysics rekent de krachten uit en gaat dan de kinematische waarden van de drone
@@ -286,6 +288,9 @@ public class MainGameLoop {
 			removeCubes();
 			
 			shader.stop();
+			shaderFreeCam.stop();
+			shaderTopDown.stop();
+			shaderSideView.stop();
 			DisplayManager.updateDisplay();
 		}
 
@@ -293,6 +298,9 @@ public class MainGameLoop {
 		TextMaster.cleanUp();
 		shader.cleanUp();
 		shaderFreeCam.cleanUp();
+		shaderTopDown.cleanUp();
+		shaderText.cleanUp();
+		shaderSideView.cleanUp();
 		loader.cleanUp();
 		DisplayManager.closeDisplay();
 
