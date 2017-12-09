@@ -18,7 +18,7 @@ public class DisplayManager {
 	private static long lastFrameTime;
 	private static float delta;
 	
-	private static boolean started = true;
+	private static boolean started = false;
 	
 	public static void createDisplay(){		
 //		ContextAttribs attribs = new ContextAttribs(3,2)

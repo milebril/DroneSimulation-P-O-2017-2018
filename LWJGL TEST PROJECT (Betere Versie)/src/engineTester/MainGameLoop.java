@@ -44,6 +44,8 @@ import entities.cubeTestPlayer;
 import fontMeshCreator.FontType;
 import fontMeshCreator.GUIText;
 import fontRendering.TextMaster;
+import guis.GuiRenderer;
+import guis.GuiTexture;
 import interfaces.Autopilot;
 import interfaces.AutopilotConfig;
 import interfaces.AutopilotFactory;
@@ -72,7 +74,7 @@ public class MainGameLoop {
 	
 	//TODO main opruimen, code eruit halen
 	
-	private static ViewStates viewState = ViewStates.ORTHO;
+	private static ViewStates viewState = ViewStates.CHASE;
 	private static enum ViewStates {
 			CHASE, ORTHO
 	};
@@ -117,7 +119,7 @@ public class MainGameLoop {
 		//FreeRoam Camera
 		freeRoamCamera = new Camera();
 		freeRoamCamera.setPosition(new Vector3f(0, 100, 0));
-		freeRoamCamera.setYaw(-45);
+		//freeRoamCamera.setYaw(-45);
 		
 		//TopDown camera
 		Camera topDownCamera = new Camera();
@@ -161,9 +163,15 @@ public class MainGameLoop {
 		Autopilot autopilot = AutopilotFactory.createAutopilot();
 		autopilot.simulationStarted(autopilotConfig, drone.getAutoPilotInputs());
 		
+		//GUI
+		List<GuiTexture> guis = new ArrayList<>();
+		guis.add(new GuiTexture(loader.loadTexture("openfile"), new Vector2f(0.95f, 0.95f),  new Vector2f(0.05f, 0.05f)));
+		
+		GuiRenderer guiRenderer = new GuiRenderer(loader);
+		
 		while(!Display.isCloseRequested()){
 			//RENDER BUTTONS
-			
+
 			//Drone Camera View
 			drone.getCamera().setPosition(drone.getPosition());	
 			GL11.glViewport(0, 0, 200, 200);
@@ -184,11 +192,11 @@ public class MainGameLoop {
 				GL11.glViewport(200+1, 0, Display.getWidth() - 201, Display.getHeight());
 				GL11.glScissor(200+1, 0, Display.getWidth()- 201, Display.getHeight());
 				GL11.glEnable(GL11.GL_SCISSOR_TEST);
-				//rendererFreeCam.prepare();
 				renderSideView.prepareText();
 				shaderFreeCam.start();
 				shaderFreeCam.loadViewMatrix(freeRoamCamera);
 				renderView(rendererFreeCam, shaderFreeCam);
+				guiRenderer.render(guis);
 
 				break;
 			case ORTHO:
@@ -213,8 +221,6 @@ public class MainGameLoop {
 
 				renderView(renderTopDown, shaderTopDown);
 				
-				//topDownCamera.setPosition(new Vector3f(0, 150, drone.getPosition().z));
-				
 				//SideView
 				GL11.glViewport(200 + 1, 0,Display.getWidth() - 201, Display.getHeight()/2);
 				GL11.glScissor(200 + 1, 0 ,Display.getWidth() - 201, Display.getHeight()/2);
@@ -229,8 +235,6 @@ public class MainGameLoop {
 				GL11.glMatrixMode(GL11.GL_MODELVIEW);
 				
 				renderView(renderSideView, shaderSideView);
-				
-				//sideViewCamera.setPosition(new Vector3f(150, 0, drone.getPosition().z));
 				break;
 				default:
 					System.out.println("ERROR");
@@ -259,7 +263,7 @@ public class MainGameLoop {
 			textPosition.setColour(1, 1, 1);
 			
 			float dt = DisplayManager.getFrameTimeSeconds();
-			System.out.println(dt);
+			System.out.println(DisplayManager.getElapsedTime());
 			if(!entities.isEmpty()) {
 				
 				//applyphysics rekent de krachten uit en gaat dan de kinematische waarden van de drone
@@ -285,6 +289,7 @@ public class MainGameLoop {
 			DisplayManager.updateDisplay();
 		}
 
+		guiRenderer.cleanUp();
 		TextMaster.cleanUp();
 		shader.cleanUp();
 		shaderFreeCam.cleanUp();
@@ -346,8 +351,8 @@ public class MainGameLoop {
 			sLock = true;
 		}else {
 			if (freeRoamCameraLocked) {
-				Vector3f.add(drone.getPosition(), new Vector3f(0, 30, 30), freeRoamCamera.getPosition());
-				freeRoamCamera.setRotation((float) -(Math.PI/6), 0, 0);
+				Vector3f.add(drone.getPosition(), new Vector3f(0, 0, 30), freeRoamCamera.getPosition());
+				//freeRoamCamera.setRotation((float) -(Math.PI/6), 0, 0);
 			} else {
 				freeRoamCamera.roam();
 			}
