@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
@@ -46,6 +47,7 @@ import entities.cubeTestPlayer;
 import fontMeshCreator.FontType;
 import fontMeshCreator.GUIText;
 import fontRendering.TextMaster;
+import guis.Button;
 import guis.GuiRenderer;
 import guis.GuiTexture;
 import interfaces.Autopilot;
@@ -166,10 +168,38 @@ public class MainGameLoop {
 		autopilot.simulationStarted(autopilotConfig, drone.getAutoPilotInputs());
 		
 		//GUI
-		List<GuiTexture> guis = new ArrayList<>();
-		guis.add(new GuiTexture(loader.loadTexture("openfile"), new Vector2f(0.95f, 0.95f),  new Vector2f(0.05f, 0.05f)));
+//		guis.add(new GuiTexture(loader.loadTexture("openfile"), new Vector2f(0.95f, 0.95f),  new Vector2f(0.05f, 0.05f)));
 		
+//		List<Button> guis = new ArrayList<>();
+//		guis.add(new Button(new Vector2f(0.95f, 0.95f),  new Vector2f(0.05f, 0.05f), "openfile"));
+		
+		List<GuiTexture> guis = new ArrayList<>();
 		GuiRenderer guiRenderer = new GuiRenderer(loader);
+		
+		Button openFile = new Button(loader, "openfile", new Vector2f(0.9f, 0.9f), new Vector2f(0.05f, 0.05f)) {
+			
+			@Override
+			public void whileHover() {
+				//Do nothing
+			}
+			
+			@Override
+			public void stopHover() {
+				this.setScale(new Vector2f(0.05f, 0.05f));
+			}
+			
+			@Override
+			public void startHover() {
+				this.playHoverAnimation(0.01f);
+			}
+			
+			@Override
+			public void onClick() {
+				this.playerClickAnimation(0.02f);
+				System.out.println("hier");
+			}
+		};
+		openFile.show(guis);
 		
 		//GUI Text
 		String speed = String.valueOf(Math.round(drone.getAbsVelocity()));
@@ -183,7 +213,7 @@ public class MainGameLoop {
 		
 		while(!Display.isCloseRequested()){
 			//RENDER BUTTONS
-
+			
 			//Drone Camera View
 			drone.getCamera().setPosition(drone.getPosition());	
 			GL11.glViewport(0, 0, 200, 200);
@@ -207,7 +237,6 @@ public class MainGameLoop {
 				shaderFreeCam.start();
 				shaderFreeCam.loadViewMatrix(freeRoamCamera);
 				renderView(rendererFreeCam, shaderFreeCam);
-				guiRenderer.render(guis);
 			} else {
 				GL11.glViewport(200+1, 0, Display.getWidth() - 201, Display.getHeight());
 				GL11.glScissor(200+1, 0, Display.getWidth()- 201, Display.getHeight());
@@ -225,7 +254,8 @@ public class MainGameLoop {
 				
 				GL11.glMatrixMode(GL11.GL_PROJECTION);
 				GL11.glLoadIdentity();
-				GL11.glOrtho(200+1, Display.getWidth(), Display.getHeight(), Display.getHeight()/2 + 1, 1, -1);
+				//GL11.glOrtho(200+1, Display.getWidth(), Display.getHeight(), Display.getHeight()/2 + 1, 1, -1);
+				GL11.glOrtho(0, Display.getWidth(), 0, Display.getHeight() + 1, 1, -1);
 				GL11.glMatrixMode(GL11.GL_MODELVIEW);
 
 				renderView(renderTopDown, shaderTopDown);
@@ -240,7 +270,8 @@ public class MainGameLoop {
 				
 				GL11.glMatrixMode(GL11.GL_PROJECTION);
 				GL11.glLoadIdentity();
-				GL11.glOrtho(200+1, Display.getWidth(), Display.getHeight()/2, 0, 1, -1);
+				//GL11.glOrtho(200+1, Display.getWidth(), Display.getHeight()/2, 0, 1, -1);
+				GL11.glOrtho(0, Display.getWidth(), 0, Display.getHeight() + 1, 1, -1);
 				GL11.glMatrixMode(GL11.GL_MODELVIEW);
 				
 				renderView(renderSideView, shaderSideView);
@@ -265,6 +296,17 @@ public class MainGameLoop {
 			textPosition.setString("Position = ("+xpos+" , "+ypos+" , "+zpos +")");
 			TextMaster.loadText(textPosition);
 			
+			TextMaster.render();
+			
+			//GUI
+			GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
+			GL11.glScissor(0, 0, Display.getWidth(), Display.getHeight());
+			GL11.glEnable(GL11.GL_SCISSOR_TEST);
+			
+			guiRenderer.render(guis);
+			openFile.checkHover();
+			
+			
 			float dt = DisplayManager.getFrameTimeSeconds();
 			if(!entities.isEmpty()) {
 				
@@ -277,8 +319,6 @@ public class MainGameLoop {
 				AutopilotOutputs outputs = autopilot.timePassed(inputs);
 				drone.setAutopilotOutouts(outputs);
 			}
-			
-			TextMaster.render();
 			
 			// de tekst moet telkens worden verwijderd, anders wordt er elke loop nieuwe tekst overgeprint (=> onleesbaar)
 			TextMaster.removeText(textSpeed);

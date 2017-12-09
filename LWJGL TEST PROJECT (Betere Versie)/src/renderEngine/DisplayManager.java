@@ -2,11 +2,13 @@ package renderEngine;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.ContextAttribs;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.PixelFormat;
+import org.lwjgl.util.vector.Vector2f;
 
 public class DisplayManager {
 	
@@ -87,5 +89,12 @@ public class DisplayManager {
 
 	public static void start() {
 		started = true;
+	}
+
+	public static Vector2f getNormailzedMouseCoordinates() {
+		float normalizedX = -1.0f + 2.0f * (float) Mouse.getX() / (float) Display.getWidth();
+		float normalizedY = 1.0f - 2.0f * (float) Mouse.getY() / (float) Display.getHeight();
+		
+		return new Vector2f(normalizedX, normalizedY);
 	}
 }
