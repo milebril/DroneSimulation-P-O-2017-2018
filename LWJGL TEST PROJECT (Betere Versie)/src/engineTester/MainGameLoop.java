@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import javax.swing.JFileChooser;
+
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
@@ -176,6 +178,8 @@ public class MainGameLoop {
 		List<GuiTexture> guis = new ArrayList<>();
 		GuiRenderer guiRenderer = new GuiRenderer(loader);
 		
+		JFileChooser fc = new JFileChooser();
+		
 		Button openFile = new Button(loader, "openfile", new Vector2f(0.9f, 0.9f), new Vector2f(0.05f, 0.05f)) {
 			
 			@Override
@@ -196,7 +200,15 @@ public class MainGameLoop {
 			@Override
 			public void onClick() {
 				this.playerClickAnimation(0.02f);
-				System.out.println("hier");
+
+				int returnVal = fc.showOpenDialog(null);
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					File file = fc.getSelectedFile();
+					//Read file and load cubes
+					
+				} else {
+					System.out.println("Open command cancelled by user.");
+				}
 			}
 		};
 		openFile.show(guis);
