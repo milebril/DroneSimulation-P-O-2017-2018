@@ -42,7 +42,6 @@ public abstract class Button implements IButton {
             Vector2f location = guiTexture.getPosition();
             Vector2f scale = guiTexture.getScale();
             Vector2f mouseCoordinates = DisplayManager.getNormailzedMouseCoordinates();
-            System.out.println(location + " " + scale + "  " +mouseCoordinates);
             if (location.y + scale.y > -mouseCoordinates.y && location.y - scale.y < -mouseCoordinates.y &&
             		location.x + scale.x > mouseCoordinates.x && location.x - scale.x < mouseCoordinates.x) {
             	whileHover();

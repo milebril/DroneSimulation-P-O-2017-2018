@@ -42,6 +42,11 @@ public class StaticShader extends ShaderProgram{
 		super.loadMatrix(location_viewMatrix, viewMatrix);
 	}
 	
+//	public void loadOrthogonalViewMatrix(Camera camera) {
+//		Matrix4f viewMatrix = Maths.createOrtho(camera);
+//		super.loadMatrix(location_viewMatrix, viewMatrix);
+//	}
+	
 	public void loadProjectionMatrix(Matrix4f projection){
 		super.loadMatrix(location_projectionMatrix, projection);
 	}

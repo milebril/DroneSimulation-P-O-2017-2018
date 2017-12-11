@@ -8,12 +8,15 @@ import physicsEngine.approximationMethods.EulerPrediction;
 import physicsEngine.approximationMethods.PredictionMethod;
 
 import java.awt.Font;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,6 +81,8 @@ public class MainGameLoop {
 	
 	public static Loader loader;
 	
+	public static Matrix4f OrthoMatrix;
+	
 	//TODO main opruimen, code eruit halen
 	
 	private static ViewStates viewState = ViewStates.CHASE;
@@ -139,27 +144,17 @@ public class MainGameLoop {
 		
 		//Creating 10 test cubes
 		entities = new ArrayList<>();
-//		Random r = new Random();
-//		for (int i = 0; i < 10; i++) {
-//			Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
-//			RawModel model = loader.loadToVAO(c.positions, c.colors, null);
-//			//TexturedModel staticModel = new TexturedModel(model,new ModelTexture(loader.loadTexture("image")));
-//			entities.add(new cubeTestPlayer(model, 
-//					new Vector3f(r.nextFloat()*20-10,r.nextFloat()*10,r.nextFloat()*-90-10),0, 0, 0, 1));
-//		}
 		
 		Cube c = new Cube(1, 0, 0);
 		RawModel redCubeModel = loader.loadToVAO(c.positions, c.colors, null);
 		redCube = new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(-10,30,-50)) , 1);
 		
-		//entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(-10,0,-40)), 1));
-		
 		//WORKING DEMO
-		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,-10,-40)), 1));
-		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,0,-80)), 1));
-		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,-5,-120)), 1));
-		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,8,-160)), 1));
-		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,-2,-200)), 1));
+//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,-10,-40)), 1));
+//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,0,-80)), 1));
+//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,-5,-120)), 1));
+//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,8,-160)), 1));
+//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,-2,-200)), 1));
 		
 		Cuboid droneCube = new Cuboid(0, 0, 0);
 		drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
@@ -181,7 +176,6 @@ public class MainGameLoop {
 		JFileChooser fc = new JFileChooser();
 		
 		Button openFile = new Button(loader, "openfile", new Vector2f(0.9f, 0.9f), new Vector2f(0.05f, 0.05f)) {
-			
 			@Override
 			public void whileHover() {
 				//Do nothing
@@ -205,13 +199,41 @@ public class MainGameLoop {
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					File file = fc.getSelectedFile();
 					//Read file and load cubes
-					
+					loadCubes(file);
 				} else {
 					System.out.println("Open command cancelled by user.");
 				}
 			}
 		};
 		openFile.show(guis);
+		
+		Button randomCubes = new Button(loader, "random", new Vector2f(0.9f, 0.75f), new Vector2f(0.05f, 0.05f)) {
+			
+			@Override
+			public void whileHover() {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void stopHover() {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void startHover() {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onClick() {
+				System.out.println("hier");
+				generateRandomCubes();
+			}
+		};
+		randomCubes.show(guis);
 		
 		//GUI Text
 		String speed = String.valueOf(Math.round(drone.getAbsVelocity()));
@@ -225,6 +247,7 @@ public class MainGameLoop {
 		
 		while(!Display.isCloseRequested()){
 			//RENDER BUTTONS
+			
 			
 			//Drone Camera View
 			drone.getCamera().setPosition(drone.getPosition());	
@@ -283,12 +306,12 @@ public class MainGameLoop {
 				GL11.glMatrixMode(GL11.GL_PROJECTION);
 				GL11.glLoadIdentity();
 				//GL11.glOrtho(200+1, Display.getWidth(), Display.getHeight()/2, 0, 1, -1);
+				//GL11.glOrtho(200+1, Display.getWidth(), 0, Display.getHeight()/2, 1, -1);
 				GL11.glOrtho(0, Display.getWidth(), 0, Display.getHeight() + 1, 1, -1);
 				GL11.glMatrixMode(GL11.GL_MODELVIEW);
 				
 				renderView(renderSideView, shaderSideView);
 			}
-			
 			
 			//GUI View
 			GL11.glViewport(0, 200, 200, Display.getHeight() - 200);
@@ -317,6 +340,7 @@ public class MainGameLoop {
 			
 			guiRenderer.render(guis);
 			openFile.checkHover();
+			randomCubes.checkHover();
 			
 			
 			float dt = DisplayManager.getFrameTimeSeconds();
@@ -421,5 +445,55 @@ public class MainGameLoop {
 			oLock = false;
 			sLock = false;
 		}
+	}
+	
+	public static void loadCubes(File file) {
+		Random r = new Random();
+		
+		//reset entities first
+		entities = new ArrayList<>();
+		
+		try(BufferedReader br = new BufferedReader(new FileReader(file))) {
+		    for(String line; (line = br.readLine()) != null; ) {
+		        String[] s = line.split(" ");
+		        float x = Float.parseFloat(s[0]);
+		        float y = Float.parseFloat(s[1]);
+		        float z = Float.parseFloat(s[2]);
+		        
+		        Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
+				RawModel model = loader.loadToVAO(c.positions, c.colors, null);
+		        
+		        entities.add(new Entity(model, new Matrix4f().translate(new Vector3f(x, y, z)), 1));
+		    }
+		    // line is not visible here.
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public static void generateRandomCubes() {
+		Random r = new Random();
+		entities = new ArrayList<>();
+//		for (int i = 0; i < 10; i++) {
+//			Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
+//			RawModel model = loader.loadToVAO(c.positions, c.colors, null);
+//			entities.add(new Entity(model, 
+//					new Matrix4f().translate(new Vector3f(r.nextFloat()*20-10,r.nextFloat()*10,r.nextFloat()*-90-10)), 1));
+//		}
+		
+		 for (int i = 1; i <= 5; i++) {
+		      Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
+		      RawModel model = loader.loadToVAO(c.positions, c.colors, null);
+		      //TexturedModel staticModel = new TexturedModel(model,new ModelTexture(loader.loadTexture("image")));
+		      float x = r.nextFloat()*20-10;
+		      float y = r.nextFloat()*10;
+		      float z = i*-40;
+		      Vector3f position = new Vector3f(x,y,z);
+		      entities.add(new Entity(model, new Matrix4f().translate(position), 1));
+		    }
 	}
 }
