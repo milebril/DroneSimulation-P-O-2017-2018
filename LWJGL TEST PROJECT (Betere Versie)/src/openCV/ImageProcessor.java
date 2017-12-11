@@ -395,9 +395,7 @@ public class ImageProcessor {
 				// -> -roll ! ! !
 				
 				if (a != x || b != y || c != z) {
-					//System.out.println(roll);
-					//System.out.println(String.valueOf(x) + " - " + String.valueOf(y) + " - " + String.valueOf(z));
-					//System.out.println(String.valueOf(a) + " - " + String.valueOf(b) + " - " + String.valueOf(c));
+					
 				}
 				
 				point[0] = a;
@@ -561,19 +559,6 @@ public class ImageProcessor {
 			Mat rgbMat = byteArrayToRGBMat(getImageWidth(), getImageHeight(), getImage());
 			List<double[]> colorHSVList = getAllDifferentHSVColors(rgbMat);
 			List<Vector3f> ListWithCoordinatesOfCubes = new ArrayList<Vector3f>();
-			List<double[]> colorRGBList = getAllDifferentRGBColors(rgbMat);
-			
-			System.out.println("rgb");
-			
-			for (int i = 0; i < colorRGBList.size(); i++){
-				System.out.println(colorRGBList.get(i)[0]+" "+colorRGBList.get(i)[1]+" "+colorRGBList.get(i)[2]);
-			}
-			
-			System.out.println("hsv");
-			
-			for (int i = 0; i < colorHSVList.size(); i++){
-				System.out.println(colorHSVList.get(i)[0]);
-			}
 			
 			for (int i = 0; i < colorHSVList.size(); i++){
 				
@@ -590,17 +575,17 @@ public class ImageProcessor {
 				double[] centerOfMass = getType0CenterOfMass(filterMat);
 
 				if (centerOfMass == null) {
-					System.out.println("hier");
+					System.out.println("Geen kubussen gevonden...");
 					return (List<Vector3f>) new Vector3f(0,0,0);
 				}
 
 
-				// Get red area in image
-				int redArea = Core.countNonZero(filterMat);
+				// Get area in image
+				int Area = Core.countNonZero(filterMat);
 
 
-				// Get red area percentage
-				double percentage = redArea / ((float) getImageHeight()*getImageWidth());
+				// Get area percentage
+				double percentage = Area / ((float) getImageHeight()*getImageWidth());
 
 
 
