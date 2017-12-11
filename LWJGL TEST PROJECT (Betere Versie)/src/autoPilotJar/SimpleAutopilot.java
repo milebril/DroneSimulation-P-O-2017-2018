@@ -71,7 +71,9 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		//Initialize PIDController for horizontalflight
 		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
 		//this.pidHorStab = new PIDController(10.0f,1.0f,5.0f);
-		this.pidHorWing = new PIDController(1.0f,0.0f,10.0f, (float) -(Math.PI / 180), 0);
+		//this.pidHorWing = new PIDController(1.0f,0.0f,10.0f, (float) -(Math.PI / 180), 0);
+		//this.pidHorStab = new PIDController(2.0f,1.0f,10.0f, (float) (Math.PI / 180), 0);
+		this.pidHorGoal = new PIDController(1.0f,0.0f,0.5f, (float) (Math.PI / 180), 0);
 		
 		this.pidHorStab = new PIDController(2.0f,1.0f,10.0f, (float) (Math.PI / 180), 0);
 		this.pidHorGoal = new PIDController(1.0f,0.0f,0.5f, (float) (Math.PI / 180), 0);
@@ -212,11 +214,12 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		        	  this.newThrust = configAP.getMaxThrust(); 
 		          } 
 		      } 
-			
+			//REMOVE THIS AFTER TESTING:
+		      this.newThrust = configAP.getMaxThrust();
 		      //SAVE DATA
 		      this.prevPosition = new Vector3f(currentPosition.x, currentPosition.y, currentPosition.z); 
 		}
-		
+
 		return this;
 	}
 
