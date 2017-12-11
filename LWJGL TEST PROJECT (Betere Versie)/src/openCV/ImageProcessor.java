@@ -140,24 +140,21 @@ public class ImageProcessor {
 	
 	
 	
-	/**
-	 * Returns a list containing the HSV values of all the different colors found in the image.
-	 */
 	public static List<double[]> getAllDifferentHSVColors(Mat rgbMat){
 		List<double[]> colorHSVList = new ArrayList<double[]>();
 		Mat hsvMat = new Mat();
-		Imgproc.cvtColor(rgbMat, hsvMat, Imgproc.COLOR_BGR2HSV);
+		Imgproc.cvtColor(rgbMat, hsvMat, Imgproc.COLOR_RGB2HSV);
 		for (int x = 0; x < 200; x+=2) {
 			for (int y = 0; y < 200; y+=2) {
 				if ( !(rgbMat.get(y, x)[0] == 255.0 && rgbMat.get(y, x)[1] == 255.0 && rgbMat.get(y, x)[2] == 255.0 )) {
 					int teller = 0;
 					for (int j = 0; j < colorHSVList.size(); j++) {
-						if ( (colorHSVList.get(j)[0] <= hsvMat.get(y, x)[0]+3 && colorHSVList.get(j)[0] >= hsvMat.get(y, x)[0]-3 ) && (colorHSVList.get(j)[1] <= hsvMat.get(y, x)[1]+3 &&colorHSVList.get(j)[1] >= hsvMat.get(y, x)[1]-3 ) && (colorHSVList.get(j)[2] <= hsvMat.get(y, x)[2]+3 &&colorHSVList.get(j)[2] >= hsvMat.get(y, x)[2]-3 )) {
+						if ( (colorHSVList.get(j)[0]%178 <= hsvMat.get(y, x)[0]%178 && colorHSVList.get(j)[0]%178 >= hsvMat.get(y, x)[0]%178 )){
 							teller+=1;
 							}
 					}
 					if ( teller == 0 ) {
-						colorHSVList.add(new double[]{hsvMat.get(y, x)[0], hsvMat.get(y, x)[1],hsvMat.get(y, x)[2]});
+						colorHSVList.add(new double[]{hsvMat.get(y, x)[0]});
 					}
 
 					
@@ -170,12 +167,7 @@ public class ImageProcessor {
     return colorHSVList;
    
 	}
-	
-	
-	
-	/**
-	 * Returns a list containing the HS values of all the different cubes.
-	 */
+
 	public static List<double[]> getHSValuesofCubes(List<double[]> colorHSVList){
 		List<double[]> colorHSList = new ArrayList<double[]>();
 		
@@ -199,11 +191,7 @@ public class ImageProcessor {
 		return colorHSList;	
 		}
 
-	
-	
-	/**
-	 * Returns a list containing the V values of all the different sides of the cubes.
-	 */
+			
 	public static List<double[]> getValuesOfV(List<double[]> colorHSVList){
 		List<double[]> colorVList = new ArrayList<double[]>();
 		
@@ -226,6 +214,33 @@ public class ImageProcessor {
 
 		return colorVList;	
 		}
+	
+	public static List<double[]> getAllDifferentRGBColors(Mat rgbMat){
+		List<double[]> colorRGBList = new ArrayList<double[]>();
+		Imgproc.cvtColor(rgbMat, rgbMat, Imgproc.COLOR_RGB2BGR);
+		for (int x = 0; x < 200; x+=2) {
+			for (int y = 0; y < 200; y+=2) {
+				if ( !(rgbMat.get(y, x)[0] == 255.0 && rgbMat.get(y, x)[1] == 255.0 && rgbMat.get(y, x)[2] == 255.0 )) {
+					int teller = 0;
+					for (int j = 0; j < colorRGBList.size(); j++) {
+						if ( (colorRGBList.get(j)[0] <= rgbMat.get(y, x)[0]+3 && colorRGBList.get(j)[0] >= rgbMat.get(y, x)[0]-3 ) && (colorRGBList.get(j)[1] <= rgbMat.get(y, x)[1]+3 &&colorRGBList.get(j)[1] >= rgbMat.get(y, x)[1]-3 ) && (colorRGBList.get(j)[2] <= rgbMat.get(y, x)[2]+3 &&colorRGBList.get(j)[2] >= rgbMat.get(y, x)[2]-3 )) {
+							teller+=1;
+							}
+					}
+					if ( teller == 0 ) {
+						colorRGBList.add(new double[]{rgbMat.get(y, x)[0], rgbMat.get(y, x)[1],rgbMat.get(y, x)[2]});
+					}
+
+					
+				}
+				
+			}
+		}
+		
+
+    return colorRGBList;
+   
+	}
 	
 	
 	
@@ -261,7 +276,7 @@ public class ImageProcessor {
 	 * Order: pos x, neg x, pos y, neg y, pos z, neg z
 	 * @param colorVList 
 	 */
-	public static Mat[] RGBMatFilter(Mat rgbMat, double[] color, List<double[]> colorVList) {
+	public static Mat[] RGBMatFilter(Mat rgbMat, double color) {
 		
 			// turn the rgb Mat into a hsv Mat
 			// (vreemd genoeg heeft BGR 2 HSV hier het gewenste effect en RGB 2 HSV niet)
@@ -271,15 +286,15 @@ public class ImageProcessor {
 			// filter the 6 different red hue's
 			// Red Hue range: [0,10] & [160,179] Saturation is 255 and Value range depends on the surface
 			// Values: pos x: 216, neg x: 76, pos y: 255, neg y: 38, pos z: 178, neg z: 114
-			Mat[] matArray = new Mat[colorVList.size()];
+			Mat[] matArray = new Mat[3];
 			Mat tempMat1 = new Mat(hsvMat.height(), hsvMat.width(), 0, new Scalar(0));
 		
 
 		
-			for (int i = 0; i < colorVList.size(); i++) {
+			for (int i = 0; i < 3; i++) {
 				
 				// filter the hsv Mat
-				Core.inRange(hsvMat, new Scalar(color[0]-5,   color[1]-5, colorVList.get(i)[0]-5), new Scalar(color[0]+5,   color[1]+5, colorVList.get(i)[0]+5), tempMat1);
+				Core.inRange(hsvMat, new Scalar(color,   0, 0), new Scalar(color,   255, 255), tempMat1);
 			
 				// save the Mat object in the array
 				matArray[i] = tempMat1.clone();
@@ -545,16 +560,26 @@ public class ImageProcessor {
 			// byteArray --> Mat object
 			Mat rgbMat = byteArrayToRGBMat(getImageWidth(), getImageHeight(), getImage());
 			List<double[]> colorHSVList = getAllDifferentHSVColors(rgbMat);
-			List<double[]> colorHSList = getHSValuesofCubes(colorHSVList);
-			List<double[]> colorVList = getValuesOfV(colorHSVList);
 			List<Vector3f> ListWithCoordinatesOfCubes = new ArrayList<Vector3f>();
+			List<double[]> colorRGBList = getAllDifferentRGBColors(rgbMat);
 			
-			for (int i = 0; i < colorHSList.size(); i++){
+			System.out.println("rgb");
+			
+			for (int i = 0; i < colorRGBList.size(); i++){
+				System.out.println(colorRGBList.get(i)[0]+" "+colorRGBList.get(i)[1]+" "+colorRGBList.get(i)[2]);
+			}
+			
+			System.out.println("hsv");
+			
+			for (int i = 0; i < colorHSVList.size(); i++){
+				System.out.println(colorHSVList.get(i)[0]);
+			}
+			
+			for (int i = 0; i < colorHSVList.size(); i++){
 				
-				double[] color ={colorHSList.get(i)[0],colorHSList.get(i)[1]};
+				double[] color = colorHSVList.get(i);
 				// Filter RGB Mat for 6 different red Hue's
-				Mat[] matArray = RGBMatFilter(rgbMat, color, colorVList);
-
+				Mat[] matArray = RGBMatFilter(rgbMat, color[0]);
 
 
 				// Combine the 6 filtered Mats
