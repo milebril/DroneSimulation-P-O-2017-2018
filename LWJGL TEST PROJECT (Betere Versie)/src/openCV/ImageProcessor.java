@@ -27,13 +27,13 @@ public class ImageProcessor {
 		// rotate the cube to be in alignment with the world frame
 		alignCube();
 
-		// place the cube in front of the camera
+		// places the cube 5 meter in front of the camera 
 		translate(0, 0, -5);
 	}
 	
 	private final SimpleAutopilot autopilot;
 	
-	 //Getters for the AutoPilot config 
+	//Getters for the AutoPilot config 
 	
 	public float getHorizontalAngleOfView() {
 		return autopilot.getConfig().getHorizontalAngleOfView();
@@ -52,7 +52,7 @@ public class ImageProcessor {
 	}
 	
 	
-	 //Getters for the AutoPilot input 
+	//Getters for the AutoPilot input 
 	
 	public byte[] getImage() {
 		return autopilot.getInput().getImage();
@@ -79,7 +79,7 @@ public class ImageProcessor {
 	 * Returns a Mat object of given width and height containing the RGB values of the given byteArray.
 	 */
 	private static Mat byteArrayToRGBMat(int width, int height, byte[] byteArray) {
-		// reads the given array as BGR (while the array is in RGB formar)
+		// reads the given array as BGR (while the array is in RGB format)
 		Mat data = new Mat(height, width, CvType.CV_8UC3);
 		data.put(0, 0, byteArray);
 		
@@ -136,6 +136,115 @@ public class ImageProcessor {
 		// return a copy of the total Mat
 		return totalMat.clone();
 	}
+	
+	
+	
+	
+	public static List<double[]> getAllDifferentHSVColors(Mat rgbMat){
+		List<double[]> colorHSVList = new ArrayList<double[]>();
+		Mat hsvMat = new Mat();
+		Imgproc.cvtColor(rgbMat, hsvMat, Imgproc.COLOR_RGB2HSV);
+		for (int x = 0; x < 200; x+=2) {
+			for (int y = 0; y < 200; y+=2) {
+				if ( !(rgbMat.get(y, x)[0] == 255.0 && rgbMat.get(y, x)[1] == 255.0 && rgbMat.get(y, x)[2] == 255.0 )) {
+					int teller = 0;
+					for (int j = 0; j < colorHSVList.size(); j++) {
+						if ( (colorHSVList.get(j)[0]%178 <= hsvMat.get(y, x)[0]%178 && colorHSVList.get(j)[0]%178 >= hsvMat.get(y, x)[0]%178 )){
+							teller+=1;
+							}
+					}
+					if ( teller == 0 ) {
+						colorHSVList.add(new double[]{hsvMat.get(y, x)[0]});
+					}
+
+					
+				}
+				
+			}
+		}
+		
+
+    return colorHSVList;
+   
+	}
+
+	public static List<double[]> getHSValuesofCubes(List<double[]> colorHSVList){
+		List<double[]> colorHSList = new ArrayList<double[]>();
+		
+		colorHSList.add(new double[]{colorHSVList.get(0)[0],colorHSVList.get(0)[1]});
+		
+		for (int i = 1; i < colorHSVList.size(); i++) {
+			int teller = 0;
+			int size = colorHSList.size();
+			for (int j = 0; j < size; j++) {
+				if ((colorHSVList.get(i)[0] >= colorHSList.get(j)[0]-3 && colorHSVList.get(i)[0] <= colorHSList.get(j)[0]+3 ) && (colorHSVList.get(i)[1] >= colorHSList.get(j)[1]-3 && colorHSVList.get(i)[1] <= colorHSList.get(j)[1]+3 )) {
+					teller+=1;
+					}
+			}
+			if ( teller == 0 ) {
+				
+				colorHSList.add(new double[]{colorHSVList.get(i)[0],colorHSVList.get(i)[1]} );	
+			}	
+			
+		}
+
+		return colorHSList;	
+		}
+
+			
+	public static List<double[]> getValuesOfV(List<double[]> colorHSVList){
+		List<double[]> colorVList = new ArrayList<double[]>();
+		
+		colorVList.add(new double[]{colorHSVList.get(0)[2]});
+		
+		for (int i = 1; i < colorHSVList.size(); i++) {
+			int teller = 0;
+			int size = colorVList.size();
+			for (int j = 0; j < size; j++) {
+				if ((colorHSVList.get(i)[2] == colorVList.get(j)[0])) {
+					teller+=1;
+					}
+			}
+			if ( teller == 0 ) {
+				
+				colorVList.add(new double[]{colorHSVList.get(i)[2]} );	
+			}	
+			
+		}
+
+		return colorVList;	
+		}
+	
+	public static List<double[]> getAllDifferentRGBColors(Mat rgbMat){
+		List<double[]> colorRGBList = new ArrayList<double[]>();
+		Imgproc.cvtColor(rgbMat, rgbMat, Imgproc.COLOR_RGB2BGR);
+		for (int x = 0; x < 200; x+=2) {
+			for (int y = 0; y < 200; y+=2) {
+				if ( !(rgbMat.get(y, x)[0] == 255.0 && rgbMat.get(y, x)[1] == 255.0 && rgbMat.get(y, x)[2] == 255.0 )) {
+					int teller = 0;
+					for (int j = 0; j < colorRGBList.size(); j++) {
+						if ( (colorRGBList.get(j)[0] <= rgbMat.get(y, x)[0]+3 && colorRGBList.get(j)[0] >= rgbMat.get(y, x)[0]-3 ) && (colorRGBList.get(j)[1] <= rgbMat.get(y, x)[1]+3 &&colorRGBList.get(j)[1] >= rgbMat.get(y, x)[1]-3 ) && (colorRGBList.get(j)[2] <= rgbMat.get(y, x)[2]+3 &&colorRGBList.get(j)[2] >= rgbMat.get(y, x)[2]-3 )) {
+							teller+=1;
+							}
+					}
+					if ( teller == 0 ) {
+						colorRGBList.add(new double[]{rgbMat.get(y, x)[0], rgbMat.get(y, x)[1],rgbMat.get(y, x)[2]});
+					}
+
+					
+				}
+				
+			}
+		}
+		
+
+    return colorRGBList;
+   
+	}
+	
+	
+	
+	
 	
 	/**
 	 * Returns a byte[] array of the RGB values of the given BufferedImage.
@@ -209,33 +318,33 @@ public class ImageProcessor {
 	/**
 	 * Returns a Mat[] array of the 6 different red cube hue's filtered from the given RGB Mat object.
 	 * Order: pos x, neg x, pos y, neg y, pos z, neg z
-	 * @param color 
+	 * @param colorVList 
 	 */
-	public static Mat[] redRGBMatFilter(Mat rgbMat, double[] color) {
+	public static Mat[] RGBMatFilter(Mat rgbMat, double color) {
 		
-		// turn the rgb Mat into a hsv Mat
-		// (vreemd genoeg heeft BGR 2 HSV hier het gewenste effect en RGB 2 HSV niet)
-		Mat hsvMat = new Mat();
-		Imgproc.cvtColor(rgbMat, hsvMat, Imgproc.COLOR_BGR2HSV);
+			// turn the rgb Mat into a hsv Mat
+			// (vreemd genoeg heeft BGR 2 HSV hier het gewenste effect en RGB 2 HSV niet)
+			Mat hsvMat = new Mat();
+			
+			Imgproc.cvtColor(rgbMat, hsvMat, Imgproc.COLOR_BGR2HSV);
+			// filter the 6 different red hue's
+			// Red Hue range: [0,10] & [160,179] Saturation is 255 and Value range depends on the surface
+			// Values: pos x: 216, neg x: 76, pos y: 255, neg y: 38, pos z: 178, neg z: 114
+			Mat[] matArray = new Mat[3];
+			Mat tempMat1 = new Mat(hsvMat.height(), hsvMat.width(), 0, new Scalar(0));
 		
-		// filter the 6 different red hue's
-		// Red Hue range: [0,10] & [160,179] Saturation is 255 and Value range depends on the surface
-		// Values: pos x: 216, neg x: 76, pos y: 255, neg y: 38, pos z: 178, neg z: 114
-		Mat[] matArray = new Mat[6];
-		ArrayList<Integer> vValues = new ArrayList<>(Arrays.asList(216, 76, 255, 38, 178, 114));
-		Mat tempMat1 = new Mat(hsvMat.height(), hsvMat.width(), 0, new Scalar(0));
-		Mat tempMat2 = new Mat(hsvMat.height(), hsvMat.width(), 0, new Scalar(0));
-		int i;
-		for (i = 0; i < 6; i++) {
-			// filter the hsv Mat
-			Core.inRange(hsvMat, new Scalar(color[0],   color[1], vValues.get(i) - 3), new Scalar(color[0],   color[1], vValues.get(i) + 3), tempMat1);
-			Core.inRange(hsvMat, new Scalar(color[0],   color[1], vValues.get(i) - 3), new Scalar(color[0],   color[1], vValues.get(i) + 3), tempMat2);
-			// combine the 2 filtered Mat objects into 1
-			Core.addWeighted(tempMat1, 1, tempMat2, 1, 0, tempMat1);
-			// save the Mat object in the array
-			matArray[i] = tempMat1.clone();
-		}
+
 		
+			for (int i = 0; i < 3; i++) {
+				
+				// filter the hsv Mat
+				Core.inRange(hsvMat, new Scalar(color,   0, 0), new Scalar(color,   255, 255), tempMat1);
+			
+				// save the Mat object in the array
+				matArray[i] = tempMat1.clone();
+		
+			}
+			
 		return matArray;
 	}
 	
@@ -331,9 +440,7 @@ public class ImageProcessor {
 				// -> -roll ! ! !
 				
 				if (a != x || b != y || c != z) {
-					//System.out.println(roll);
-					//System.out.println(String.valueOf(x) + " - " + String.valueOf(y) + " - " + String.valueOf(z));
-					//System.out.println(String.valueOf(a) + " - " + String.valueOf(b) + " - " + String.valueOf(c));
+					
 				}
 				
 				point[0] = a;
@@ -495,14 +602,14 @@ public class ImageProcessor {
 			
 			// byteArray --> Mat object
 			Mat rgbMat = byteArrayToRGBMat(getImageWidth(), getImageHeight(), getImage());
-			List<double[]> colorHSVList = getAllHSVColors(rgbMat);
-			List<double[]> colorHSList = getAllHSColors(colorHSVList);
-			List<Vector3f> listDistanceOfCubes = new ArrayList<Vector3f>();
-			for (int i = 0; i < colorHSList.size(); i++){
+			List<double[]> colorHSVList = getAllDifferentHSVColors(rgbMat);
+			List<Vector3f> ListWithCoordinatesOfCubes = new ArrayList<Vector3f>();
+			
+			for (int i = 0; i < colorHSVList.size(); i++){
 				
-				double[] color ={colorHSList.get(i)[0],colorHSList.get(i)[1]};
+				double[] color = colorHSVList.get(i);
 				// Filter RGB Mat for 6 different red Hue's
-				Mat[] matArray = redRGBMatFilter(rgbMat, color);
+				Mat[] matArray = RGBMatFilter(rgbMat, color[0]);
 
 
 				// Combine the 6 filtered Mats
@@ -513,16 +620,17 @@ public class ImageProcessor {
 				double[] centerOfMass = getType0CenterOfMass(filterMat);
 
 				if (centerOfMass == null) {
+					System.out.println("Geen kubussen gevonden...");
 					return (List<Vector3f>) new Vector3f(0,0,0);
 				}
 
 
-				// Get red area in image
-				int redArea = Core.countNonZero(filterMat);
+				// Get area in image
+				int Area = Core.countNonZero(filterMat);
 
 
-				// Get red area percentage
-				double percentage = redArea / ((float) getImageHeight()*getImageWidth());
+				// Get area percentage
+				double percentage = Area / ((float) getImageHeight()*getImageWidth());
 
 
 
@@ -552,11 +660,11 @@ public class ImageProcessor {
 				}
 
 
-				listDistanceOfCubes.add(new Vector3f((float) (imaginaryCube.getPosition()[0]), 
+				ListWithCoordinatesOfCubes.add(new Vector3f ((float) (imaginaryCube.getPosition()[0]), 
 						(float) (imaginaryCube.getPosition()[1]) , 
-						(float) (imaginaryCube.getPosition()[2])));
+						(float) (imaginaryCube.getPosition()[2]) ));
 			}
-			return listDistanceOfCubes;
+			return ListWithCoordinatesOfCubes;
 		}
 			/**
 			 * Returns the center of mass of the given type 0 Mat object
@@ -579,19 +687,21 @@ public class ImageProcessor {
 						}
 					}
 				}
-				// calculate the coordinates
-				double[] coordinates = new double[2];
-				coordinates[0] = (int) Math.round(xCoord / (float) amount);
-				coordinates[0] = (coordinates[0] - 100.0) / 100.0;
-				coordinates[1] = (int) Math.round(yCoord / (float) amount);
-				coordinates[1] = (100.0 - coordinates[1]) / 100.0;
-
-				if (coordinates[0] == -1 && coordinates[1] == 1) {
-					return null;
-				}
-
-				return coordinates;
 			}
+			// calculate the coordinates
+			double[] coordinates = new double[2];
+			coordinates[0] = (int) Math.round(xCoord / (float) amount);
+			coordinates[0] = (coordinates[0] - 100.0) / 100.0;
+			coordinates[1] = (int) Math.round(yCoord / (float) amount);
+			coordinates[1] = (100.0 - coordinates[1]) / 100.0;
+			
+			if (coordinates[0] == -1 && coordinates[1] == 1) {
+				return null;
+			}
+			
+			return coordinates;
+		}
+	
 	}
 	
 
