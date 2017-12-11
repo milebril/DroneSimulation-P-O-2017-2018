@@ -1,5 +1,6 @@
 package autoPilotJar;
 
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -20,6 +21,10 @@ import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
 import openCV.ImageProcessor;
 import openCV.RedCubeLocator;
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.AxisAngle4f;
+import javax.vecmath.Matrix3f;
+import javax.vecmath.Matrix4f;
 
 public class SimpleAutopilot implements Autopilot, AutopilotOutputs{	
 	private boolean heightGoalReached = false;
@@ -28,6 +33,99 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	
 	private Vector3f currentPosition;
 	private Vector3f prevPosition;
+	
+	//both will be zero during the first iteration
+	private float currentHeading;
+	private float prevHeading;
+	
+	private void setHeading(float heading){
+		this.prevHeading = this.currentHeading;
+		this.currentHeading = heading;
+	}
+	
+	private float currentPitch;
+	private float prevPitch;
+	
+	private void setPitch(float pitch){
+		this.prevPitch = this.currentPitch;
+		this.currentPitch = pitch;
+	}
+	
+	private float currentRoll;
+	private float prevRoll;
+	
+	private void setRoll(float roll){
+		this.prevRoll = this.currentRoll;
+		this.currentRoll = roll;
+	}
+	
+	/**
+	 * 
+	 * @return an array containing the the current rotation axis and the speed around this axis in the order
+	 * [x, y, z, speed] 
+	 */
+	private Vector3f getCurrentRotationSpeed(){
+		
+		Matrix4f currentOrientation = getCurrentOrientation();
+		
+		Matrix4f prevOrientation;
+		Matrix4f xRotp = new Matrix4f();
+		xRotp.rotX(prevPitch);
+		Matrix4f yRotp = new Matrix4f();
+		yRotp.rotY(prevHeading);
+		Matrix4f zRotp = new Matrix4f();
+		zRotp.rotZ(prevRoll);;
+		zRotp.mul(xRotp);
+		zRotp.mul(yRotp);
+		prevOrientation = zRotp;
+		
+		prevOrientation.transpose(); 
+		currentOrientation.mul(prevOrientation);
+		
+		AxisAngle4f rotation = new AxisAngle4f();
+		rotation.set(currentOrientation);
+		float[] result = new float[4];
+		rotation.get(result);
+		float rotSpeed = result[3] / this.dt;
+		result[3] = rotSpeed;
+		
+		Vector3f speed = new Vector3f(result[0], result[1], result[2]);
+		speed.scale(result[3]);
+		
+		return speed;
+	}
+
+	private Matrix4f getCurrentOrientation() {
+		
+		Matrix4f currentOrientation;
+		Matrix4f xRot = new Matrix4f();
+		xRot.rotX(currentPitch);
+		Matrix4f yRot = new Matrix4f();
+		yRot.rotY(currentHeading);
+		Matrix4f zRot = new Matrix4f();
+		zRot.rotZ(currentRoll);;
+		zRot.mul(xRot);
+		zRot.mul(yRot);
+		currentOrientation = zRot;
+		return currentOrientation;
+	}
+
+	
+	private float getAOALeftWing(float inclination){
+		Vector3f localRotationSpeed = new Vector3f();
+		//de hefboomsafstand
+		Vector3f leftWingLever = new Vector3f(-this.configAP.getWingX(), 0, 0);
+		// v_rot = omega x hefboomstafstand
+		Vector3f.cross(this.getCurrentRotationSpeed(), leftWingLever , localRotationSpeed);
+		//totale snelheid is de som van de rotatie en de drone snelheid
+		Vector3f totalSpeed = new Vector3f();
+		Vector3f.add(this.calculateSpeedVector(), localRotationSpeed, totalSpeed); 
+		
+		//The left wing's attack vector is (0, sin(leftWingInclination), -cos(leftWingInclination)
+		Vector3f attackVector = new Vector3f (0.0f, (float) Math.sin(inclination), (float)-Math.cos(inclination));
+		
+		this.getCurrentOrientation().transform(attackVector);
+	}
 	
 	private Vector3f oldSpeed;
 	
@@ -157,6 +255,18 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		return (float) Math.atan(overstaande/aanliggende);
 	}
 	
+	private float maxAOAWings(){
+		
+	}
+	
+	private float maxAOAVertStab(){
+		
+	}
+	
+	private float maxAOAHorStab(){
+		
+	}
+	
 	private float getEuclidDist(Vector3f vec1, Vector3f vec2){
 		Vector3f temp = new Vector3f(0,0,0);
 		Vector3f.sub(vec1, vec2, temp);
@@ -172,6 +282,11 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			this.dt = inputs.getElapsedTime() - prevElapsedTime;
 			prevElapsedTime = inputs.getElapsedTime();
 			
+			
+			//load Current Orientation Of Drone
+			setHeading(inputAP.getHeading());
+			setPitch(inputAP.getPitch());
+			setRoll(inputAP.getRoll());
 			
 			newHorStabInclination += pidHorGoal.calculateChange(inputAP.getPitch() + getVerAngle(), dt);
 			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
@@ -240,4 +355,5 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	public float getVerStabInclination() {
 		return newVerStabInclination;
 	}
+	
 }
