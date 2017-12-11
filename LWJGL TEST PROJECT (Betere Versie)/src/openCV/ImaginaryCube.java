@@ -267,7 +267,7 @@ public class ImaginaryCube {
 			//Imgproc.circle(image, new org.opencv.core.Point((int) (punten.get(i)[0]+100), (int) (-punten.get(i)[1]+100)), 1, new Scalar(120, 120, 120));
 			//Imgproc.circle(image, new org.opencv.core.Point((int) (punten.get(i)[0]+100), (int) (-punten.get(i)[1]+100)), 0, new Scalar(0, 0, 0));
 		}
-		Imgcodecs.imwrite("res/" + imageName + ".png", image);
+		//Imgcodecs.imwrite("res/" + imageName + ".png", image);
 	}
 	
 	public void saveAsImage(String imageName) {
@@ -275,3 +275,4 @@ public class ImaginaryCube {
 	}
 	
 }
+

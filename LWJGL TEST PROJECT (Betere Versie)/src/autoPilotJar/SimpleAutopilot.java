@@ -7,7 +7,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.GenericArrayType;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.lwjgl.opengl.AMDBlendMinmaxFactor;
@@ -32,7 +34,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	private Vector3f oldSpeed;
 	
 	//Aanpassen als we naar nieuwe cubus moeten gaan
-	private Vector3f cubePos;
+	private Vector3f stubCube = new Vector3f(0, 0, -40);
+	private Vector3f cubePos = stubCube;
 	private List<Vector3f> cubePositions = new ArrayList<>();
 	
 	
@@ -71,7 +74,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		this.pidHorWing = new PIDController(1.0f,0.0f,10.0f, (float) -(Math.PI / 180), 0);
 		
 		this.pidHorStab = new PIDController(2.0f,1.0f,10.0f, (float) (Math.PI / 180), 0);
-		this.pidHorGoal = new PIDController(2.0f,0.0f,0.0f, (float) (Math.PI / 180), 0);
+		this.pidHorGoal = new PIDController(1.0f,0.0f,0.5f, (float) (Math.PI / 180), 0);
 		this.pidVerGoal = new PIDController(2.0f,0.0f,1.0f, (float) (Math.PI / 180), 0);
 		//Initialize AP with configfile
 		
@@ -79,27 +82,6 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
 		this.pidThrust = new PIDController(1.0f, 0.0f, 3.0f, -10, 10);
 		//initialize();
-		
-		//ADD CUBES TO LIST
-		//cubePositions.add(new Vector3f(0,0, -200));
-//		cubePositions.add(new Vector3f(0,0,-80));
-//		cubePositions.add(new Vector3f(-2,0,-120));
-//		cubePositions.add(new Vector3f(0,0,-160));
-//		cubePositions.add(new Vector3f(0, 0, -80));
-//		cubePositions.add(new Vector3f(-5,0,-40));
-//		cubePositions.add(new Vector3f(-2.5f,0,-60));
-		
-		
-		//cubePositions.add(new Vector3f(-5,0,-40));
-		
-		//WORKING DEMO UP/DOWN
-		cubePositions.add(new Vector3f(0,-10,-40));
-		cubePositions.add(new Vector3f(0,0,-80));
-		cubePositions.add(new Vector3f(0,-5,-120));
-		cubePositions.add(new Vector3f(0,8,-160));
-		cubePositions.add(new Vector3f(0,-2,-200));
-		
-		cubePos = cubePositions.remove(0);
 	}
 	
 	private Vector3f calculateSpeedVector(){
@@ -142,6 +124,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		this.configAP = config;
 		this.inputAP = inputs;
 		
+		cubeLocator = new ImageProcessor(this);
+		
 		return this;
 	}
 	
@@ -159,7 +143,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	
 	private float getEuclidDist(Vector3f vec1, Vector3f vec2){
 		Vector3f temp = new Vector3f(0,0,0);
-		Vector3f.sub(vec1, vec2, temp);
+		Vector3f.sub(vec2, vec1, temp);
 		return temp.length();
 	}
 	
@@ -167,7 +151,6 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
 		this.inputAP = inputs;
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
-			
 			currentPosition = new Vector3f(inputAP.getX(), inputAP.getY(), inputAP.getZ());
 			this.dt = inputs.getElapsedTime() - prevElapsedTime;
 			prevElapsedTime = inputs.getElapsedTime();
@@ -181,9 +164,42 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			if(newVerStabInclination > Math.PI/6) newVerStabInclination = (float) (Math.PI/6);
 			else if(newVerStabInclination < - Math.PI/6) newVerStabInclination = (float) -(Math.PI/6);
 			
+			cubePositions = cubeLocator.getCoordinatesOfCube();
+			cubePositions.sort(new Comparator<Vector3f>() {
+				@Override
+				public int compare(Vector3f o1, Vector3f o2) {
+					return -Float.compare(o1.z, o2.z);
+				}
+			});
+			
+			if (cubePositions.size() > 0) {
+				Vector3f temp = new Vector3f(0,0,0);
+				Vector3f.sub(cubePos, cubePositions.get(0), temp);
+				if (temp.length() > 3) {
+					cubePos = cubePositions.get(0);
+//					System.out.println("CUBE:" + cubePos);
+//					System.out.println("POS" + currentPosition);
+				}
+			}
+			
+//			if (cubePos == stubCube) {
+//				//System.out.println(cubePos);
+//				if (getEuclidDist(this.currentPosition, cubePos) < 4) {
+//					stubCube.translate(0, 0, -40);
+//					cubePos = stubCube;
+//					System.out.println(cubePos);;
+//				}
+//				System.out.println("Size:" + cubeLocator.getCoordinatesOfCube().size());
+//				if (cubePositions.size() > 0) {
+//					System.out.println("Cube Found");
+//					cubePos = cubePositions.get(0);
+//				}
+//			}
+			
 			//CUBE REACHED
-			if(getEuclidDist(this.currentPosition,cubePos) <= 4 && !cubePositions.isEmpty()){
-				this.cubePos = cubePositions.remove(0);
+			if(getEuclidDist(this.currentPosition,cubePos) <= 4){
+				System.out.println("hier");
+				this.cubePos = stubCube.translate(0, 0, -40);
 			}
 			
 			//THRUST FORCE

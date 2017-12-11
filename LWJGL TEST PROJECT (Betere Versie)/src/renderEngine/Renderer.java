@@ -129,12 +129,6 @@ public class Renderer {
 		projectionMatrix.m32 = -((2 * NEAR_PLANE * FAR_PLANE) / frustum_length);
 		projectionMatrix.m33 = 0;
 		
-//		projectionMatrix = new Matrix4f();
-//		projectionMatrix.m00 = x_scale;
-//		projectionMatrix.m11 = y_scale;
-//		projectionMatrix.m22 = - 2f / (FAR_PLANE - NEAR_PLANE);
-//		projectionMatrix.m23 = -1;
-//		projectionMatrix.m33 = 1;
 	}
 	
 	public void renderQuad() {

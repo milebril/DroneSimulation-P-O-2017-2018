@@ -2,21 +2,26 @@ package openCV;
 
 import java.awt.Point;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
 
 import org.lwjgl.util.vector.Vector3f;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import autoPilotJar.SimpleAutopilot;
+import toolbox.ImageConverter;
 
 public class ImageProcessor {
 	
@@ -77,13 +82,24 @@ public class ImageProcessor {
 	
 	/**
 	 * Returns a Mat object of given width and height containing the RGB values of the given byteArray.
+	 * System.loadLibrary(Core.NATIVE_LIBRARY_NAME) must have been excecuted once before calling this method!
+	 * @throws IllegalArgumentException if the given byteArray length is not equal to width*height*3.
+	 * 									(because each pixel needs exactly 3 values: red, green, blue)
 	 */
-	private static Mat byteArrayToRGBMat(int width, int height, byte[] byteArray) {
-		// reads the given array as BGR (while the array is in RGB format)
+	public static Mat byteArrayToRGBMat(int width, int height, byte[] byteArray) 
+			throws IllegalArgumentException {
+		if (width*height*3 != byteArray.length) {
+			throw new IllegalArgumentException("given byteArray has " + String.valueOf(byteArray.length) 
+			+ " values but " + String.valueOf(width*height*3) + " (=width*height*3) are required!");
+		}
+		
+		// data reads the given array as BGR
 		Mat data = new Mat(height, width, CvType.CV_8UC3);
+		
 		data.put(0, 0, byteArray);
 		
-		// transform from BGR to RGB (to correct the input being read as BGR)
+		
+		// the input was RGB instead of BGR so transform...
 		Imgproc.cvtColor(data, data, Imgproc.COLOR_BGR2RGB);
 		
 		return data;
@@ -149,7 +165,7 @@ public class ImageProcessor {
 				if ( !(rgbMat.get(y, x)[0] == 255.0 && rgbMat.get(y, x)[1] == 255.0 && rgbMat.get(y, x)[2] == 255.0 )) {
 					int teller = 0;
 					for (int j = 0; j < colorHSVList.size(); j++) {
-						if ( (colorHSVList.get(j)[0]%178 <= hsvMat.get(y, x)[0]%178 && colorHSVList.get(j)[0]%178 >= hsvMat.get(y, x)[0]%178 )){
+						if ( (colorHSVList.get(j)[0]%178 <= hsvMat.get(y, x)[0]%178+5 && colorHSVList.get(j)[0]%178 >= hsvMat.get(y, x)[0]%178-5 )){
 							teller+=1;
 							}
 					}
@@ -244,8 +260,6 @@ public class ImageProcessor {
 	
 	
 	
-	
-	
 	/**
 	 * Returns a byte[] array of the RGB values of the given BufferedImage.
 	 */
@@ -270,50 +284,6 @@ public class ImageProcessor {
 		
 		return bytes;
 	}
-	
-	
-	public static List<double[]> getAllHSVColors(Mat rgbMat){
-		List<double[]> colorHSVList = new ArrayList<double[]>();
-		Mat hsvMat = new Mat();
-		Imgproc.cvtColor(rgbMat, hsvMat, Imgproc.COLOR_BGR2HSV);
-		for (int x = 0; x < 200; x++) {
-			for (int y = 0; y < 200; y++) {
-				if ( !(rgbMat.get(y, x)[0] == 255.0 && rgbMat.get(y, x)[1] == 255.0 && rgbMat.get(y, x)[2] == 255.0 )) {
-					colorHSVList.add(new double[]{hsvMat.get(y, x)[0], hsvMat.get(y, x)[1],hsvMat.get(y, x)[2]});
-				}
-				
-			}
-		}
-		
-
-    return colorHSVList;
-   
-	}
-	
-	public static List<double[]> getAllHSColors(List<double[]> colorHSVList){
-		List<double[]> colorHSList = new ArrayList<double[]>();
-		colorHSList.add(new double[]{colorHSVList.get(0)[0],colorHSVList.get(0)[1]});
-		
-		for (int i = 1; i < colorHSVList.size(); i++) {
-			int teller = 0;
-			int size = colorHSList.size();
-			for (int j = 0; j < size; j++) {
-				
-				if ( (colorHSVList.get(i)[0] == colorHSList.get(j)[0]) && (colorHSVList.get(i)[1] == colorHSList.get(j)[1])) {
-					teller+=1;
-					}
-			}
-			if ( teller == 0 ) {
-				colorHSList.add(new double[]{colorHSVList.get(i)[0],colorHSVList.get(i)[1]});	
-			}	
-			
-		}
-		for (int i = 0; i < colorHSList.size(); i++){
-			System.out.print(colorHSList.get(i)[0] + " " + colorHSList.get(i)[1]);
-			System.out.print(" ");
-		}
-		return colorHSList;	
-		}
 	
 	/**
 	 * Returns a Mat[] array of the 6 different red cube hue's filtered from the given RGB Mat object.
@@ -348,33 +318,32 @@ public class ImageProcessor {
 		return matArray;
 	}
 	
-	
 	/**
 	 * Returns the 2D coordinates of the center of mass of the given filter.
 	 * Returns null if the filter has no nonzero values.
 	 */
-//	private static int[] getFilterCenterOfMass(Mat filter) {
-//		// variables to store the total x and y coordinates
-//		long xCoord = 0; long yCoord= 0; int amount = 0;
-//		
-//		// iterate over every x,y coordinate and add the coordinates if their value equals 255
-//		for (int x = 0; x < filter.width(); x++) {
-//			for (int y = 0; y < filter.height(); y++) {
-//				if (filter.get(y, x)[0] == 255) {
-//					xCoord += x; yCoord += y; amount++;
-//				}
-//			}
-//		}
-//		// if the amount is 0, the filter contains no nonzero values
-//		if (amount == 0) return null;
-//		
-//		// calculate the coordinates
-//		int[] coordinates = new int[]{(int) Math.round(xCoord / (float) amount), 
-//										(int) Math.round(yCoord / (float) amount)};
-//		
-//		return coordinates;
-//		
-//	}
+	private static int[] getFilterCenterOfMass(Mat filter) {
+		// variables to store the total x and y coordinates
+		long xCoord = 0; long yCoord= 0; int amount = 0;
+		
+		// iterate over every x,y coordinate and add the coordinates if their value equals 255
+		for (int x = 0; x < filter.width(); x++) {
+			for (int y = 0; y < filter.height(); y++) {
+				if (filter.get(y, x)[0] == 255) {
+					xCoord += x; yCoord += y; amount++;
+				}
+			}
+		}
+		// if the amount is 0, the filter contains no nonzero values
+		if (amount == 0) return null;
+		
+		// calculate the coordinates
+		int[] coordinates = new int[]{(int) Math.round(xCoord / (float) amount), 
+										(int) Math.round(yCoord / (float) amount)};
+		
+		return coordinates;
+		
+	}
 	// Focal length of the simulated pinhole camera
 	
 		private static double f = 100 / Math.tan(Math.PI / 3);
@@ -440,7 +409,9 @@ public class ImageProcessor {
 				// -> -roll ! ! !
 				
 				if (a != x || b != y || c != z) {
-					
+					//System.out.println(roll);
+					//System.out.println(String.valueOf(x) + " - " + String.valueOf(y) + " - " + String.valueOf(z));
+					//System.out.println(String.valueOf(a) + " - " + String.valueOf(b) + " - " + String.valueOf(c));
 				}
 				
 				point[0] = a;
@@ -599,50 +570,56 @@ public class ImageProcessor {
 		
 		
 		public List<Vector3f> getCoordinatesOfCube() {
-			
 			// byteArray --> Mat object
 			Mat rgbMat = byteArrayToRGBMat(getImageWidth(), getImageHeight(), getImage());
 			List<double[]> colorHSVList = getAllDifferentHSVColors(rgbMat);
+			List<double[]> colorRGBList = getAllDifferentRGBColors(rgbMat);
 			List<Vector3f> ListWithCoordinatesOfCubes = new ArrayList<Vector3f>();
 			
+
+			//System.out.println("rgb");
+			
+//			for (int i = 0; i < colorRGBList.size(); i++){
+//				System.out.println(colorRGBList.get(i)[0]+" "+colorRGBList.get(i)[1]+" "+colorRGBList.get(i)[2]);
+//			}
+//			
+//			System.out.println("hsv");
+//			
+//			for (int i = 0; i < colorHSVList.size(); i++){
+//				System.out.println(colorHSVList.get(i)[0]);
+//			}
+//			
 			for (int i = 0; i < colorHSVList.size(); i++){
 				
 				double[] color = colorHSVList.get(i);
 				// Filter RGB Mat for 6 different red Hue's
 				Mat[] matArray = RGBMatFilter(rgbMat, color[0]);
 
-
 				// Combine the 6 filtered Mats
 				Mat filterMat = combineMatArray(matArray);
-
-
+				
 				// Get center of mass (of the 2D red cube)
 				double[] centerOfMass = getType0CenterOfMass(filterMat);
 
-				if (centerOfMass == null) {
-					System.out.println("Geen kubussen gevonden...");
-					return (List<Vector3f>) new Vector3f(0,0,0);
-				}
+				// Get red area in image
+				int redArea = Core.countNonZero(filterMat);
 
-
-				// Get area in image
-				int Area = Core.countNonZero(filterMat);
-
-
-				// Get area percentage
-				double percentage = Area / ((float) getImageHeight()*getImageWidth());
-
-
+				// Get red area percentage
+				double 
+				percentage = redArea / ((float) getImageHeight()*getImageWidth());
 
 				// create imaginary cube
-				ImaginaryCube imaginaryCube = new ImaginaryCube(getHeading(), getPitch(), getRoll());
+				ImaginaryCube imaginaryCube = new ImaginaryCube(0.0, 0.0, 0.0);
 
 				double[] imCenterOfMass; double deltaX=10; double deltaY=10;
 				double imPercentage; double ratio = 10;
-
+				int iterations = 0;
 
 				while (deltaX > 0.005 || deltaY > 0.005 || ratio > 1.025 || ratio < 0.975) {
-
+					iterations++;
+					if (iterations > 600) {
+						break;
+					}
 					// get difference between the centers of mass
 					imCenterOfMass = imaginaryCube.getProjectedAreaCenterOfMass((float) (120.0 / 180 * Math.PI), (float) (120.0 / 180 * Math.PI));
 					deltaX =  (centerOfMass[0] - imCenterOfMass[0]);
@@ -653,38 +630,35 @@ public class ImageProcessor {
 					// get the ration between the projected areas
 					imPercentage = imaginaryCube.getProjectedAreaPercentage((float) (120.0 / 180 * Math.PI), (float) (120.0 / 180 * Math.PI));
 					ratio = imPercentage / percentage;
-
 					imaginaryCube.translate(0, 0, (1 - ratio)*0.1);
-
-					//imaginaryCube.saveAsImage("result " + String.valueOf(iterations * 2 - 1), rgbMat);
 				}
-
-
-				ListWithCoordinatesOfCubes.add(new Vector3f ((float) (imaginaryCube.getPosition()[0]), 
-						(float) (imaginaryCube.getPosition()[1]) , 
-						(float) (imaginaryCube.getPosition()[2]) ));
+				
+				ListWithCoordinatesOfCubes.add(new Vector3f ((float)(int) (imaginaryCube.getPosition()[0]) + autopilot.getInput().getX(), 
+						(float)(int) (imaginaryCube.getPosition()[1]) + autopilot.getInput().getY(), 
+						(float)(int) (imaginaryCube.getPosition()[2]) + autopilot.getInput().getZ()));
 			}
+				
 			return ListWithCoordinatesOfCubes;
 		}
-			/**
-			 * Returns the center of mass of the given type 0 Mat object
-			 * @throws IllegalArgumentException if the type of the mat is not 0
-			 * @throws IllegalArgumentException if the total sum of x or y coordinates overflows.
-			 */
-			public static double[] getType0CenterOfMass(Mat mat) {
-				// check wether the Mat type is 0
-				if (mat.type() != 0) throw new IllegalArgumentException("given mat must be of type 0!");
-				// variables to store the total x and y coordinates
-				long xCoord = 0; long yCoord= 0; int amount = 0;
-				// iterate over every x,y coordinate and add the coordinates if their value equals 255
-				int x; int y;
-				for (x = 0; x < mat.width(); x++) {
-					for (y = 0; y < mat.height(); y++) {
-						if (mat.get(y, x)[0] == 255) {
-							if (Long.MAX_VALUE - xCoord < x || Long.MAX_VALUE - yCoord < y)
-								throw new IllegalArgumentException("total sum of x or y coordinates overflows!");
-							xCoord += x; yCoord += y; amount++;
-						}
+		
+		/**
+		 * Returns the center of mass of the given type 0 Mat object
+		 * @throws IllegalArgumentException if the type of the mat is not 0
+		 * @throws IllegalArgumentException if the total sum of x or y coordinates overflows.
+		 */
+		public static double[] getType0CenterOfMass(Mat mat) {
+			// check wether the Mat type is 0
+			if (mat.type() != 0) throw new IllegalArgumentException("given mat must be of type 0!");
+			// variables to store the total x and y coordinates
+			long xCoord = 0; long yCoord= 0; int amount = 0;
+			// iterate over every x,y coordinate and add the coordinates if their value equals 255
+			int x; int y;
+			for (x = 0; x < mat.width(); x++) {
+				for (y = 0; y < mat.height(); y++) {
+					if (mat.get(y, x)[0] == 255) {
+						if (Long.MAX_VALUE - xCoord < x || Long.MAX_VALUE - yCoord < y)
+							throw new IllegalArgumentException("total sum of x or y coordinates overflows!");
+						xCoord += x; yCoord += y; amount++;
 					}
 				}
 			}
@@ -695,13 +669,10 @@ public class ImageProcessor {
 			coordinates[1] = (int) Math.round(yCoord / (float) amount);
 			coordinates[1] = (100.0 - coordinates[1]) / 100.0;
 			
-			if (coordinates[0] == -1 && coordinates[1] == 1) {
-				return null;
-			}
-			
 			return coordinates;
 		}
 	
 	}
 	
+
 

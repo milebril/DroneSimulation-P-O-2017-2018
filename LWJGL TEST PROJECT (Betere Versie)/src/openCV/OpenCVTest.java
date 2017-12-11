@@ -100,8 +100,6 @@ public class OpenCVTest {
 		
 		// byteArra --> Mat object
 		Mat rgbMat = byteArrayToRGBMat(image.getWidth(), image.getHeight(), byteArray);
-		List<double[]> colorHSVList = getAllHSVColors(rgbMat);
-		List<double[]> colorHSList = getAllHSColors(colorHSVList);
 		
 
 		List<double[]> colorHSVList = getAllDifferentHSVColors(rgbMat);
@@ -529,3 +527,4 @@ public class OpenCVTest {
 	}
 		
 	
+

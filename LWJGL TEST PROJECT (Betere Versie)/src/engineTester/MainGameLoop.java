@@ -150,7 +150,7 @@ public class MainGameLoop {
 		redCube = new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(-10,30,-50)) , 1);
 		
 		//WORKING DEMO
-//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,-10,-40)), 1));
+//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,0, -40)), 1));
 //		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,0,-80)), 1));
 //		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,-5,-120)), 1));
 //		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,8,-160)), 1));
@@ -478,22 +478,17 @@ public class MainGameLoop {
 	public static void generateRandomCubes() {
 		Random r = new Random();
 		entities = new ArrayList<>();
-//		for (int i = 0; i < 10; i++) {
-//			Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
-//			RawModel model = loader.loadToVAO(c.positions, c.colors, null);
-//			entities.add(new Entity(model, 
-//					new Matrix4f().translate(new Vector3f(r.nextFloat()*20-10,r.nextFloat()*10,r.nextFloat()*-90-10)), 1));
-//		}
 		
 		 for (int i = 1; i <= 5; i++) {
 		      Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
 		      RawModel model = loader.loadToVAO(c.positions, c.colors, null);
-		      //TexturedModel staticModel = new TexturedModel(model,new ModelTexture(loader.loadTexture("image")));
-		      float x = r.nextFloat()*20-10;
-		      float y = r.nextFloat()*10;
+		      //float x = r.nextFloat()*20-10;
+		      float x = 0;
+		      float y = ((float) r.nextInt(1000) / 500 - 1)*10;
+		      System.out.println(y);
 		      float z = i*-40;
 		      Vector3f position = new Vector3f(x,y,z);
 		      entities.add(new Entity(model, new Matrix4f().translate(position), 1));
-		    }
+		 }
 	}
 }
