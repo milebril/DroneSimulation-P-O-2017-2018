@@ -30,7 +30,7 @@ import javax.vecmath.Matrix4f;
 
 public class SimpleAutopilot implements Autopilot, AutopilotOutputs{	
 	
-	private static float INCLINATIONINCREMENT = 0.1f;
+	private static float INCLINATIONINCREMENT = 0.01f;
 	
 	private boolean heightGoalReached = false;
 	private AutopilotConfig configAP;
