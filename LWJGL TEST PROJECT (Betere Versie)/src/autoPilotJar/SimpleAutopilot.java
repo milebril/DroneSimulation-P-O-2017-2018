@@ -29,6 +29,9 @@ import javax.vecmath.AxisAngle4f;
 import javax.vecmath.Matrix4f;
 
 public class SimpleAutopilot implements Autopilot, AutopilotOutputs{	
+	
+	private static float INCLINATIONINCREMENT = 0.1f;
+	
 	private boolean heightGoalReached = false;
 	private AutopilotConfig configAP;
 	private AutopilotInputs inputAP;
@@ -323,10 +326,10 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		// zo nee: vergroot de inclinatie of verklein de inclinatie, bereken opnieuw de angle of attack en voer lus opnieuw uit
 		while((aoa < 0.9 *maxAOA)|| (aoa > maxAOA)){
 			if (aoa > maxAOA){
-				inclination -= Math.abs(aoa- maxAOA);
+				inclination -= INCLINATIONINCREMENT;
 			}
 			else{
-				inclination += Math.abs(aoa - maxAOA);
+				inclination += INCLINATIONINCREMENT;
 			}
 			
 			attackVectorDroneFrame = new Vector3f(0.0f, (float)Math.sin(inclination), - (float)Math.cos(inclination));
@@ -355,10 +358,10 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		// zo nee: vergroot de inclinatie of verklein de inclinatie, bereken opnieuw de angle of attack en voer lus opnieuw uit
 		while((aoa < 0.9 *maxAOA)|| (aoa > maxAOA)){
 			if (aoa > maxAOA){
-				inclination -= Math.abs(aoa- maxAOA);
+				inclination -= INCLINATIONINCREMENT;
 			}
 			else{
-				inclination += Math.abs(aoa - maxAOA);
+				inclination += INCLINATIONINCREMENT;
 			}
 			
 			attackVectorDroneFrame = new Vector3f(0.0f, (float)Math.sin(inclination), - (float)Math.cos(inclination));
@@ -386,10 +389,10 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		// zo nee: vergroot de inclinatie of verklein de inclinatie, bereken opnieuw de angle of attack en voer lus opnieuw uit
 		while((aoa < 0.9 *maxAOA)|| (aoa > maxAOA)){
 			if (aoa > maxAOA){
-				inclination -= Math.abs(aoa- maxAOA);
+				inclination -= INCLINATIONINCREMENT;
 			}
 			else{
-				inclination += Math.abs(aoa - maxAOA);
+				inclination += INCLINATIONINCREMENT;
 			}
 			
 			attackVectorDroneFrame = new Vector3f(- (float)Math.sin(inclination), 0f, - (float)Math.cos(inclination));		
@@ -418,10 +421,10 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		// zo nee: vergroot de inclinatie of verklein de inclinatie, bereken opnieuw de angle of attack en voer lus opnieuw uit
 		while((aoa < 0.9 *maxAOA)|| (aoa > maxAOA)){
 			if (aoa > maxAOA){
-				inclination -= Math.abs(aoa- maxAOA);
+				inclination -= INCLINATIONINCREMENT;
 			}
 			else{
-				inclination += Math.abs(aoa - maxAOA);
+				inclination += INCLINATIONINCREMENT;
 			}
 			
 			attackVectorDroneFrame = new Vector3f(0f, (float)Math.sin(inclination), - (float)Math.cos(inclination));		
