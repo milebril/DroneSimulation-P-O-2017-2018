@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -148,6 +149,12 @@ public class MainGameLoop {
 		Cube c = new Cube(1, 0, 0);
 		RawModel redCubeModel = loader.loadToVAO(c.positions, c.colors, null);
 		redCube = new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(-10,30,-50)) , 1);
+		
+		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(-5,0,-40)), 1));
+		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,0,-80)), 1));
+		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(3,5,-120)), 1));
+		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(3,-5,-160)), 1));
+		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(6,0,-200)), 1));
 		
 		//WORKING DEMO
 //		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,0, -40)), 1));
@@ -482,8 +489,8 @@ public class MainGameLoop {
 		 for (int i = 1; i <= 5; i++) {
 		      Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
 		      RawModel model = loader.loadToVAO(c.positions, c.colors, null);
-		      //float x = r.nextFloat()*20-10;
-		      float x = 0;
+		      float x = r.nextFloat()*20-10;
+		      //float x = 0;
 		      float y = ((float) r.nextInt(1000) / 500 - 1)*10;
 		      System.out.println(y);
 		      float z = i*-40;

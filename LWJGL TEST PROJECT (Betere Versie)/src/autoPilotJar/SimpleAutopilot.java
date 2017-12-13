@@ -73,9 +73,9 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		//this.pidHorStab = new PIDController(10.0f,1.0f,5.0f);
 		//this.pidHorWing = new PIDController(1.0f,0.0f,10.0f, (float) -(Math.PI / 180), 0);
 		//this.pidHorStab = new PIDController(2.0f,1.0f,10.0f, (float) (Math.PI / 180), 0);
-		this.pidHorGoal = new PIDController(1.0f,0.0f,0.5f, (float) (Math.PI / 180), 0);
+		//this.pidHorGoal = new PIDController(1.0f,0.0f,0.5f, (float) (Math.PI / 180), 0);
 		
-		this.pidHorStab = new PIDController(2.0f,1.0f,10.0f, (float) (Math.PI / 180), 0);
+		//this.pidHorStab = new PIDController(2.0f,1.0f,10.0f, (float) (Math.PI / 180), 0);
 		this.pidHorGoal = new PIDController(1.0f,0.0f,0.5f, (float) (Math.PI / 180), 0);
 		this.pidVerGoal = new PIDController(2.0f,0.0f,1.0f, (float) (Math.PI / 180), 0);
 		//Initialize AP with configfile
@@ -179,24 +179,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 				Vector3f.sub(cubePos, cubePositions.get(0), temp);
 				if (temp.length() > 3) {
 					cubePos = cubePositions.get(0);
-//					System.out.println("CUBE:" + cubePos);
-//					System.out.println("POS" + currentPosition);
 				}
 			}
-			
-//			if (cubePos == stubCube) {
-//				//System.out.println(cubePos);
-//				if (getEuclidDist(this.currentPosition, cubePos) < 4) {
-//					stubCube.translate(0, 0, -40);
-//					cubePos = stubCube;
-//					System.out.println(cubePos);;
-//				}
-//				System.out.println("Size:" + cubeLocator.getCoordinatesOfCube().size());
-//				if (cubePositions.size() > 0) {
-//					System.out.println("Cube Found");
-//					cubePos = cubePositions.get(0);
-//				}
-//			}
 			
 			//CUBE REACHED
 			if(getEuclidDist(this.currentPosition,cubePos) <= 4){
@@ -205,19 +189,21 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			}
 			
 			//THRUST FORCE
-		      if (this.calculateSpeedVector().length() > 20) { 
-		          newThrust = 0; 
-		      } else { 
-		          if (Math.abs(newVerStabInclination) > 0.1) { 
-		        	  newThrust = configAP.getMaxThrust() / 4; 
-		          } else { 
-		        	  this.newThrust = configAP.getMaxThrust(); 
-		          } 
-		      } 
-			//REMOVE THIS AFTER TESTING:
-		      this.newThrust = configAP.getMaxThrust();
-		      //SAVE DATA
-		      this.prevPosition = new Vector3f(currentPosition.x, currentPosition.y, currentPosition.z); 
+	      if (this.calculateSpeedVector().length() > 20) { 
+	          newThrust = 0; 
+	      } else { 
+//		          if (Math.abs(newVerStabInclination) > 0.1) { 
+//		        	  newThrust = configAP.getMaxThrust() / 4; 
+//		          } else { 
+//	        	  this.newThrust = configAP.getMaxThrust(); 
+//		          } 
+	    	  
+	    	this.newThrust = configAP.getMaxThrust();  
+		  } 
+	      //REMOVE THIS AFTER TESTING:
+	      //this.newThrust = configAP.getMaxThrust();
+	      //SAVE DATA
+	      this.prevPosition = new Vector3f(currentPosition.x, currentPosition.y, currentPosition.z); 
 		}
 
 		return this;
