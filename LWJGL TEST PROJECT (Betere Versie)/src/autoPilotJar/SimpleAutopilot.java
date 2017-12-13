@@ -192,17 +192,17 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		//We define an airfoil's projected airspeed vector as its airspeed vector (its
 //		velocity minus the wind velocity) projected onto the plane perpendicular to its
 //		axis vector.
-		System.out.println("rotation axis VOOR SCALE: " + copyRotationAxis);
+//		System.out.println("rotation axis VOOR SCALE: " + copyRotationAxis);
 
 		Vector3f.sub(totalSpeed, (Vector3f) copyRotationAxis.scale(Vector3f.dot(totalSpeed, copyRotationAxis)), projAirspeedVector);
 		
-		System.out.println("rotation axis NA SCALE: " + copyRotationAxis);
+//		System.out.println("rotation axis NA SCALE: " + copyRotationAxis);
 
-		System.out.println("getAOA projAirspeedVector: " + projAirspeedVector);
-		System.out.println("getAOA totalSpeed: " + totalSpeed);
+//		System.out.println("getAOA projAirspeedVector: " + projAirspeedVector);
+//		System.out.println("getAOA totalSpeed: " + totalSpeed);
 //		System.out.println("getAOA normal: " + normal);
 //		System.out.println("getAOA projAirspeedVector: " + projAirspeedVector);
-		System.out.println("getAOA attackVector: " + attackVector);
+//		System.out.println("getAOA attackVector: " + attackVector);
 		
 		float aoa = - (float) Math.atan2(Vector3f.dot(projAirspeedVector, normal), Vector3f.dot(projAirspeedVector, attackVector));
 		
@@ -441,6 +441,12 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 //		- The axis vector of both wings and of the horizontal stabilizer is (1, 0, 0).
 //		 - The horizontal stabilizer's attack vector is (0, sin(horStabInclination), -cos(horStabInclination)).
 
+//		try {
+//			Thread.sleep(1000);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		System.out.println("getmaxincl");
 		
 		Vector3f rotationAxis = new Vector3f(1, 0, 0);
@@ -448,16 +454,18 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		float inclination = 0;
 		
 		float maxAOA = configAP.getMaxAOA();
-		
-		Vector3f attackVectorDroneFrame = new Vector3f(0f, (float)Math.sin(inclination), - (float)Math.cos(inclination));		
-		float aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
+		float aoa = Float.NaN;
 		
 		//checken of de aoa al in het gewenste interval ligt.
 		// zo nee: vergroot de inclinatie of verklein de inclinatie, bereken opnieuw de angle of attack en voer lus opnieuw uit
 		if(this.calculateSpeedVector().length() == 0){
-			aoa = this.configAP.getMaxAOA();
+			aoa = maxAOA;
 		}
 		else{
+			
+			Vector3f attackVectorDroneFrame = new Vector3f(0f, (float)Math.sin(inclination), - (float)Math.cos(inclination));		
+			aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
+			
 			while((aoa < 0.9 *maxAOA)|| (aoa > maxAOA)){
 				System.out.println("getMaxInclinationHorStab maxaoa:  " + maxAOA);
 				System.out.println("getMaxInclinationHorStab current inclination:  " + inclination);;
@@ -487,6 +495,9 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	
 	@Override
 	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
+		
+		System.out.println("AutopilotOutputs timepassed: ");
+		
 		this.inputAP = inputs;
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
 			currentPosition = new Vector3f(inputAP.getX(), inputAP.getY(), inputAP.getZ());
