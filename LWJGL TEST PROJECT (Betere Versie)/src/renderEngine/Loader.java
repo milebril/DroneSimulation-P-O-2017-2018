@@ -34,7 +34,6 @@ public class Loader {
 		storeDataInAttributeList(0,3,positions);
 		storeDataInAttributeList(1,3,colours);
 		unbindVAO();
-		//return new RawModel(vaoID,indices.length);
 		return new RawModel(vaoID, positions.length/3);
 	}
 	
