@@ -154,9 +154,12 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	 * @param attackVectorDroneFrame: in drone frame
 	 * @return the current estimated aoa of the left wing with given inclination
 	 */
-	private float getAOA(float inclination, Vector3f rotationAxis, Vector3f wingCentreOfMass, Vector3f attackVectorDroneFrame){
+	private float getAOA(float inclination, Vector3f rotationAxisD, Vector3f wingCentreOfMassD, Vector3f attackVectorDroneFrame){
 		
-		Vector3f copyRotationAxis = new Vector3f(rotationAxis.x, rotationAxis.y, rotationAxis.z);
+		//copy and transform to world frame
+		Vector3f rotationAxisW = new Vector3f();		
+		Matrix3f.transform(this.getCurrentOrientation(), rotationAxisD, rotationAxisW);
+
 		
 //		System.out.println("getAOA inclination : " + inclination);
 //		System.out.println("getAOA rotationAxis : " + copyRotationAxis);
@@ -169,32 +172,32 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
+		
 		Vector3f wingRotationSpeed = new Vector3f();
 		//de hefboomsafstand in wereldassenstelsel
 		Vector3f leftWingLever = new Vector3f();
-		Matrix3f.transform(this.getCurrentOrientation(), wingCentreOfMass, leftWingLever);
+		Matrix3f.transform(this.getCurrentOrientation(), wingCentreOfMassD, leftWingLever);
 		// v_rot = omega x hefboomstafstand (in Wereldassenstelsel)
 		Vector3f.cross(this.getCurrentRotationSpeed(), leftWingLever , wingRotationSpeed);
-		//totale snelheid is de som van de rotatie en de drone snelheid
-		Vector3f totalSpeed = new Vector3f();
-		Vector3f.add(this.calculateSpeedVector(), wingRotationSpeed, totalSpeed); 
-		
+		//totale snelheid is de som van de rotatie en de drone snelheid (in was)
+		Vector3f totalSpeedW = new Vector3f();
+		Vector3f.add(this.calculateSpeedVector(), wingRotationSpeed, totalSpeedW); 		
 		
 		//The left wing's attack vector is (0, sin(leftWingInclination), -cos(leftWingInclination)
-		Vector3f attackVector = new Vector3f();
-		Matrix3f.transform(this.getCurrentOrientation(), attackVectorDroneFrame, attackVector);
+		Vector3f attackVectorW = new Vector3f();
+		Matrix3f.transform(this.getCurrentOrientation(), attackVectorDroneFrame, attackVectorW);
 		
 		//We define an airfoil's normal as the cross product of its axis vector and its attack vector.
-		Vector3f normal = new Vector3f();
-		Vector3f.cross(copyRotationAxis, attackVector, normal);
+		Vector3f normalW = new Vector3f();
+		Vector3f.cross(rotationAxisW, attackVectorW, normalW);
 		
-		Vector3f projAirspeedVector = new Vector3f();
+		Vector3f projAirspeedVectorW = new Vector3f();
 		//We define an airfoil's projected airspeed vector as its airspeed vector (its
 //		velocity minus the wind velocity) projected onto the plane perpendicular to its
 //		axis vector.
 //		System.out.println("rotation axis VOOR SCALE: " + copyRotationAxis);
 
-		Vector3f.sub(totalSpeed, (Vector3f) copyRotationAxis.scale(Vector3f.dot(totalSpeed, copyRotationAxis)), projAirspeedVector);
+		Vector3f.sub(totalSpeedW, (Vector3f) rotationAxisW.scale(Vector3f.dot(totalSpeedW, rotationAxisW)), projAirspeedVectorW);
 		
 //		System.out.println("rotation axis NA SCALE: " + copyRotationAxis);
 
@@ -204,7 +207,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 //		System.out.println("getAOA projAirspeedVector: " + projAirspeedVector);
 //		System.out.println("getAOA attackVector: " + attackVector);
 		
-		float aoa = - (float) Math.atan2(Vector3f.dot(projAirspeedVector, normal), Vector3f.dot(projAirspeedVector, attackVector));
+		float aoa = - (float) Math.atan2(Vector3f.dot(projAirspeedVectorW, normalW), Vector3f.dot(projAirspeedVectorW, attackVectorW));
 		
 		return aoa;		
 	}
@@ -356,15 +359,15 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
 			
 			while((aoa < 0.9 *maxAOA)|| (aoa > maxAOA)){
-				System.out.println("getMaxInclinationHorStab maxaoa:  " + maxAOA);
-				System.out.println("getMaxInclinationHorStab current inclination:  " + inclination);;
+//				System.out.println("getMaxInclinationHorStab maxaoa:  " + maxAOA);
+//				System.out.println("getMaxInclinationHorStab current inclination:  " + inclination);;
 				if (aoa > maxAOA){
 					inclination -= INCLINATIONINCREMENT;
 				}
 				else{
 					inclination += INCLINATIONINCREMENT;
 				}
-				System.out.println("getMaxInclinationHorStab current rotationAxis:  " + rotationAxis);
+//				System.out.println("getMaxInclinationHorStab current rotationAxis:  " + rotationAxis);
 	
 				attackVectorDroneFrame = new Vector3f(0.0f, (float)Math.sin(inclination), - (float)Math.cos(inclination));		
 				aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
@@ -397,15 +400,15 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
 			
 			while((aoa < 0.9 *maxAOA)|| (aoa > maxAOA)){
-				System.out.println("getMaxInclinationHorStab maxaoa:  " + maxAOA);
-				System.out.println("getMaxInclinationHorStab current inclination:  " + inclination);;
+//				System.out.println("getMaxInclinationHorStab maxaoa:  " + maxAOA);
+//				System.out.println("getMaxInclinationHorStab current inclination:  " + inclination);;
 				if (aoa > maxAOA){
 					inclination -= INCLINATIONINCREMENT;
 				}
 				else{
 					inclination += INCLINATIONINCREMENT;
 				}
-				System.out.println("getMaxInclinationHorStab current rotationAxis:  " + rotationAxis);
+//				System.out.println("getMaxInclinationHorStab current rotationAxis:  " + rotationAxis);
 				attackVectorDroneFrame = new Vector3f(0.0f, (float)Math.sin(inclination), - (float)Math.cos(inclination));		
 				aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
 			}
@@ -438,15 +441,15 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
 			
 			while((aoa < 0.9 *maxAOA)|| (aoa > maxAOA)){
-				System.out.println("getMaxInclinationHorStab maxaoa:  " + maxAOA);
-				System.out.println("getMaxInclinationHorStab current inclination:  " + inclination);;
+//				System.out.println("getMaxInclinationHorStab maxaoa:  " + maxAOA);
+//				System.out.println("getMaxInclinationHorStab current inclination:  " + inclination);;
 				if (aoa > maxAOA){
 					inclination -= INCLINATIONINCREMENT;
 				}
 				else{
 					inclination += INCLINATIONINCREMENT;
 				}
-				System.out.println("getMaxInclinationHorStab current rotationAxis:  " + rotationAxis);
+//				System.out.println("getMaxInclinationHorStab current rotationAxis:  " + rotationAxis);
 	
 				attackVectorDroneFrame = new Vector3f(- (float)Math.sin(inclination), 0f, - (float)Math.cos(inclination));		
 				aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
@@ -469,8 +472,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 //		}
 		//System.out.println("getmaxincl");
 		
-		Vector3f rotationAxis = new Vector3f(1, 0, 0);
-		Vector3f wingCentreOfMass = new Vector3f(0, 0, this.configAP.getTailSize());
+		Vector3f rotationAxisD = new Vector3f(1, 0, 0);
+		Vector3f wingCentreOfMassD = new Vector3f(0, 0, this.configAP.getTailSize());
 		float inclination = 0;
 		
 		float maxAOA = configAP.getMaxAOA();
@@ -479,13 +482,13 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		//checken of de aoa al in het gewenste interval ligt.
 		// zo nee: vergroot de inclinatie of verklein de inclinatie, bereken opnieuw de angle of attack en voer lus opnieuw uit
 		if(this.calculateSpeedVector().length() == 0){
-			aoa = maxAOA;
+			inclination = maxAOA;
 		}
 		else{
 			
 			Vector3f attackVectorDroneFrame = new Vector3f(0f, (float)Math.sin(inclination), - (float)Math.cos(inclination));		
-			aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
-			int count = 0;
+			aoa = this.getAOA(inclination, rotationAxisD, wingCentreOfMassD, attackVectorDroneFrame);
+//			int count = 0;
 			while((aoa < 0.9 *maxAOA)|| (aoa > maxAOA)){
 				if (aoa > maxAOA){
 					inclination -= INCLINATIONINCREMENT;
@@ -494,14 +497,14 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 					inclination += INCLINATIONINCREMENT;
 				}
 	
-				System.out.println(count++);
+//				System.out.println(count++);
 				attackVectorDroneFrame = new Vector3f(0f, (float)Math.sin(inclination), - (float)Math.cos(inclination));		
-				aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
+				aoa = this.getAOA(inclination, rotationAxisD, wingCentreOfMassD, attackVectorDroneFrame);
 			}
 		}
 		
-		System.out.println("getMaxInclinationHorStab current aoa:  " + aoa);
-
+		System.out.println("getMaxInclinationHorStab BEREKENDE AOA IN AP:  " + aoa);
+		
 		return inclination;		
 	}
 	
@@ -530,11 +533,12 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 //			else if(newHorStabInclination < - Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
 
 			float maxHorStab = getMaxInclinationHorStab();
-			if (newHorStabInclination > maxHorStab) {
-				newHorStabInclination = maxHorStab;
-			} else if (newHorStabInclination < -maxHorStab) {
-				newHorStabInclination = -maxHorStab;
-			}
+			newHorStabInclination = maxHorStab;
+//			if (newHorStabInclination > maxHorStab) {
+//				newHorStabInclination = maxHorStab;
+//			} else if (newHorStabInclination < -maxHorStab) {
+//				newHorStabInclination = -maxHorStab;
+//			}
 			
 			newVerStabInclination += pidVerGoal.calculateChange(inputAP.getHeading() - getHorAngle(), dt);
 			if(newVerStabInclination > Math.PI/6) newVerStabInclination = (float) (Math.PI/6);
@@ -558,11 +562,11 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 				this.cubePos = stubCube;
 			}
 			
-			System.out.println(cubePos);
+//			System.out.println(cubePos);
 			
 			//CUBE REACHED
 			if(getEuclidDist(this.currentPosition,cubePos) <= 4){
-				System.out.println("hier");
+//				System.out.println("hier");
 				this.cubePos = stubCube.translate(0, 0, -40);
 			}
 			
