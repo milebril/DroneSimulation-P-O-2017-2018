@@ -227,6 +227,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	private PIDController pidHorWing;
 	private PIDController pidHorGoal;
 	private PIDController pidVerGoal;
+	private PIDController pidVerStab;
 	private PIDController pidThrust;
 	
 	/* Variables to send back to drone	 
@@ -252,7 +253,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		
 		//this.pidHorStab = new PIDController(2.0f,1.0f,10.0f, (float) (Math.PI / 180), 0);
 		this.pidHorGoal = new PIDController(1.0f,0.0f,0.5f, (float) (Math.PI / 180), 0);
-		this.pidVerGoal = new PIDController(2.0f,0.0f,1.0f, (float) (Math.PI / 180), 0);
+		//this.pidVerGoal = new PIDController(2.0f,0.0f,1.0f, (float) (Math.PI / 180), 0);
+		this.pidVerStab = new PIDController(1.0f,10.0f,1.0f,(float)Math.toRadians(1),0);
 		//Initialize AP with configfile
 		
 		//Initialize PIDController for Thrust
@@ -526,17 +528,18 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			setCurrentOrientation();
 			
 			newHorStabInclination += pidHorGoal.calculateChange(inputAP.getPitch() + getVerAngle(), dt);
-//			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
-//			else if(newHorStabInclination < - Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
+			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
+			else if(newHorStabInclination < - Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
 
-			float maxHorStab = getMaxInclinationHorStab();
-			if (newHorStabInclination > maxHorStab) {
-				newHorStabInclination = maxHorStab;
-			} else if (newHorStabInclination < -maxHorStab) {
-				newHorStabInclination = -maxHorStab;
-			}
+			System.out.println("Angular:" + getCurrentRotationSpeed());
+//			float maxHorStab = getMaxInclinationHorStab();
+//			if (newHorStabInclination > maxHorStab) {
+//				newHorStabInclination = maxHorStab;
+//			} else if (newHorStabInclination < -maxHorStab) {
+//				newHorStabInclination = -maxHorStab;
+//			}
 			
-			newVerStabInclination += pidVerGoal.calculateChange(inputAP.getHeading() - getHorAngle(), dt);
+			newVerStabInclination += pidVerStab.calculateChange(inputAP.getHeading() - getHorAngle(), dt);
 			if(newVerStabInclination > Math.PI/6) newVerStabInclination = (float) (Math.PI/6);
 			else if(newVerStabInclination < - Math.PI/6) newVerStabInclination = (float) -(Math.PI/6);
 			
