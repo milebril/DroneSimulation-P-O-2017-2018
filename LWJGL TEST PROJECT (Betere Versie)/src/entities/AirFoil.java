@@ -158,7 +158,7 @@ public class AirFoil {
 //		float aoa = this.calculateAOA(projectedAirspeedVectorD, normalD, attackVectorD);
 		float aoa = (float) - Math.atan2(a, b);	
 
-//		System.out.println("Airfoil calculateAirfliff AOA: " + aoa);
+		System.out.println("Airfoil calculateAirfliff  EFFECTIEVE AOA GEZET DOOR AP(lw, rw, hs, vs): " + aoa);
 
 		// calculate the lift force N . liftSlope . AOA . s^2, where N is the
 		// normal, AOA is the angle of attack, and s is the projected airspeed
