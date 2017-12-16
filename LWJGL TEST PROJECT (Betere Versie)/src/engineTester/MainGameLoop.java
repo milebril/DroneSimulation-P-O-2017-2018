@@ -1,24 +1,23 @@
 package engineTester;
 
-import models.Model2D;
 import models.RawModel;
-import models.TexturedModel;
 import physicsEngine.PhysicsEngine;
 import physicsEngine.approximationMethods.EulerPrediction;
-import physicsEngine.approximationMethods.PredictionMethod;
 
-import java.awt.Font;
-import java.io.BufferedInputStream;
+import static org.lwjgl.opengl.GL11.GL_MODELVIEW;
+import static org.lwjgl.opengl.GL11.GL_PROJECTION;
+import static org.lwjgl.opengl.GL11.glLoadIdentity;
+import static org.lwjgl.opengl.GL11.glMatrixMode;
+import static org.lwjgl.opengl.GL11.glOrtho;
+import static org.lwjgl.opengl.GL11.glViewport;
+
 import java.io.BufferedReader;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -26,30 +25,23 @@ import java.util.Random;
 import javax.swing.JFileChooser;
 
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
-import org.newdawn.slick.TrueTypeFont;
 import org.opencv.core.Core;
 
-import autoPilotJar.SimpleAutopilot;
 import autopilot.AutopilotConfigReader;
-import autopilot.AutopilotConfigValues;
-import autopilot.AutopilotConfigWriter;
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
 import renderEngine.Renderer;
 import shaders.StaticShader;
 import testObjects.Cube;
 import testObjects.Cuboid;
-import textures.ModelTexture;
 import entities.Camera;
 import entities.Drone;
 import entities.Entity;
-import entities.cubeTestPlayer;
 import fontMeshCreator.FontType;
 import fontMeshCreator.GUIText;
 import fontRendering.TextMaster;
@@ -70,22 +62,40 @@ public class MainGameLoop {
 	
 	private static Drone drone;
 	
-	private static Camera freeRoamCamera;
-	private static boolean freeRoamCameraLocked = true;
-	
 	private static boolean oLock = false;
 	private static boolean lLock = false;
 	private static boolean sLock = false;
 	
-	private static Entity redCube;
 	private static List<Entity> entities;
 	
 	public static Loader loader;
 	
-	public static Matrix4f OrthoMatrix;
+	//Renderers
+	private static Renderer renderer;
+	private static Renderer rendererFreeCam;
+	private static Renderer renderTopDown;
+	private static Renderer renderSideView;
+	private static Renderer rendererText;
 	
-	//TODO main opruimen, code eruit halen
+	//Shaders
+	private static StaticShader shader;
+	private static StaticShader shaderFreeCam;
+	private static StaticShader shaderTopDown;
+	private static StaticShader shaderSideView;
+	private static StaticShader shaderText;
 	
+	//Cameras
+	private static Camera freeRoamCamera;
+	private static boolean freeRoamCameraLocked = true;
+	
+	private static Camera topDownCamera;
+	private static Camera sideViewCamera;
+	
+	//Buttons
+	private static Button openFile;
+	private static Button randomCubes;
+
+	//ViewStates
 	private static ViewStates viewState = ViewStates.CHASE;
 	private static enum ViewStates {
 			CHASE, ORTHO
@@ -95,13 +105,10 @@ public class MainGameLoop {
 		
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
-		/*
-		 * Start reading AutopilotConfig.cfg
-		 */
-		File config = new File("res/AutopilotConfig.cfg");
 		
+		//***INITIALIZE CONFIG***
 		try {
-			//Read the config file
+			File config = new File("res/AutopilotConfig.cfg");
 			DataInputStream inputStream = new DataInputStream(new FileInputStream(config));
 			autopilotConfig = AutopilotConfigReader.read(inputStream);
 		} catch (FileNotFoundException e) {
@@ -110,139 +117,43 @@ public class MainGameLoop {
 			e.printStackTrace();
 		}
 		
-		//Create the display AKA the screen
+		//***INITIALIZE LOADERS & SCREEN***
 		DisplayManager.createDisplay();
-		//Loader is used to load models using VAO's and VBO's
 		loader = new Loader();
 		TextMaster.init(loader);
-		
-		StaticShader shader = new StaticShader();
-		StaticShader shaderFreeCam = new StaticShader();
-		StaticShader shaderText = new StaticShader();
-		StaticShader shaderTopDown = new StaticShader();
-		StaticShader shaderSideView = new StaticShader();
-		// Renderer based on FOVX and FOVY
-		Renderer renderer = new Renderer(shader, autopilotConfig.getHorizontalAngleOfView(), autopilotConfig.getVerticalAngleOfView());
-		Renderer rendererFreeCam = new Renderer(shaderFreeCam, 50, 50);
-		Renderer rendererText = new Renderer(shaderText, 50, 50);
-		Renderer renderTopDown = new Renderer(shaderTopDown, 40, 40);
-		Renderer renderSideView = new Renderer(shaderSideView, 40, 40);
-		
-		//FreeRoam Camera
-		freeRoamCamera = new Camera();
-		freeRoamCamera.setPosition(new Vector3f(0, 100, 0));
-		//freeRoamCamera.setYaw(-45);
-		
-		//TopDown camera
-		Camera topDownCamera = new Camera();
-		topDownCamera.setPosition(new Vector3f(0, 300, -100));
-		topDownCamera.setRotation((float) -(Math.PI / 2), 0, 0);
-		
-		//Sideview Camera
-		Camera sideViewCamera = new Camera();
-		sideViewCamera.setPosition(new Vector3f(300,0,-100));
-		sideViewCamera.setRotation(0, (float) -(Math.PI / 2), 0);
-		
-		//Creating 10 test cubes
 		entities = new ArrayList<>();
 		
-		Cube c = new Cube(1, 0, 0);
-		RawModel redCubeModel = loader.loadToVAO(c.positions, c.colors, null);
-		redCube = new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(-10,30,-50)) , 1);
-		
-		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(-5,0,-40)), 1));
-		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,0,-80)), 1));
-		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(3,5,-120)), 1));
-		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(3,-5,-160)), 1));
-		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(6,0,-200)), 1));
-		
-		//WORKING DEMO
-//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,0, -40)), 1));
-//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,0,-80)), 1));
-//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,-5,-120)), 1));
-//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,8,-160)), 1));
-//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,-2,-200)), 1));
+		//***INITIALIZE DRONEVIEW***
+		shader = new StaticShader();
+		renderer = new Renderer(shader, autopilotConfig.getHorizontalAngleOfView(), autopilotConfig.getVerticalAngleOfView());
 		
 		Cuboid droneCube = new Cuboid(0, 0, 0);
 		drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
 				new Matrix4f().translate(new Vector3f(0, 0, 0)), 1, autopilotConfig, new EulerPrediction(STEP_TIME));
 		
-		//Autopilot stuff
-		Autopilot autopilot = AutopilotFactory.createAutopilot();
-		autopilot.simulationStarted(autopilotConfig, drone.getAutoPilotInputs());
+		//***INITIALIZE FREEROAM***
+		shaderFreeCam = new StaticShader();
+		rendererFreeCam = new Renderer(shaderFreeCam, 50, 50);
+		freeRoamCamera = new Camera();
+		freeRoamCamera.setPosition(new Vector3f(0, 100, 0));
 		
-		//GUI
-//		guis.add(new GuiTexture(loader.loadTexture("openfile"), new Vector2f(0.95f, 0.95f),  new Vector2f(0.05f, 0.05f)));
+		//***INITIALIZE TOPDOWN***
+		shaderTopDown = new StaticShader();
+		renderTopDown = new Renderer(shaderTopDown, 40, 40);
+		topDownCamera = new Camera();
+		topDownCamera.setPosition(new Vector3f(0, 300, -100));
+		topDownCamera.setRotation((float) -(Math.PI / 2), 0, 0);
 		
-//		List<Button> guis = new ArrayList<>();
-//		guis.add(new Button(new Vector2f(0.95f, 0.95f),  new Vector2f(0.05f, 0.05f), "openfile"));
+		//***INITIALIZE SIDEVIEW***
+		shaderSideView = new StaticShader();
+		renderSideView = new Renderer(shaderSideView, 40, 40);
+		sideViewCamera = new Camera();
+		sideViewCamera.setPosition(new Vector3f(300,0,-100));
+		sideViewCamera.setRotation(0, (float) -(Math.PI / 2), 0);
 		
-		List<GuiTexture> guis = new ArrayList<>();
-		GuiRenderer guiRenderer = new GuiRenderer(loader);
-		
-		JFileChooser fc = new JFileChooser();
-		
-		Button openFile = new Button(loader, "openfile", new Vector2f(0.9f, 0.9f), new Vector2f(0.05f, 0.05f)) {
-			@Override
-			public void whileHover() {
-				//Do nothing
-			}
-			
-			@Override
-			public void stopHover() {
-				this.setScale(new Vector2f(0.05f, 0.05f));
-			}
-			
-			@Override
-			public void startHover() {
-				this.playHoverAnimation(0.01f);
-			}
-			
-			@Override
-			public void onClick() {
-				this.playerClickAnimation(0.02f);
-
-				int returnVal = fc.showOpenDialog(null);
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					File file = fc.getSelectedFile();
-					//Read file and load cubes
-					loadCubes(file);
-				} else {
-					System.out.println("Open command cancelled by user.");
-				}
-			}
-		};
-		openFile.show(guis);
-		
-		Button randomCubes = new Button(loader, "random", new Vector2f(0.9f, 0.75f), new Vector2f(0.05f, 0.05f)) {
-			
-			@Override
-			public void whileHover() {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void stopHover() {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void startHover() {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void onClick() {
-				System.out.println("hier");
-				generateRandomCubes();
-			}
-		};
-		randomCubes.show(guis);
-		
-		//GUI Text
+		//***INITIALIZE GUI-TEXT***
+		shaderText = new StaticShader();
+		rendererText = new Renderer(shaderText, 50, 50);
 		String speed = String.valueOf(Math.round(drone.getAbsVelocity()));
 		FontType font = new FontType(loader.loadTexture("verdana"), new File("res/verdana.fnt"));
 		GUIText textSpeed = new GUIText("Speed = " + speed + "m/s", 5, font, new Vector2f(0.01f,0), 1, true);
@@ -252,86 +163,53 @@ public class MainGameLoop {
 		GUIText textPosition = new GUIText("" , 5, font, new Vector2f(0.01f,0.2f), 1, true);
 		textPosition.setColour(1, 1, 1);
 		
+		Cube c = new Cube(1, 0, 0);
+		RawModel redCubeModel = loader.loadToVAO(c.positions, c.colors, null);
+		
+//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(-5,0,-40)), 1));
+//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,0,-80)), 1));
+//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(3,5,-120)), 1));
+//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(3,-5,-160)), 1));
+//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(6,0,-200)), 1));
+		
+		//***WORKING DEMO***
+		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,0, -40)), 1));
+		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,0,-80)), 1));
+		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,-5,-120)), 1));
+		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,8,-160)), 1));
+		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,0,-200)), 1));
+		
+		//***INITIALIZE AP***
+		Autopilot autopilot = AutopilotFactory.createAutopilot();
+		autopilot.simulationStarted(autopilotConfig, drone.getAutoPilotInputs());
+		
+		//***INITIALIZE BUTTONS GUI***
+		List<GuiTexture> guis = new ArrayList<>();
+		GuiRenderer guiRenderer = new GuiRenderer(loader);
+		
+		createOpenFileButton();
+		openFile.show(guis);
+		
+		createRandomCubeButton();
+		randomCubes.show(guis);
+		
 		while(!Display.isCloseRequested()){
-			//RENDER BUTTONS
+			//***DRONE CAMERA VIEW***
+			renderCameraView();
 			
+			//****MAIN PANEL****
+			renderMainScreen();
 			
-			//Drone Camera View
-			drone.getCamera().setPosition(drone.getPosition());	
-			GL11.glViewport(0, 0, 200, 200);
-			GL11.glScissor(0,0,200,200);
-			GL11.glEnable(GL11.GL_SCISSOR_TEST);
-			renderer.prepare();
-			shader.start();
-			shader.loadViewMatrix(drone.getCamera());
-			renderView(renderer, shader);
-			
-			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
-				drone.getCamera().takeSnapshot();
-			}
-			
-			if (viewState == ViewStates.CHASE) {
-				//3rd Person View (FreeCam)
-				GL11.glViewport(200+1, 0, Display.getWidth() - 201, Display.getHeight());
-				GL11.glScissor(200+1, 0, Display.getWidth()- 201, Display.getHeight());
-				GL11.glEnable(GL11.GL_SCISSOR_TEST);
-				renderSideView.prepareText();
-				shaderFreeCam.start();
-				shaderFreeCam.loadViewMatrix(freeRoamCamera);
-				renderView(rendererFreeCam, shaderFreeCam);
-			} else {
-				GL11.glViewport(200+1, 0, Display.getWidth() - 201, Display.getHeight());
-				GL11.glScissor(200+1, 0, Display.getWidth()- 201, Display.getHeight());
-				GL11.glEnable(GL11.GL_SCISSOR_TEST);
-				renderTopDown.prepareText();
-				renderTopDown.prepare();
-				
-				//TopDown View
-				GL11.glViewport(200 + 1, Display.getHeight()/2 + 1 ,Display.getWidth() - 201, Display.getHeight()/2);
-				GL11.glScissor(200 + 1, Display.getHeight()/2  + 1, Display.getWidth() - 201, Display.getHeight()/2);
-				GL11.glEnable(GL11.GL_SCISSOR_TEST);
-				renderTopDown.prepare();
-				shaderTopDown.start();
-				shaderTopDown.loadViewMatrix(topDownCamera);
-				
-				GL11.glMatrixMode(GL11.GL_PROJECTION);
-				GL11.glLoadIdentity();
-				//GL11.glOrtho(200+1, Display.getWidth(), Display.getHeight(), Display.getHeight()/2 + 1, 1, -1);
-				GL11.glOrtho(0, Display.getWidth(), 0, Display.getHeight() + 1, 1, -1);
-				GL11.glMatrixMode(GL11.GL_MODELVIEW);
-
-				renderView(renderTopDown, shaderTopDown);
-				
-				//SideView
-				GL11.glViewport(200 + 1, 0,Display.getWidth() - 201, Display.getHeight()/2);
-				GL11.glScissor(200 + 1, 0 ,Display.getWidth() - 201, Display.getHeight()/2);
-				GL11.glEnable(GL11.GL_SCISSOR_TEST);
-				renderSideView.prepareText();
-				shaderSideView.start();
-				shaderSideView.loadViewMatrix(sideViewCamera);
-				
-				GL11.glMatrixMode(GL11.GL_PROJECTION);
-				GL11.glLoadIdentity();
-				//GL11.glOrtho(200+1, Display.getWidth(), Display.getHeight()/2, 0, 1, -1);
-				//GL11.glOrtho(200+1, Display.getWidth(), 0, Display.getHeight()/2, 1, -1);
-				GL11.glOrtho(0, Display.getWidth(), 0, Display.getHeight() + 1, 1, -1);
-				GL11.glMatrixMode(GL11.GL_MODELVIEW);
-				
-				renderView(renderSideView, shaderSideView);
-			}
-			
-			//GUI View
+			//***GUI VIEW***
 			GL11.glViewport(0, 200, 200, Display.getHeight() - 200);
 			GL11.glScissor(0, 200, 200, Display.getHeight() - 200);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			rendererText.prepareDroneCamera();
-			
-			// snelheid van de drone
+
 			speed = String.valueOf(Math.round(drone.getAbsVelocity()));
 			textSpeed .setString("Speed = " + speed + "m/s");
 			TextMaster.loadText(textSpeed);
-			
-			// positie van de drone
+
 			xpos = String.valueOf(Math.round(drone.getPosition().x));
 			ypos = String.valueOf(Math.round(drone.getPosition().y));
 			zpos = String.valueOf(Math.round(drone.getPosition().z));
@@ -339,8 +217,10 @@ public class MainGameLoop {
 			TextMaster.loadText(textPosition);
 			
 			TextMaster.render();
+			TextMaster.removeText(textSpeed);
+			TextMaster.removeText(textPosition);
 			
-			//GUI
+			//***BUTTON GUI***
 			GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
 			GL11.glScissor(0, 0, Display.getWidth(), Display.getHeight());
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
@@ -349,7 +229,7 @@ public class MainGameLoop {
 			openFile.checkHover();
 			randomCubes.checkHover();
 			
-			
+			//***UPDATES***
 			float dt = DisplayManager.getFrameTimeSeconds();
 			if(!entities.isEmpty()) {
 				
@@ -362,10 +242,6 @@ public class MainGameLoop {
 				AutopilotOutputs outputs = autopilot.timePassed(inputs);
 				drone.setAutopilotOutouts(outputs);
 			}
-			
-			// de tekst moet telkens worden verwijderd, anders wordt er elke loop nieuwe tekst overgeprint (=> onleesbaar)
-			TextMaster.removeText(textSpeed);
-			TextMaster.removeText(textPosition);
 			
 			keyInputs();
 			removeCubes();
@@ -409,6 +285,74 @@ public class MainGameLoop {
 		} 
 		
 		renderer.render(drone, shader);
+	}
+	
+	private static void renderCameraView() {
+		drone.getCamera().setPosition(drone.getPosition());	
+		GL11.glViewport(0, 0, 200, 200);
+		GL11.glScissor(0,0,200,200);
+		GL11.glEnable(GL11.GL_SCISSOR_TEST);
+		renderer.prepare();
+		shader.start();
+		shader.loadViewMatrix(drone.getCamera());
+		renderView(renderer, shader);
+		
+		if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
+			drone.getCamera().takeSnapshot();
+		}
+	}
+	
+	private static void renderMainScreen() {
+		if (viewState == ViewStates.CHASE) {
+			//3rd Person View (FreeCam)
+			GL11.glViewport(200+1, 0, Display.getWidth() - 201, Display.getHeight());
+			GL11.glScissor(200+1, 0, Display.getWidth()- 201, Display.getHeight());
+			GL11.glEnable(GL11.GL_SCISSOR_TEST);
+			renderSideView.prepareText();
+			shaderFreeCam.start();
+			shaderFreeCam.loadViewMatrix(freeRoamCamera);
+			renderView(rendererFreeCam, shaderFreeCam);
+		} else {
+			//MAKE BLACK LINE
+			GL11.glViewport(200+1, 0, Display.getWidth() - 201, Display.getHeight());
+			GL11.glScissor(200+1, 0, Display.getWidth()- 201, Display.getHeight());
+			GL11.glEnable(GL11.GL_SCISSOR_TEST);
+			renderTopDown.prepareText();
+			renderTopDown.prepare();
+			
+			//TopDown View
+			GL11.glViewport(200 + 1, Display.getHeight()/2 + 1 ,Display.getWidth() - 201, Display.getHeight()/2);
+			GL11.glScissor(200 + 1, Display.getHeight()/2  + 1, Display.getWidth() - 201, Display.getHeight()/2);
+			GL11.glEnable(GL11.GL_SCISSOR_TEST);
+			renderTopDown.prepare();
+			shaderTopDown.start();
+			shaderTopDown.loadViewMatrix(topDownCamera);
+			
+			GL11.glMatrixMode(GL11.GL_PROJECTION);
+			GL11.glLoadIdentity();
+			//GL11.glOrtho(200+1, Display.getWidth(), Display.getHeight(), Display.getHeight()/2 + 1, 1, -1);
+			GL11.glOrtho(0, Display.getWidth(), 0, Display.getHeight() + 1, 1, -1);
+			GL11.glMatrixMode(GL11.GL_MODELVIEW);
+
+			renderView(renderTopDown, shaderTopDown);
+			
+			//SideView
+            GL11.glScissor(200 + 1, 0 ,Display.getWidth() - 201, Display.getHeight()/2);
+			GL11.glEnable(GL11.GL_SCISSOR_TEST);
+			
+			glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+            glOrtho(0, Display.getWidth(), 0, Display.getHeight() + 1, 1, -1);
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
+            glViewport(200 + 1, 0,Display.getWidth() - 201, Display.getHeight()/2);
+			
+			renderSideView.prepareText();
+			shaderSideView.start();
+			shaderSideView.loadViewMatrix(sideViewCamera);
+			
+			renderView(renderSideView, shaderSideView);
+		}
 	}
 	
 	public static void keyInputs() {
@@ -474,10 +418,8 @@ public class MainGameLoop {
 		    }
 		    // line is not visible here.
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -497,5 +439,59 @@ public class MainGameLoop {
 		      Vector3f position = new Vector3f(x,y,z);
 		      entities.add(new Entity(model, new Matrix4f().translate(position), 1));
 		 }
+	}
+	
+	private static void createOpenFileButton() {
+		JFileChooser fc = new JFileChooser();
+		openFile = new Button(loader, "openfile", new Vector2f(0.9f, 0.9f), new Vector2f(0.05f, 0.05f)) {
+			@Override
+			public void whileHover() { }
+
+			@Override
+			public void stopHover() {
+				this.setScale(new Vector2f(0.05f, 0.05f));
+			}
+
+			@Override
+			public void startHover() {
+				this.playHoverAnimation(0.01f);
+			}
+			
+			@Override
+			public void onClick() {
+				this.playerClickAnimation(0.02f);
+
+				int returnVal = fc.showOpenDialog(null);
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					File file = fc.getSelectedFile();
+					//Read file and load cubes
+					loadCubes(file);
+				} else {
+					System.out.println("Open command cancelled by user.");
+				}
+			}
+		};
+	}
+	
+	private static void createRandomCubeButton() {
+		randomCubes = new Button(loader, "random", new Vector2f(0.9f, 0.75f), new Vector2f(0.05f, 0.05f)) {
+			@Override
+			public void whileHover() {
+			}
+			
+			@Override
+			public void stopHover() {
+			}
+			
+			@Override
+			public void startHover() {
+			}
+			
+			@Override
+			public void onClick() {
+				System.out.println("hier");
+				generateRandomCubes();
+			}
+		};
 	}
 }

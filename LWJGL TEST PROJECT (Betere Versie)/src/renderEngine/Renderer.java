@@ -22,10 +22,14 @@ public class Renderer {
 	private static final float NEAR_PLANE = 0.1f;
 	private static final float FAR_PLANE = 1000;
 	
+//	private static final float NEAR_PLANE = 10;
+//	private static final float FAR_PLANE = 1000;
+	
 	private static float FOVX;
 	private static float FOVY;
 	
 	private Matrix4f projectionMatrix;
+	private Matrix4f orthoMatrix;
 	private StaticShader shader;
 	
 	public Renderer(StaticShader shader, float fovx, float fovy){
@@ -35,8 +39,10 @@ public class Renderer {
 		GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glCullFace(GL11.GL_BACK);
 		createProjectionMatrix();
+		createOrthoMatrix();
 		shader.start();
 		shader.loadProjectionMatrix(projectionMatrix);
+		shader.loadOrthogonalViewMatrix(orthoMatrix);
 		shader.stop();
 	}
 
@@ -106,6 +112,25 @@ public class Renderer {
 		GL30.glBindVertexArray(0);
 	}
 	
+	public void renderObject(Entity entity, StaticShader shader) {
+		RawModel rawModel = entity.getModel();
+		GL30.glBindVertexArray(rawModel.getVaoID());
+		GL20.glEnableVertexAttribArray(0); //Vertices
+		GL20.glEnableVertexAttribArray(1); //Colors
+//		Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(),
+//				entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
+		Matrix4f transformationMatrix = entity.getPose();
+		shader.loadTransformationMatrix(transformationMatrix);
+		//GL13.glActiveTexture(GL13.GL_TEXTURE0);
+		//GL11.glBindTexture(GL11.GL_TEXTURE_2D, model.getTexture().getID());
+		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, rawModel.getVertexCount());
+		//GL11.glDrawElements(GL11.GL_TRIANGLES, model.getRawModel().getVertexCount(), //Voor models
+		//		GL11.GL_UNSIGNED_INT, 0);
+		GL20.glDisableVertexAttribArray(0);
+		GL20.glDisableVertexAttribArray(1);
+		GL30.glBindVertexArray(0);
+	}
+	
 	public void render(RawModel model) {
 		GL30.glBindVertexArray(model.getVaoID());
 		GL20.glEnableVertexAttribArray(0);
@@ -128,11 +153,15 @@ public class Renderer {
 		projectionMatrix.m23 = -1;
 		projectionMatrix.m32 = -((2 * NEAR_PLANE * FAR_PLANE) / frustum_length);
 		projectionMatrix.m33 = 0;
-		
 	}
 	
-	public void renderQuad() {
-		GL11.glBegin(GL11.GL_QUADS);
+	private void createOrthoMatrix(){
+		orthoMatrix = new Matrix4f();
+		orthoMatrix.m00 = 2 / (Display.getWidth() - 200);
+		orthoMatrix.m11 = 2 / (Display.getHeight() - 0);
+		orthoMatrix.m22 = -2/990;
+		orthoMatrix.m13 = -1;
+		orthoMatrix.m03 = -1;
+		orthoMatrix.m23 = -1010/990;
 	}
-
 }

@@ -524,7 +524,6 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			this.dt = inputs.getElapsedTime() - prevElapsedTime;
 			prevElapsedTime = inputs.getElapsedTime();
 			
-			
 			//load Current Orientation Of Drone
 			setHeading(inputAP.getHeading());
 			setPitch(inputAP.getPitch());
@@ -532,15 +531,15 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			setCurrentOrientation();
 			
 			newHorStabInclination += pidHorGoal.calculateChange(inputAP.getPitch() + getVerAngle(), dt);
-//			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
-//			else if(newHorStabInclination < - Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
+			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
+			else if(newHorStabInclination < - Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
 
-			float maxHorStab = getMaxInclinationHorStab();
-			if (newHorStabInclination > maxHorStab) {
-				newHorStabInclination = maxHorStab;
-			} else if (newHorStabInclination < -maxHorStab) {
-				newHorStabInclination = -maxHorStab;
-			}
+//			float maxHorStab = getMaxInclinationHorStab();
+//			if (newHorStabInclination > maxHorStab) {
+//				newHorStabInclination = maxHorStab;
+//			} else if (newHorStabInclination < -maxHorStab) {
+//				newHorStabInclination = -maxHorStab;
+//			}
 			
 			newVerStabInclination += pidVerGoal.calculateChange(inputAP.getHeading() - getHorAngle(), dt);
 			if(newVerStabInclination > Math.PI/6) newVerStabInclination = (float) (Math.PI/6);
@@ -569,7 +568,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			}
 			
 			//THRUST FORCE
-	      if (this.calculateSpeedVector().length() > 20) { 
+	      if (this.calculateSpeedVector().length() > 30) { 
 	          newThrust = 0; 
 	      } else { 
 //		          if (Math.abs(newVerStabInclination) > 0.1) { 
