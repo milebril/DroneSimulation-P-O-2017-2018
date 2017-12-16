@@ -158,11 +158,11 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		
 		Vector3f copyRotationAxis = new Vector3f(rotationAxis.x, rotationAxis.y, rotationAxis.z);
 		
-		System.out.println("getAOA inclination : " + inclination);
-		System.out.println("getAOA rotationAxis : " + copyRotationAxis);
-		System.out.println("getAOA wingCentreOfMass : " + wingCentreOfMass);
-		System.out.println("getAOA attackVectorDroneFrame : " + attackVectorDroneFrame);		
-		
+//		System.out.println("getAOA inclination : " + inclination);
+//		System.out.println("getAOA rotationAxis : " + copyRotationAxis);
+//		System.out.println("getAOA wingCentreOfMass : " + wingCentreOfMass);
+//		System.out.println("getAOA attackVectorDroneFrame : " + attackVectorDroneFrame);		
+//		
 //		try {
 //			Thread.sleep(1000);
 //		} catch (InterruptedException e) {
@@ -467,7 +467,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-		System.out.println("getmaxincl");
+		//System.out.println("getmaxincl");
 		
 		Vector3f rotationAxis = new Vector3f(1, 0, 0);
 		Vector3f wingCentreOfMass = new Vector3f(0, 0, this.configAP.getTailSize());
@@ -485,18 +485,16 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			
 			Vector3f attackVectorDroneFrame = new Vector3f(0f, (float)Math.sin(inclination), - (float)Math.cos(inclination));		
 			aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
-			
+			int count = 0;
 			while((aoa < 0.9 *maxAOA)|| (aoa > maxAOA)){
-				System.out.println("getMaxInclinationHorStab maxaoa:  " + maxAOA);
-				System.out.println("getMaxInclinationHorStab current inclination:  " + inclination);;
 				if (aoa > maxAOA){
 					inclination -= INCLINATIONINCREMENT;
 				}
 				else{
 					inclination += INCLINATIONINCREMENT;
 				}
-				System.out.println("getMaxInclinationHorStab current rotationAxis:  " + rotationAxis);
 	
+				System.out.println(count++);
 				attackVectorDroneFrame = new Vector3f(0f, (float)Math.sin(inclination), - (float)Math.cos(inclination));		
 				aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
 			}
@@ -515,9 +513,6 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	
 	@Override
 	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
-		
-		System.out.println("AutopilotOutputs timepassed: ");
-		
 		this.inputAP = inputs;
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
 			currentPosition = new Vector3f(inputAP.getX(), inputAP.getY(), inputAP.getZ());
@@ -559,7 +554,11 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 				if (temp.length() > 3) {
 					cubePos = cubePositions.get(0);
 				}
+			} else {
+				this.cubePos = stubCube;
 			}
+			
+			System.out.println(cubePos);
 			
 			//CUBE REACHED
 			if(getEuclidDist(this.currentPosition,cubePos) <= 4){

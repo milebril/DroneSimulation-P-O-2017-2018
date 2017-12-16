@@ -67,6 +67,7 @@ public class MainGameLoop {
 	private static boolean sLock = false;
 	
 	private static List<Entity> entities;
+	private static List<Entity> scaledEntities;
 	
 	public static Loader loader;
 	
@@ -122,6 +123,7 @@ public class MainGameLoop {
 		loader = new Loader();
 		TextMaster.init(loader);
 		entities = new ArrayList<>();
+		scaledEntities = new ArrayList<>();
 		
 		//***INITIALIZE DRONEVIEW***
 		shader = new StaticShader();
@@ -139,14 +141,14 @@ public class MainGameLoop {
 		
 		//***INITIALIZE TOPDOWN***
 		shaderTopDown = new StaticShader();
-		renderTopDown = new Renderer(shaderTopDown, 40, 40);
+		renderTopDown = new Renderer(shaderTopDown, 50, 40);
 		topDownCamera = new Camera();
 		topDownCamera.setPosition(new Vector3f(0, 300, -100));
 		topDownCamera.setRotation((float) -(Math.PI / 2), 0, 0);
 		
 		//***INITIALIZE SIDEVIEW***
 		shaderSideView = new StaticShader();
-		renderSideView = new Renderer(shaderSideView, 40, 40);
+		renderSideView = new Renderer(shaderSideView, 40, 20);
 		sideViewCamera = new Camera();
 		sideViewCamera.setPosition(new Vector3f(300,0,-100));
 		sideViewCamera.setRotation(0, (float) -(Math.PI / 2), 0);
@@ -173,11 +175,11 @@ public class MainGameLoop {
 //		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(6,0,-200)), 1));
 		
 		//***WORKING DEMO***
-		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,0, -40)), 1));
-		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,0,-80)), 1));
-		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,-5,-120)), 1));
-		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,8,-160)), 1));
-		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,0,-200)), 1));
+//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,-10, -40)), 1));
+//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,0,-80)), 1));
+//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,-5,-120)), 1));
+//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,8,-160)), 1));
+//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,0,-200)), 1));
 		
 		//***INITIALIZE AP***
 		Autopilot autopilot = AutopilotFactory.createAutopilot();
@@ -267,7 +269,7 @@ public class MainGameLoop {
 	
 	private static void removeCubes() {
 		List<Entity> toRemove = new ArrayList<>();
-		
+		List<Entity> toRemoveScaled = new ArrayList<>();		
 		for (Entity e : entities) {
 			if ( Math.abs(Math.sqrt(Math.pow(drone.getPosition().x - e.getPosition().x, 2) +
 					Math.pow(drone.getPosition().y - e.getPosition().y, 2) +
@@ -277,10 +279,28 @@ public class MainGameLoop {
 		}
 		
 		entities.removeAll(toRemove);
+		
+		for (Entity e : scaledEntities) {
+			if ( Math.abs(Math.sqrt(Math.pow(drone.getPosition().x - e.getPosition().x, 2) +
+					Math.pow(drone.getPosition().y - e.getPosition().y, 2) +
+					Math.pow(drone.getPosition().z - e.getPosition().z, 2))) <= 4) {
+				toRemoveScaled.add(e);
+			}
+		}
+		
+		scaledEntities.removeAll(toRemoveScaled);
 	}
 	
 	public static void renderView(Renderer renderer, StaticShader shader) {
 		for (Entity entity : entities) {
+			renderer.render(entity,shader);
+		} 
+		
+		renderer.render(drone, shader);
+	}
+	
+	public static void renderViewScaled(Renderer renderer, StaticShader shader) {
+		for (Entity entity : scaledEntities) {
 			renderer.render(entity,shader);
 		} 
 		
@@ -334,7 +354,7 @@ public class MainGameLoop {
 			GL11.glOrtho(0, Display.getWidth(), 0, Display.getHeight() + 1, 1, -1);
 			GL11.glMatrixMode(GL11.GL_MODELVIEW);
 
-			renderView(renderTopDown, shaderTopDown);
+			renderViewScaled(renderTopDown, shaderTopDown);
 			
 			//SideView
             GL11.glScissor(200 + 1, 0 ,Display.getWidth() - 201, Display.getHeight()/2);
@@ -351,7 +371,7 @@ public class MainGameLoop {
 			shaderSideView.start();
 			shaderSideView.loadViewMatrix(sideViewCamera);
 			
-			renderView(renderSideView, shaderSideView);
+			renderViewScaled(renderSideView, shaderSideView);
 		}
 	}
 	
@@ -415,6 +435,7 @@ public class MainGameLoop {
 				RawModel model = loader.loadToVAO(c.positions, c.colors, null);
 		        
 		        entities.add(new Entity(model, new Matrix4f().translate(new Vector3f(x, y, z)), 1));
+		        scaledEntities.add(new Entity(model, new Matrix4f().translate(new Vector3f(x, y, z)), 2));
 		    }
 		    // line is not visible here.
 		} catch (FileNotFoundException e) {
@@ -428,16 +449,29 @@ public class MainGameLoop {
 		Random r = new Random();
 		entities = new ArrayList<>();
 		
+		float prevX = 0.0f;
+		float prevY = 0.0f;
+		
 		 for (int i = 1; i <= 5; i++) {
 		      Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
 		      RawModel model = loader.loadToVAO(c.positions, c.colors, null);
-		      float x = r.nextFloat()*20-10;
-		      //float x = 0;
+		      //float x = r.nextFloat()*20-10;
+		      float x = 0;
 		      float y = ((float) r.nextInt(1000) / 500 - 1)*10;
-		      System.out.println(y);
 		      float z = i*-40;
 		      Vector3f position = new Vector3f(x,y,z);
+		      
+		      while(Math.sqrt(Math.pow(x - prevX, 2) + Math.pow(y - prevY, 2)) > 10) {
+		    	  x = r.nextFloat()*20-10;
+			      x = 0;
+			      y = ((float) r.nextInt(1000) / 500 - 1)*10;
+		      }
+		      
+		      prevX = x;
+		      prevY = y;
+		      
 		      entities.add(new Entity(model, new Matrix4f().translate(position), 1));
+		      scaledEntities.add(new Entity(model, new Matrix4f().translate(position), 2));
 		 }
 	}
 	

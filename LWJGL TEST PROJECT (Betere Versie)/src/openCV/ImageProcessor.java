@@ -82,6 +82,8 @@ public class ImageProcessor {
 	 */
 	public static Mat byteArrayToRGBMat(int width, int height, byte[] byteArray) 
 			throws IllegalArgumentException {
+		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		
 		if (width*height*3 != byteArray.length) {
 			throw new IllegalArgumentException("given byteArray has " + String.valueOf(byteArray.length) 
 			+ " values but " + String.valueOf(width*height*3) + " (=width*height*3) are required!");
