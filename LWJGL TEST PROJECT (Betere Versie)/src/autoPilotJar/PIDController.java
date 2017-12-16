@@ -43,6 +43,10 @@ public float calculateChange(float current, float dt){
 	return factor * this.changeFactor;
 }
 	
+public void reset(){
+	this.prevError = 0;
+	this.totalError = 0;
+}
 //	public float calculateThrustChange(float currentSpeed, float goalSpeed, float dt){
 //		float currentError = currentSpeed - goalSpeed;
 //		totalError += currentError*dt;

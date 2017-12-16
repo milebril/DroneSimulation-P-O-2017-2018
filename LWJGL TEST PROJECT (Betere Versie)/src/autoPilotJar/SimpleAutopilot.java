@@ -22,14 +22,12 @@ import openCV.ImageProcessor;
 import openCV.RedCubeLocator;
 
 public class SimpleAutopilot implements Autopilot, AutopilotOutputs{	
-	private boolean heightGoalReached = false;
 	private AutopilotConfig configAP;
 	private AutopilotInputs inputAP;
 	
 	private Vector3f currentPosition;
 	private Vector3f prevPosition;
 	
-	private Vector3f oldSpeed;
 	
 	//Aanpassen als we naar nieuwe cubus moeten gaan
 	private Vector3f cubePos;
@@ -42,14 +40,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	private float prevElapsedTime;
 	private float dt = 0;
 	
-	private float heightGoal = 1;
-	
-	private ImageProcessor cubeLocator;
 	private PIDController pidHorStab;
-	private PIDController pidHorWing;
-	private PIDController pidHorGoal;
-	private PIDController pidVerGoal;
-	private PIDController pidThrust;
+	private PIDController pidVerStab;
 	
 	/* Variables to send back to drone	 
 	 * Initialy All inclinations are 0
@@ -67,37 +59,35 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		
 		//Initialize PIDController for horizontalflight
 		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
-		//this.pidHorStab = new PIDController(10.0f,1.0f,5.0f);
-		this.pidHorWing = new PIDController(1.0f,0.0f,10.0f, (float) -(Math.PI / 180), 0);
-		
-		this.pidHorStab = new PIDController(2.0f,1.0f,10.0f, (float) (Math.PI / 180), 0);
-		this.pidHorGoal = new PIDController(2.0f,0.0f,0.0f, (float) (Math.PI / 180), 0);
-		this.pidVerGoal = new PIDController(2.0f,0.0f,1.0f, (float) (Math.PI / 180), 0);
+		this.pidHorStab = new PIDController(1.0f,0.0f,0.5f,(float)Math.toRadians(1),0);
+		//this.pidVerStab = new PIDController(1.0f,0.75f,0.0f,(float)Math.toRadians(1),0);
+		this.pidVerStab = new PIDController(1.0f,10.0f,1.0f,(float)Math.toRadians(1),0);
 		//Initialize AP with configfile
 		
-		//Initialize PIDController for Thrust
-		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
-		this.pidThrust = new PIDController(1.0f, 0.0f, 3.0f, -10, 10);
-		//initialize();
 		
 		//ADD CUBES TO LIST
-		//cubePositions.add(new Vector3f(0,0, -200));
+//		cubePositions.add(new Vector3f(0,0, -200));
 //		cubePositions.add(new Vector3f(0,0,-80));
 //		cubePositions.add(new Vector3f(-2,0,-120));
 //		cubePositions.add(new Vector3f(0,0,-160));
 //		cubePositions.add(new Vector3f(0, 0, -80));
 //		cubePositions.add(new Vector3f(-5,0,-40));
 //		cubePositions.add(new Vector3f(-2.5f,0,-60));
+//		cubePositions.add(new Vector3f(-5,0,-40));
 		
-		
-		//cubePositions.add(new Vector3f(-5,0,-40));
+		//TURNING DEMO
+		cubePositions.add(new Vector3f(5,0, -40));
+		cubePositions.add(new Vector3f(0,0, -80));
+		cubePositions.add(new Vector3f(-2,0, -120));
+		cubePositions.add(new Vector3f(-3,0, -160));
+		cubePositions.add(new Vector3f(5,0, -200));
 		
 		//WORKING DEMO UP/DOWN
-		cubePositions.add(new Vector3f(0,-10,-40));
-		cubePositions.add(new Vector3f(0,0,-80));
-		cubePositions.add(new Vector3f(0,-5,-120));
-		cubePositions.add(new Vector3f(0,8,-160));
-		cubePositions.add(new Vector3f(0,-2,-200));
+//		cubePositions.add(new Vector3f(0,-10,-40));
+//		cubePositions.add(new Vector3f(0,0,-80));
+//		cubePositions.add(new Vector3f(0,-5,-120));
+//		cubePositions.add(new Vector3f(0,8,-160));
+//		cubePositions.add(new Vector3f(0,-2,-200));
 		
 		cubePos = cubePositions.remove(0);
 	}
@@ -168,37 +158,29 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		this.inputAP = inputs;
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
 			
+			//SAVE DATA 
 			currentPosition = new Vector3f(inputAP.getX(), inputAP.getY(), inputAP.getZ());
 			this.dt = inputs.getElapsedTime() - prevElapsedTime;
 			prevElapsedTime = inputs.getElapsedTime();
+			this.prevPosition = new Vector3f(currentPosition.x, currentPosition.y, currentPosition.z);
 			
 			
-			newHorStabInclination += pidHorGoal.calculateChange(inputAP.getPitch() + getVerAngle(), dt);
+			newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() + getVerAngle(), dt);
 			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
 			else if(newHorStabInclination < - Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
 
-			newVerStabInclination += pidVerGoal.calculateChange(inputAP.getHeading() - getHorAngle(), dt);
+			newVerStabInclination += pidVerStab.calculateChange(inputAP.getHeading() - getHorAngle(), dt);
 			if(newVerStabInclination > Math.PI/6) newVerStabInclination = (float) (Math.PI/6);
 			else if(newVerStabInclination < - Math.PI/6) newVerStabInclination = (float) -(Math.PI/6);
 			
 			//CUBE REACHED
 			if(getEuclidDist(this.currentPosition,cubePos) <= 4 && !cubePositions.isEmpty()){
 				this.cubePos = cubePositions.remove(0);
+				this.pidHorStab.reset();
+				this.pidVerStab.reset();
 			}
-			
-			//THRUST FORCE
-		      if (this.calculateSpeedVector().length() > 20) { 
-		          newThrust = 0; 
-		      } else { 
-		          if (Math.abs(newVerStabInclination) > 0.1) { 
-		        	  newThrust = configAP.getMaxThrust() / 4; 
-		          } else { 
-		        	  this.newThrust = configAP.getMaxThrust(); 
-		          } 
-		      } 
-			
-		      //SAVE DATA
-		      this.prevPosition = new Vector3f(currentPosition.x, currentPosition.y, currentPosition.z); 
+			this.newThrust = this.configAP.getMaxThrust();
+		      
 		}
 		
 		return this;
