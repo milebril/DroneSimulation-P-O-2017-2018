@@ -171,7 +171,7 @@ public class MainGameLoop {
 		Cube c = new Cube(1, 0, 0);
 		RawModel redCubeModel = loader.loadToVAO(c.positions, c.colors, null);
 		
-//		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(-5,0,-40)), 1));
+		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,10,-40)), 1));
 //		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,0,-80)), 1));
 //		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(3,5,-120)), 1));
 //		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(3,-5,-160)), 1));
@@ -470,7 +470,7 @@ public class MainGameLoop {
 		      Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
 		      RawModel model = loader.loadToVAO(c.positions, c.colors, null);
 		      float x = r.nextFloat()*20-10;
-		      //x = 0;
+		      x = 0;
 		      float y = ((float) r.nextInt(1000) / 500 - 1)*10;
 		      float z = i*-40;
 		      Vector3f position = new Vector3f(x,y,z);
