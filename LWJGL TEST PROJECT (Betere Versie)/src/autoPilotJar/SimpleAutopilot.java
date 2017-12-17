@@ -594,14 +594,20 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 					System.out.println("Schatting: " + cubePos);
 					System.out.println("Z POS: " + currentPosition.z);
 					System.out.println(inputAP.getElapsedTime());
+					System.out.println(blockCount);
+				}
+				
+				if (blockCount == 2) {
+					System.out.println("pos" + currentPosition.z);
+					System.out.println(temp);
 				}
 				
 				if (!lockedOnTarget && getEuclidDist(currentPosition, cubePos) <= 15) {
 					lockedOnTarget = true;
-//					cubePos = new Vector3f((cubePositions.get(0).x + cubePos.x) / 2f, 
-//							(cubePositions.get(0).y + cubePos.y) / 2f, ((int) (cubePos.z / 40)) * 40 ) ;
-					cubePos = cubePositions.get(0); 
-		          	cubePos.z = ((int) (cubePos.z / 40)) * 40; 
+					cubePos = new Vector3f((cubePositions.get(0).x + cubePos.x) / 2f, 
+							(cubePositions.get(0).y + cubePos.y) / 2f, ((int) (cubePos.z / 40)) * 40 ) ;
+//					cubePos = cubePositions.get(0); 
+//		          	cubePos.z = ((int) (cubePos.z / 40)) * 40; 
 					System.out.println("Lock: " + cubePos);
 				}
 			} 
