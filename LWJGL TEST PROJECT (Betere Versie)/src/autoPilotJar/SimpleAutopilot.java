@@ -565,17 +565,17 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			if(this.newRightWingInclination < 0) this.newRightWingInclination = 0;
 
 			//Negatieve Roll (LeftWingInclination > RightWingInclination) -> NegatieveChangeWingRoll
-			if(Math.abs(this.inputAP.getRoll()) > Math.toRadians(10)){
-				float changeWingRoll = this.pidRoll.calculateChange(this.inputAP.getRoll(),dt);
-				//System.out.println("Roll | ChangeWingRoll : " + this.inputAP.getRoll() + " | " + changeWingRoll);
-				this.newLeftWingInclination += changeWingRoll;
-				if(this.newLeftWingInclination > Math.toRadians(20)) this.newLeftWingInclination = (float) Math.toRadians(20);
-				if(this.newLeftWingInclination < 0) this.newLeftWingInclination = 0;
-				
-				this.newRightWingInclination -= changeWingRoll;
-				if(this.newRightWingInclination > Math.toRadians(20)) this.newRightWingInclination = (float) Math.toRadians(20);
-				if(this.newRightWingInclination < 0) this.newRightWingInclination = 0;
-			}
+//			if(Math.abs(this.inputAP.getRoll()) > Math.toRadians(10)){
+//				float changeWingRoll = this.pidRoll.calculateChange(this.inputAP.getRoll(),dt);
+//				//System.out.println("Roll | ChangeWingRoll : " + this.inputAP.getRoll() + " | " + changeWingRoll);
+//				this.newLeftWingInclination += changeWingRoll;
+//				if(this.newLeftWingInclination > Math.toRadians(20)) this.newLeftWingInclination = (float) Math.toRadians(20);
+//				if(this.newLeftWingInclination < 0) this.newLeftWingInclination = 0;
+//				
+//				this.newRightWingInclination -= changeWingRoll;
+//				if(this.newRightWingInclination > Math.toRadians(20)) this.newRightWingInclination = (float) Math.toRadians(20);
+//				if(this.newRightWingInclination < 0) this.newRightWingInclination = 0;
+//			}
 			
 			cubePositions = cubeLocator.getCoordinatesOfCube();
 			cubePositions.sort(new Comparator<Vector3f>() {
@@ -596,12 +596,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 					System.out.println(inputAP.getElapsedTime());
 					System.out.println(blockCount);
 				}
-				
-				if (blockCount == 2) {
-					System.out.println("pos" + currentPosition.z);
-					System.out.println(temp);
-				}
-				
+								
 				if (!lockedOnTarget && getEuclidDist(currentPosition, cubePos) <= 15) {
 					lockedOnTarget = true;
 					cubePos = new Vector3f((cubePositions.get(0).x + cubePos.x) / 2f, 
@@ -620,8 +615,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			if(getEuclidDist(this.currentPosition,cubePos) <= 4){
 				this.cubePos = stubCube.translate(0, 0, -40);
 				lockedOnTarget = false;
-				this.pidHorStab.reset();
-	            this.pidWings.reset();
+//				this.pidHorStab.reset();
+//	            this.pidWings.reset();
 			}
 			
 			//THRUST FORCE
