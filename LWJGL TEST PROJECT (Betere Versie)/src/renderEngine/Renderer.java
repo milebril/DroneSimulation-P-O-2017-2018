@@ -22,8 +22,8 @@ public class Renderer {
 	private static final float NEAR_PLANE = 0.1f;
 	private static final float FAR_PLANE = 1000;
 	
-//	private static final float NEAR_PLANE = 10;
-//	private static final float FAR_PLANE = 1000;
+//	private static final float NEAR_PLANE = -1;
+//	private static final float FAR_PLANE = 1;
 	
 	private static float FOVX;
 	private static float FOVY;
@@ -156,12 +156,22 @@ public class Renderer {
 	}
 	
 	private void createOrthoMatrix(){
+		
+		float t =  0;
+		float b = Display.getHeight();
+		float l = 0;
+		float r = Display.getWidth();
+		float f = -1;
+		float n = 1;
+		
 		orthoMatrix = new Matrix4f();
-		orthoMatrix.m00 = 2 / (Display.getWidth() - 200);
-		orthoMatrix.m11 = 2 / (Display.getHeight() - 0);
-		orthoMatrix.m22 = -2/990;
-		orthoMatrix.m13 = -1;
-		orthoMatrix.m03 = -1;
-		orthoMatrix.m23 = -1010/990;
+		orthoMatrix.setIdentity();
+		orthoMatrix.m00 = 2 / (r - l); 
+		orthoMatrix.m11 = 2 / (t - b); 
+	 
+	    orthoMatrix.m22 = -2 / (f - n); 
+	    orthoMatrix.m30 = -(r + l) / (r - l); 
+	    orthoMatrix.m31 = -(t + b) / (t - b); 
+	    orthoMatrix.m32 = -(f + n) / (f - n); 
 	}
 }

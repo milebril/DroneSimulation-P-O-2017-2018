@@ -511,6 +511,9 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		return temp.length();
 	}
 	
+	private int blockCount = 0;
+	private boolean lockedOnTarget = false;
+	
 	@Override
 	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
 		this.inputAP = inputs;
@@ -548,22 +551,28 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 				}
 			});
 			
+			//Lock next target
 			if (cubePositions.size() > 0) {
-				Vector3f temp = new Vector3f(0,0,0);
-				Vector3f.sub(cubePos, cubePositions.get(0), temp);
-				if (temp.length() > 3) {
-					cubePos = cubePositions.get(0);
+				Vector3f temp = cubePositions.get(0);
+				if ((int) (temp.z / -40) > blockCount) {
+					blockCount++;
+					cubePos = new Vector3f(Math.round(temp.x), Math.round(temp.y), ((int) (temp.z / 40)) * 40);
+					System.out.println("Schatting: " + cubePos);
 				}
-			} else {
-				this.cubePos = stubCube;
-			}
-			
-			System.out.println(cubePos);
+				
+				if (!lockedOnTarget && getEuclidDist(this.currentPosition,cubePos) <= 7) {
+					lockedOnTarget = true;
+					cubePos = new Vector3f((cubePositions.get(0).x + cubePos.x) / 2f, 
+							(cubePositions.get(0).y + cubePos.y) / 2f, ((int) (cubePos.z / 40)) * 40 ) ;
+					//cubePos.z = ((int) (cubePos.z / 40)) * 40;
+					System.out.println("Lock: " + cubePos);
+				}
+			} 
 			
 			//CUBE REACHED
 			if(getEuclidDist(this.currentPosition,cubePos) <= 4){
-				System.out.println("hier");
 				this.cubePos = stubCube.translate(0, 0, -40);
+				lockedOnTarget = false;
 			}
 			
 			//THRUST FORCE

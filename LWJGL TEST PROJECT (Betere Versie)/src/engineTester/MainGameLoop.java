@@ -102,6 +102,9 @@ public class MainGameLoop {
 			CHASE, ORTHO
 	};
 	
+	//Autopilot
+	private static Autopilot autopilot;
+	
 	public static void main(String[] args) throws IOException {
 		
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -182,7 +185,7 @@ public class MainGameLoop {
 //		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,0,-200)), 1));
 		
 		//***INITIALIZE AP***
-		Autopilot autopilot = AutopilotFactory.createAutopilot();
+		autopilot = AutopilotFactory.createAutopilot();
 		autopilot.simulationStarted(autopilotConfig, drone.getAutoPilotInputs());
 		
 		//***INITIALIZE BUTTONS GUI***
@@ -271,9 +274,7 @@ public class MainGameLoop {
 		List<Entity> toRemove = new ArrayList<>();
 		List<Entity> toRemoveScaled = new ArrayList<>();		
 		for (Entity e : entities) {
-			if ( Math.abs(Math.sqrt(Math.pow(drone.getPosition().x - e.getPosition().x, 2) +
-					Math.pow(drone.getPosition().y - e.getPosition().y, 2) +
-					Math.pow(drone.getPosition().z - e.getPosition().z, 2))) <= 4) {
+			if (getEuclidDist(drone.getPosition(), e.getPosition()) <= 4) {
 				toRemove.add(e);
 			}
 		}
@@ -281,14 +282,18 @@ public class MainGameLoop {
 		entities.removeAll(toRemove);
 		
 		for (Entity e : scaledEntities) {
-			if ( Math.abs(Math.sqrt(Math.pow(drone.getPosition().x - e.getPosition().x, 2) +
-					Math.pow(drone.getPosition().y - e.getPosition().y, 2) +
-					Math.pow(drone.getPosition().z - e.getPosition().z, 2))) <= 4) {
+			if (getEuclidDist(drone.getPosition(), e.getPosition()) <= 4) {
 				toRemoveScaled.add(e);
 			}
 		}
 		
 		scaledEntities.removeAll(toRemoveScaled);
+	}
+	
+	private static float getEuclidDist(Vector3f vec1, Vector3f vec2){
+		Vector3f temp = new Vector3f(0,0,0);
+		Vector3f.sub(vec2, vec1, temp);
+		return temp.length();
 	}
 	
 	public static void renderView(Renderer renderer, StaticShader shader) {
@@ -363,8 +368,11 @@ public class MainGameLoop {
 			glMatrixMode(GL_PROJECTION);
             glLoadIdentity();
             glOrtho(0, Display.getWidth(), 0, Display.getHeight() + 1, 1, -1);
-            glMatrixMode(GL_MODELVIEW);
-            glLoadIdentity();
+            //GL11.glTranslatef(sideViewCamera.getPosition().x - Display.getWidth()/2, sideViewCamera.getPosition().x - Display.getHeight()/2, 0.0f);
+            GL11.glPushMatrix();
+            GL11.glTranslatef(sideViewCamera.getPosition().x, -sideViewCamera.getPosition().y, 0f);
+//            glMatrixMode(GL_MODELVIEW);
+//            glLoadIdentity();
             glViewport(200 + 1, 0,Display.getWidth() - 201, Display.getHeight()/2);
 			
 			renderSideView.prepareText();
@@ -372,6 +380,8 @@ public class MainGameLoop {
 			shaderSideView.loadViewMatrix(sideViewCamera);
 			
 			renderViewScaled(renderSideView, shaderSideView);
+			
+			GL11.glPopMatrix();
 		}
 	}
 	
@@ -404,6 +414,8 @@ public class MainGameLoop {
 			}
 			
 			sLock = true;
+		} else if(Keyboard.isKeyDown(Keyboard.KEY_R)) {
+			reset();
 		}else {
 			if (freeRoamCameraLocked) {
 				Vector3f.add(drone.getPosition(), new Vector3f(0, 0, 30), freeRoamCamera.getPosition());
@@ -423,6 +435,7 @@ public class MainGameLoop {
 		
 		//reset entities first
 		entities = new ArrayList<>();
+		scaledEntities = new ArrayList<>();
 		
 		try(BufferedReader br = new BufferedReader(new FileReader(file))) {
 		    for(String line; (line = br.readLine()) != null; ) {
@@ -448,6 +461,7 @@ public class MainGameLoop {
 	public static void generateRandomCubes() {
 		Random r = new Random();
 		entities = new ArrayList<>();
+		scaledEntities = new ArrayList<>();
 		
 		float prevX = 0.0f;
 		float prevY = 0.0f;
@@ -455,8 +469,8 @@ public class MainGameLoop {
 		 for (int i = 1; i <= 5; i++) {
 		      Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
 		      RawModel model = loader.loadToVAO(c.positions, c.colors, null);
-		      //float x = r.nextFloat()*20-10;
-		      float x = 0;
+		      float x = r.nextFloat()*20-10;
+		      x = 0;
 		      float y = ((float) r.nextInt(1000) / 500 - 1)*10;
 		      float z = i*-40;
 		      Vector3f position = new Vector3f(x,y,z);
@@ -470,9 +484,33 @@ public class MainGameLoop {
 		      prevX = x;
 		      prevY = y;
 		      
+		      //Debug Print
+		      System.out.println(position);
+		      
 		      entities.add(new Entity(model, new Matrix4f().translate(position), 1));
 		      scaledEntities.add(new Entity(model, new Matrix4f().translate(position), 2));
 		 }
+		 
+		 System.out.println("#####");
+	}
+	
+	private static void reset() {
+		//Reset Cubes & Display
+		generateRandomCubes();
+		DisplayManager.reset();
+		
+		//Reset Cameras
+		freeRoamCameraLocked = true;
+		viewState = ViewStates.CHASE;
+		
+		//Reset Drone
+		Cuboid droneCube = new Cuboid(0, 0, 0);
+		drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
+				new Matrix4f().translate(new Vector3f(0, 0, 0)), 1, autopilotConfig, new EulerPrediction(STEP_TIME));
+		
+		//Reset AP
+		autopilot = AutopilotFactory.createAutopilot();
+		autopilot.simulationStarted(autopilotConfig, drone.getAutoPilotInputs());
 	}
 	
 	private static void createOpenFileButton() {

@@ -97,4 +97,10 @@ public class DisplayManager {
 		
 		return new Vector2f(normalizedX, normalizedY);
 	}
+
+	public static void reset() {
+		started = false;
+		elapsedTime = 0;
+		lastFrameTime = 0;
+	}
 }
