@@ -227,6 +227,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	private PIDController pidHorWing;
 	private PIDController pidHorGoal;
 	private PIDController pidVerGoal;
+	private PIDController pidWings;
+	private PIDController pidRoll;
 	private PIDController pidThrust;
 	
 	/* Variables to send back to drone	 
@@ -251,9 +253,17 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		//this.pidHorGoal = new PIDController(1.0f,0.0f,0.5f, (float) (Math.PI / 180), 0);
 		
 		//this.pidHorStab = new PIDController(2.0f,1.0f,10.0f, (float) (Math.PI / 180), 0);
-		this.pidHorGoal = new PIDController(1.0f,0.0f,0.5f, (float) (Math.PI / 180), 0);
+		this.pidHorStab = new PIDController(1.0f,0.0f,0.5f, (float) (Math.PI / 180), 0);
 		this.pidVerGoal = new PIDController(2.0f,0.0f,1.0f, (float) (Math.PI / 180), 0);
+		
+		
+		this.pidWings = new PIDController(1.0f,0.0f,5.0f,(float) Math.toRadians(1),0);
+        this.pidRoll = new PIDController(5.0f,0.0f,10.0f,(float) Math.toRadians(1),0);
+
+		
 		//Initialize AP with configfile
+		
+		
 		
 		//Initialize PIDController for Thrust
 		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
@@ -528,7 +538,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			setRoll(inputAP.getRoll());
 			setCurrentOrientation();
 			
-			newHorStabInclination += pidHorGoal.calculateChange(inputAP.getPitch() + getVerAngle(), dt);
+			newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() + getVerAngle(), dt);
 			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
 			else if(newHorStabInclination < - Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
 
@@ -539,9 +549,33 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 //				newHorStabInclination = -maxHorStab;
 //			}
 			
-			newVerStabInclination += pidVerGoal.calculateChange(inputAP.getHeading() - getHorAngle(), dt);
-			if(newVerStabInclination > Math.PI/6) newVerStabInclination = (float) (Math.PI/6);
-			else if(newVerStabInclination < - Math.PI/6) newVerStabInclination = (float) -(Math.PI/6);
+//			newVerStabInclination += pidVerGoal.calculateChange(inputAP.getHeading() - getHorAngle(), dt);
+//			if(newVerStabInclination > Math.PI/6) newVerStabInclination = (float) (Math.PI/6);
+//			else if(newVerStabInclination < - Math.PI/6) newVerStabInclination = (float) -(Math.PI/6);
+
+			//ROLL PID
+			float changeWing = this.pidWings.calculateChange(inputAP.getHeading() - getHorAngle(), dt);
+				
+			this.newLeftWingInclination += changeWing;
+			if(this.newLeftWingInclination > Math.toRadians(20)) this.newLeftWingInclination = (float) Math.toRadians(20);
+			if(this.newLeftWingInclination < 0) this.newLeftWingInclination = 0;
+				
+			this.newRightWingInclination -= changeWing;
+			if(this.newRightWingInclination > Math.toRadians(20)) this.newRightWingInclination = (float) Math.toRadians(20);
+			if(this.newRightWingInclination < 0) this.newRightWingInclination = 0;
+
+			//Negatieve Roll (LeftWingInclination > RightWingInclination) -> NegatieveChangeWingRoll
+			if(Math.abs(this.inputAP.getRoll()) > Math.toRadians(10)){
+				float changeWingRoll = this.pidRoll.calculateChange(this.inputAP.getRoll(),dt);
+				//System.out.println("Roll | ChangeWingRoll : " + this.inputAP.getRoll() + " | " + changeWingRoll);
+				this.newLeftWingInclination += changeWingRoll;
+				if(this.newLeftWingInclination > Math.toRadians(20)) this.newLeftWingInclination = (float) Math.toRadians(20);
+				if(this.newLeftWingInclination < 0) this.newLeftWingInclination = 0;
+				
+				this.newRightWingInclination -= changeWingRoll;
+				if(this.newRightWingInclination > Math.toRadians(20)) this.newRightWingInclination = (float) Math.toRadians(20);
+				if(this.newRightWingInclination < 0) this.newRightWingInclination = 0;
+			}
 			
 			if (cubePos == stubCube || !lockedOnTarget) {
 				cubePositions = cubeLocator.getCoordinatesOfCube();
@@ -578,6 +612,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			if(getEuclidDist(this.currentPosition,cubePos) <= 4){
 				this.cubePos = stubCube.translate(0, 0, -40);
 				lockedOnTarget = false;
+				this.pidHorStab.reset();
+	            this.pidWings.reset();
 			}
 			
 			//THRUST FORCE
