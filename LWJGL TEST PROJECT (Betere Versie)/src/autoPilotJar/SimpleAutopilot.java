@@ -549,22 +549,22 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 //				newHorStabInclination = -maxHorStab;
 //			}
 			
-//			newVerStabInclination += pidVerGoal.calculateChange(inputAP.getHeading() - getHorAngle(), dt);
-//			if(newVerStabInclination > Math.PI/6) newVerStabInclination = (float) (Math.PI/6);
-//			else if(newVerStabInclination < - Math.PI/6) newVerStabInclination = (float) -(Math.PI/6);
+			newVerStabInclination += pidVerGoal.calculateChange(inputAP.getHeading() - getHorAngle(), dt);
+			if(newVerStabInclination > Math.PI/6) newVerStabInclination = (float) (Math.PI/6);
+			else if(newVerStabInclination < - Math.PI/6) newVerStabInclination = (float) -(Math.PI/6);
 
-			//ROLL PID
-			float changeWing = this.pidWings.calculateChange(inputAP.getHeading() - getHorAngle(), dt);
-				
-			this.newLeftWingInclination += changeWing;
-			if(this.newLeftWingInclination > Math.toRadians(20)) this.newLeftWingInclination = (float) Math.toRadians(20);
-			if(this.newLeftWingInclination < 0) this.newLeftWingInclination = 0;
-				
-			this.newRightWingInclination -= changeWing;
-			if(this.newRightWingInclination > Math.toRadians(20)) this.newRightWingInclination = (float) Math.toRadians(20);
-			if(this.newRightWingInclination < 0) this.newRightWingInclination = 0;
-
-			//Negatieve Roll (LeftWingInclination > RightWingInclination) -> NegatieveChangeWingRoll
+//			//ROLL PID
+//			float changeWing = this.pidWings.calculateChange(inputAP.getHeading() - getHorAngle(), dt);
+//				
+//			this.newLeftWingInclination += changeWing;
+//			if(this.newLeftWingInclination > Math.toRadians(20)) this.newLeftWingInclination = (float) Math.toRadians(20);
+//			if(this.newLeftWingInclination < 0) this.newLeftWingInclination = 0;
+//				
+//			this.newRightWingInclination -= changeWing;
+//			if(this.newRightWingInclination > Math.toRadians(20)) this.newRightWingInclination = (float) Math.toRadians(20);
+//			if(this.newRightWingInclination < 0) this.newRightWingInclination = 0;
+//
+//			//Negatieve Roll (LeftWingInclination > RightWingInclination) -> NegatieveChangeWingRoll
 //			if(Math.abs(this.inputAP.getRoll()) > Math.toRadians(10)){
 //				float changeWingRoll = this.pidRoll.calculateChange(this.inputAP.getRoll(),dt);
 //				//System.out.println("Roll | ChangeWingRoll : " + this.inputAP.getRoll() + " | " + changeWingRoll);

@@ -455,7 +455,7 @@ public class MainGameLoop {
 						c = new Cube(0, 1, 0);
 						break;
 					case 2:
-						c = new Cube(0, 0, 1);
+						c = new Cube(1, 0, 1);
 						break;
 					case 3:
 						c = new Cube(1, 1, 0);
