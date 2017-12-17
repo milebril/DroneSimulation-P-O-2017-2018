@@ -41,9 +41,9 @@ public float calculateChange(float current, float dt){
 	this.prevError = currentError;
 	}
 	
-	System.out.println("P :" + P);
-	System.out.println("I :" + I);
-	System.out.println("D :" + D);
+//	System.out.println("P :" + P);
+//	System.out.println("I :" + I);
+//	System.out.println("D :" + D);
 	
 	float factor = P + I + D;
 	return factor * this.changeFactor;

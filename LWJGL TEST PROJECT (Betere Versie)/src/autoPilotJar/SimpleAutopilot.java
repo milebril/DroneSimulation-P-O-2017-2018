@@ -43,7 +43,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	private PIDController pidHorStab;
 	private PIDController pidVerStab;
 	private PIDController pidWings;
-	private PIDController pidRoll;
+	private PIDController pidRollPos;
+	private PIDController pidRollNeg;
 	
 	/* Variables to send back to drone	 
 	 * Initialy All inclinations are 0
@@ -65,8 +66,9 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		//this.pidVerStab = new PIDController(1.0f,0.75f,0.0f,(float)Math.toRadians(1),0);
 		this.pidVerStab = new PIDController(1.0f,10.0f,1.0f,(float) Math.toRadians(1),0);
 		
-		this.pidWings = new PIDController(1.0f,0.0f,5f,(float) Math.toRadians(1),0);
-		this.pidRoll = new PIDController(5.0f,0.0f,10.0f,(float) Math.toRadians(1),0);
+		this.pidWings = new PIDController(2.0f,0.0f,3.0f,(float) Math.toRadians(1),0);
+		this.pidRollPos = new PIDController(2.0f,0.5f,4.0f,(float) Math.toRadians(1),(float)Math.toRadians(10));
+		this.pidRollNeg = new PIDController(2.0f,0.5f,4.0f,(float) Math.toRadians(1),(float)Math.toRadians(-10));
 		
 		//Initialize AP with configfile
 		
@@ -182,7 +184,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			//System.out.println("ChangeFactor als kubus links: " + this.pidWings.calculateChange(inputAP.getHeading() - getHorAngle(), dt));
 			// ALS kubus links, is de changefactor negatief
 			
-			System.out.println("Wings PID: ");
+			//System.out.println("Wings PID: ");
 			
 			float changeWing = this.pidWings.calculateChange(inputAP.getHeading() - getHorAngle(), dt);
 			
@@ -194,12 +196,24 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			if(this.newRightWingInclination > Math.toRadians(20)) this.newRightWingInclination = (float) Math.toRadians(20);
 			if(this.newRightWingInclination < 0) this.newRightWingInclination = 0;
 			
-			System.out.println("Roll PID: ");
+			//System.out.println("Roll PID: ");
 			
 			//Negatieve Roll (LeftWingInclination > RightWingInclination) -> NegatieveChangeWingRoll
-			if(Math.abs(this.inputAP.getRoll()) > Math.toRadians(10)){
-				float changeWingRoll = this.pidRoll.calculateChange(this.inputAP.getRoll(),dt);
-				//System.out.println("Roll | ChangeWingRoll : " + this.inputAP.getRoll() + " | " + changeWingRoll);
+			if(this.inputAP.getRoll() > Math.toRadians(10)){
+				float changeWingRoll = this.pidRollPos.calculateChange(this.inputAP.getRoll(),dt);
+				System.out.println("Roll (Pos) | ChangeWingRoll : " + this.inputAP.getRoll() + " | " + changeWingRoll);
+				this.newLeftWingInclination += changeWingRoll;
+				if(this.newLeftWingInclination > Math.toRadians(20)) this.newLeftWingInclination = (float) Math.toRadians(20);
+				if(this.newLeftWingInclination < 0) this.newLeftWingInclination = 0;
+				
+				this.newRightWingInclination -= changeWingRoll;
+				if(this.newRightWingInclination > Math.toRadians(20)) this.newRightWingInclination = (float) Math.toRadians(20);
+				if(this.newRightWingInclination < 0) this.newRightWingInclination = 0;
+			}
+			
+			if(this.inputAP.getRoll() < Math.toRadians(-10)){
+				float changeWingRoll = this.pidRollNeg.calculateChange(this.inputAP.getRoll(),dt);
+				System.out.println("Roll (Neg) | ChangeWingRoll : " + this.inputAP.getRoll() + " | " + changeWingRoll);
 				this.newLeftWingInclination += changeWingRoll;
 				if(this.newLeftWingInclination > Math.toRadians(20)) this.newLeftWingInclination = (float) Math.toRadians(20);
 				if(this.newLeftWingInclination < 0) this.newLeftWingInclination = 0;
@@ -210,7 +224,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			}
 			
 			
-			System.out.println("Horizontal stabiliser PID: ");
+			//System.out.println("Horizontal stabiliser PID: ");
 			
 			newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() + getVerAngle(), dt);
 			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
@@ -225,7 +239,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 				this.cubePos = cubePositions.remove(0);
 				this.pidHorStab.reset();
 				this.pidVerStab.reset();
-				this.pidRoll.reset();
+				this.pidRollPos.reset();
+				this.pidRollNeg.reset();
 				this.pidWings.reset();
 			}
 			this.newThrust = this.configAP.getMaxThrust();
