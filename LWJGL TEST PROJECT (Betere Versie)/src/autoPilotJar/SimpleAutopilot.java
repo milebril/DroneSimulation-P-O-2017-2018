@@ -42,6 +42,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	
 	private PIDController pidHorStab;
 	private PIDController pidVerStab;
+	private PIDController pidWings;
+	private PIDController pidRoll;
 	
 	/* Variables to send back to drone	 
 	 * Initialy All inclinations are 0
@@ -61,12 +63,25 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
 		this.pidHorStab = new PIDController(1.0f,0.0f,0.5f,(float)Math.toRadians(1),0);
 		//this.pidVerStab = new PIDController(1.0f,0.75f,0.0f,(float)Math.toRadians(1),0);
-		this.pidVerStab = new PIDController(1.0f,10.0f,1.0f,(float)Math.toRadians(1),0);
+		this.pidVerStab = new PIDController(1.0f,10.0f,1.0f,(float) Math.toRadians(1),0);
+		
+		this.pidWings = new PIDController(1.0f,0.0f,5f,(float) Math.toRadians(1),0);
+		this.pidRoll = new PIDController(5.0f,0.0f,10.0f,(float) Math.toRadians(1),0);
+		
 		//Initialize AP with configfile
 		
+//		5 0 -40
+//		0 0 -80
+//		-2 0 -120
+//		-3 0 -160
+//		2 0 -200 -> VerStab kan dit
 		
 		//ADD CUBES TO LIST
-//		cubePositions.add(new Vector3f(0,0, -200));
+		cubePositions.add(new Vector3f(5,0,-40));
+		cubePositions.add(new Vector3f(0,0,-80));
+		cubePositions.add(new Vector3f(-2,0,-120));
+		cubePositions.add(new Vector3f(-3,0,-160));
+		cubePositions.add(new Vector3f(2,0,-200));
 //		cubePositions.add(new Vector3f(0,0,-80));
 //		cubePositions.add(new Vector3f(-2,0,-120));
 //		cubePositions.add(new Vector3f(0,0,-160));
@@ -75,12 +90,12 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 //		cubePositions.add(new Vector3f(-2.5f,0,-60));
 //		cubePositions.add(new Vector3f(-5,0,-40));
 		
-		//TURNING DEMO
-		cubePositions.add(new Vector3f(5,0, -40));
-		cubePositions.add(new Vector3f(0,0, -80));
-		cubePositions.add(new Vector3f(-2,0, -120));
-		cubePositions.add(new Vector3f(-3,0, -160));
-		cubePositions.add(new Vector3f(5,0, -200));
+		//TURNING DEMO -> verticalStabiliser
+//		cubePositions.add(new Vector3f(5,0, -40));
+//		cubePositions.add(new Vector3f(0,0, -80));
+//		cubePositions.add(new Vector3f(-2,0, -120));
+//		cubePositions.add(new Vector3f(-3,0, -160));
+//		cubePositions.add(new Vector3f(5,0, -200));
 		
 		//WORKING DEMO UP/DOWN
 //		cubePositions.add(new Vector3f(0,-10,-40));
@@ -164,20 +179,54 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			prevElapsedTime = inputs.getElapsedTime();
 			this.prevPosition = new Vector3f(currentPosition.x, currentPosition.y, currentPosition.z);
 			
+			//System.out.println("ChangeFactor als kubus links: " + this.pidWings.calculateChange(inputAP.getHeading() - getHorAngle(), dt));
+			// ALS kubus links, is de changefactor negatief
+			
+			System.out.println("Wings PID: ");
+			
+			float changeWing = this.pidWings.calculateChange(inputAP.getHeading() - getHorAngle(), dt);
+			
+			this.newLeftWingInclination += changeWing;
+			if(this.newLeftWingInclination > Math.toRadians(20)) this.newLeftWingInclination = (float) Math.toRadians(20);
+			if(this.newLeftWingInclination < 0) this.newLeftWingInclination = 0;
+			
+			this.newRightWingInclination -= changeWing;
+			if(this.newRightWingInclination > Math.toRadians(20)) this.newRightWingInclination = (float) Math.toRadians(20);
+			if(this.newRightWingInclination < 0) this.newRightWingInclination = 0;
+			
+			System.out.println("Roll PID: ");
+			
+			//Negatieve Roll (LeftWingInclination > RightWingInclination) -> NegatieveChangeWingRoll
+			if(Math.abs(this.inputAP.getRoll()) > Math.toRadians(10)){
+				float changeWingRoll = this.pidRoll.calculateChange(this.inputAP.getRoll(),dt);
+				//System.out.println("Roll | ChangeWingRoll : " + this.inputAP.getRoll() + " | " + changeWingRoll);
+				this.newLeftWingInclination += changeWingRoll;
+				if(this.newLeftWingInclination > Math.toRadians(20)) this.newLeftWingInclination = (float) Math.toRadians(20);
+				if(this.newLeftWingInclination < 0) this.newLeftWingInclination = 0;
+				
+				this.newRightWingInclination -= changeWingRoll;
+				if(this.newRightWingInclination > Math.toRadians(20)) this.newRightWingInclination = (float) Math.toRadians(20);
+				if(this.newRightWingInclination < 0) this.newRightWingInclination = 0;
+			}
+			
+			
+			System.out.println("Horizontal stabiliser PID: ");
 			
 			newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() + getVerAngle(), dt);
 			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
 			else if(newHorStabInclination < - Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
-
-			newVerStabInclination += pidVerStab.calculateChange(inputAP.getHeading() - getHorAngle(), dt);
-			if(newVerStabInclination > Math.PI/6) newVerStabInclination = (float) (Math.PI/6);
-			else if(newVerStabInclination < - Math.PI/6) newVerStabInclination = (float) -(Math.PI/6);
+			
+//			newVerStabInclination += pidVerStab.calculateChange(inputAP.getHeading() - getHorAngle(), dt);
+//			if(newVerStabInclination > Math.PI/6) newVerStabInclination = (float) (Math.PI/6);
+//			else if(newVerStabInclination < - Math.PI/6) newVerStabInclination = (float) -(Math.PI/6);
 			
 			//CUBE REACHED
 			if(getEuclidDist(this.currentPosition,cubePos) <= 4 && !cubePositions.isEmpty()){
 				this.cubePos = cubePositions.remove(0);
 				this.pidHorStab.reset();
 				this.pidVerStab.reset();
+				this.pidRoll.reset();
+				this.pidWings.reset();
 			}
 			this.newThrust = this.configAP.getMaxThrust();
 		      
