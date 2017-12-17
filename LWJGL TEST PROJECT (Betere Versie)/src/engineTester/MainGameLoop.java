@@ -171,7 +171,6 @@ public class MainGameLoop {
 		Cube c = new Cube(1, 0, 0);
 		RawModel redCubeModel = loader.loadToVAO(c.positions, c.colors, null);
 		
-		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,10,-40)), 1));
 //		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(0,0,-80)), 1));
 //		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(3,5,-120)), 1));
 //		entities.add(new Entity(redCubeModel, new Matrix4f().translate(new Vector3f(3,-5,-160)), 1));
@@ -437,6 +436,8 @@ public class MainGameLoop {
 		entities = new ArrayList<>();
 		scaledEntities = new ArrayList<>();
 		
+		int count = 0;
+		
 		try(BufferedReader br = new BufferedReader(new FileReader(file))) {
 		    for(String line; (line = br.readLine()) != null; ) {
 		        String[] s = line.split(" ");
@@ -444,7 +445,29 @@ public class MainGameLoop {
 		        float y = Float.parseFloat(s[1]);
 		        float z = Float.parseFloat(s[2]);
 		        
-		        Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
+		        Cube c = null;
+		        
+			    switch (count) {
+					case 0:
+						c = new Cube(1, 0, 0);
+						break;
+					case 1:
+						c = new Cube(0, 1, 0);
+						break;
+					case 2:
+						c = new Cube(0, 0, 1);
+						break;
+					case 3:
+						c = new Cube(1, 1, 0);
+						break;
+					case 4:
+						c = new Cube(0, 1, 1);
+						break;
+					default:
+						break;
+				}
+		        count++;
+		        
 				RawModel model = loader.loadToVAO(c.positions, c.colors, null);
 		        
 		        entities.add(new Entity(model, new Matrix4f().translate(new Vector3f(x, y, z)), 1));
@@ -467,7 +490,28 @@ public class MainGameLoop {
 		float prevY = 0.0f;
 		
 		 for (int i = 1; i <= 5; i++) {
-		      Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
+		      Cube c = null;
+		      
+		    switch (i) {
+				case 1:
+					c = new Cube(1, 0, 0);
+					break;
+				case 2:
+					c = new Cube(0, 1, 0);
+					break;
+				case 3:
+					c = new Cube(0, 0, 1);
+					break;
+				case 4:
+					c = new Cube(1, 1, 0);
+					break;
+				case 5:
+					c = new Cube(0, 1, 1);
+					break;
+				default:
+					break;
+			}
+		      
 		      RawModel model = loader.loadToVAO(c.positions, c.colors, null);
 		      float x = r.nextFloat()*20-10;
 		      x = 0;
