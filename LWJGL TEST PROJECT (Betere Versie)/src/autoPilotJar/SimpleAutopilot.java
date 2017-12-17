@@ -543,13 +543,15 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			if(newVerStabInclination > Math.PI/6) newVerStabInclination = (float) (Math.PI/6);
 			else if(newVerStabInclination < - Math.PI/6) newVerStabInclination = (float) -(Math.PI/6);
 			
-			cubePositions = cubeLocator.getCoordinatesOfCube();
-			cubePositions.sort(new Comparator<Vector3f>() {
-				@Override
-				public int compare(Vector3f o1, Vector3f o2) {
-					return -Float.compare(o1.z, o2.z);
-				}
-			});
+			if (cubePos == stubCube || !lockedOnTarget) {
+				cubePositions = cubeLocator.getCoordinatesOfCube();
+				cubePositions.sort(new Comparator<Vector3f>() {
+					@Override
+					public int compare(Vector3f o1, Vector3f o2) {
+						return -Float.compare(o1.z, o2.z);
+					}
+				});
+			}
 			
 			//Lock next target
 			if (cubePositions.size() > 0) {
@@ -560,14 +562,17 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 					System.out.println("Schatting: " + cubePos);
 				}
 				
-				if (!lockedOnTarget && getEuclidDist(this.currentPosition,cubePos) <= 7) {
+				if (!lockedOnTarget && Math.abs(this.currentPosition.z - cubePos.z) <= 7) {
 					lockedOnTarget = true;
 					cubePos = new Vector3f((cubePositions.get(0).x + cubePos.x) / 2f, 
 							(cubePositions.get(0).y + cubePos.y) / 2f, ((int) (cubePos.z / 40)) * 40 ) ;
-					//cubePos.z = ((int) (cubePos.z / 40)) * 40;
+//					cubePos = cubePositions.get(0);
+//					cubePos.z = ((int) (cubePos.z / 40)) * 40;
 					System.out.println("Lock: " + cubePos);
 				}
 			} 
+		
+			
 			
 			//CUBE REACHED
 			if(getEuclidDist(this.currentPosition,cubePos) <= 4){
@@ -588,7 +593,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	    	this.newThrust = configAP.getMaxThrust();  
 		  } 
 	      //REMOVE THIS AFTER TESTING:
-	      //this.newThrust = configAP.getMaxThrust();
+	      this.newThrust = configAP.getMaxThrust();
 	      //SAVE DATA
 	      this.prevPosition = new Vector3f(currentPosition.x, currentPosition.y, currentPosition.z); 
 		}

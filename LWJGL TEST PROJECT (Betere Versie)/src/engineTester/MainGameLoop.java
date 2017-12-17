@@ -470,14 +470,14 @@ public class MainGameLoop {
 		      Cube c = new Cube(r.nextFloat(), r.nextFloat(), r.nextFloat());
 		      RawModel model = loader.loadToVAO(c.positions, c.colors, null);
 		      float x = r.nextFloat()*20-10;
-		      x = 0;
+		      //x = 0;
 		      float y = ((float) r.nextInt(1000) / 500 - 1)*10;
 		      float z = i*-40;
 		      Vector3f position = new Vector3f(x,y,z);
 		      
 		      while(Math.sqrt(Math.pow(x - prevX, 2) + Math.pow(y - prevY, 2)) > 10) {
 		    	  x = r.nextFloat()*20-10;
-			      x = 0;
+			      //x = 0;
 			      y = ((float) r.nextInt(1000) / 500 - 1)*10;
 		      }
 		      

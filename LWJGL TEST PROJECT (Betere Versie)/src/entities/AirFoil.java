@@ -1,6 +1,9 @@
 package entities;
 
+import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
+
+import renderEngine.DisplayManager;
 
 /**
  * all airfoils have a neutral attack vector oriented along (O,0,-1) expressed in the Drone Frame
@@ -156,7 +159,12 @@ public class AirFoil {
 		//System.out.println("b: " + b); // x
 		
 //		float aoa = this.calculateAOA(projectedAirspeedVectorD, normalD, attackVectorD);
-		float aoa = (float) - Math.atan2(a, b);	
+		float aoa = (float) - Math.atan2(a, b);
+		
+		if (aoa > drone.getMaxAOA()) {
+			System.out.println(aoa);
+			System.exit(0);
+		}
 
 //		System.out.println("Airfoil calculateAirfliff AOA: " + aoa);
 
