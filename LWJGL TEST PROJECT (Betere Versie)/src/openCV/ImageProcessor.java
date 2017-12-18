@@ -629,9 +629,9 @@ public class ImageProcessor {
 					imaginaryCube.translate(0, 0, (1 - ratio)*0.1);
 				}
 				
-				ListWithCoordinatesOfCubes.add(new Vector3f ((float)(int) (imaginaryCube.getPosition()[0]) + autopilot.getInput().getX(), 
-						(float)(int) (imaginaryCube.getPosition()[1]) + autopilot.getInput().getY(), 
-						(float)(int) (imaginaryCube.getPosition()[2]) + autopilot.getInput().getZ()));
+				ListWithCoordinatesOfCubes.add(new Vector3f ((float) (imaginaryCube.getPosition()[0]) + autopilot.getInput().getX(), 
+						(float) (imaginaryCube.getPosition()[1]) + autopilot.getInput().getY(), 
+						(float) (imaginaryCube.getPosition()[2]) + autopilot.getInput().getZ()));
 			}
 				
 			return ListWithCoordinatesOfCubes;
