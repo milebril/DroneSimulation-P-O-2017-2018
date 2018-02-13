@@ -37,7 +37,10 @@ public class Entity {
 	}
 
 	public void translate(Vector3f vector) {
-		this.pose.translate(vector);
+		//this.pose.translate(vector);
+		this.pose.m30 += vector.x;
+		this.pose.m31 += vector.y;
+		this.pose.m32 += vector.z;
 	}
 
 //	public void increasePosition(Vector3f increment) {

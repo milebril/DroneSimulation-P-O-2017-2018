@@ -241,6 +241,13 @@ public class MainGameLoop {
 				// aanpassen op basis daarvan 
 				PhysicsEngine.applyPhysics(drone, dt);
 				
+//				try {
+//					Thread.sleep(1000);
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+				
 				//Autopilot stuff
 				AutopilotInputs inputs = drone.getAutoPilotInputs();
 				AutopilotOutputs outputs = autopilot.timePassed(inputs);
