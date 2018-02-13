@@ -47,14 +47,14 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		
 		// Left wing, Right wing, Horizontal stabilizer, Vertical stabilizer
 		// vertical rotation axis: (0,1,0) (= y-axis) // horizontal rotation axis: (1,0,0) (= x-axis)
-		this.airFoils[0] = new AirFoil(this, new Vector3f(-cfg.getWingX(), 0, 0), cfg.getWingMass(), 
-														cfg.getWingLiftSlope(), new Vector3f(1,0,0));
-		this.airFoils[1] = new AirFoil(this, new Vector3f(cfg.getWingX(), 0, 0), cfg.getWingMass(), 
-														cfg.getWingLiftSlope(), new Vector3f(1,0,0));
-		this.airFoils[2] = new AirFoil(this, new Vector3f(0, 0, cfg.getTailSize()), 0, 
-														cfg.getHorStabLiftSlope(), new Vector3f(1,0,0));
-		this.airFoils[3] = new AirFoil(this, new Vector3f(0, 0, cfg.getTailSize()), 0, 
-														cfg.getVerStabLiftSlope(), new Vector3f(0,1,0));
+		this.airFoils[0] = new AirFoil(this, new Vector3f(1,0,0), new Vector3f(-cfg.getWingX(), 0, 0), cfg.getWingMass(), 
+														cfg.getWingLiftSlope());
+		this.airFoils[1] = new AirFoil(this, new Vector3f(1,0,0), new Vector3f(cfg.getWingX(), 0, 0), cfg.getWingMass(), 
+														cfg.getWingLiftSlope());
+		this.airFoils[2] = new AirFoil(this, new Vector3f(1,0,0), new Vector3f(0, 0, cfg.getTailSize()), 0, 
+														cfg.getHorStabLiftSlope());
+		this.airFoils[3] = new AirFoil(this, new Vector3f(0,1,0), new Vector3f(0, 0, cfg.getTailSize()), 0, 
+														cfg.getVerStabLiftSlope());
 		
 		//set configs
 		this.maxThrust = cfg.getMaxThrust();
