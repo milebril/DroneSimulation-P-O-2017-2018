@@ -184,4 +184,10 @@ public class GUIText {
 		return textString;
 	}
 
+	public void setString(String speed) {
+		this.textString = speed;
+	}
+	
+	
+
 }

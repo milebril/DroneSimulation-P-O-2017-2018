@@ -2,487 +2,441 @@ package entities;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.Math;
 
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
+import org.lwjgl.util.vector.Vector4f;
 
-import autoPilotJar.AutoPilot;
-import autoPilotJar.AutopilotInputs;
 import autoPilotJar.AutopilotInputsWriter;
-import autoPilotJar.AutopilotOutputs;
 import autoPilotJar.AutopilotOutputsReader;
-import autopilot.AutopilotConfig;
+import autopilot.AutopilotConfigReader;
+import interfaces.AutopilotConfig;
+import interfaces.AutopilotInputs;
+import interfaces.AutopilotOutputs;
 import models.RawModel;
-import openCV.RedCubeLocator;
+import physicsEngine.approximationMethods.EulerPrediction;
+import physicsEngine.approximationMethods.PredictionMethod;
 import renderEngine.DisplayManager;
 import toolbox.ImageConverter;
 
+/**
+ * Vectornames gevolgd door een D staan in het drone assenstelsel, gevolgd door een W staan in het wereld
+ * uitgedrukt
+ * alle vectoren bestaan uit 3 elementen omdat het crossproduct voor 4 niet gedefinieerd is in de library
+ * @author Jakob
+ *
+ */
 public class Drone extends Entity /* implements AutopilotConfig */ {
 
-	private Wing leftWing;
-	private Wing rightWing;
+	private final PredictionMethod predictionMethod;
 	
-	private Stabilizer horizontalStabilizer;
-	private Stabilizer verticalStabilizer;
 	
-	private Camera camera;
 	
-	private float engineMass;
-	private Vector3f enginePosition;
-	private float thrustForce;
 	
-	private float tailMass;
-	private float tailSize;
-	
-	private float maxThrust;
-	private float maxAOA;
-	
-	private Vector3f speedVector;
-	private Vector3f speedChangeVector;
-	private Vector3f speedVectorOld;
-	private Vector3f headingVector;
+	public Drone(RawModel model, Matrix4f pose, float scale,
+				AutopilotConfig cfg, PredictionMethod predictionMethod) {
+		super(model, pose, scale);
+		
+		this.linearVelocityW = new Vector3f(0.0f,0.0f, -15.0f);
 
-	private Vector3f rotationSpeedVector;
-	private Vector3f rotationAcceleration;
-	
-	private static final float GRAVITY = -9.81f;
-	private static final float SPEED_SCALE = 10.0f;
-	
-	
-	/*
-	 * DEBUG VARS
-	 */
-	private boolean flying = false;
-	
-	public Drone(RawModel model, Vector3f position, float rotX, float rotY, float rotZ, float scale,
-			AutopilotConfig cfg) {
-
-		super(model, position, rotX, rotY, rotZ, scale);
+		this.angularVelocityW = new Vector3f(0f, 0f, 0f);
 		
-		this.speedVector = new Vector3f(0.0f,0.0f, -15.0f);
-		this.speedChangeVector = new Vector3f(0.0f,0.0f,0.0f);
-		this.speedVectorOld = new Vector3f(0.0f,0.0f,0.0f);
-		this.headingVector = new Vector3f(0.0f,0.0f,-1.0f);
 		
-		this.rotationSpeedVector = new Vector3f(0f, 0f, 0f);
-		this.rotationAcceleration = new Vector3f(0f, 0f, 0f);
-		//Vector3f orig = new Vector3f(10,10,10);
+		// Left wing, Right wing, Horizontal stabilizer, Vertical stabilizer
+		// vertical rotation axis: (0,1,0) (= y-axis) // horizontal rotation axis: (1,0,0) (= x-axis)
+		this.airFoils[0] = new AirFoil(this, new Vector3f(-cfg.getWingX(), 0, 0), cfg.getWingMass(), 
+														cfg.getWingLiftSlope(), new Vector3f(1,0,0));
+		this.airFoils[1] = new AirFoil(this, new Vector3f(cfg.getWingX(), 0, 0), cfg.getWingMass(), 
+														cfg.getWingLiftSlope(), new Vector3f(1,0,0));
+		this.airFoils[2] = new AirFoil(this, new Vector3f(0, 0, cfg.getTailSize()), 0, 
+														cfg.getHorStabLiftSlope(), new Vector3f(1,0,0));
+		this.airFoils[3] = new AirFoil(this, new Vector3f(0, 0, cfg.getTailSize()), 0, 
+														cfg.getVerStabLiftSlope(), new Vector3f(0,1,0));
 		
-		//TODO updater for inclination (in wing and stab)
-		//TODO updater for speedVector
-		
-		//Read from config:
-		this.leftWing  = new Wing(new Vector3f(-cfg.getWingX(),0,0), cfg.getWingMass(), cfg.getWingLiftSlope(), new Vector3f(1,0,0));  //horizontal rotation Axis = (1,0,0)
-		this.rightWing = new Wing(new Vector3f(cfg.getWingX(),0,0), cfg.getWingMass(), cfg.getWingLiftSlope(), new Vector3f(1,0,0));   //horizontal rotation Axis = (1,0,0)
-		
-		this.horizontalStabilizer = new Stabilizer(new Vector3f(0,0,cfg.getTailSize()), cfg.getTailMass(),cfg.getHorStabLiftSlope(),new Vector3f(1,0,0)); //horizontal rotation Axis = (1,0,0)
-		this.verticalStabilizer   = new Stabilizer(new Vector3f(0,0,cfg.getTailSize()), cfg.getTailMass(),cfg.getVerStabLiftSlope(),new Vector3f(0,1,0)); //vertical rotation Axis = (0,1,0)
-		
-		horizontalStabilizer.setInclination(0);
-		verticalStabilizer.setInclination(0);
-		
+		//set configs
 		this.maxThrust = cfg.getMaxThrust();
 		this.maxAOA = cfg.getMaxAOA();
-		this.setEngineMass(cfg.getEngineMass());
-		this.enginePosition = calculateEnginePosition();
+		this.gravity = cfg.getGravity();		
+		
+		// tail properties
 		this.setTailMass(cfg.getTailMass());
 		this.setTailSize(cfg.getTailSize());
+		this.tailMassPosition = new Vector3f(0, 0, getTailSize());
 		
-		this.thrustForce = 1000;
+		// engine properties
+		this.setEngineMass(cfg.getEngineMass());
+		float z = (-this.getTailMass() * this.getTailSize()) / this.getEngineMass(); // so the drones center of mass is at (0, 0, 0)
+		this.enginePosition = new Vector3f(0,0,z);
+
+		// calculate and save the drones inertia matrix
+		this.setInertiaMatrix(this.calculateInertiaMatrix());
 		
 		camera = new Camera(cfg.getNbColumns(), cfg.getNbRows());
 		camera.increasePosition(this.getPosition().x, this.getPosition().y, this.getPosition().z);
+		
+		this.predictionMethod = predictionMethod;
 	}
 	
-	//Calculates engine position
-	private Vector3f calculateEnginePosition(){
-		float z = (-this.getTailMass()*this.getTailSize()) / this.getEngineMass();
-		return new Vector3f(0,0,z);
+	
+	public Drone(Matrix4f pose, AutopilotConfig autopilotConfig, Vector3f velocity, Vector3f rotVel) {
+		this(null, pose, 1f, autopilotConfig, new EulerPrediction(0.01f));
+		this.setLinearVelocity(velocity);
+		this.setAngularVelocity(rotVel);
 	}
 
-	//Calculates left wing liftforce
-	private Vector3f calculateLeftWingLift(){
-		//TODO: normal wordt gedeclareerd als een 0 vector omdat Vector3f.cross iets moet opslaan in vector.
-		//alternatief is mss vector declareren in Vector3f.cross?
-		Vector3f normal = new Vector3f(0,0,0);
-		
-		// The left wing's attack vector is (0, sin(leftWingInclination), -cos(leftWingInclination)).
-		Vector3f attackVector = new Vector3f(0,(float)Math.sin(this.getLeftWing().getInclination()), (float) -Math.cos(this.getLeftWing().getInclination()));
-		Vector3f.cross(this.getLeftWing().getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
-
-		float liftSlope = this.getLeftWing().getLiftSlope();
-		
-		//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
-		
-		float AoA = (float) - Math.atan2(Vector3f.dot(this.getSpeedVector(),normal), Vector3f.dot(this.getSpeedVector(),attackVector)); 
-		float speed = (float) Math.pow(this.getSpeed(),2);
-		Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*speed),
-									   (float)(normal.y*liftSlope*AoA*speed),
-									   (float)(normal.z*liftSlope*AoA*speed));
-		
-		return result;
-	}
+	// AIRFOILS
 	
-	//Calculates right wing liftforce
-	private Vector3f calculateRightWingLift(){
-		Vector3f normal = new Vector3f(0,0,0);
-		
-		// The right wing's attack vector is (0, sin(rightWingInclination), -cos(rightWingInclination)).
-		Vector3f attackVector = new Vector3f(0,(float)Math.sin(this.getRightWing().getInclination()), (float) -Math.cos(this.getRightWing().getInclination()));
-		Vector3f.cross(this.getRightWing().getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
-		
-		float liftSlope = this.getRightWing().getLiftSlope();
-		
-		//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
-		float AoA = (float) - Math.atan2(Vector3f.dot(this.getSpeedVector(),normal), Vector3f.dot(this.getSpeedVector(),attackVector)); 
-		float speed = (float) Math.pow(this.getSpeed(),2);
-		
-		Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*speed),
-									   (float)(normal.y*liftSlope*AoA*speed),
-									   (float)(normal.z*liftSlope*AoA*speed));
-		return result;
-	}
-	
-	//Calculates horizontal stabilizer liftforce
-	private Vector3f calculateHorStabLift(){
-		Vector3f normal = new Vector3f(0,0,0);
-		
-		// The horizontal stabilizer's attack vector is (0, sin(horStabInclination), -cos(horStabInclination)).
-		Vector3f attackVector = new Vector3f(0,(float)Math.sin(this.getHorizontalStabilizer().getInclination()), (float) -Math.cos(this.horizontalStabilizer.getInclination()));
-		
-		Vector3f.cross(this.getHorizontalStabilizer().getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
-		float liftSlope = this.getHorizontalStabilizer().getLiftSlope();
-		
-		//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
-		float AoA = (float) -Math.atan2(Vector3f.dot(this.getSpeedVector(),normal), Vector3f.dot(this.getSpeedVector(),attackVector)); 
-		float speed = (float) Math.pow(this.getSpeed(),2);
-		
-		Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*speed),
-									   (float)(normal.y*liftSlope*AoA*speed),
-									   (float)(normal.z*liftSlope*AoA*speed));
-		
-		return result;
-	}
-	
-	//Calculates vertical stabilizer liftforce
-	private Vector3f calculateVerStabLift(){
-		Vector3f normal = new Vector3f(0,0,0);
-			
-		// The vertical stabilizer's attack vector is (-sin(verStabInclination), 0, -cos(verStabInclination)).
-		Vector3f attackVector = new Vector3f((float) -Math.sin(this.getVerticalStabilizer().getInclination()), 0, (float) -Math.cos(this.verticalStabilizer.getInclination()));
-		
-		Vector3f.cross(this.getVerticalStabilizer().getRotAxis(), attackVector, normal); // normal = rotationAxis x attackVector
-		float liftSlope = this.getVerticalStabilizer().getLiftSlope();
-			
-		//angle of attack = -atan2(speedVector*normal ; speedVector*attackVector)
-		float AoA = (float) - Math.atan2(Vector3f.dot(this.getSpeedVector(),normal), Vector3f.dot(this.getSpeedVector(),attackVector)); 
-		float speed = (float) Math.pow(this.getSpeed(),2);
-		Vector3f result = new Vector3f((float)(normal.x*liftSlope*AoA*speed),
-									   (float)(normal.y*liftSlope*AoA*speed),
-									   (float)(normal.z*liftSlope*AoA*speed));
-		return result;
-	}	
-	
-	private Vector3f calculateVerStabTorque() {
-		Vector3f lift = calculateVerStabLift();
-		Vector3f torque = new Vector3f(0,0,0);
-		Vector3f.cross(getVerticalStabilizer().getCenterOfMass(), lift, torque);
-		return torque;
-	}
-	
-	public void increasePosition(float dt) {
-		float dx = dt * this.getSpeedVector().x;
-		float dy = dt * this.getSpeedVector().y;
-		float dz = dt * this.getSpeedVector().z;
-		
-		super.increasePosition(dx, dy, dz);
-
-		this.getCamera().increasePosition(dx, dy, dz);
-		this.getCamera().increaseRotation(this.getHeadingVector());
-		super.setRotation(0, -this.getCamera().getPitch(), 0);
-	}
-	
-	// wrm argument dt???????????????????????????????????????????????????????????????????????????????
-	public void sendToAutopilot(float dt) throws IOException {
-		DataOutputStream s = new DataOutputStream(new FileOutputStream("res/APInputs.cfg"));
-		
-		AutopilotInputs value = new AutopilotInputs() {
-			public byte[] getImage() { return ImageConverter.bufferedImageToByteArray(camera.takeSnapshot()); /* TODO !!!!*/}
-			
-			public float getX() { return getPosition().x; }
-			public float getY() { return getPosition().y; }
-			public float getZ() { return getPosition().z; }
-			
-			public float getHeading() { return getHeadingVector().x; }
-			public float getPitch() { return getHeadingVector().y; }
-			public float getRoll() { return getHeadingVector().z; }
-			
-			public float getElapsedTime() { return DisplayManager.getElapsedTime(); }
-		};
-		
-		AutopilotInputsWriter.write(s, value);
-		
-		s.close();
-	}
-	
-	//inputstream niet sluiten?
-	public void getFromAutopilot() throws IOException {
-		DataInputStream i = new DataInputStream(new FileInputStream("res/APOutputs.cfg"));
-		
-		AutopilotOutputs settings = AutopilotOutputsReader.read(i);
-		
-		setThrustForce(settings.getThrust());
-		
-		getLeftWing().setInclination(settings.getLeftWingInclination());
-		System.out.println("hoek: " + settings.getLeftWingInclination());
-		getRightWing().setInclination(settings.getRightWingInclination());
-		
-		getHorizontalStabilizer().setInclination(settings.getHorStabInclination());
-		getVerticalStabilizer().setInclination(settings.getVerStabInclination());
-	}
-	
-	public void applyForces(float dt) {
-		//Checks:
-//		if (this.getThrustForce() > this.getMaxThrust()) { //TODO: deze check is overbodig omdat de setter van Thrust deze check doet?
-//			this.setThrustForce(this.getMaxThrust());
-//		}
-		
-		//Gravity
-		//Check voor maximale valversnelling
-		if (Math.abs(this.getSpeedVector().y) < 200) {
-			this.getSpeedChangeVector().y += GRAVITY * dt; // v = v0 + a*t, a = F/m
-		}
-		
-		//Engine = Speed
-//		if (this.getSpeed() < 100)
-		
-		applyEngineForce(dt);		
-		applyLiftForces(dt);
-		applyTorqueForces(dt);
-		
-		System.out.println("headingVector: " + this.getHeadingVector());
-		/*
-		if (!flying) {
-			getLeftWing().setInclination(0);
-			getRightWing().setInclination(0);
-			getVerticalStabilizer().setInclination(0);
-		}
-		**/
-		
-		/*if (Math.abs(this.getHeadingVector().y) > 0.1 && !flying) {
-			if (this.getHeadingVector().y > 0) {
-				getLeftWing().setInclination(getLeftWing().getInclination() - 0.01f);
-				getRightWing().setInclination(getRightWing().getInclination() - 0.01f);
-			} else if (this.getHeadingVector().y < 0) {
-				getLeftWing().setInclination(getLeftWing().getInclination() + 0.01f);
-				getRightWing().setInclination(getRightWing().getInclination() + 0.01f);
-			} else {
-				//Do nothing
-			}
-		} 	*/	
-		
-//		flyMode();
-		
-		Vector3f.add(this.getSpeedVector(), this.getSpeedChangeVector(), this.getSpeedVector());
-		Vector3f.add(rotationSpeedVector, rotationAcceleration, rotationSpeedVector);
-		
-		deepCopySpeedVector();
-		this.setSpeedChangeVector(new Vector3f(0,0,0));
-		rotationAcceleration = new Vector3f(0,0,0);
-	
-		//setHeadingVector();
-		this.headingVector = rotate(rotationSpeedVector.y);
-		
-		getHeadingVector().normalise();
-		
-		updateTailPosition();
+	public PredictionMethod getPredictionMethod() {
+		return predictionMethod;
 	}
 
-	private void updateTailPosition() {
-		Vector3f centerOfMass = new Vector3f(0,0,0);
-		
-		centerOfMass.x = -headingVector.x * tailSize;
-		centerOfMass.y = -headingVector.y * tailSize;
-		centerOfMass.z = -headingVector.z * tailSize;
-		
-		getVerticalStabilizer().setCenterOfMass(centerOfMass);
-	}
 
-	private Vector3f rotate(float angles) {
-		Vector3f newH = new Vector3f(0,0,0);
-		float angle = (float) Math.toRadians(angles);
-		
-		Matrix3f matrix = new Matrix3f();
-		
-		matrix.m00 = (float) Math.cos(angle);
-		matrix.m11 = 1;
-		matrix.m22 = (float) Math.cos(angle);
-		matrix.m12 = (float) Math.sin(angle);
-		matrix.m21 = - (float) Math.sin(angle);
-		
-		newH.x = (float) (this.headingVector.x * Math.cos(angle) - this.headingVector.z * Math.sin(angle));
-		newH.y = this.headingVector.y;
-		newH.z = (float) (+this.headingVector.x * Math.sin(angle) + this.headingVector.z * Math.cos(angle));
-		
-		//Matrix3f.mul(matrix, getHeadingVector(), newH);
-		
-		return newH;
-	}
+	/**
+	 * The airFoils of the drone (in order [leftwing, rightwing, hor. stabilizer, vert. stabilizer])
+	 */
+	private AirFoil[] airFoils = new AirFoil[4];
 	
-	private void deepCopySpeedVector() {
-		//DeepCopy the vector!!!
-		this.speedVectorOld.x = this.speedVector.x;
-		this.speedVectorOld.y = this.speedVector.y;
-		this.speedVectorOld.z = this.speedVector.z;
-	}
-	
-	private void applyEngineForce(float dt) {
-		//v = v0 + a*t -> a = thrustForce / droneMass
-		//speedVectorNew = speedVectorOld + (thrustForce / droneMass)*dt
-		Vector3f engineVector = new Vector3f(this.getHeadingVector().x*(this.getThrustForce() / this.getDroneMass())*dt,
-											 this.getHeadingVector().y*(this.getThrustForce() / this.getDroneMass())*dt,
-											 this.getHeadingVector().z*(this.getThrustForce() / this.getDroneMass())*dt);
-		Vector3f.add(engineVector, this.getSpeedChangeVector(), this.getSpeedChangeVector());
-	}
-
-	private void applyLiftForces(float dt){
-		//Left Wing
-		Vector3f leftWingLiftForce = calculateLeftWingLift(); 			// = F
-		leftWingLiftForce.scale(1/getDroneMass() * dt); 			  			// = a = F/Mass
-		this.getSpeedChangeVector().y += leftWingLiftForce.y;
-		
-		//Right Wing
-		Vector3f rightWing = calculateRightWingLift(); 		 // = F
-		rightWing.scale(1/getDroneMass() * dt); 			  		 // = a = F/Mass
-		this.getSpeedChangeVector().y += rightWing.y;
-		
-//		Vector3f horStab= calculateHorStabLift();
-//		horStab.scale(1/getDroneMass() * dt);
-//		this.getSpeedChangeVector().y += horStab.y;
-		
-		Vector3f verStab= calculateVerStabLift();
-		verStab.scale(1/getDroneMass() * dt);
-		Vector3f.add(verStab, this.speedChangeVector, this.speedChangeVector);
-	}
-	
-	private void applyTorqueForces(float dt) {
-		Vector3f verStabTorque = null;
-		verStabTorque = calculateVerStabTorque();
-		verStabTorque.scale(1/getInertionY() * dt);
-		Vector3f.add(verStabTorque, rotationAcceleration, rotationAcceleration);
-		
-	}
-	
-	public void setRoll(float roll) {
-		this.getCamera().setRoll(roll);
-	}
-	
-	public void increaseCameraRoll(float roll) {
-		this.getCamera().increaseRoll(roll);
-	}
-
-	public Camera getCamera() {
-		return this.camera;
-	}
-	
-	public float getDroneMass() {
-		return this.getEngineMass() + this.tailMass + this.leftWing.getMass() + this.rightWing.getMass();
-	}
-	
-	public void setHeadingVector() {
-		if(this.speedVector.getX() == 0 && this.speedVector.getY() == 0 && this.speedVector.getZ() == 0)
-			return;
-		this.speedVector.normalise(this.headingVector);
-	}
-	
-	private Vector3f getHeadingVector() {
-		return this.headingVector;
+	/**
+	 * Returns an array of the airFoils of the drone.
+	 * (in order [leftwing, rightwing, hor. stabilizer, vert. stabilizer])
+	 * @return
+	 */
+	public AirFoil[] getAirFoils(){
+		return this.airFoils.clone();
 	}
 	
 	/**
-	 * functie die de snelheid van de drone berekent uit de speedVector
+	 * Returns the left wing of the Drone.
 	 */
-	public float getSpeed() {
-		return this.getSpeedVector().length(); 
-	}
-	
-	public void setSpeedVector(Vector3f speedVector) {
-		this.speedVector = speedVector;
+	public AirFoil getLeftWing(){
+		return this.airFoils[0];
 	}
 
-	public Vector3f getSpeedVector(){
-		return this.speedVector;
+	/**
+	 * Returns the right wing of the Drone.
+	 */
+	public AirFoil getRightWing(){
+		return this.airFoils[1];
+	}
+
+	/**
+	 * Returns the horizontal stabilizer of the Drone.
+	 */
+	public AirFoil getHorizStabilizer(){
+		return this.airFoils[2];
+	}
+
+	/**
+	 * Returns the vertical stabilizer of the Drone.
+	 */
+	public AirFoil getVertStabilizer(){
+		return this.airFoils[3];
 	}
 	
-	public void setSpeedChangeVector(Vector3f vector){
-		this.speedChangeVector = vector;
+	
+	// FORWARD VECTOR
+	
+	/**
+	 * The forward vector of the drone in world frame.
+	 */
+	private Vector3f forwardVectorW;
+	
+	/**
+	 * Returns the forward vector of the drone in world frame.
+	 */
+	public Vector3f getForwardVector() {
+		return this.transformToWorldFrame(new Vector3f(0, 0, -1));
 	}
 	
-	public Vector3f getSpeedChangeVector(){
-		return this.speedChangeVector;
+	
+	/** 
+	 * Returns the heading vector of the Drone in world frame.
+	 * The heading vector is a normalized version of the forward vector of the 
+	 * drone, projected onto the world xz-plane.
+	 */
+	private Vector3f getHeadingVector() {
+		Vector3f forwardVectorW = getForwardVector();
+		
+		// project the forward vector onto the xz-plane
+		Vector3f headingVector = new Vector3f(forwardVectorW.x, 0, forwardVectorW.z);
+		
+		// normalize the projected vector
+		headingVector.normalise();
+		
+		return headingVector;
 	}
 	
-	public void setEngineMass(float engineMass) {
+	
+	// LINEAR VELOCITY
+	
+	/**
+	 * The linear velocity of the drone in world frame.
+	 */
+	private Vector3f linearVelocityW;
+	
+	/**
+	 * Returns the linear velocity vector of the drone in world frame.
+	 */
+	public Vector3f getLinearVelocity(){
+		return new Vector3f(this.linearVelocityW.x, this.linearVelocityW.y, this.linearVelocityW.z);
+	}
+	
+	/**
+	 * Set the linear velocity vector of the drone.
+	 */
+	public void setLinearVelocity(Vector3f vector) {
+		this.linearVelocityW.set(vector.x, vector.y, vector.z);
+	}
+
+	/**
+	 * Returns the velocity of the drone.
+	 */
+	public float getAbsVelocity() {
+		return this.getLinearVelocity().length(); 
+	}
+	
+	// ANGULAR VELOCITY
+	
+	/**
+	 * The angular velocity of the drone in world frame.
+	 */
+	private Vector3f angularVelocityW;
+	
+	/**
+	 * Returns the angular velocity vector of the drone in world frame.
+	 */
+	public Vector3f getAngularVelocity() {
+		return new Vector3f(this.angularVelocityW.x, this.angularVelocityW.y, this.angularVelocityW.z);
+	}
+	
+	/**
+	 * Set the angular velocity vector of the drone.
+	 */
+	public void setAngularVelocity(Vector3f vector) {
+		this.angularVelocityW.set(vector.x, vector.y, vector.z);
+	}
+
+	// TAILSIZE
+	
+	/**
+	 * The size of the Drones tail.
+	 * (the mass of the tail and the stabilizers are located at the end of this tail)
+	 */
+	private float tailSize;
+	
+	/**
+	 * Returns the size of the Drones tail.
+	 */
+	public float getTailSize() {
+		return this.tailSize;
+	}
+	
+	/**
+	 * Set the size of the Drones tail.
+	 * @throws IllegalArgumentException if the given size is smaller than or equal to 0
+	 */
+	public void setTailSize(float tailSize) throws IllegalArgumentException {
+		if (tailSize <= 0) throw new IllegalArgumentException("TailSize must be larger than zero.");
+		this.tailSize = tailSize;
+	}
+	
+	
+	// TAILMASS
+	
+	/**
+	 * The mass of the Drones tail.
+	 */
+	private float tailMass;
+
+	/**
+	 * Returns the mass of the Drones tail.
+	 * @return
+	 */
+	public float getTailMass(){
+		return this.tailMass;
+	}
+	
+	/**
+	 * Set the mass of the Drones tail.
+	 * @throws IllegalArgumentException if the given mass is smaller than or equal to 0
+	 */
+	public void setTailMass(float tailMass) throws IllegalArgumentException {
+		if (tailMass <= 0) throw new IllegalArgumentException("TailMass must be larger than zero.");
+		this.tailMass = tailMass;
+	}
+		
+	
+	// TAILMASS POSITION
+	
+	/**
+	 * The position of the Drones tailmass (in drone frame)
+	 */
+	private final Vector3f tailMassPosition;
+	
+	/**
+	 * Returns the position of the Drones tailmass.
+	 */
+	public Vector3f getTailMassPosition() {
+		return new Vector3f(this.tailMassPosition.x, this.tailMassPosition.y, this.tailMassPosition.z);
+	}
+	
+	
+	// ENGINE POSITION
+	
+	/**
+	 * The Drones engine position (in drone frame)
+	 */
+	private final Vector3f enginePosition;
+	
+	/**
+	 * Returns the Drones engine position. (in drone frame)
+	 */
+	public Vector3f getEnginePosition() {
+		return new Vector3f(this.enginePosition.x, this.enginePosition.y, this.enginePosition.z);
+	}
+	
+	
+	
+	
+	// ENGINE MASS
+	
+	/**
+	 * The mass of the Drones engine.
+	 */
+	private float engineMass;
+	
+	/**
+	 * Returns the mass of the Drones engine.
+	 */
+	public float getEngineMass(){
+		return this.engineMass;
+	}
+	
+	/**
+	 * Set the mass of the Drones engine.
+	 * @throws IllegalArgumentException if the given mass is smaller than or equal to 0
+	 */
+	public void setEngineMass(float engineMass) throws IllegalArgumentException {
 		if(engineMass <= 0) throw new IllegalArgumentException("EngineMass must be larger than zero.");
 		this.engineMass = engineMass;
 	}
 	
 	
+	// DRONE MASS
 	
-	public float getEngineMass(){
-		return this.engineMass;
+	/**
+	 * Returns the total mass of the Drone.
+	 */
+	// mass of the drone
+	public float getMass() {
+		return getEngineMass() + getTailMass() + getLeftWing().getMass() + getRightWing().getMass();
 	}
 	
-	public Wing getRightWing(){
-		return this.rightWing;
+	
+	// GRAVITY
+	
+	/**
+	 * The gravity that is applied to the drone.
+	 */
+	private float gravity;
+	
+	/**
+	 * Returns the gravity that is applied to the drone.
+	 */
+	public float getGravity() {
+		return this.gravity;
 	}
 	
-	public Wing getLeftWing(){
-		return this.leftWing;
+	/**
+	 * Set the gravity that is applied to the drone.
+	 */
+	public void setGravity(float g) {
+		this.gravity = g;
+	}
+		
+	
+	// INERTIA MATRIX
+	
+	/**
+	 * The inertia matrix of the Drone (in drone frame)
+	 */
+	private Matrix3f inertiaMatrix;
+	
+	/**
+	 * Returns a copy of the Drones inertia matrix
+	 */
+	public Matrix3f getInertiaMatrix() {
+		Matrix3f result = new Matrix3f();
+		result.m00 = this.inertiaMatrix.m00;
+		result.m11 = this.inertiaMatrix.m11;
+		result.m22 = this.inertiaMatrix.m22;
+		return result;
 	}
 	
-	public Stabilizer getHorizontalStabilizer(){
-		return this.horizontalStabilizer;
+	/**
+	 * Sets the inertia matrix of the Drone
+	 */
+	public void setInertiaMatrix(Matrix3f inertiaMatrix) {
+		this.inertiaMatrix = inertiaMatrix;
+	}
+
+	/**
+	 * Calculates the inertia matrix of the Drone
+	 */
+	private Matrix3f calculateInertiaMatrix(){
+		Matrix3f result = new Matrix3f();
+		// x inertion
+		result.m00 = (float) (getTailMass() *  Math.pow(getTailSize(), 2) + 
+				getEngineMass() * Math.pow(this.getEnginePosition().z, 2));
+		// y inertion
+		result.m11 = (float) (getTailMass() * Math.pow(getTailSize(), 2) + 
+				2 * getLeftWing().getMass() * Math.pow(getLeftWing().getCenterOfMass().x, 2) +
+				getEngineMass() * Math.pow(this.getEnginePosition().z, 2));
+		// z inertion
+		result.m22 = (float) (2 * getLeftWing().getMass() * 
+				Math.pow(getLeftWing().getCenterOfMass().x, 2));
+		return result;
 	}
 	
-	public Stabilizer getVerticalStabilizer(){
-		return this.verticalStabilizer;
-	}
 	
-	public void setTailMass(float tailMass) {
-		if(tailMass <= 0) throw new IllegalArgumentException("TailMass must be larger than zero.");
-		this.tailMass = tailMass;
-	}
+	// MAXIMUM THRUST
 	
-	public float getTailMass(){
-		return this.tailMass;
-	}
+	/**
+	 * The maximum thrust of the Drones engine.
+	 */
+	private final float maxThrust;
 	
-	public void setTailSize(float tailSize) {
-		if(tailSize <= 0) throw new IllegalArgumentException("TailSize must be larger than zero.");
-		this.tailSize = tailSize;
-	}
-	
-	public float getTailSize() {
-		return this.tailSize;
-	}
-	
-	public float getThrustForce() {
-		return this.thrustForce;
-	}
-	
+	/**
+	 * Returns the maximum thrust of the Drones engine.
+	 */
 	public float getMaxThrust() {
 		return this.maxThrust;
 	}
 	
+	
+	// THRUST FORCE
+	
+	/**
+	 * The current thrust force of the Drones engine.
+	 */
+	private float thrustForce;
+	
+	/**
+	 * Returns the absolute value of current thrust force of the Drones engine.
+	 */
+	public float getThrustForce() {
+		return this.thrustForce;
+	}
+	
+	/**
+	 * Set the current thrust force of the Drones engine.
+	 */
 	public void setThrustForce(float thrustForce) {
 		if(thrustForce <= this.getMaxThrust())
 			this.thrustForce = thrustForce;
@@ -490,67 +444,248 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 			this.thrustForce = this.getMaxThrust();
 	}
 	
-	private float getInertionY() {
-		float inertia = (float) (getTailMass() * Math.pow(getTailSize(), 2) + 
-				2 * getLeftWing().getMass() * Math.pow(getLeftWing().getCenterOfMass().x, 2) +
-				getEngineMass() * Math.pow(this.enginePosition.z, 2));
-		
-		return inertia;
+	
+	// MAXIMUM ANGLE OF ATTACK
+	
+	/**
+	 * The Drones maximum angle of attack
+	 */
+	private final float maxAOA;
+	
+	/**
+	 * Returns the Drones maximum angle of attack.
+	 */
+	public float getMaxAOA() {
+		return this.maxAOA;
 	}
 	
-	private float getInertionX() {
-		float inertia = (float) (getTailMass() *  Math.pow(getTailSize(), 2) + 
-				getEngineMass() * Math.pow(this.enginePosition.z, 2));
-		
-		return inertia;
+	
+	// CAMERA
+	
+	/**
+	 * The Drones camera
+	 */
+	private Camera camera;
+	
+	/**
+	 * Returns the Drones camera.
+	 */
+	public Camera getCamera() {
+		return this.camera;
 	}
 	
-	private float getInertionZ() {
-		return (float) (2 * getLeftWing().getMass() * Math.pow(getLeftWing().getCenterOfMass().x, 2));
+	/**
+	 * Set the roll of the Drones camera.
+	 */
+	public void setRoll(float roll) {
+		this.getCamera().setRoll(roll);
 	}
+	
+	/**
+	 * Increase the roll of the Drones camera.
+	 */
+	public void increaseCameraRoll(float roll) {
+		this.getCamera().increaseRoll(roll);	
+	}
+
+	// Autopilot communication
+	/**
+	 * Add drone data to Autopilots interface to send to the Autopilot
+	 * @throws IOException
+	 */
+	public AutopilotInputs getAutoPilotInputs() {
+
+		return new AutopilotInputs() {
+			public byte[] getImage() { return ImageConverter.bufferedImageToByteArray(camera.takeSnapshot());}
+			
+			public float getX() { return getPosition().x; }
+			public float getY() { return getPosition().y; }
+			public float getZ() { return getPosition().z; }
+			
+			public float getHeading() { return getHeadingFloat(); }
+			public float getPitch() { return getPitchFloat(); }
+			public float getRoll() { return getRollFloat(); }
+			
+			public float getElapsedTime() { return DisplayManager.getElapsedTime(); }
+		};
+		
+	}
+	
+	/**
+	 * Receives the input controls from the Autopilot
+	 */
+	public void setAutopilotOutouts(AutopilotOutputs outputs) {
+		setThrustForce(outputs.getThrust());
+		
+		this.getLeftWing().setInclination(outputs.getLeftWingInclination());
+		this.getRightWing().setInclination(outputs.getRightWingInclination());		
+		this.getHorizStabilizer().setInclination(outputs.getHorStabInclination());
+		this.getVertStabilizer().setInclination(outputs.getVerStabInclination());
+	}	
+	
+	
+	/**
+	 * Transforms the given vector from the drone frame to the world frame.
+	 */
+	public Vector3f transformToWorldFrame(Vector3f originalD){
+//		Matrix4f transformationMatrix = this.getPose();
+//		Vector4f vectorToTransform = new Vector4f(0, originalD.x, originalD.y, originalD.z);
+		Matrix3f transformationMatrix = (Matrix3f) calculateDtoWTransformationMatrix();
+		Vector3f resultW = new Vector3f(0,0,0);
+//		Matrix4f.transform(transformationMatrix, vectorToTransform, resultW);
+
+		Matrix3f.transform(transformationMatrix, originalD, resultW);
+//		return new Vector3f(resultW.x, resultW.y, resultW.z);
+		return resultW;
+	}
+	
+	/**
+	 * Transforms the given vector from the world frame to the drone frame.
+	 */
+	public Vector3f transformToDroneFrame(Vector3f originalW){
+		Matrix3f transformationMatrix = new Matrix3f();
+		calculateDtoWTransformationMatrix().transpose(transformationMatrix);
+		
+		Vector3f resultD = new Vector3f();
+		
+		Matrix3f.transform(transformationMatrix, originalW, resultD);
+		return resultD;
+	}
+
+	public Matrix3f calculateDtoWTransformationMatrix(){
+		Matrix4f matrix4 = this.getPose();
+		Matrix3f result = new Matrix3f();
+		result.m00 = matrix4.m00;
+		result.m01 = matrix4.m01;
+		result.m02 = matrix4.m02;
+		result.m10 = matrix4.m10;
+		result.m11 = matrix4.m11;
+		result.m12 = matrix4.m12;
+		result.m20 = matrix4.m20;
+		result.m21 = matrix4.m21;
+		result.m22 = matrix4.m22;
+		//System.out.println("Drone calculatedtowtransformationmatrix matrix: " + result);
+		return result;
+	}
+//	public Matrix3f calculateWToDTransformationMatrix() {
+//		
+//		
+//		
+//		float heading = this.getHeading();
+//		float pitch = this.getPitch();
+//		float roll = this.getRoll();
+//		
+////		Matrix4f rotationMatrix = new Matrix4f();
+//		//!!!!!!!!!!!!!!!!!!!matrices worden getransponeerd tov de normale conventie opgeslagen!!!!!!!!!!
+//		
+//		// de afzonderlijke rotatiematrices opstellen
+//		Matrix3f headingTransform = new Matrix3f();
+//		headingTransform.m00 = (float) Math.cos(heading); 
+//		headingTransform.m20 = (float) Math.sin(heading); 
+//		headingTransform.m02 = (float) - Math.sin(heading); 
+//		headingTransform.m22 = (float) Math.cos(heading); 
+//		
+//		Matrix3f pitchTransform = new Matrix3f();
+//		pitchTransform.m11 = (float) Math.cos(pitch);
+//		pitchTransform.m21 = (float) - Math.sin(pitch);
+//		pitchTransform.m12 = (float) Math.sin(pitch);
+//		pitchTransform.m22 = (float) Math.cos(pitch);
+//		
+//		Matrix3f rollTransform = new Matrix3f();
+//		rollTransform.m00 = (float) Math.cos(roll);
+//		rollTransform.m10 = (float) - Math.sin(roll);
+//		rollTransform.m01 = (float) Math.sin(roll);
+//		rollTransform.m11 = (float) Math.cos(roll);
+//		
+//		//het product berekenen om de totale transformatie te bepalen
+//		Matrix3f transformationMatrix = new Matrix3f();
+//		Matrix3f temp = new Matrix3f();
+//		Matrix3f.mul(pitchTransform, rollTransform, temp);
+//		Matrix3f.mul(headingTransform, temp, transformationMatrix);
+//		
+//		return transformationMatrix;
+//	}
+
+	private float getRollFloat() {
+		Vector3f r0 = new Vector3f();
+		Vector3f u0 = new Vector3f();
+		Vector3f headingVector = this.getHeadingVector();
+		Vector3f forwardVector = this.getForwardVector();
+		Vector3f.cross(headingVector, new Vector3f(0,1,0), r0);
+		Vector3f.cross(r0, forwardVector, u0);
+		Vector3f r = this.transformToWorldFrame(new Vector3f(1,0,0));
+	
+		return (float) Math.atan2(Vector3f.dot(r, u0), Vector3f.dot(r, r0));
+	}
+
+	private float getPitchFloat() {
+		
+		Vector3f headingVector = this.getHeadingVector();
+		Vector3f forwardVector = this.getForwardVector();
+		return (float) Math.atan2(forwardVector.y, Vector3f.dot(headingVector, forwardVector));
+	}
+
+	/**
+	 * 
+	 * @return atan2(H . (-1, 0, 0), H . (0, 0, -1)), where H is the drone's heading vector (which we define as H0/||H0|| where H0 is the drone's forward vector ((0, 0, -1) in drone coordinates) projected onto the world XZ plane.
+	 */
+	private float getHeadingFloat() {
+
+		Vector3f headingVector = this.getHeadingVector(); 
+		return (float) Math.atan2(-headingVector.x, - headingVector.z);
+	}
+	
+	
+	
 	
 	/*
 	 * DEBUG
 	 */
-	/**
-	 * 
-	 */
-	public void moveHeadingVector() {
-		if(Keyboard.isKeyDown(Keyboard.KEY_Z)){
-			this.headingVector.y += 0.01f;
-			this.headingVector.normalise();
-		}
-		if(Keyboard.isKeyDown(Keyboard.KEY_S)){
-			this.headingVector.y -= 0.01f;
-			this.headingVector.normalise();
-		}
-		if(Keyboard.isKeyDown(Keyboard.KEY_D)){
-			this.headingVector = rotate(0.2f);
-			this.headingVector.normalise();
-		}
-		if(Keyboard.isKeyDown(Keyboard.KEY_Q)){
-			this.headingVector.x -= 0.01f;
-			this.headingVector.normalise();
-		}
-  
-		camera.increaseRotation(this.headingVector);
-	}
 	
-	private void flyMode() {		
-		flying = true;
-		
-		if(Keyboard.isKeyDown(Keyboard.KEY_Z)){
-			getLeftWing().setInclination((float) Math.PI / 10);
-			getRightWing().setInclination((float) Math.PI / 10);
-		} else if(Keyboard.isKeyDown(Keyboard.KEY_S)){
-			getLeftWing().setInclination(- (float) Math.PI / 10);
-			getRightWing().setInclination(- (float) Math.PI / 10);
-		} else if(Keyboard.isKeyDown(Keyboard.KEY_D)){
-			getVerticalStabilizer().setInclination((float)-Math.PI/20);
-		} else if(Keyboard.isKeyDown(Keyboard.KEY_Q)){
-			getVerticalStabilizer().setInclination((float)Math.PI/20);
-		} else {
-			flying = false;
-		}
-	}
+//	public void moveHeadingVector() {
+//		if(Keyboard.isKeyDown(Keyboard.KEY_Z)){
+//			this.forwardVectorW.y += 0.01f;
+//			this.forwardVectorW.normalise();
+//		}
+//		if(Keyboard.isKeyDown(Keyboard.KEY_S)){
+//			this.forwardVectorW.y -= 0.01f;
+//			this.forwardVectorW.normalise();
+//		}
+//		if(Keyboard.isKeyDown(Keyboard.KEY_D)){
+//			this.forwardVectorW = rotate(0.2f);
+//			this.forwardVectorW.normalise();
+//		}
+//		if(Keyboard.isKeyDown(Keyboard.KEY_Q)){
+//			this.forwardVectorW.x -= 0.01f;
+//			this.forwardVectorW.normalise();
+//		}
+//  
+//		camera.increaseRotation(this.forwardVectorW);
+//	}
+//	
+//	//	private static final float SPEED_SCALE = 10.0f;
+//	
+//	
+//	/*
+//	 * DEBUG VARS
+//	 */
+//	private boolean flying = false;
+//
+//	private void flyMode() {		
+//		flying = true;
+//		
+//		if(Keyboard.isKeyDown(Keyboard.KEY_Z)){
+//			getLeftWing().setInclination((float) Math.PI / 10);
+//			getRightWing().setInclination((float) Math.PI / 10);
+//		} else if(Keyboard.isKeyDown(Keyboard.KEY_S)){
+//			getLeftWing().setInclination(- (float) Math.PI / 10);
+//			getRightWing().setInclination(- (float) Math.PI / 10);
+//		} else if(Keyboard.isKeyDown(Keyboard.KEY_D)){
+//			getVerticalStabilizer().setInclination((float)-Math.PI/20);
+//		} else if(Keyboard.isKeyDown(Keyboard.KEY_Q)){
+//			getVerticalStabilizer().setInclination((float)Math.PI/20);
+//		} else {
+//			flying = false;
+//		}
+//	}
 }

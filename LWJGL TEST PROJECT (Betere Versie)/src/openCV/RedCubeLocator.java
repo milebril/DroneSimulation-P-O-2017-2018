@@ -1,8 +1,10 @@
 package openCV;
 import java.util.ArrayList;
+
 import java.util.Arrays;
 import java.util.List;
 
+import org.lwjgl.util.vector.Vector3f;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -11,12 +13,14 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.lwjgl.util.vector.Vector3f;
 
 public class RedCubeLocator {
 	
+	private static final Mat Mat = null;
 	/**
 	 * Creates a RedCubeLocator object which processes the given image data to locate the red cubes
-	 * co�rdinates relative to the drone.
+	 * coordinates relative to the drone.
 	 * @param image
 	 * 		  a byte array of the image data (from the pinhole camera) in RGB format
 	 * @param nbColumns
@@ -112,6 +116,47 @@ public class RedCubeLocator {
 		return coords;
 	}
 	
+	/** 
+	 * Returns the co�rdinates of the center of mass of the cube in the given image 
+	 * The origin of the coordinate is in the top left corner with the leftmost and topmost
+	 * pixel having co�rdinates (0, 0) 
+	*/
+	public Vector3f getCoordinatesOfCube() {
+		// byteArra --> Mat object
+		Mat rgbMat = byteArrayToRGBMat(this.getImageWidth(), this.getImageHeight(), this.getImageByteArray());
+				
+		// Filter RGB Mat for 6 different red Hue's
+		Mat[] matArray = redRGBMatFilter(rgbMat);
+		Mat totalFilter = combineMatArray(matArray);
+				
+		// Get center of mass of the 6 filters
+		int[] centerOfMass = getType0CenterOfMass(combineMatArray(matArray));
+		this.xCoordInImage = (centerOfMass[0] + 1) / (0.5 * getImageWidth()) - 1; 
+		this.yCoordInImage = -1 * ((centerOfMass[1] + 1) / (0.5 * getImageHeight()) - 1);
+		// Get 2D perspective size
+		int perspectiveSize = Core.countNonZero(totalFilter);
+		//System.out.println("perspective Size: " + String.valueOf(perspectiveSize));
+		// 2D straight size
+		double ratio = getAreaRatio(0,0,0);
+		double size = perspectiveSize / ratio;
+//		System.out.println("perspectiveSize: " + String.valueOf(perspectiveSize));
+//		System.out.println("ratio: " + String.valueOf(ratio));
+//		System.out.println("size: " + String.valueOf(size));
+		
+		// 2D pixels for 1 meter
+		float pixelsPerMeter = (float) Math.sqrt(size);
+		//System.out.println("pixels per meter: " + String.valueOf(pixelsPerMeter));
+		//System.out.println("center " + centerOfMass[0]);
+
+		double W = 200 / pixelsPerMeter;
+		double hoek = (120.0 / 180) * Math.PI;
+//		System.out.println("schermbreedte in meter: " + String.valueOf(W));
+		
+		double afstand = (W / 2) * (Math.cos(hoek/2) / Math.sin(hoek/2))+0.5;
+		return new Vector3f(centerOfMass[0]/pixelsPerMeter,centerOfMass[1]/pixelsPerMeter,(float) -afstand);
+		
+	}
+	
 	
 	
 	
@@ -119,39 +164,20 @@ public class RedCubeLocator {
 	private void process() throws IllegalArgumentException {
 		
 		// byteArra --> Mat object
-		Mat rgbMat = byteArrayToRGBMat(this.getImageWidth(), this.getImageHeight(), this.getImageByteArray());
+		//Mat rgbMat = byteArrayToRGBMat(this.getImageWidth(), this.getImageHeight(), this.getImageByteArray());
 		
 		// Filter RGB Mat for 6 different red Hue's
-		Mat[] matArray = redRGBMatFilter(rgbMat);
-		Mat totalFilter = combineMatArray(matArray);
+		//Mat[] matArray = redRGBMatFilter(rgbMat);
+		//Mat totalFilter = combineMatArray(matArray);
 		
 		// Get center of mass of the 6 filters
-		int[] centerOfMass = getType0CenterOfMass(combineMatArray(matArray));
-		this.xCoordInImage = (centerOfMass[0] + 1) / (0.5 * getImageWidth()) - 1; 
-		this.yCoordInImage = -1 * ((centerOfMass[1] + 1) / (0.5 * getImageHeight()) - 1);
+		//int[] centerOfMass = getType0CenterOfMass(combineMatArray(matArray));
+		//this.xCoordInImage = (centerOfMass[0] + 1) / (0.5 * getImageWidth()) - 1; 
+		//this.yCoordInImage = -1 * ((centerOfMass[1] + 1) / (0.5 * getImageHeight()) - 1);
 		
-		// Get 2D perspective size
-		int perspectiveSize = Core.countNonZero(totalFilter);
-		
-		// 2D straight size
-		double ratio = getAreaRatio(45 * (Math.PI / 180),  45 * (Math.PI / 180));
-		double size = perspectiveSize / ratio;
-//		System.out.println("perspectiveSize: " + String.valueOf(perspectiveSize));
-//		System.out.println("ratio: " + String.valueOf(ratio));
-//		System.out.println("size: " + String.valueOf(size));
-		
-		// 2D pixels for 1 meter
-		double pixelsPerMeter = Math.sqrt(size);
-//		System.out.println("pixels per meter: " + String.valueOf(pixelsPerMeter));
-		
-		double W = 200 / pixelsPerMeter;
-		double hoek = (120.0 / 180) * Math.PI;
-//		System.out.println("schermbreedte in meter: " + String.valueOf(W));
-		
-		double afstand = (W / 2) * (Math.cos(hoek/2) / Math.sin(hoek/2));
-		System.out.println("afstand: " + String.valueOf(afstand+0.5));
-		
-		W = 10*2 / (Math.cos(hoek/2) / Math.sin(hoek/2));
+
+		//System.out.println(getCoordinatesOfCube());
+		//W = 10*2 / (Math.cos(hoek/2) / Math.sin(hoek/2));
 //		System.out.println(W);
 //		System.out.println(200 / pixelsPerMeter);
 		
@@ -183,7 +209,7 @@ public class RedCubeLocator {
 		}
 		
 		// data reads the given array as BGR
-		System.out.println(String.valueOf(width) + " " +  String.valueOf(height) + " " + String.valueOf(byteArray.length) );
+		//System.out.println(String.valueOf(width) + " " +  String.valueOf(height) + " " + String.valueOf(byteArray.length) );
 		Mat data = new Mat(height, width, CvType.CV_8UC3);
 		data.put(0, 0, byteArray);
 		
@@ -305,7 +331,7 @@ public class RedCubeLocator {
 		// check wether the Mat type is 0
 		if (mat.type() != 0) throw new IllegalArgumentException("given mat must be of type 0!");
 		// variables to store the total x and y coordinates
-		long xCoord = 0; long yCoord= 0; int amount = 0;
+		long xCoord = 0; long yCoord= 0; int amount = 0; int s = 100;
 		// iterate over every x,y coordinate and add the coordinates if their value equals 255
 		int x; int y;
 		for (x = 0; x < mat.width(); x++) {
@@ -320,8 +346,10 @@ public class RedCubeLocator {
 		// calculate the coordinates
 		int[] coordinates = new int[2];
 		coordinates[0] = (int) Math.round(xCoord / (float) amount);
+		coordinates[0] = coordinates[0] - s;
 		coordinates[1] = (int) Math.round(yCoord / (float) amount);
-		
+		coordinates[1] = s - coordinates[1];
+		System.out.println(coordinates[0] + " " +  coordinates[1]);
 		return coordinates;
 	}
 	
@@ -399,46 +427,80 @@ public class RedCubeLocator {
 		}
 		return returnMat;
 	}
+
+	
+	private List<double[]> setPositionCube() {
+
+		
+		int x = 0;
+		int y = 0;
+
+		double[] A = new double[]{x-0.5, y+0.5, -0.5};
+		double[] B = new double[]{x-0.5, y+0.5,  0.5};
+		double[] C = new double[]{x+0.5, y+0.5,  0.5};
+		double[] D = new double[]{x+0.5, y+0.5, -0.5};
+		double[] E = new double[]{x-0.5, y-0.5, -0.5};
+		double[] F = new double[]{x-0.5, y-0.5,  0.5};
+		double[] G = new double[]{x+0.5, y-0.5,  0.5};
+		double[] H = new double[]{x+0.5, y-0.5, -0.5};
+		
+		List<double[]> points = Arrays.asList(A, B, C, D, E, F, G, H);
+		return points;
+		
+	}
+	
+	
+	
+	
+	static double d = 2;
+	static double f = 1;
+	
+
+	
 	
 	
 	/**
-	 * Returns rotatedArea/originalArea
-	 * @return gedraaide opp / rechte opp
+	 * Returns points
+	 * @return geroteerde punten via transformatiematrices (heading, pitch en roll)
 	 */
-	private static double getAreaRatio(double heading, double pitch) {
-		double d = 2;
-		double f = 1;
-		int factor = 1000000;
-		double originalArea = 4.0/9;
-		double rotatedArea;
-
-		double[] A = new double[]{-0.5,  0.5, -0.5};
-		double[] B = new double[]{-0.5,  0.5,  0.5};
-		double[] C = new double[]{ 0.5,  0.5,  0.5};
-		double[] D = new double[]{ 0.5,  0.5, -0.5};
-		double[] E = new double[]{-0.5, -0.5, -0.5};
-		double[] F = new double[]{-0.5, -0.5,  0.5};
-		double[] G = new double[]{ 0.5, -0.5,  0.5};
-		double[] H = new double[]{ 0.5, -0.5, -0.5};
+	
+	private List<double[]> setRotatedPoints(double d, double heading, double pitch, double roll) {
 		
-		List<double[]> points = Arrays.asList(A, B, C, D, E, F, G, H);
 		
-		// rotate all points
 		int i;
 		double x; double newX;
 		double y; double newY;
 		double z; double newZ;
+		List<double[]> points = setPositionCube();
+		
 		for (i = 0; i < points.size(); i++) {
 			x = points.get(i)[0]; y = points.get(i)[1]; z = points.get(i)[2];
-			newX = x * Math.cos(heading) + z * Math.sin(heading);
-			newY = y * Math.cos(pitch) - (z * Math.cos(heading) - x * Math.sin(heading)) * Math.sin(pitch);
-			newZ = y * Math.sin(pitch) + (z * Math.cos(heading) - x * Math.sin(heading)) * Math.cos(pitch);
+			newX = x * (Math.cos(heading)*Math.cos(roll) - Math.sin(heading)*Math.sin(pitch)*Math.sin(roll))  + y * (-Math.cos(pitch)*Math.sin(roll)) + z * (Math.cos(roll)*Math.sin(heading) + Math.cos(heading)*Math.sin(pitch)*Math.sin(roll));
+			newY = x* (Math.cos(heading)*Math.sin(roll) + Math.cos(roll)*Math.sin(heading)*Math.sin(pitch)) + y * (Math.cos(pitch)*Math.cos(roll)) + z * (Math.sin(heading)*Math.sin(roll) - Math.cos(heading)*Math.cos(roll)*Math.sin(pitch));
+			newZ = x * (-Math.cos(pitch)*Math.sin(heading)) + y * (Math.sin(pitch))+ z * (Math.cos(heading) * Math.cos(pitch));
 			points.set(i, new double[]{newX, newY, newZ + d});
 		}
+		return points;
 		
 		
+	}
+	/**
+	 * Returns rotatedArea/originalArea
+	 * @return gedraaide opp / rechte opp
+	 */
+	private double getAreaRatio(double heading, double pitch, double roll) {
+		int factor = 1000000;
+		double originalArea = 4.0/9;
+		double rotatedArea;
+
+		List<double[]> points = setRotatedPoints(d, heading, pitch, roll);
+
 		// project all points
 		List<java.awt.Point> projectedPoints = new ArrayList<>();
+		int i;
+		double x; double newX;
+		double y; double newY;
+		double z;
 		for (i = 0; i < points.size(); i++) {
 			x = points.get(i)[0]; y = points.get(i)[1]; z = points.get(i)[2];
 			newX = (f / z) * x;
@@ -474,7 +536,7 @@ public class RedCubeLocator {
 		}
 		rotatedArea = Math.abs(totaal/2);
 		
-		
+		//System.out.println(rotatedArea);
 		return rotatedArea/originalArea;
 	}
 	

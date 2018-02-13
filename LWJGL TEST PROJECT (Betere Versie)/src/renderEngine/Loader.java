@@ -8,6 +8,7 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import models.Model2D;
 import models.RawModel;
 
 import org.lwjgl.BufferUtils;
@@ -33,8 +34,15 @@ public class Loader {
 		storeDataInAttributeList(0,3,positions);
 		storeDataInAttributeList(1,3,colours);
 		unbindVAO();
-		//return new RawModel(vaoID,indices.length);
 		return new RawModel(vaoID, positions.length/3);
+	}
+	
+	public RawModel loadToVAO(float[] positions) {
+		int vaoID = createVAO();
+		storeDataInAttributeList(0, 2, positions);
+		unbindVAO();
+		
+		return new RawModel(vaoID, positions.length/2);
 	}
 	
 	public int loadToVAO(float[] positions, float[] textureCoords) {

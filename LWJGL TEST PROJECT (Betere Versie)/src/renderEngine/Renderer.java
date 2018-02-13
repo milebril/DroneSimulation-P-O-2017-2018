@@ -22,10 +22,14 @@ public class Renderer {
 	private static final float NEAR_PLANE = 0.1f;
 	private static final float FAR_PLANE = 1000;
 	
+//	private static final float NEAR_PLANE = -1;
+//	private static final float FAR_PLANE = 1;
+	
 	private static float FOVX;
 	private static float FOVY;
 	
 	private Matrix4f projectionMatrix;
+	private Matrix4f orthoMatrix;
 	private StaticShader shader;
 	
 	public Renderer(StaticShader shader, float fovx, float fovy){
@@ -35,15 +39,23 @@ public class Renderer {
 		GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glCullFace(GL11.GL_BACK);
 		createProjectionMatrix();
+		createOrthoMatrix();
 		shader.start();
 		shader.loadProjectionMatrix(projectionMatrix);
+		shader.loadOrthogonalViewMatrix(orthoMatrix);
 		shader.stop();
 	}
 
 	public void prepare() {
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT|GL11.GL_DEPTH_BUFFER_BIT);
-		GL11.glClearColor(0, 0.3f, 0.0f, 1);
+		GL11.glClearColor(1, 1, 1, 1);
+	}
+	
+	public void prepareDroneCamera() {
+		GL11.glEnable(GL11.GL_DEPTH_TEST);
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT|GL11.GL_DEPTH_BUFFER_BIT);
+		GL11.glClearColor(1, 1, 1, 1);
 	}
 	
 	public void prepareText() {
@@ -75,18 +87,20 @@ public class Renderer {
 	}
 	
 	private void prepareInstance(Entity entity) {
-		Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(),
-				entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
+//		Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(),
+//				entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
+		Matrix4f transformationMatrix = entity.getPose();
 		shader.loadTransformationMatrix(transformationMatrix);
 	}
 
 	public void render(Entity entity, StaticShader shader) {
 		RawModel rawModel = entity.getModel();
 		GL30.glBindVertexArray(rawModel.getVaoID());
-		GL20.glEnableVertexAttribArray(0);
-		GL20.glEnableVertexAttribArray(1);
-		Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(),
-				entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
+		GL20.glEnableVertexAttribArray(0); //Vertices
+		GL20.glEnableVertexAttribArray(1); //Colors
+//		Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(),
+//				entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
+		Matrix4f transformationMatrix = entity.getPose();
 		shader.loadTransformationMatrix(transformationMatrix);
 		//GL13.glActiveTexture(GL13.GL_TEXTURE0);
 		//GL11.glBindTexture(GL11.GL_TEXTURE_2D, model.getTexture().getID());
@@ -95,6 +109,33 @@ public class Renderer {
 		//		GL11.GL_UNSIGNED_INT, 0);
 		GL20.glDisableVertexAttribArray(0);
 		GL20.glDisableVertexAttribArray(1);
+		GL30.glBindVertexArray(0);
+	}
+	
+	public void renderObject(Entity entity, StaticShader shader) {
+		RawModel rawModel = entity.getModel();
+		GL30.glBindVertexArray(rawModel.getVaoID());
+		GL20.glEnableVertexAttribArray(0); //Vertices
+		GL20.glEnableVertexAttribArray(1); //Colors
+//		Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(),
+//				entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
+		Matrix4f transformationMatrix = entity.getPose();
+		shader.loadTransformationMatrix(transformationMatrix);
+		//GL13.glActiveTexture(GL13.GL_TEXTURE0);
+		//GL11.glBindTexture(GL11.GL_TEXTURE_2D, model.getTexture().getID());
+		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, rawModel.getVertexCount());
+		//GL11.glDrawElements(GL11.GL_TRIANGLES, model.getRawModel().getVertexCount(), //Voor models
+		//		GL11.GL_UNSIGNED_INT, 0);
+		GL20.glDisableVertexAttribArray(0);
+		GL20.glDisableVertexAttribArray(1);
+		GL30.glBindVertexArray(0);
+	}
+	
+	public void render(RawModel model) {
+		GL30.glBindVertexArray(model.getVaoID());
+		GL20.glEnableVertexAttribArray(0);
+		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, model.getVertexCount());
+		GL20.glDisableVertexAttribArray(0);
 		GL30.glBindVertexArray(0);
 	}
 	
@@ -113,5 +154,24 @@ public class Renderer {
 		projectionMatrix.m32 = -((2 * NEAR_PLANE * FAR_PLANE) / frustum_length);
 		projectionMatrix.m33 = 0;
 	}
-
+	
+	private void createOrthoMatrix(){
+		
+		float t =  0;
+		float b = Display.getHeight();
+		float l = 0;
+		float r = Display.getWidth();
+		float f = -1;
+		float n = 1;
+		
+		orthoMatrix = new Matrix4f();
+		orthoMatrix.setIdentity();
+		orthoMatrix.m00 = 2 / (r - l); 
+		orthoMatrix.m11 = 2 / (t - b); 
+	 
+	    orthoMatrix.m22 = -2 / (f - n); 
+	    orthoMatrix.m30 = -(r + l) / (r - l); 
+	    orthoMatrix.m31 = -(t + b) / (t - b); 
+	    orthoMatrix.m32 = -(f + n) / (f - n); 
+	}
 }
