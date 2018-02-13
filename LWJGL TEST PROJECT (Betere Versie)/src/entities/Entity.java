@@ -5,11 +5,6 @@ import models.RawModel;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
-/**
- * position of entity is stored in a 4x4 pose matrix
- * @author Jakob
- *
- */
 public class Entity {
 	
 	public Entity(RawModel model, Matrix4f pose, float scale) {
