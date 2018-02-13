@@ -220,9 +220,6 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 	private float prevElapsedTime;
 	private float dt = 0;
 	
-	private float heightGoal = 1;
-	
-	private ImageProcessor cubeLocator;
 	private PIDController pidHorStab;
 	private PIDController pidHorWing;
 	private PIDController pidHorGoal;
@@ -531,6 +528,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs{
 			currentPosition = new Vector3f(inputAP.getX(), inputAP.getY(), inputAP.getZ());
 			this.dt = inputs.getElapsedTime() - prevElapsedTime;
 			prevElapsedTime = inputs.getElapsedTime();
+			this.prevPosition = new Vector3f(currentPosition.x, currentPosition.y, currentPosition.z);
 			
 			//load Current Orientation Of Drone
 			setHeading(inputAP.getHeading());
