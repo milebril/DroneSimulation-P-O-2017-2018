@@ -223,11 +223,11 @@ public class AirFoil {
 		return liftForceD;
 	}
 	
-	//TODO Angle of Attack Calculation:
+	// TODO : Angle of Attack Calculation:
 	/**
 	 * Returns the angle of attack of this AirFoil
 	 */
-	private float calculateAOA(Vector3f projectedAirspeedVectorD, Vector3f normalD, Vector3f attackVectorD) {
+	public float getAOA(Vector3f projectedAirspeedVectorD, Vector3f normalD, Vector3f attackVectorD) {
 		float currentAoa = (float) - Math.atan2(Vector3f.dot(projectedAirspeedVectorD, normalD), 
 				Vector3f.dot(projectedAirspeedVectorD, attackVectorD));	
 		
