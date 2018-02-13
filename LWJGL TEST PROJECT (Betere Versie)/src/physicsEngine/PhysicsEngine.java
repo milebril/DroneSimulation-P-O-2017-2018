@@ -6,6 +6,8 @@ import entities.Drone;
 
 public class PhysicsEngine {
 	
+	// MAIN
+	
 	/**
 	 * Applies physics to the given drone for dt seconds, translating the drone dt seconds into the future.
 	 */
@@ -50,7 +52,8 @@ public class PhysicsEngine {
 		PhysicsEngine.applyPhysics(drone, (dt - h));
 	}
 	
-
+	// ACCELERATIONS
+	
 	/**
 	 * All the forces and torques exercised on the drone are calculated, added together and then
 	 * returned in an array.
@@ -98,6 +101,14 @@ public class PhysicsEngine {
 	}
 	
 	/**
+	 * Calculates and returns the linear and angular accelerations of the drone (in drone frame).
+	 * @return The linear and angular accelerations of the drone (in drone frame)
+	 */
+	private static Vector3f[] calculateAccelerations(Drone drone) {
+		return calculateAccelerations(drone, calculateForces(drone));
+	}
+	
+	/**
 	 * Calculates and returns the linear and angular accelerations of the drone (in drone frame). 
 	 * The given forces Vector3f[] array is assumed to contain the forces at index 0 and 
 	 * torque at index 1, both in drone frame.
@@ -126,13 +137,7 @@ public class PhysicsEngine {
 		return new Vector3f[]{linearAccelerationD, angularAccelerationD};
 	}
 	
-	/**
-	 * Calculates and returns the linear and angular accelerations of the drone (in drone frame).
-	 * @return The linear and angular accelerations of the drone (in drone frame)
-	 */
-	private static Vector3f[] calculateAccelerations(Drone drone) {
-		return calculateAccelerations(drone, calculateForces(drone));
-	}
+	// POSITION
 	
 	/**
 	 * Calculates and returns the translation and rotation of the drone given its new velocities (in world frame).
