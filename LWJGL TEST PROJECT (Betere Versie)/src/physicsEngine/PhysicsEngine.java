@@ -3,15 +3,22 @@ package physicsEngine;
 import org.lwjgl.util.vector.Vector3f;
 import entities.AirFoil;
 import entities.Drone;
+import entities.Tyre;
 
 public class PhysicsEngine {
+	
+	/**
+	 * At which y-value the ground level is.
+	 */
+	public static double groundLevel = 0;
 	
 	// MAIN
 	
 	/**
 	 * Applies physics to the given drone for dt seconds, translating the drone dt seconds into the future.
+	 * @throws DroneCrashException if the Drone crashes
 	 */
-	public static void applyPhysics (Drone drone, float dt) {
+	public static void applyPhysics (Drone drone, float dt) throws DroneCrashException {
 		
 		// stepsize bepalen
 		float h;
@@ -47,6 +54,27 @@ public class PhysicsEngine {
 			deltaPositions[1].normalise(rotationAxis);
 			drone.rotate(deltaPositions[1].length(), rotationAxis);
 		}
+		
+		// checken of de drone crasht
+		Vector3f leftWingCenterOfMass = new Vector3f(0,0,0);
+		Vector3f.add(drone.transformToWorldFrame(drone.getLeftWing().getCenterOfMass()), drone.getPosition(), leftWingCenterOfMass);
+		Vector3f rightWingCenterOfMass = new Vector3f(0,0,0);
+		Vector3f.add(drone.transformToWorldFrame(drone.getRightWing().getCenterOfMass()), drone.getPosition(), rightWingCenterOfMass);
+		if (drone.transformToWorldFrame(drone.getEnginePosition()).y <= groundLevel) {
+			throw new DroneCrashException("Drone Crashed: the engine hit the ground!");
+		} else if (drone.transformToWorldFrame(drone.getTailMassPosition()).y <= groundLevel) {
+			throw new DroneCrashException("Drone Crashed: the tail hit the ground!");
+		} else if (leftWingCenterOfMass.y <= groundLevel) {
+			throw new DroneCrashException("Drone Crashed: the left wing hit the ground!");
+		} else if (rightWingCenterOfMass.y <= groundLevel) {
+			throw new DroneCrashException("Drone Crashed: the right wing hit the ground!");
+		}
+		for (Tyre tyre : drone.getTyres()) {
+			if (tyre.getRadius() < tyre.getCompression()) {
+				throw new DroneCrashException("Drone Crashed: tyre compressed too much!");
+			}
+		}
+		
 		
 		//recursieve oproep
 		PhysicsEngine.applyPhysics(drone, (dt - h));

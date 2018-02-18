@@ -65,10 +65,21 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		// calculate and save the drones inertia matrix
 		this.setInertiaMatrix(this.calculateInertiaMatrix());
 		
+		// camera
 		camera = new Camera(cfg.getNbColumns(), cfg.getNbRows());
 		camera.increasePosition(this.getPosition().x, this.getPosition().y, this.getPosition().z);
 		
+		// set the prediciton method
 		this.predictionMethod = predictionMethod;
+		
+		// Tyres
+		// TODO: de nieuwe inputreader fixen
+		/* 
+		Tyre frontTyre = new Tyre(this, new Vector3f(0, cfg.getWheelY(), cfg.getFrontWheelZ()), cfg.getTyreRadius(), cfg.getRMax(), cfg.getFcMax(), cfg.getTyreSlope(), cfg.getDampSlope());
+		Tyre leftTyre = new Tyre(this, new Vector3f(-cfg.getRearWheelX(), cfg.getWheelY(), cfg.getRearWheelZ()), cfg.getTyreRadius(), cfg.getRMax(), cfg.getFcMax(), cfg.getTyreSlope(), cfg.getDampSlope());
+		Tyre rightTyre = new Tyre(this, new Vector3f(cfg.getRearWheelX(), cfg.getWheelY(), cfg.getRearWheelZ()), cfg.getTyreRadius(), cfg.getRMax(), cfg.getFcMax(), cfg.getTyreSlope(), cfg.getDampSlope());
+		*/
+		
 	}
 	
 	public Drone(Matrix4f pose, AutopilotConfig autopilotConfig, Vector3f velocity, Vector3f rotVel) {
@@ -99,9 +110,8 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	private AirFoil[] airFoils = new AirFoil[4];
 	
 	/**
-	 * Returns an array of the airFoils of the drone.
+	 * Returns a copy of the airFoils array.
 	 * (in order [leftwing, rightwing, hor. stabilizer, vert. stabilizer])
-	 * @return
 	 */
 	public AirFoil[] getAirFoils(){
 		return this.airFoils.clone();
@@ -133,6 +143,42 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	 */
 	public AirFoil getVertStabilizer(){
 		return this.airFoils[3];
+	}
+	
+	// TYRES
+	
+	/**
+	 * The Tyres of the drone (in order [front wheel, rear left wheel, rear right wheel])
+	 */
+	private Tyre[] tyres = new Tyre[3];
+	
+	/**
+	 * Returns a copy of the tyres array.
+	 * (in order [leftwing, rightwing, hor. stabilizer, vert. stabilizer])
+	 */
+	public Tyre[] getTyres(){
+		return this.tyres.clone();
+	}
+	
+	/**
+	 * Returns the front Tyre.
+	 */
+	public Tyre getFrontTyre() {
+		return this.tyres[0];
+	}
+	
+	/**
+	 * Returns the left Tyre.
+	 */
+	public Tyre getLeftTyre() {
+		return this.tyres[1];
+	}
+	
+	/**
+	 * Returns the right Tyre.
+	 */
+	public Tyre getRightTyre() {
+		return this.tyres[2];
 	}
 	
 	// FORWARD AND HEADING VECTOR
@@ -552,7 +598,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	/**
 	 * Returns the roll of the drone in radians.
 	 */
-	private float getRollFloat() {
+	public float getRollFloat() {
 		Vector3f r0 = new Vector3f();
 		Vector3f u0 = new Vector3f();
 		Vector3f headingVector = this.getHeadingVector();
@@ -568,7 +614,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	 * Returns the pitch of the drone in radians.
 	 * @return
 	 */
-	private float getPitchFloat() {
+	public float getPitchFloat() {
 		
 		Vector3f headingVector = this.getHeadingVector();
 		Vector3f forwardVector = this.getForwardVector();
@@ -579,7 +625,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	 * Returns the heading of the drone in radians.
 	 * @return atan2(H . (-1, 0, 0), H . (0, 0, -1)), where H is the drone's heading vector (which we define as H0/||H0|| where H0 is the drone's forward vector ((0, 0, -1) in drone coordinates) projected onto the world XZ plane.
 	 */
-	private float getHeadingFloat() {
+	public float getHeadingFloat() {
 
 		Vector3f headingVector = this.getHeadingVector(); 
 		return (float) Math.atan2(-headingVector.x, - headingVector.z);
