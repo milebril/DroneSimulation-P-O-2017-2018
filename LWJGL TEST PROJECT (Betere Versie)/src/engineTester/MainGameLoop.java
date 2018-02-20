@@ -1,6 +1,7 @@
 package engineTester;
 
 import models.RawModel;
+import physicsEngine.DroneCrashException;
 import physicsEngine.PhysicsEngine;
 import physicsEngine.approximationMethods.EulerPrediction;
 
@@ -239,7 +240,12 @@ public class MainGameLoop {
 				
 				//applyphysics rekent de krachten uit en gaat dan de kinematische waarden van de drone
 				// aanpassen op basis daarvan 
-				PhysicsEngine.applyPhysics(drone, dt);
+				try {
+					PhysicsEngine.applyPhysics(drone, dt);
+				} catch (DroneCrashException e) {
+					System.out.println("Drone crashed!");
+				} // TODO: stop simulation (drone crashed)
+				
 				
 				//Autopilot stuff
 				AutopilotInputs inputs = drone.getAutoPilotInputs();
