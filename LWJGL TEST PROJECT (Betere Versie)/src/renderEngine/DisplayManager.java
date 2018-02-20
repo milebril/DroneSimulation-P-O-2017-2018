@@ -69,7 +69,7 @@ public class DisplayManager {
 	
 	public static float getFrameTimeSeconds() {
 		if (started) {
-			return (float) (delta);
+			return (float) (delta) / 10;
 		} else {
 			return 0;
 		}

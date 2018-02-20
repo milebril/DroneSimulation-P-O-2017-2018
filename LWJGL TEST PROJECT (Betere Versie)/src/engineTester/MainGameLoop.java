@@ -245,6 +245,8 @@ public class MainGameLoop {
 				AutopilotInputs inputs = drone.getAutoPilotInputs();
 				AutopilotOutputs outputs = autopilot.timePassed(inputs);
 				drone.setAutopilotOutouts(outputs);
+				
+				
 			}
 			
 			keyInputs();
@@ -529,13 +531,13 @@ public class MainGameLoop {
 		      prevY = y;
 		      
 		      //Debug Print
-		      System.out.println(position);
+		      //System.out.println(position);
 		      
 		      entities.add(new Entity(model, new Matrix4f().translate(position), 1));
 		      scaledEntities.add(new Entity(model, new Matrix4f().translate(position), 2));
 		 }
 		 
-		 System.out.println("#####");
+		// System.out.println("#####");
 	}
 	
 	private static void reset() {
@@ -605,7 +607,7 @@ public class MainGameLoop {
 			
 			@Override
 			public void onClick() {
-				System.out.println("hier");
+				//System.out.println("hier");
 				generateRandomCubes();
 			}
 		};
