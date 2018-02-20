@@ -612,7 +612,6 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	
 	/**
 	 * Returns the pitch of the drone in radians.
-	 * @return
 	 */
 	public float getPitchFloat() {
 		

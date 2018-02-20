@@ -53,7 +53,7 @@ public class Entity {
 	public Vector3f getPosition() {
 		return new Vector3f(this.getPose().m30, this.getPose().m31, this.getPose().m32);
 	}
-
+	
 	/**
 	 * Translates this entity over the given vector.
 	 */
@@ -88,32 +88,5 @@ public class Entity {
 	public void setScale(float scale) {
 		this.scale = scale;
 	}
-
-	
-	/* TODO : wat is dit:
-	//	public void increasePosition(Vector3f increment) {
-	//		Vector3f newPosition = new Vector3f();
-	//		Vector3f.add(this.getPosition(), increment, newPosition);
-	//		setPosition(newPosition);
-	//	}
-		
-		
-		// the orientation of the entity
-	//	private Matrix4f orientation;
-		
-	//	public Vector3f getOrientation() {
-	//		return new Vector3f(this.orientation.x, this.orientation.y, this.orientation.z);
-	//	}
-	//
-	//	public void setOrientation(Vector3f vector) {
-	//		this.orientation.set(vector.x, vector.y, vector.z);
-	//	}
-		
-	//	public void increaseOrientation(Vector3f increment) {
-	//		Vector3f newOrientation = new Vector3f();
-	//		Vector3f.add(this.getOrientation(), increment, newOrientation);
-	//		setOrientation(newOrientation);
-	//	}
-	*/
 	
 }
