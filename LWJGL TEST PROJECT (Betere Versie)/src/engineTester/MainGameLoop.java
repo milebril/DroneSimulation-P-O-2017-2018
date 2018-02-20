@@ -243,7 +243,7 @@ public class MainGameLoop {
 				try {
 					PhysicsEngine.applyPhysics(drone, dt);
 				} catch (DroneCrashException e) {
-					System.out.println("Drone crashed!");
+					System.out.println(e);
 				} // TODO: stop simulation (drone crashed)
 				
 				
@@ -536,14 +536,9 @@ public class MainGameLoop {
 		      prevX = x;
 		      prevY = y;
 		      
-		      //Debug Print
-		      //System.out.println(position);
-		      
 		      entities.add(new Entity(model, new Matrix4f().translate(position), 1));
 		      scaledEntities.add(new Entity(model, new Matrix4f().translate(position), 2));
 		 }
-		 
-		// System.out.println("#####");
 	}
 	
 	private static void reset() {
@@ -613,7 +608,6 @@ public class MainGameLoop {
 			
 			@Override
 			public void onClick() {
-				//System.out.println("hier");
 				generateRandomCubes();
 			}
 		};

@@ -56,25 +56,25 @@ public class PhysicsEngine {
 		}
 		
 		// checken of de drone crasht
-		Vector3f leftWingCenterOfMass = new Vector3f(0,0,0);
-		Vector3f.add(drone.transformToWorldFrame(drone.getLeftWing().getCenterOfMass()), drone.getPosition(), leftWingCenterOfMass);
-		Vector3f rightWingCenterOfMass = new Vector3f(0,0,0);
-		Vector3f.add(drone.transformToWorldFrame(drone.getRightWing().getCenterOfMass()), drone.getPosition(), rightWingCenterOfMass);
-		if (drone.transformToWorldFrame(drone.getEnginePosition()).y <= groundLevel) {
-			throw new DroneCrashException("Drone Crashed: the engine hit the ground!");
-		} else if (drone.transformToWorldFrame(drone.getTailMassPosition()).y <= groundLevel) {
-			throw new DroneCrashException("Drone Crashed: the tail hit the ground!");
-		} else if (leftWingCenterOfMass.y <= groundLevel) {
-			throw new DroneCrashException("Drone Crashed: the left wing hit the ground!");
-		} else if (rightWingCenterOfMass.y <= groundLevel) {
-			throw new DroneCrashException("Drone Crashed: the right wing hit the ground!");
-		}
-		for (Tyre tyre : drone.getTyres()) {
-			if (tyre.getRadius() < tyre.getCompression()) {
-				throw new DroneCrashException("Drone Crashed: tyre compressed too much!");
-			}
-		}
-		
+//		Vector3f leftWingCenterOfMass = new Vector3f(0,0,0);
+//		Vector3f.add(drone.transformToWorldFrame(drone.getLeftWing().getCenterOfMass()), drone.getPosition(), leftWingCenterOfMass);
+//		Vector3f rightWingCenterOfMass = new Vector3f(0,0,0);
+//		Vector3f.add(drone.transformToWorldFrame(drone.getRightWing().getCenterOfMass()), drone.getPosition(), rightWingCenterOfMass);
+//		if (drone.transformToWorldFrame(drone.getEnginePosition()).y <= groundLevel) {
+//			throw new DroneCrashException("Drone Crashed: the engine hit the ground!");
+//		} else if (drone.transformToWorldFrame(drone.getTailMassPosition()).y <= groundLevel) {
+//			throw new DroneCrashException("Drone Crashed: the tail hit the ground!");
+//		} else if (leftWingCenterOfMass.y <= groundLevel) {
+//			throw new DroneCrashException("Drone Crashed: the left wing hit the ground!");
+//		} else if (rightWingCenterOfMass.y <= groundLevel) {
+//			throw new DroneCrashException("Drone Crashed: the right wing hit the ground!");
+//		}
+//		for (Tyre tyre : drone.getTyres()) {
+//			if (tyre.getRadius() < tyre.getCompression()) {
+//				throw new DroneCrashException("Drone Crashed: tyre compressed too much!");
+//			}
+//		}
+//		
 		
 		//recursieve oproep
 		PhysicsEngine.applyPhysics(drone, (dt - h));

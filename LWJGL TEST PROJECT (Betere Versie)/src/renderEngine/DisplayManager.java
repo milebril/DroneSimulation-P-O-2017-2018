@@ -69,7 +69,7 @@ public class DisplayManager {
 	
 	public static float getFrameTimeSeconds() {
 		if (started) {
-			return (float) (delta) / 10;
+			return (float) (delta) ; //Simulatie wordt trager afgespeeld zodat het duidelijker is.
 		} else {
 			return 0;
 		}
