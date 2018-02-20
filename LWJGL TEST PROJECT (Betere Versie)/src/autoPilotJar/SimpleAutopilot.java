@@ -309,6 +309,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		float aanliggende = cubePos.getZ() - getProperties().getPosition().getZ();
 		return (float) Math.atan(overstaande/aanliggende);
 	}
+	
 //	
 //	 - The left wing's attack vector is (0, sin(leftWingInclination), -cos(leftWingInclination)). => rot axis = (1 , 0, 0)
 //	 - The right wing's attack vector is (0, sin(rightWingInclination), -cos(rightWingInclination)). => rot axis = (1 , 0, 0)
