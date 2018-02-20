@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UTFDataFormatException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -28,50 +29,80 @@ public class generateConfigFile extends JFrame{
 
 	private static JPanel panel = new JPanel();
 
-	private static JLabel gravity = new JLabel("Gravity: ");
+	private static JLabel droneID = new JLabel("droneID: "); //1
+	private static JTextField droneIDText = new JTextField();
+	
+	private static JLabel gravity = new JLabel("Gravity: "); //2
 	private static JTextField gravityText = new JTextField();
 	
-	private static JLabel wingX = new JLabel("wingX: ");
+	private static JLabel wingX = new JLabel("wingX: "); //3
 	private static JTextField wingXText = new JTextField();
 	
-	private static JLabel tailSize = new JLabel("tailSize: ");
+	private static JLabel tailSize = new JLabel("tailSize: "); //4
 	private static JTextField tailSizeText = new JTextField();
 	
-	private static JLabel engineMass = new JLabel("engineMass: ");
+	private static JLabel wheelY = new JLabel("wheelY: "); //5
+	private static JTextField wheelYText = new JTextField();
+	
+	private static JLabel frontWheelZ = new JLabel("frontWheelZ: "); //6
+	private static JTextField frontWheelZText = new JTextField();
+	
+	private static JLabel rearWheelZ = new JLabel("rearWheelZ: "); //7
+	private static JTextField rearWheelZText = new JTextField();
+	
+	private static JLabel rearWheelX = new JLabel("rearWheelX: "); //8
+	private static JTextField rearWheelXText = new JTextField();
+	
+	private static JLabel tyreSlope = new JLabel("tyreSlope: "); //9
+	private static JTextField tyreSlopeText = new JTextField();
+	
+	private static JLabel dampSlope = new JLabel("dampSlope: "); //10
+	private static JTextField dampSlopeText = new JTextField();
+	
+	private static JLabel tyreRadius = new JLabel("tyreRadius: "); //11
+	private static JTextField tyreRadiusText = new JTextField();
+	
+	private static JLabel rMax = new JLabel("rMax: "); //12
+	private static JTextField rMaxText = new JTextField();
+	
+	private static JLabel fcMax = new JLabel("fcMAx: "); //13
+	private static JTextField fcMaxText = new JTextField();
+	
+	private static JLabel engineMass = new JLabel("engineMass: "); //14
 	private static JTextField engineMassText= new JTextField();
 	
-	private static JLabel wingMass = new JLabel("wingMass: ");
+	private static JLabel wingMass = new JLabel("wingMass: "); //15
 	private static JTextField wingMassText= new JTextField();
 	
-	private static JLabel tailMass = new JLabel("tailMass: ");
+	private static JLabel tailMass = new JLabel("tailMass: "); //16
 	private static JTextField tailMassText= new JTextField();
 	
-	private static JLabel maxThrust = new JLabel("maxThrust: ");
+	private static JLabel maxThrust = new JLabel("maxThrust: "); //17
 	private static JTextField maxThrustText= new JTextField();
 	
-	private static JLabel maxAOA = new JLabel("maxAOA: ");
+	private static JLabel maxAOA = new JLabel("maxAOA: "); //18
 	private static JTextField maxAOAText= new JTextField();
 	
-	private static JLabel wingLiftSlope = new JLabel("wingLiftSlope: ");
+	private static JLabel wingLiftSlope = new JLabel("wingLiftSlope: "); //19
 	private static JTextField wingLiftSlopeText = new JTextField();
 	
-	private static JLabel horStabLiftSlope = new JLabel("horStabLiftSlope: ");
+	private static JLabel horStabLiftSlope = new JLabel("horStabLiftSlope: "); //20
 	private static JTextField horStabLiftSlopeText = new JTextField();
 	
-	private static JLabel verStabLiftSlope = new JLabel("verStabLiftSlope: ");
+	private static JLabel verStabLiftSlope = new JLabel("verStabLiftSlope: "); //21
 	private static JTextField verStabLiftSlopeText= new JTextField();
 	
-	private static JLabel horizontalAngleOfView = new JLabel("horizontalAngleOfView: ");
+	private static JLabel horizontalAngleOfView = new JLabel("horizontalAngleOfView: "); //22
 	private static JTextField horizontalAngleOfViewText= new JTextField();
 	
-	private static JLabel verticalAngleOfView = new JLabel("verticalAngleOfView: ");
+	private static JLabel verticalAngleOfView = new JLabel("verticalAngleOfView: "); //23
 	private static JTextField verticalAngleOfViewText= new JTextField();
 	
-	private static JLabel nbColumns = new JLabel("nbColumns: ");
+	private static JLabel nbColumns = new JLabel("nbColumns: "); //24
 	private static JTextField nbColumnsText= new JTextField();
 	
-	private static JLabel nbRows = new JLabel("nbRows: ");
-	private static JTextField nbRowsText= new JTextField();
+	private static JLabel nbRows = new JLabel("nbRows: "); //25
+	private static JTextField nbRowsText= new JTextField(); 
 	
 	private static JButton btnSave = new JButton("Save");
 	
@@ -83,22 +114,42 @@ public class generateConfigFile extends JFrame{
 		}
 		
 		JFrame frame = new JFrame("Config Writer");
-		frame.setSize(300, 400);
+		frame.setSize(300, 667); //400 voor 15 -> 26,66666 per regel
 		frame.setLocation(200, 200);
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
-		GridLayout g = new GridLayout(15, 2);
+		GridLayout g = new GridLayout(25, 2);
 		g.setHgap(10);
 		
 		panel.setLayout(g);
 		
+		panel.add(droneID);
+		panel.add(droneIDText);
 		panel.add(gravity);
 		panel.add(gravityText);
 		panel.add(wingX);
 		panel.add(wingXText);
 		panel.add(tailSize);
 		panel.add(tailSizeText);
+		panel.add(wheelY);
+		panel.add(wheelYText);
+		panel.add(frontWheelZ);
+		panel.add(frontWheelZText);
+		panel.add(rearWheelZ);
+		panel.add(rearWheelZText);
+		panel.add(rearWheelX);
+		panel.add(rearWheelXText);
+		panel.add(tyreSlope);
+		panel.add(tyreSlopeText);
+		panel.add(dampSlope);
+		panel.add(dampSlopeText);
+		panel.add(tyreRadius);
+		panel.add(tyreRadiusText);
+		panel.add(rMax);
+		panel.add(rMaxText);
+		panel.add(fcMax);
+		panel.add(fcMaxText);
 		panel.add(engineMass);
 		panel.add(engineMassText);
 		panel.add(wingMass);
@@ -150,9 +201,19 @@ public class generateConfigFile extends JFrame{
 	}
 
 	private static void writeDataInTextFields(AutopilotConfig cfg) {
+		droneIDText.setText(cfg.getDroneID());
 		gravityText.setText(Float.toString(cfg.getGravity()));
 		wingXText.setText(Float.toString(cfg.getWingX()));
 		tailSizeText.setText(Float.toString(cfg.getTailSize()));
+		wheelYText.setText(Float.toString(cfg.getWheelY()));
+		frontWheelZText.setText(Float.toString(cfg.getFrontWheelZ()));
+		rearWheelZText.setText(Float.toString(cfg.getRearWheelZ()));
+		rearWheelXText.setText(Float.toString(cfg.getRearWheelX()));
+		tyreSlopeText.setText(Float.toString(cfg.getTyreSlope()));
+		dampSlopeText.setText(Float.toString(cfg.getDampSlope()));
+		tyreRadiusText.setText(Float.toString(cfg.getTyreRadius()));
+		rMaxText.setText(Float.toString(cfg.getRMax()));
+		fcMaxText.setText(Float.toString(cfg.getFcMax()));
 		engineMassText.setText(Float.toString(cfg.getEngineMass()));
 		wingMassText.setText(Float.toString(cfg.getWingMass()));
 		tailMassText.setText(Float.toString(cfg.getTailMass()));
@@ -231,6 +292,46 @@ public class generateConfigFile extends JFrame{
 				
 				public float getEngineMass() {
 					return Float.parseFloat(engineMassText.getText());
+				}
+
+				public String getDroneID() {
+					return droneIDText.getText();
+				}
+
+				public float getWheelY() {
+					return Float.parseFloat(wheelYText.getText());
+				}
+
+				public float getFrontWheelZ() {
+					return Float.parseFloat(frontWheelZText.getText());
+				}
+
+				public float getRearWheelZ() {
+					return Float.parseFloat(rearWheelZText.getText());
+				}
+
+				public float getRearWheelX() {
+					return Float.parseFloat(rearWheelXText.getText());
+				}
+
+				public float getTyreSlope() {
+					return Float.parseFloat(tyreSlopeText.getText());
+				}
+
+				public float getDampSlope() {
+					return Float.parseFloat(dampSlope.getText());
+				}
+
+				public float getTyreRadius() {
+					return Float.parseFloat(tyreRadius.getText());
+				}
+
+				public float getRMax() {
+					return Float.parseFloat(rMax.getText());
+				}
+
+				public float getFcMax() {
+					return Float.parseFloat(fcMax.getText());
 				}
 			});
 		} catch (FileNotFoundException e) {
