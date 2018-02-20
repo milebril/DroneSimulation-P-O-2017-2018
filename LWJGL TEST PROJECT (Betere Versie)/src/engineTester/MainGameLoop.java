@@ -35,7 +35,7 @@ import org.opencv.core.Core;
 import autopilot.AutopilotConfigReader;
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
-import renderEngine.Renderer;
+import renderEngine.EntityRenderer;
 import shaders.StaticShader;
 import testObjects.Cube;
 import testObjects.Cuboid;
@@ -72,11 +72,11 @@ public class MainGameLoop {
 	public static Loader loader;
 	
 	//Renderers
-	private static Renderer renderer;
-	private static Renderer rendererFreeCam;
-	private static Renderer renderTopDown;
-	private static Renderer renderSideView;
-	private static Renderer rendererText;
+	private static EntityRenderer renderer;
+	private static EntityRenderer rendererFreeCam;
+	private static EntityRenderer renderTopDown;
+	private static EntityRenderer renderSideView;
+	private static EntityRenderer rendererText;
 	
 	//Shaders
 	private static StaticShader shader;
@@ -130,7 +130,7 @@ public class MainGameLoop {
 		
 		//***INITIALIZE DRONEVIEW***
 		shader = new StaticShader();
-		renderer = new Renderer(shader, autopilotConfig.getHorizontalAngleOfView(), autopilotConfig.getVerticalAngleOfView());
+		renderer = new EntityRenderer(shader, autopilotConfig.getHorizontalAngleOfView(), autopilotConfig.getVerticalAngleOfView());
 		
 		Cuboid droneCube = new Cuboid(0, 0, 0);
 		drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
@@ -138,27 +138,27 @@ public class MainGameLoop {
 		
 		//***INITIALIZE FREEROAM***
 		shaderFreeCam = new StaticShader();
-		rendererFreeCam = new Renderer(shaderFreeCam, 50, 50);
+		rendererFreeCam = new EntityRenderer(shaderFreeCam, 50, 50);
 		freeRoamCamera = new Camera();
 		freeRoamCamera.setPosition(new Vector3f(0, 100, 0));
 		
 		//***INITIALIZE TOPDOWN***
 		shaderTopDown = new StaticShader();
-		renderTopDown = new Renderer(shaderTopDown, 50, 40);
+		renderTopDown = new EntityRenderer(shaderTopDown, 50, 40);
 		topDownCamera = new Camera();
 		topDownCamera.setPosition(new Vector3f(0, 300, -100));
 		topDownCamera.setRotation((float) -(Math.PI / 2), 0, 0);
 		
 		//***INITIALIZE SIDEVIEW***
 		shaderSideView = new StaticShader();
-		renderSideView = new Renderer(shaderSideView, 40, 20);
+		renderSideView = new EntityRenderer(shaderSideView, 40, 20);
 		sideViewCamera = new Camera();
 		sideViewCamera.setPosition(new Vector3f(300,0,-100));
 		sideViewCamera.setRotation(0, (float) -(Math.PI / 2), 0);
 		
 		//***INITIALIZE GUI-TEXT***
 		shaderText = new StaticShader();
-		rendererText = new Renderer(shaderText, 50, 50);
+		rendererText = new EntityRenderer(shaderText, 50, 50);
 		String speed = String.valueOf(Math.round(drone.getAbsVelocity()));
 		FontType font = new FontType(loader.loadTexture("verdana"), new File("res/verdana.fnt"));
 		GUIText textSpeed = new GUIText("Speed = " + speed + "m/s", 5, font, new Vector2f(0.01f,0), 1, true);
@@ -295,7 +295,7 @@ public class MainGameLoop {
 		return temp.length();
 	}
 	
-	public static void renderView(Renderer renderer, StaticShader shader) {
+	public static void renderView(EntityRenderer renderer, StaticShader shader) {
 		for (Entity entity : entities) {
 			renderer.render(entity,shader);
 		} 
@@ -303,7 +303,7 @@ public class MainGameLoop {
 		renderer.render(drone, shader);
 	}
 	
-	public static void renderViewScaled(Renderer renderer, StaticShader shader) {
+	public static void renderViewScaled(EntityRenderer renderer, StaticShader shader) {
 		for (Entity entity : scaledEntities) {
 			renderer.render(entity,shader);
 		} 
@@ -518,7 +518,7 @@ public class MainGameLoop {
 		      float y = ((float) r.nextInt(1000) / 500 - 1)*10;
 		      float z = i*-40;
 		      Vector3f position = new Vector3f(x,y,z);
-		      
+		      	
 		      while(Math.sqrt(Math.pow(x - prevX, 2) + Math.pow(y - prevY, 2)) > 10) {
 		    	  x = r.nextFloat()*20-10;
 			      //x = 0;

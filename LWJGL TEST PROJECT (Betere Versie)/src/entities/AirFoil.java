@@ -160,8 +160,8 @@ public class AirFoil {
 		
 //		float aoa = this.calculateAOA(projectedAirspeedVectorD, normalD, attackVectorD);
 		float aoa = (float) - Math.atan2(a, b);
-		
-		if (aoa > drone.getMaxAOA()) {
+		//System.out.println(drone.getMaxAOA());
+		if (aoa > Math.toRadians(drone.getMaxAOA())) {
 			System.out.println(aoa);
 			System.exit(0);
 		}
