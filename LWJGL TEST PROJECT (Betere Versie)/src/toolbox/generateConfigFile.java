@@ -319,19 +319,19 @@ public class generateConfigFile extends JFrame{
 				}
 
 				public float getDampSlope() {
-					return Float.parseFloat(dampSlope.getText());
+					return Float.parseFloat(dampSlopeText.getText());
 				}
 
 				public float getTyreRadius() {
-					return Float.parseFloat(tyreRadius.getText());
+					return Float.parseFloat(tyreRadiusText.getText());
 				}
 
 				public float getRMax() {
-					return Float.parseFloat(rMax.getText());
+					return Float.parseFloat(rMaxText.getText());
 				}
 
 				public float getFcMax() {
-					return Float.parseFloat(fcMax.getText());
+					return Float.parseFloat(fcMaxText.getText());
 				}
 			});
 		} catch (FileNotFoundException e) {
