@@ -858,5 +858,25 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		}
 		
 	}
+
+	@Override
+	public float getFrontBrakeForce() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public float getLeftBrakeForce() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public float getRightBrakeForce() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 	
 }
