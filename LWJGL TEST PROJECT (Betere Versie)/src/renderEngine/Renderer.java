@@ -1,10 +1,12 @@
 package renderEngine;
 
 import models.RawModel;
+import models.RawOBJModel;
 import models.TexturedModel;
 
 import java.util.List;
 
+import org.hamcrest.core.IsInstanceOf;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -21,9 +23,6 @@ public class Renderer {
 	
 	private static final float NEAR_PLANE = 0.1f;
 	private static final float FAR_PLANE = 1000;
-	
-//	private static final float NEAR_PLANE = -1;
-//	private static final float FAR_PLANE = 1;
 	
 	private static float FOVX;
 	private static float FOVY;
@@ -94,22 +93,33 @@ public class Renderer {
 	}
 
 	public void render(Entity entity, StaticShader shader) {
-		RawModel rawModel = entity.getModel();
-		GL30.glBindVertexArray(rawModel.getVaoID());
-		GL20.glEnableVertexAttribArray(0); //Vertices
-		GL20.glEnableVertexAttribArray(1); //Colors
-//		Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(),
-//				entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
-		Matrix4f transformationMatrix = entity.getPose();
-		shader.loadTransformationMatrix(transformationMatrix);
-		//GL13.glActiveTexture(GL13.GL_TEXTURE0);
-		//GL11.glBindTexture(GL11.GL_TEXTURE_2D, model.getTexture().getID());
-		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, rawModel.getVertexCount());
-		//GL11.glDrawElements(GL11.GL_TRIANGLES, model.getRawModel().getVertexCount(), //Voor models
-		//		GL11.GL_UNSIGNED_INT, 0);
-		GL20.glDisableVertexAttribArray(0);
-		GL20.glDisableVertexAttribArray(1);
-		GL30.glBindVertexArray(0);
+		if(entity.getModel() != null) {
+			RawModel rawModel = entity.getModel();
+			GL30.glBindVertexArray(rawModel.getVaoID());
+			GL20.glEnableVertexAttribArray(0); //Vertices
+			GL20.glEnableVertexAttribArray(1); //Colors
+			Matrix4f transformationMatrix = entity.getPose();
+			shader.loadTransformationMatrix(transformationMatrix);
+			GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, rawModel.getVertexCount());
+			GL20.glDisableVertexAttribArray(0);
+			GL20.glDisableVertexAttribArray(1);
+			GL30.glBindVertexArray(0);
+		} else if (entity.getTexModel() != null) {
+			System.out.println("e");
+			//TexturedModel model = entity.getTexModel();
+			RawOBJModel rawModel = entity.getOBJModel();
+			GL30.glBindVertexArray(rawModel.getVaoID());
+			GL20.glEnableVertexAttribArray(0); //Vertices
+			GL20.glEnableVertexAttribArray(1); //Colors
+			Matrix4f transformationMatrix = entity.getPose();
+			shader.loadTransformationMatrix(transformationMatrix);
+			//GL13.glActiveTexture(GL13.GL_TEXTURE0);
+			//GL11.glBindTexture(GL11.GL_TEXTURE_2D, model.getTexture().getID());
+			GL11.glDrawElements(GL11.GL_TRIANGLES, rawModel.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
+			GL20.glDisableVertexAttribArray(0);
+			GL20.glDisableVertexAttribArray(1);
+			GL30.glBindVertexArray(0);
+		}
 	}
 	
 	public void renderObject(Entity entity, StaticShader shader) {

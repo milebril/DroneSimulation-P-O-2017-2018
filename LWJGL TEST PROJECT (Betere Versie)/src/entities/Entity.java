@@ -1,6 +1,8 @@
 package entities;
 
 import models.RawModel;
+import models.RawOBJModel;
+import models.TexturedModel;
 
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
@@ -20,16 +22,44 @@ public class Entity {
 //		this.orientation = orientation;
 		this.scale = scale;
 	}
+	
+	public Entity(RawOBJModel model, Matrix4f pose, float scale) {
+		this.objmodel = model;
+		this.setPose(pose);
+//		this.orientation = orientation;
+		this.scale = scale;
+	}
+	
+	public Entity(TexturedModel model, Matrix4f pose, float scale) {
+		this.texModel = model;
+		this.setPose(pose);
+//		this.orientation = orientation;
+		this.scale = scale;
+	}
 
 	// The model of the entity
 	private RawModel model;
+	private RawOBJModel objmodel;
+	private TexturedModel texModel;
 	
 	public RawModel getModel() {
 		return model;
 	}
+	
+	public RawOBJModel getOBJModel() {
+		return objmodel;
+	}
+	
+	public TexturedModel getTexModel() {
+		return this.texModel;
+	}
 
 	public void setModel(RawModel model) {
 		this.model = model;
+	}
+	
+	public void setOBJModel(RawOBJModel model) {
+		this.objmodel = model;
 	}
 	
 	public Vector3f getPosition() {

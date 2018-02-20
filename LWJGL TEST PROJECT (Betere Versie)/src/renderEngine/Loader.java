@@ -10,6 +10,7 @@ import java.util.List;
 
 import models.Model2D;
 import models.RawModel;
+import models.RawOBJModel;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -35,6 +36,17 @@ public class Loader {
 		storeDataInAttributeList(1,3,colours);
 		unbindVAO();
 		return new RawModel(vaoID, positions.length/3);
+	}
+	
+	public RawOBJModel loadOBJToVAO(float[] positions,float[] colours,int[] indices){
+		int vaoID = createVAO();
+		if (indices != null) {
+			bindIndicesBuffer(indices);
+		}
+		storeDataInAttributeList(0,3,positions);
+		storeDataInAttributeList(1,3,colours);
+		unbindVAO();
+		return new RawOBJModel(vaoID, positions.length/3);
 	}
 	
 	public RawModel loadToVAO(float[] positions) {

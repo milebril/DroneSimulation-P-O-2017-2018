@@ -1,11 +1,10 @@
 package models;
 
-public class RawModel {
-	
+public class RawOBJModel {
 	private int vaoID;
 	private int vertexCount;
 	
-	public RawModel(int vaoID, int vertexCount){
+	public RawOBJModel(int vaoID, int vertexCount){
 		this.vaoID = vaoID;
 		this.vertexCount = vertexCount;
 	}
