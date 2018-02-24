@@ -247,7 +247,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		return (float) Math.atan(overstaande/aanliggende);
 	}
 	
-/**
+	/**
 	 *  We define its angle of attack as -atan2(S . N, S . A), where S
 	 * is the projected airspeed vector, N is the normal, and A is the attack vector
 	 * @param inclination
@@ -352,217 +352,65 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		return newVerStabInclination;
 	}
 	
-
-	
-	//	
-	//	 - The left wing's attack vector is (0, sin(leftWingInclination), -cos(leftWingInclination)). => rot axis = (1 , 0, 0)
-	//	 - The right wing's attack vector is (0, sin(rightWingInclination), -cos(rightWingInclination)). => rot axis = (1 , 0, 0)
-	//	 - The horizontal stabilizer's attack vector is (0, sin(horStabInclination), -cos(horStabInclination)). => rot axis = (1 , 0, 0)
-	//	 - The vertical stabilizer's attack vector is (-sin(verStabInclination), 0, -cos(verStabInclination)).  => rot axis = (0 , 1, 0)
-	
-	//	- The axis vector of both wings and of the horizontal stabilizer is (1, 0, 0).
-	//	- The axis vector of the vertical stabilizer is (0, 1, 0).
-		
-	//	 the left wing is at (-wingX, 0, 0)
-	//	 the right wing is at (wingX, 0, 0)
-	//	 - the horizontal and vertical stabilizers are at (0, 0, tailSize)
-		//TODO de eerste iteratie is de heading volgens z-as ipv negatieve z-as
-	
-	
-	//
-//	private float getMaxInclinationLeftWing(){
-//		
-//		Vector3f rotationAxis = new Vector3f(1, 0, 0);
-//		Vector3f wingCentreOfMass = new Vector3f(-this.configAP.getWingX(), 0, 0);
-//		float inclination = 0;
-//	
-//		float maxAOA = configAP.getMaxAOA();
-//		
-//		//eerst ruwe benadering van de maximale inclination maken zonder rotatiesnelheid en benaderingen van cos en sin
-//		inclination =  (float) ((-	getProperties().getVelocity().y + getProperties().getVelocity().z*Math.tan(maxAOA))/
-//								getProperties().getVelocity().z + getProperties().getVelocity().y*Math.tan(maxAOA));		
-//	
-//		float aoa = Float.NaN;
-//		
-//		//checken of de aoa al in het gewenste interval ligt.
-//		// zo nee: vergroot de inclinatie of verklein de inclinatie, bereken opnieuw de angle of attack en voer lus opnieuw uit
-//		if(getProperties().getVelocity().length() == 0){
-//			aoa = maxAOA;
-//		}
-//		else{
-//			
-//			Vector3f attackVectorDroneFrame = new Vector3f(0.0f, (float)Math.sin(inclination), - (float)Math.cos(inclination));		
-//			aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
-//			
-//			while((aoa < 0.9 *maxAOA)|| (aoa > maxAOA)){
-//				//System.out.println("getMaxInclinationHorStab maxaoa:  " + maxAOA);
-//				//System.out.println("getMaxInclinationHorStab current inclination:  " + inclination);;
-//				if (aoa > maxAOA){
-//					inclination -= INCLINATIONINCREMENT;
-//				}
-//				else{
-//					inclination += INCLINATIONINCREMENT;
-//				}
-//				//System.out.println("getMaxInclinationHorStab current rotationAxis:  " + rotationAxis);
-//	
-//				attackVectorDroneFrame = new Vector3f(0.0f, (float)Math.sin(inclination), - (float)Math.cos(inclination));		
-//				aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
-//			}
-//		}
-//		return inclination;
-//	}
-//
-//
-//	private float getMaxInclinationRightWing(){
-//		
-//		Vector3f rotationAxis = new Vector3f(1, 0, 0);
-//		Vector3f wingCentreOfMass = new Vector3f(this.configAP.getWingX(), 0, 0);
-//		float inclination = 0;
-//	
-//		float maxAOA = configAP.getMaxAOA();
-//		//eerst ruwe benadering van de maximale inclination maken zonder rotatiesnelheid en benaderingen van cos en sin
-//		inclination =  (float) ((-	getProperties().getVelocity().y + getProperties().getVelocity().z*Math.tan(maxAOA))/
-//				getProperties().getVelocity().z + getProperties().getVelocity().y*Math.tan(maxAOA));		
-//	
-//		float aoa = Float.NaN;
-//		
-//		//checken of de aoa al in het gewenste interval ligt.
-//		// zo nee: vergroot de inclinatie of verklein de inclinatie, bereken opnieuw de angle of attack en voer lus opnieuw uit
-//		if(getProperties().getVelocity().length() == 0){
-//			aoa = maxAOA;
-//		}
-//		else{
-//			
-//			Vector3f attackVectorDroneFrame = new Vector3f(0.0f, (float)Math.sin(inclination), - (float)Math.cos(inclination));	
-//			aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
-//			
-//			while((aoa < 0.9 *maxAOA)|| (aoa > maxAOA)){
-//				//System.out.println("getMaxInclinationHorStab maxaoa:  " + maxAOA);
-//				//System.out.println("getMaxInclinationHorStab current inclination:  " + inclination);;
-//				if (aoa > maxAOA){
-//					inclination -= INCLINATIONINCREMENT;
-//				}
-//				else{
-//					inclination += INCLINATIONINCREMENT;
-//				}
-//				//System.out.println("getMaxInclinationHorStab current rotationAxis:  " + rotationAxis);
-//				attackVectorDroneFrame = new Vector3f(0.0f, (float)Math.sin(inclination), - (float)Math.cos(inclination));		
-//				aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
-//			}
-//		}
-//		
-//		return inclination;
-//	
-//	}
-//
-//
-//	private float getMaxInclinationVertStab(){	
-//	//		 - the horizontal and vertical stabilizers are at (0, 0, tailSize)
-//	//		 - The vertical stabilizer's attack vector is (-sin(verStabInclination), 0, -cos(verStabInclination)).
-//	//		The axis vector of the vertical stabilizer is (0, 1, 0).		
-//	
-//			Vector3f rotationAxis = new Vector3f(0, 1, 0);
-//			Vector3f wingCentreOfMass = new Vector3f(0, 0, this.configAP.getTailSize());
-//			float inclination = 0;
-//				
-//			float maxAOA = configAP.getMaxAOA();
-//			float aoa = Float.NaN;
-//			
-//			//checken of de aoa al in het gewenste interval ligt.
-//			// zo nee: vergroot de inclinatie of verklein de inclinatie, bereken opnieuw de angle of attack en voer lus opnieuw uit
-//			if(getProperties().getVelocity().length() == 0){
-//				aoa = maxAOA;
-//			}
-//			else{
-//				
-//				Vector3f attackVectorDroneFrame = new Vector3f(- (float)Math.sin(inclination), 0f, - (float)Math.cos(inclination));	
-//				aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
-//				
-//				while((aoa < 0.9 *maxAOA)|| (aoa > maxAOA)){
-//					//System.out.println("getMaxInclinationHorStab maxaoa:  " + maxAOA);
-//				    //System.out.println("getMaxInclinationHorStab current inclination:  " + inclination);;
-//					if (aoa > maxAOA){
-//						inclination -= INCLINATIONINCREMENT;
-//					}
-//					else{
-//						inclination += INCLINATIONINCREMENT;
-//					}
-//					//System.out.println("getMaxInclinationHorStab current rotationAxis:  " + rotationAxis);
-//		
-//					attackVectorDroneFrame = new Vector3f(- (float)Math.sin(inclination), 0f, - (float)Math.cos(inclination));		
-//					aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
-//				}
-//			}
-//			return inclination;
-//			
-//		}
-//
-//
-//	private float getMaxInclinationHorStab(){
-//			//		 - the horizontal and vertical stabilizers are at (0, 0, tailSize)
-//	//		- The axis vector of both wings and of the horizontal stabilizer is (1, 0, 0).
-//	//		 - The horizontal stabilizer's attack vector is (0, sin(horStabInclination), -cos(horStabInclination)).
-//	
-//			
-//			Vector3f rotationAxis = new Vector3f(1, 0, 0);
-//			Vector3f wingCentreOfMass = new Vector3f(0, 0, this.configAP.getTailSize());
-//			float inclination = 0;
-//			
-//			float maxAOA = configAP.getMaxAOA();
-//			float aoa = Float.NaN;
-//			
-//			//checken of de aoa al in het gewenste interval ligt.
-//			// zo nee: vergroot de inclinatie of verklein de inclinatie, bereken opnieuw de angle of attack en voer lus opnieuw uit
-//			if(getProperties().getVelocity().length() == 0){
-//				aoa = maxAOA;
-//			}
-//			else{
-//				
-//				Vector3f attackVectorDroneFrame = new Vector3f(0f, (float)Math.sin(inclination), - (float)Math.cos(inclination));		
-//				aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
-//				int count = 0;
-//				while((aoa < 0.9 *maxAOA)|| (aoa > maxAOA)){
-//					if (aoa > maxAOA){
-//						inclination -= INCLINATIONINCREMENT;
-//					}
-//					else{
-//						inclination += INCLINATIONINCREMENT;
-//					}
-//		
-//					//System.out.println(count++);
-//					attackVectorDroneFrame = new Vector3f(0f, (float)Math.sin(inclination), - (float)Math.cos(inclination));		
-//					aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
-//				}
-//			}
-//			
-//			//System.out.println("getMaxInclinationHorStab current aoa:  " + aoa);
-//	
-//			return inclination;		
-//		}
-//
 	
 	// MAX AIRFOIL INCLINATION
 	
+	/**
+	 * Returns the velocity (in the world frame) of a given point (in drone frame) of the drone
+	 * accounting for the velocity of drone and the rotation speed of the drone.
+	 * @param a point attached to the drone (in drone frame)
+	 * @return the total velocity of the given point (in world frame)
+	 */
+	public Vector3f getVelocityOfPoint(Vector3f point) {
+		
+		// de hefboomsafstand vh point tov de drone (world frame)
+		Vector3f hefboom = new Vector3f();
+		Matrix3f.transform(getProperties().getOrientationMatrix(), point, hefboom);
+		
+		// v_rot = omega x hefboomstafstand (world frame)
+		Vector3f rotation = new Vector3f();
+		Vector3f.cross(getProperties().getRotationSpeed(), hefboom , rotation);
+		
+		// totale snelheid is de som van de rotatie en de drone snelheid
+		Vector3f totalSpeed = new Vector3f();
+		Vector3f.add(getProperties().getVelocity(), rotation, totalSpeed); 
+		
+		return totalSpeed;
+	}
+	
+	/**
+	 * An enum class used to specify the orientation of an airfoil.
+	 */
 	public enum AirfoilOrientation {
 	    HORIZONTAL, VERTICAL
 	}
 	
 	/**
-	 * Returns the max inclination of the airfoil at position centerOfMass (in drone frame) with
-	 * an axis orientation either horizontal or vertical.
+	 * Returns an array of the min and max inclination of the airfoil at position 
+	 * centerOfMass (in drone frame) with an axis orientation either horizontal or vertical.
+	 * The min and max inclinations correspont respectivly with the negative and positive 
+	 * max angle of attack.
+	 * @return float[2] {min, max}
 	 */
-	public float getMaxInclination(Vector3f wingCentreOfMass, AirfoilOrientation orientation) {
-		float maxAOA = this.getConfig().getMaxAOA();
-		float maxInclination;
+	public float[] getMaxInclination(Vector3f wingCentreOfMass, AirfoilOrientation orientation) {
+		float maxInclination[] = new float[2];
 		
-		// TODO: max inclination berekening
+		// tangens vd pos- en negative angle of attack
+		double posTangent = Math.tan(this.getConfig().getMaxAOA());
+		double negTangent = Math.tan(this.getConfig().getMaxAOA());
 		
+		// snelheid vd airfoil (world frame)
+		Vector3f S = getVelocityOfPoint(wingCentreOfMass);
+		
+		// berekening vd min en max inclination
 		switch (orientation) {
 			case HORIZONTAL:
-				
+				maxInclination[0] = (float) Math.atan((negTangent*S.z-S.y) / (S.z+negTangent*S.y));
+				maxInclination[1] = (float) Math.atan((posTangent*S.z-S.y) / (S.z+posTangent*S.y));
 				break;
 			case VERTICAL:
-				
+				maxInclination[0] = (float) Math.atan((-S.x-negTangent*S.z) / (negTangent*S.x-S.z));
+				maxInclination[1] = (float) Math.atan((-S.x-posTangent*S.z) / (posTangent*S.x-S.z));
 				break;
 		}
 		
@@ -570,30 +418,42 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	}
 	
 	/**
-	 * Returns the current max inclination for the left wing.
+	 * Returns the current min and max inclinations for the left wing.
+	 * The min and max inclinations correspont respectivly with the negative and positive 
+	 * max angle of attack.
+	 * @return float[2] {min, max}
 	 */
-	public float getMaxInclinationLeftWing() {
+	public float[] getMaxInclinationLeftWing() {
 		return getMaxInclination(new Vector3f(-getConfig().getWingX(), 0, 0), AirfoilOrientation.HORIZONTAL);
 	}
 	
 	/**
-	 * Returns the current max inclination for the right wing.
+	 * Returns the current min and max inclinations for the right wing.
+	 * The min and max inclinations correspont respectivly with the negative and positive 
+	 * max angle of attack.
+	 * @return float[2] {min, max}
 	 */
-	public float getMaxInclinationRightWing() {
+	public float[] getMaxInclinationRightWing() {
 		return getMaxInclination(new Vector3f(getConfig().getWingX(), 0, 0), AirfoilOrientation.HORIZONTAL);
 	}
 	
 	/**
-	 * Returns the current max inclination for the horizontal stabiliser.
+	 * Returns the current min and max inclinations for the horizontal stabiliser.
+	 * The min and max inclinations correspont respectivly with the negative and positive 
+	 * max angle of attack.
+	 * @return float[2] {min, max}
 	 */
-	public float getMaxInclinationHorStab() {
+	public float[] getMaxInclinationHorStab() {
 		return getMaxInclination(new Vector3f(0, 0, getConfig().getTailSize()), AirfoilOrientation.HORIZONTAL);
 	}
 	
 	/**
-	 * Returns the current max inclination for the vertical stabiliser.
+	 * Returns the current min and max inclinations for the vertical stabiliser.
+	 * The min and max inclinations correspont respectivly with the negative and positive 
+	 * max angle of attack.
+	 * @return float[2] {min, max}
 	 */
-	public float getMaxInclinationVertStab() {
+	public float[] getMaxInclinationVertStab() {
 		return getMaxInclination(new Vector3f(0, 0, getConfig().getTailSize()), AirfoilOrientation.VERTICAL);
 	}
 	
