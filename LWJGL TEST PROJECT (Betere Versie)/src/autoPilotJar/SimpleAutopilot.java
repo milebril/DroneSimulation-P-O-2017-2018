@@ -235,8 +235,6 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	private float newVerStabInclination = 0;
 	
 	
-
-	
 	private float getVerAngle(){
 		float overstaande = cubePos.getY() - getProperties().getPosition().getY();
 		float aanliggende = cubePos.getZ() - getProperties().getPosition().getZ();
@@ -250,77 +248,62 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	}
 	
 /**
-		 *  We define its angle of attack as -atan2(S . N, S . A), where S
-		 * is the projected airspeed vector, N is the normal, and A is the attack vector
-		 * @param inclination
-		 * @param copyRotationAxis : in drone frame	
-		 * @param wingCentreOfMass: in drone frame
-		 * @param attackVectorDroneFrame: in drone frame
-		 * @return the current estimated aoa of the left wing with given inclination
-		 */
-		private float getAOA(float inclination, Vector3f rotationAxis, Vector3f wingCentreOfMass, Vector3f attackVectorDroneFrame){
-			
-			Vector3f copyRotationAxis = new Vector3f(rotationAxis.x, rotationAxis.y, rotationAxis.z);
-			
-	//		System.out.println("getAOA inclination : " + inclination);
-	//		System.out.println("getAOA rotationAxis : " + copyRotationAxis);
-	//		System.out.println("getAOA wingCentreOfMass : " + wingCentreOfMass);
-	//		System.out.println("getAOA attackVectorDroneFrame : " + attackVectorDroneFrame);		
-	
-			Vector3f wingRotationSpeed = new Vector3f();
-			//de hefboomsafstand in wereldassenstelsel
-			Vector3f leftWingLever = new Vector3f();
-			Matrix3f.transform(getProperties().getOrientationMatrix(), wingCentreOfMass, leftWingLever);
-			// v_rot = omega x hefboomstafstand (in Wereldassenstelsel)
-			Vector3f.cross(getProperties().getRotationSpeed(), leftWingLever , wingRotationSpeed);
-			//totale snelheid is de som van de rotatie en de drone snelheid
-			Vector3f totalSpeed = new Vector3f();
-			Vector3f.add(getProperties().getVelocity(), wingRotationSpeed, totalSpeed); 
-			
-			
-			//The left wing's attack vector is (0, sin(leftWingInclination), -cos(leftWingInclination)
-			Vector3f attackVector = new Vector3f();
-			Matrix3f.transform(getProperties().getOrientationMatrix(), attackVectorDroneFrame, attackVector);
-			
-			//We define an airfoil's normal as the cross product of its axis vector and its attack vector.
-			Vector3f normal = new Vector3f();
-			Vector3f.cross(copyRotationAxis, attackVector, normal);
-			
-			Vector3f projAirspeedVector = new Vector3f();
-			//We define an airfoil's projected airspeed vector as its airspeed vector (its
-	//		velocity minus the wind velocity) projected onto the plane perpendicular to its
-	//		axis vector.
-	//		System.out.println("rotation axis VOOR SCALE: " + copyRotationAxis);
-	
-			Vector3f.sub(totalSpeed, (Vector3f) copyRotationAxis.scale(Vector3f.dot(totalSpeed, copyRotationAxis)), projAirspeedVector);
-			
-	//		System.out.println("rotation axis NA SCALE: " + copyRotationAxis);
-	
-	//		System.out.println("getAOA projAirspeedVector: " + projAirspeedVector);
-	//		System.out.println("getAOA totalSpeed: " + totalSpeed);
-	//		System.out.println("getAOA normal: " + normal);
-	//		System.out.println("getAOA projAirspeedVector: " + projAirspeedVector);
-	//		System.out.println("getAOA attackVector: " + attackVector);
-			
-			float aoa = - (float) Math.atan2(Vector3f.dot(projAirspeedVector, normal), Vector3f.dot(projAirspeedVector, attackVector));
-			
-			return aoa;		
-		}
+	 *  We define its angle of attack as -atan2(S . N, S . A), where S
+	 * is the projected airspeed vector, N is the normal, and A is the attack vector
+	 * @param inclination
+	 * @param copyRotationAxis : in drone frame	
+	 * @param wingCentreOfMass: in drone frame
+	 * @param attackVectorDroneFrame: in drone frame
+	 * @return the current estimated aoa of the left wing with given inclination
+	 */
+	private float getAOA(float inclination, Vector3f rotationAxis, Vector3f wingCentreOfMass, Vector3f attackVectorDroneFrame){
+		
+		Vector3f copyRotationAxis = new Vector3f(rotationAxis.x, rotationAxis.y, rotationAxis.z);
+		
+//		System.out.println("getAOA inclination : " + inclination);
+//		System.out.println("getAOA rotationAxis : " + copyRotationAxis);
+//		System.out.println("getAOA wingCentreOfMass : " + wingCentreOfMass);
+//		System.out.println("getAOA attackVectorDroneFrame : " + attackVectorDroneFrame);		
 
+		Vector3f wingRotationSpeed = new Vector3f();
+		//de hefboomsafstand in wereldassenstelsel
+		Vector3f leftWingLever = new Vector3f();
+		Matrix3f.transform(getProperties().getOrientationMatrix(), wingCentreOfMass, leftWingLever);
+		// v_rot = omega x hefboomstafstand (in Wereldassenstelsel)
+		Vector3f.cross(getProperties().getRotationSpeed(), leftWingLever , wingRotationSpeed);
+		//totale snelheid is de som van de rotatie en de drone snelheid
+		Vector3f totalSpeed = new Vector3f();
+		Vector3f.add(getProperties().getVelocity(), wingRotationSpeed, totalSpeed); 
+		
+		
+		//The left wing's attack vector is (0, sin(leftWingInclination), -cos(leftWingInclination)
+		Vector3f attackVector = new Vector3f();
+		Matrix3f.transform(getProperties().getOrientationMatrix(), attackVectorDroneFrame, attackVector);
+		
+		//We define an airfoil's normal as the cross product of its axis vector and its attack vector.
+		Vector3f normal = new Vector3f();
+		Vector3f.cross(copyRotationAxis, attackVector, normal);
+		
+		Vector3f projAirspeedVector = new Vector3f();
+		//We define an airfoil's projected airspeed vector as its airspeed vector (its
+//		velocity minus the wind velocity) projected onto the plane perpendicular to its
+//		axis vector.
+//		System.out.println("rotation axis VOOR SCALE: " + copyRotationAxis);
 
-//	
-//	 - The left wing's attack vector is (0, sin(leftWingInclination), -cos(leftWingInclination)). => rot axis = (1 , 0, 0)
-//	 - The right wing's attack vector is (0, sin(rightWingInclination), -cos(rightWingInclination)). => rot axis = (1 , 0, 0)
-//	 - The horizontal stabilizer's attack vector is (0, sin(horStabInclination), -cos(horStabInclination)). => rot axis = (1 , 0, 0)
-//	 - The vertical stabilizer's attack vector is (-sin(verStabInclination), 0, -cos(verStabInclination)).  => rot axis = (0 , 1, 0)
+		Vector3f.sub(totalSpeed, (Vector3f) copyRotationAxis.scale(Vector3f.dot(totalSpeed, copyRotationAxis)), projAirspeedVector);
+		
+//		System.out.println("rotation axis NA SCALE: " + copyRotationAxis);
 
-//	- The axis vector of both wings and of the horizontal stabilizer is (1, 0, 0).
-//	- The axis vector of the vertical stabilizer is (0, 1, 0).
-	
-//	 the left wing is at (-wingX, 0, 0)
-//	 the right wing is at (wingX, 0, 0)
-//	 - the horizontal and vertical stabilizers are at (0, 0, tailSize)
-	//TODO de eerste iteratie is de heading volgens z-as ipv negatieve z-as
+//		System.out.println("getAOA projAirspeedVector: " + projAirspeedVector);
+//		System.out.println("getAOA totalSpeed: " + totalSpeed);
+//		System.out.println("getAOA normal: " + normal);
+//		System.out.println("getAOA projAirspeedVector: " + projAirspeedVector);
+//		System.out.println("getAOA attackVector: " + attackVector);
+		
+		float aoa = - (float) Math.atan2(Vector3f.dot(projAirspeedVector, normal), Vector3f.dot(projAirspeedVector, attackVector));
+		
+		return aoa;		
+	}
 	
 	
 	private float getEuclidDist(Vector3f vec1, Vector3f vec2){
@@ -369,7 +352,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		return newVerStabInclination;
 	}
 	
-	// DRONE PROPERTIES
+
 	
 	//	
 	//	 - The left wing's attack vector is (0, sin(leftWingInclination), -cos(leftWingInclination)). => rot axis = (1 , 0, 0)
@@ -384,9 +367,6 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	//	 the right wing is at (wingX, 0, 0)
 	//	 - the horizontal and vertical stabilizers are at (0, 0, tailSize)
 		//TODO de eerste iteratie is de heading volgens z-as ipv negatieve z-as
-	
-	
-	// MAX AIRFOIL INCLINATION
 	
 	
 	//
@@ -561,7 +541,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 //		}
 //
 	
-	
+	// MAX AIRFOIL INCLINATION
 	
 	public enum AirfoilOrientation {
 	    HORIZONTAL, VERTICAL
