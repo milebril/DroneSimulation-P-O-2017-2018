@@ -34,7 +34,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		
 		//Initialize PIDController for horizontalflight
 		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
-		this.pidHorStab = new PIDController(1.0f,0.0f,0.0f, (float) (Math.PI / 360), 0);
+		this.pidHorStab = new PIDController(1.0f,0.0f,0.0f, (float) (Math.PI / 180), 0);
 		this.pidVerGoal = new PIDController(0.0f,0.0f,0.0f, (float) (Math.PI / 180), 0);
 		
 		//PID for Roll (als we dat ooit gaan gebruiken)
@@ -89,15 +89,28 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
 			setDroneProperties(inputs);
 			
+			//Set the horizontal stabilizer inclination
 			newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() + getVerAngle(), getProperties().getDeltaTime());
 			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
 			else if(newHorStabInclination < - Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
 			System.out.println("Inclination horizontal stabiliser: " + newHorStabInclination);
 			
+			//Set the vertical stabilizer inclination
 			newVerStabInclination += pidVerGoal.calculateChange(inputAP.getHeading() - getHorAngle(), getProperties().getDeltaTime());
 			if(newVerStabInclination > Math.PI/6) newVerStabInclination = (float) (Math.PI/6);
 			else if(newVerStabInclination < - Math.PI/6) newVerStabInclination = (float) -(Math.PI/6);
 			
+			//Set the wing inclination
+			newLeftWingInclination = (float) Math.toRadians(4); //met een inclination van 4graden stijgt hij 5 meter over 200 meter
+			newRightWingInclination = (float) Math.toRadians(4);
+			
+			//Set the thrust force
+			if (getProperties().getVelocity().length() > 60) //als de drone sneller vliegt dan 60m/s zet de thrust dan uit
+	          this.newThrust = 0;
+			else
+	    	  this.newThrust = configAP.getMaxThrust();
+			System.out.println("Velocity: " + getProperties().getVelocity().length());
+			System.out.println("Thrust: " + newThrust);
 			cubePositions = cubeLocator.getCoordinatesOfCube();
 			cubePositions.sort(new Comparator<Vector3f>() {
 				@Override
@@ -140,11 +153,6 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 //	            this.pidWings.reset();
 			}
 			
-			//THRUST FORCE
-			if (getProperties().getVelocity().length() > 100) //als de drone sneller vliegt dan 100m/s zet de thrust dan uit
-	          this.newThrust = 0;
-			else
-	    	  this.newThrust = configAP.getMaxThrust();  
 			//REMOVE THIS AFTER TESTING:
 			//this.newThrust = configAP.getMaxThrust();
 		}

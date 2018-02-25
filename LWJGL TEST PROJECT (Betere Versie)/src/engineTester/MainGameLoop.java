@@ -524,7 +524,7 @@ public class MainGameLoop {
 		      float x = r.nextFloat()*20-10;
 		      x = 0;
 		      float y = ((float) r.nextInt(1000) / 500 - 1)*10;
-		      float z = i*-40;
+		      float z = i*-80;
 		      Vector3f position = new Vector3f(x,y,z);
 		      
 		      while(Math.sqrt(Math.pow(x - prevX, 2) + Math.pow(y - prevY, 2)) > 10) {
