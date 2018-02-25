@@ -31,8 +31,8 @@ public class SimpleWorldTester {
 		
 		Loader loader = new Loader();
 		
-		RawOBJModel model = OBJLoader.loadObjModel("stall", loader);
-		TexturedModel tModel = new TexturedModel(model, new ModelTexture(loader.loadTexture("stallTexture")));
+		RawOBJModel model = OBJLoader.loadObjModel("dragon", loader);
+		TexturedModel tModel = new TexturedModel(model, new ModelTexture(loader.loadTexture("dragonTexture")));
 		
 		Entity e = new Entity(tModel, new Matrix4f().translate(new Vector3f(0,0,-10)), 1);
 		e.setModel(null);
