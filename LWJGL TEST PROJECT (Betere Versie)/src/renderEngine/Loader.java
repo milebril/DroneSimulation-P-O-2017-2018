@@ -38,13 +38,13 @@ public class Loader {
 		return new RawModel(vaoID, positions.length/3);
 	}
 	
-	public RawOBJModel loadOBJToVAO(float[] positions,float[] colours,int[] indices){
+	public RawOBJModel loadOBJToVAO(float[] positions,float[] textures,int[] indices){
 		int vaoID = createVAO();
 		if (indices != null) {
 			bindIndicesBuffer(indices);
 		}
 		storeDataInAttributeList(0,3,positions);
-		storeDataInAttributeList(1,3,colours);
+		storeDataInAttributeList(1,3, textures);
 		unbindVAO();
 		return new RawOBJModel(vaoID, positions.length/3);
 	}

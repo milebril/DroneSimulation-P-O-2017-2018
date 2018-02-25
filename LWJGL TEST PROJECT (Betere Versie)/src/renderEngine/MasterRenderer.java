@@ -9,19 +9,20 @@ import entities.Camera;
 import entities.Entity;
 import models.TexturedModel;
 import shaders.StaticShader;
+import shaders.StaticShaderTextures;
 
 public class MasterRenderer {
 	
-	private StaticShader shader = new StaticShader();
-	private EntityRenderer entityRenderer = new EntityRenderer(shader, 120, 120);
+	private StaticShaderTextures shader = new StaticShaderTextures();
+	private ObjectRenderer objectRenderer = new ObjectRenderer(shader, 120, 120);
 	
 	private Map<TexturedModel, List<Entity>> entities = new HashMap<TexturedModel, List<Entity>>();
 	
 	public void render(Camera camera) {
-		entityRenderer.prepare();
+		objectRenderer.prepare();
 		shader.start();
 		shader.loadViewMatrix(camera);
-		entityRenderer.render(entities);
+		objectRenderer.render(entities);
 		shader.stop();
 		entities.clear();
 	}
