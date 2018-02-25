@@ -34,28 +34,19 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		
 		//Initialize PIDController for horizontalflight
 		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
-		//this.pidHorStab = new PIDController(10.0f,1.0f,5.0f);
-		//this.pidHorWing = new PIDController(1.0f,0.0f,10.0f, (float) -(Math.PI / 180), 0);
-		//this.pidHorStab = new PIDController(2.0f,1.0f,10.0f, (float) (Math.PI / 180), 0);
-		//this.pidHorGoal = new PIDController(1.0f,0.0f,0.5f, (float) (Math.PI / 180), 0);
+		this.pidHorStab = new PIDController(1.0f,0.0f,0.0f, (float) (Math.PI / 360), 0);
+		this.pidVerGoal = new PIDController(0.0f,0.0f,0.0f, (float) (Math.PI / 180), 0);
 		
-		//this.pidHorStab = new PIDController(2.0f,1.0f,10.0f, (float) (Math.PI / 180), 0);
-		this.pidHorStab = new PIDController(1.0f,0.0f,0.5f, (float) (Math.PI / 180), 0);
-		this.pidVerGoal = new PIDController(2.0f,0.0f,1.0f, (float) (Math.PI / 180), 0);
-		
-		
-		this.pidWings = new PIDController(1.0f,0.0f,5.0f,(float) Math.toRadians(1),0);
-        this.pidRoll = new PIDController(5.0f,0.0f,10.0f,(float) Math.toRadians(1),0);
+		//PID for Roll (als we dat ooit gaan gebruiken)
+		//this.pidWings = new PIDController(1.0f,0.0f,5.0f,(float) Math.toRadians(1),0);
+        //this.pidRoll = new PIDController(5.0f,0.0f,10.0f,(float) Math.toRadians(1),0);
 
 		
-		//Initialize AP with configfile
-		
-		
+		//Initialize AP with configfile TODO: mag deze lijn weg?
 		
 		//Initialize PIDController for Thrust
 		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
-		this.pidThrust = new PIDController(1.0f, 0.0f, 3.0f, -10, 10);
-		//initialize();
+		//this.pidThrust = new PIDController(1.0f, 0.0f, 3.0f, -10, 10);
 	}
 	
 	
@@ -101,41 +92,11 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() + getVerAngle(), getProperties().getDeltaTime());
 			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
 			else if(newHorStabInclination < - Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
-
-//			float maxHorStab = getMaxInclinationHorStab();
-//			if (newHorStabInclination > maxHorStab) {
-//				newHorStabInclination = maxHorStab;
-//			} else if (newHorStabInclination < -maxHorStab) {
-//				newHorStabInclination = -maxHorStab;
-//			}
+			System.out.println("Inclination horizontal stabiliser: " + newHorStabInclination);
 			
 			newVerStabInclination += pidVerGoal.calculateChange(inputAP.getHeading() - getHorAngle(), getProperties().getDeltaTime());
 			if(newVerStabInclination > Math.PI/6) newVerStabInclination = (float) (Math.PI/6);
 			else if(newVerStabInclination < - Math.PI/6) newVerStabInclination = (float) -(Math.PI/6);
-
-//			//ROLL PID
-//			float changeWing = this.pidWings.calculateChange(inputAP.getHeading() - getHorAngle(), dt);
-//				
-//			this.newLeftWingInclination += changeWing;
-//			if(this.newLeftWingInclination > Math.toRadians(20)) this.newLeftWingInclination = (float) Math.toRadians(20);
-//			if(this.newLeftWingInclination < 0) this.newLeftWingInclination = 0;
-//				
-//			this.newRightWingInclination -= changeWing;
-//			if(this.newRightWingInclination > Math.toRadians(20)) this.newRightWingInclination = (float) Math.toRadians(20);
-//			if(this.newRightWingInclination < 0) this.newRightWingInclination = 0;
-//
-//			//Negatieve Roll (LeftWingInclination > RightWingInclination) -> NegatieveChangeWingRoll
-//			if(Math.abs(this.inputAP.getRoll()) > Math.toRadians(10)){
-//				float changeWingRoll = this.pidRoll.calculateChange(this.inputAP.getRoll(),dt);
-//				//System.out.println("Roll | ChangeWingRoll : " + this.inputAP.getRoll() + " | " + changeWingRoll);
-//				this.newLeftWingInclination += changeWingRoll;
-//				if(this.newLeftWingInclination > Math.toRadians(20)) this.newLeftWingInclination = (float) Math.toRadians(20);
-//				if(this.newLeftWingInclination < 0) this.newLeftWingInclination = 0;
-//				
-//				this.newRightWingInclination -= changeWingRoll;
-//				if(this.newRightWingInclination > Math.toRadians(20)) this.newRightWingInclination = (float) Math.toRadians(20);
-//				if(this.newRightWingInclination < 0) this.newRightWingInclination = 0;
-//			}
 			
 			cubePositions = cubeLocator.getCoordinatesOfCube();
 			cubePositions.sort(new Comparator<Vector3f>() {
@@ -151,10 +112,10 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 				if ((int) (temp.z / -40) > blockCount) {
 					blockCount++;
 					cubePos = new Vector3f(Math.round(temp.x), Math.round(temp.y), ((int) (temp.z / 40)) * 40);
-					System.out.println("Schatting: " + cubePos);
-					System.out.println("Z POS: " + getProperties().getPosition().z);
-					System.out.println(inputAP.getElapsedTime());
-					System.out.println(blockCount);
+//					System.out.println("Schatting: " + cubePos);
+//					System.out.println("Z POS: " + getProperties().getPosition().z);
+//					System.out.println(inputAP.getElapsedTime());
+//					System.out.println(blockCount);
 				}
 								
 				if (!lockedOnTarget && getEuclidDist(getProperties().getPosition(), cubePos) <= 15) {
@@ -163,7 +124,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 							(cubePositions.get(0).y + cubePos.y) / 2f, ((int) (cubePos.z / 40)) * 40 ) ;
 //					cubePos = cubePositions.get(0); 
 //		          	cubePos.z = ((int) (cubePos.z / 40)) * 40; 
-					System.out.println("Lock: " + cubePos);
+//					System.out.println("Lock: " + cubePos);
 				}
 			} 
 			
@@ -180,19 +141,12 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			}
 			
 			//THRUST FORCE
-	      if (getProperties().getVelocity().length() > 30) { 
-	          newThrust = 0;
-	      } else { 
-//		          if (Math.abs(newVerStabInclination) > 0.1) { 
-//		        	  newThrust = configAP.getMaxThrust() / 4; 
-//		          } else { 
-//	        	  this.newThrust = configAP.getMaxThrust(); 
-//		          } 
-	    	  
-	    	this.newThrust = configAP.getMaxThrust();  
-		  } 
-	      //REMOVE THIS AFTER TESTING:
-	      //this.newThrust = configAP.getMaxThrust();
+			if (getProperties().getVelocity().length() > 100) //als de drone sneller vliegt dan 100m/s zet de thrust dan uit
+	          this.newThrust = 0;
+			else
+	    	  this.newThrust = configAP.getMaxThrust();  
+			//REMOVE THIS AFTER TESTING:
+			//this.newThrust = configAP.getMaxThrust();
 		}
 
 		return this;

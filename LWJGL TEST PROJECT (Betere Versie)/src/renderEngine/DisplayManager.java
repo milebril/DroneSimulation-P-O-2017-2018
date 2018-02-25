@@ -62,6 +62,7 @@ public class DisplayManager {
 		
 		long currentFrameTime = getCurrentTime();
 		delta = (currentFrameTime - lastFrameTime) / 1000f; // In seconds
+		delta = delta/2; //Slow down the simulation
 		lastFrameTime = currentFrameTime;
 		
 		elapsedTime += delta;
