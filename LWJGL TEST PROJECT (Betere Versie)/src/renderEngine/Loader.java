@@ -44,7 +44,7 @@ public class Loader {
 			bindIndicesBuffer(indices);
 		}
 		storeDataInAttributeList(0,3,positions);
-		storeDataInAttributeList(1,3, textures);
+		storeDataInAttributeList(1,2, textures);
 		unbindVAO();
 		return new RawOBJModel(vaoID, positions.length/3);
 	}
