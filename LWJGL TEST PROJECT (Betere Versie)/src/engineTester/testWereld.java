@@ -34,14 +34,16 @@ public class testWereld {
 		
 		List<Entity> entities = new ArrayList<Entity>();
 		Random random = new Random();
-		for(int i=0;i<500;i++){
+		for(int i=0;i<1;i++){
 			entities.add(new Entity(staticModel, new Matrix4f().translate(new Vector3f(0,0,-10)), 1));
 		}
 		
 		Terrain terrain = new Terrain(0,0,loader,new ModelTexture(loader.loadTexture("grass")));
-		Terrain terrain2 = new Terrain(1,0,loader,new ModelTexture(loader.loadTexture("grass")));
+		Terrain terrain2 = new Terrain(0,-1,loader,new ModelTexture(loader.loadTexture("grass")));
 		
 		Camera camera = new Camera();	
+		camera.setPosition(new Vector3f(0, 30, 3));
+		camera.setPitch((float) (Math.PI/2));
 		MasterRenderer renderer = new MasterRenderer();
 		
 		while(!Display.isCloseRequested()){

@@ -37,7 +37,7 @@ public class MasterRenderer {
 		GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glCullFace(GL11.GL_BACK);
 		createProjectionMatrix();
-		objectRenderer = new ObjectRenderer(shader, 120, 120);
+		objectRenderer = new ObjectRenderer(shader, 60, 60);
 		terrainRenderer = new TerrainRenderer(terrainShader);
 	}
 	

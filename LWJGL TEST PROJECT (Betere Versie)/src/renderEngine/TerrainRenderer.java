@@ -23,8 +23,8 @@ public class TerrainRenderer {
 	private static final float NEAR_PLANE = 0.1f;
 	private static final float FAR_PLANE = 1000;
 	
-	private static float FOVX = 120;
-	private static float FOVY = 120;
+	private static float FOVX = 60;
+	private static float FOVY = 60;
 	
 	private TerrainShader shader;
 	Matrix4f projectionMatrix;
