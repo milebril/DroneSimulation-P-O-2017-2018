@@ -38,7 +38,7 @@ public class MasterRenderer {
 		GL11.glCullFace(GL11.GL_BACK);
 		createProjectionMatrix();
 		objectRenderer = new ObjectRenderer(shader, 120, 120);
-		terrainRenderer = new TerrainRenderer(terrainShader, projectionMatrix);
+		terrainRenderer = new TerrainRenderer(terrainShader);
 	}
 	
 	private Map<TexturedModel, List<Entity>> entities = new HashMap<TexturedModel, List<Entity>>();

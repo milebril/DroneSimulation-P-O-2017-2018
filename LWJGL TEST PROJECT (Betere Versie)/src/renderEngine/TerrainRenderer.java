@@ -20,10 +20,18 @@ import toolbox.Maths;
 
 public class TerrainRenderer {
 
+	private static final float NEAR_PLANE = 0.1f;
+	private static final float FAR_PLANE = 1000;
+	
+	private static float FOVX = 120;
+	private static float FOVY = 120;
+	
 	private TerrainShader shader;
-
-	public TerrainRenderer(TerrainShader shader, Matrix4f projectionMatrix) {
+	Matrix4f projectionMatrix;
+	
+	public TerrainRenderer(TerrainShader shader) {
 		this.shader = shader;
+		createProjectionMatrix();
 		shader.start();
 		shader.loadProjectionMatrix(projectionMatrix);
 		shader.stop();
@@ -60,5 +68,22 @@ public class TerrainRenderer {
 				new Vector3f(terrain.getX(), 0, terrain.getZ()), 0, 0, 0, 1);
 		shader.loadTransformationMatrix(transformationMatrix);
 	}
+	
+	private void createProjectionMatrix(){
+		//float aspectRatio = (float) Display.getWidth() / (float) Display.getHeight();
+		float aspectRatio = FOVX / FOVY;
+		float y_scale = (float) ((1f / Math.tan(Math.toRadians(FOVY / 2f))));
+		float x_scale = y_scale / aspectRatio;
+		float frustum_length = FAR_PLANE - NEAR_PLANE;
+
+		projectionMatrix = new Matrix4f();
+		projectionMatrix.m00 = x_scale;
+		projectionMatrix.m11 = y_scale;
+		projectionMatrix.m22 = -((FAR_PLANE + NEAR_PLANE) / frustum_length);
+		projectionMatrix.m23 = -1;
+		projectionMatrix.m32 = -((2 * NEAR_PLANE * FAR_PLANE) / frustum_length);
+		projectionMatrix.m33 = 0;
+	}
+	
 
 }
