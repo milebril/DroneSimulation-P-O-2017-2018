@@ -3,7 +3,7 @@
 in vec3 position;
 in vec2 textureCoords;
 
-out vec3 pass_textureCoords;
+out vec2 pass_textureCoords;
 out vec3 colour;
 
 uniform mat4 transformationMatrix;
