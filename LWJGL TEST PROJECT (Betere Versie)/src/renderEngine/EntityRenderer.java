@@ -5,6 +5,7 @@ import models.RawOBJModel;
 import models.TexturedModel;
 
 import java.util.List;
+import java.util.Map;
 
 import org.hamcrest.core.IsInstanceOf;
 import org.lwjgl.opengl.Display;
@@ -73,6 +74,46 @@ public class EntityRenderer {
 		unbindRawModel();
 	}
 	
+	//NEW RENDERING
+	public void render(Map<TexturedModel, List<Entity>> entities) {
+		for (TexturedModel model : entities.keySet()) {
+			prepareTexturedModel(model);
+			List<Entity> batch = entities.get(model);
+			for (Entity e : batch) {
+				prepareInstance(e);
+				GL11.glDrawElements(GL11.GL_TRIANGLES, model.getRawOBJModel().getVertexCount(), 
+						GL11.GL_UNSIGNED_INT, 0);
+			}
+			unbindTexturedModel();
+		}
+	}
+	
+	private void prepareTexturedModel(TexturedModel model) {
+		RawOBJModel rawModel = model.getRawOBJModel();
+		GL30.glBindVertexArray(rawModel.getVaoID());
+		GL20.glEnableVertexAttribArray(0); //Vertices
+		GL20.glEnableVertexAttribArray(1); //Colors
+		GL13.glActiveTexture(GL13.GL_TEXTURE0);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, model.getTexture().getID());
+	}
+	
+	private void unbindTexturedModel() {
+		GL20.glDisableVertexAttribArray(0);
+		GL20.glDisableVertexAttribArray(1);
+		GL30.glBindVertexArray(0);
+	}
+	
+	private void prepareInstance(Entity entity) {
+		Matrix4f transformationMatrix = entity.getPose();
+		shader.loadTransformationMatrix(transformationMatrix);
+	}
+	
+	
+	
+	
+	
+	
+	
 	private void prepareRawModel(RawModel rawModel) {
 		GL30.glBindVertexArray(rawModel.getVaoID());
 		GL20.glEnableVertexAttribArray(0);
@@ -83,13 +124,6 @@ public class EntityRenderer {
 		GL20.glDisableVertexAttribArray(0);
 		GL20.glDisableVertexAttribArray(1);
 		GL30.glBindVertexArray(0);
-	}
-	
-	private void prepareInstance(Entity entity) {
-//		Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(),
-//				entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
-		Matrix4f transformationMatrix = entity.getPose();
-		shader.loadTransformationMatrix(transformationMatrix);
 	}
 
 	public void render(Entity entity, StaticShader shader) {

@@ -14,6 +14,7 @@ import models.RawOBJModel;
 import models.TexturedModel;
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
+import renderEngine.MasterRenderer;
 import renderEngine.OBJLoader;
 import renderEngine.EntityRenderer;
 import shaders.StaticShader;
@@ -21,40 +22,34 @@ import textures.ModelTexture;
 
 public class SimpleWorldTester {
 
-	private static EntityRenderer renderer;
-	private static StaticShader shader;
 	private static Camera camera;
 	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		
 		DisplayManager.createDisplay();
-		
-		shader = new StaticShader();
-		renderer = new EntityRenderer(shader, 60, 60);
+	
 		camera = new Camera();
 		
 		Loader loader = new Loader();
 		
-		RawOBJModel model = OBJLoader.loadOBJModel("bunny", loader);
-		
+		RawOBJModel model = OBJLoader.loadObjModel("stall", loader);
 		TexturedModel tModel = new TexturedModel(model, new ModelTexture(loader.loadTexture("stallTexture")));
+		
 		Entity e = new Entity(tModel, new Matrix4f().translate(new Vector3f(0,0,-10)), 1);
 		e.setModel(null);
 		e.setOBJModel(model);
 		
+		MasterRenderer masterRenderer = new MasterRenderer();
 		while(!Display.isCloseRequested()){
 			e.getPose().rotate((float) (Math.PI/180), new Vector3f(0,1,0));
-			//renderer.prepare();
-			shader.start();
-			shader.loadViewMatrix(camera);
-			renderer.render(e, shader);
 			
-			shader.stop();
+			masterRenderer.processEntity(e);
+			
+			masterRenderer.render(camera);
 			DisplayManager.updateDisplay();
 		}
 		
-		shader.cleanUp();
+		masterRenderer.cleanUp();
+		//loader.cleanUp();
 		DisplayManager.closeDisplay();
 	}
 
