@@ -30,7 +30,16 @@ import javax.vecmath.Matrix4f;
 
 public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	
+	private List<Vector3f> cubePositions = new ArrayList<>();
+	
 	public SimpleAutopilot() {
+		this.cubePositions.add(new Vector3f(0, 5,-80 ));
+		this.cubePositions.add(new Vector3f(0,10,-160));
+		this.cubePositions.add(new Vector3f(0, 5,-240));
+		this.cubePositions.add(new Vector3f(0, 0,-320));
+		this.cubePositions.add(new Vector3f(0,-5,-400));
+		
+		this.cubePos = this.cubePositions.remove(0);
 		
 		//Initialize PIDController for horizontalflight
 		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
@@ -88,7 +97,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
 			setDroneProperties(inputs);
-			
+			System.out.println("Goal: " + this.cubePos);
 			//Set the horizontal stabilizer inclination
 			newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() + getVerAngle(), getProperties().getDeltaTime());
 			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
@@ -109,46 +118,50 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	          this.newThrust = 0;
 			else
 	    	  this.newThrust = configAP.getMaxThrust();
+			
 			System.out.println("Velocity: " + getProperties().getVelocity().length());
 			System.out.println("Thrust: " + newThrust);
-			cubePositions = cubeLocator.getCoordinatesOfCube();
-			cubePositions.sort(new Comparator<Vector3f>() {
-				@Override
-				public int compare(Vector3f o1, Vector3f o2) {
-					return -Float.compare(o1.z, o2.z);
-				}
-			});
+			
+//			cubePositions = cubeLocator.getCoordinatesOfCube();
+//			cubePositions.sort(new Comparator<Vector3f>() {
+//				@Override
+//				public int compare(Vector3f o1, Vector3f o2) {
+//					return -Float.compare(o1.z, o2.z);
+//				}
+//			});
 			
 			//Lock next target
-			if (cubePositions.size() > 0) {
-				Vector3f temp = cubePositions.get(0);
-				if ((int) (temp.z / -40) > blockCount) {
-					blockCount++;
-					cubePos = new Vector3f(Math.round(temp.x), Math.round(temp.y), ((int) (temp.z / 40)) * 40);
+//			if (cubePositions.size() > 0) {
+//				Vector3f temp = cubePositions.get(0);
+//				if ((int) (temp.z / -40) > blockCount) {
+//					blockCount++;
+//					cubePos = new Vector3f(Math.round(temp.x), Math.round(temp.y), ((int) (temp.z / 40)) * 40);
 //					System.out.println("Schatting: " + cubePos);
 //					System.out.println("Z POS: " + getProperties().getPosition().z);
 //					System.out.println(inputAP.getElapsedTime());
 //					System.out.println(blockCount);
-				}
+//				}
 								
-				if (!lockedOnTarget && getEuclidDist(getProperties().getPosition(), cubePos) <= 15) {
-					lockedOnTarget = true;
-					cubePos = new Vector3f((cubePositions.get(0).x + cubePos.x) / 2f, 
-							(cubePositions.get(0).y + cubePos.y) / 2f, ((int) (cubePos.z / 40)) * 40 ) ;
+//				if (!lockedOnTarget && getEuclidDist(getProperties().getPosition(), cubePos) <= 15) {
+//					lockedOnTarget = true;
+//					cubePos = new Vector3f((cubePositions.get(0).x + cubePos.x) / 2f, 
+//							(cubePositions.get(0).y + cubePos.y) / 2f, ((int) (cubePos.z / 40)) * 40 ) ;
 //					cubePos = cubePositions.get(0); 
 //		          	cubePos.z = ((int) (cubePos.z / 40)) * 40; 
 //					System.out.println("Lock: " + cubePos);
-				}
-			} 
+//				}
+//			} 
 			
 //			if (cubePositions.size() > 0) {
 //				cubePos = cubePositions.get(0);
 //			}
 			
 			//CUBE REACHED
+			System.out.println("Size: " + this.cubePositions.size());
 			if(getEuclidDist(getProperties().getPosition(),cubePos) <= 4){
-				this.cubePos = stubCube.translate(0, 0, -40);
-				lockedOnTarget = false;
+				this.cubePos = this.cubePositions.remove(0);
+//				this.cubePos = stubCube.translate(0, 0, -40);
+//				lockedOnTarget = false;
 //				this.pidHorStab.reset();
 //	            this.pidWings.reset();
 			}
@@ -233,9 +246,6 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	//Aanpassen als we naar nieuwe cubus moeten gaan
 	private Vector3f stubCube = new Vector3f(0, 0, -40);
 	private Vector3f cubePos = stubCube;
-	private List<Vector3f> cubePositions = new ArrayList<>();
-	
-	
 	
 	private float heightGoal = 1;
 	
