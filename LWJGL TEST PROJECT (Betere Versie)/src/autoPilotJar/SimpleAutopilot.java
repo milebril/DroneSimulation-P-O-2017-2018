@@ -43,7 +43,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		
 		//Initialize PIDController for horizontalflight
 		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
-		this.pidHorStab = new PIDController(1.0f,0.0f,0.0f, (float) (Math.PI / 180), 0);
+		this.pidHorStab = new PIDController(1.0f,0.0f,1.0f, (float) (Math.PI / 180), 0);
 		this.pidVerGoal = new PIDController(0.0f,0.0f,0.0f, (float) (Math.PI / 180), 0);
 		
 		//PID for Roll (als we dat ooit gaan gebruiken)

@@ -152,9 +152,9 @@ public class MainGameLoop {
 		
 		//***INITIALIZE SIDEVIEW***
 		shaderSideView = new StaticShader();
-		renderSideView = new Renderer(shaderSideView, 40, 20);
+		renderSideView = new Renderer(shaderSideView, 80, 20);
 		sideViewCamera = new Camera();
-		sideViewCamera.setPosition(new Vector3f(300,0,-100));
+		sideViewCamera.setPosition(new Vector3f(300,0,-200));
 		sideViewCamera.setRotation(0, (float) -(Math.PI / 2), 0);
 		
 		//***INITIALIZE GUI-TEXT***
