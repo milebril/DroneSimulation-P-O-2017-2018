@@ -236,7 +236,8 @@ public class MainGameLoop {
 			
 			//***UPDATES***
 			float dt = DisplayManager.getFrameTimeSeconds();
-			if(!entities.isEmpty()) {
+			System.out.println("dt: " + dt);
+			if(!entities.isEmpty() && dt > 0.00001) {
 				
 				//applyphysics rekent de krachten uit en gaat dan de kinematische waarden van de drone
 				// aanpassen op basis daarvan 

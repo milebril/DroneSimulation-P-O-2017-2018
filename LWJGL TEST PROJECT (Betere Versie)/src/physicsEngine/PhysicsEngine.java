@@ -19,7 +19,7 @@ public class PhysicsEngine {
 	 * @throws DroneCrashException if the Drone crashes
 	 */
 	public static void applyPhysics (Drone drone, float dt) throws DroneCrashException {
-		
+		System.out.println("test123");
 		// stepsize bepalen
 		float h;
 		if(dt - drone.getPredictionMethod().getStepSize() >= 0){
