@@ -33,22 +33,22 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	private List<Vector3f> cubePositions = new ArrayList<>();
 	
 	public SimpleAutopilot() {
-		this.cubePositions.add(new Vector3f(0, 5,-80 ));
-		this.cubePositions.add(new Vector3f(0,10,-160));
-		this.cubePositions.add(new Vector3f(0, 5,-240));
-		this.cubePositions.add(new Vector3f(0, 0,-320));
-		this.cubePositions.add(new Vector3f(0,-5,-400));
+		this.cubePositions.add(new Vector3f(  5,0,-80 )); 
+	    this.cubePositions.add(new Vector3f(  0,0,-160)); 
+	    this.cubePositions.add(new Vector3f( -5,0,-240)); 
+	    this.cubePositions.add(new Vector3f(-10,0,-320)); 
+	    this.cubePositions.add(new Vector3f( -5,0,-400)); 
 		
 		this.cubePos = this.cubePositions.remove(0);
 		
 		//Initialize PIDController for horizontalflight
 		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
 		this.pidHorStab = new PIDController(1.0f,0.0f,1.0f, (float) (Math.PI / 180), 0);
-		this.pidVerGoal = new PIDController(0.0f,0.0f,0.0f, (float) (Math.PI / 180), 0);
+		this.pidVerStab = new PIDController(2.5f,0.0f,2.0f, (float) (Math.PI / 180), 0);
 		
 		//PID for Roll (als we dat ooit gaan gebruiken)
 		//this.pidWings = new PIDController(1.0f,0.0f,5.0f,(float) Math.toRadians(1),0);
-        //this.pidRoll = new PIDController(5.0f,0.0f,10.0f,(float) Math.toRadians(1),0);
+        this.pidRoll = new PIDController(0.0f,0.5f,1.0f,(float) Math.toRadians(1),0);
 
 		
 		//Initialize AP with configfile TODO: mag deze lijn weg?
@@ -94,6 +94,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	@Override
 	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
 		this.inputAP = inputs;
+		System.out.println("Roll: " + inputs.getRoll());
 		
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
 			setDroneProperties(inputs);
@@ -105,19 +106,23 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			System.out.println("Inclination horizontal stabiliser: " + newHorStabInclination);
 			
 			//Set the vertical stabilizer inclination
-			newVerStabInclination += pidVerGoal.calculateChange(inputAP.getHeading() - getHorAngle(), getProperties().getDeltaTime());
+			newVerStabInclination += pidVerStab.calculateChange(inputAP.getHeading() - getHorAngle(), getProperties().getDeltaTime());
 			if(newVerStabInclination > Math.PI/6) newVerStabInclination = (float) (Math.PI/6);
 			else if(newVerStabInclination < - Math.PI/6) newVerStabInclination = (float) -(Math.PI/6);
 			
 			//Set the wing inclination
 			newLeftWingInclination = (float) Math.toRadians(4); //met een inclination van 4graden stijgt hij 5 meter over 200 meter
+//			newLeftWingInclination += pidRoll.calculateChange(inputAP.getRoll(), getProperties().getDeltaTime());
+//			if(newLeftWingInclination > Math.PI/6) newLeftWingInclination = (float) (Math.PI/6);
+//			else if(newLeftWingInclination < - Math.PI/6) newLeftWingInclination = (float) -(Math.PI/6);
+			
 			newRightWingInclination = (float) Math.toRadians(4);
 			
 			//Set the thrust force
-			if (getProperties().getVelocity().length() > 60) //als de drone sneller vliegt dan 60m/s zet de thrust dan uit
-	          this.newThrust = 0;
-			else
-	    	  this.newThrust = configAP.getMaxThrust();
+			//if (getProperties().getVelocity().length() > 60) //als de drone sneller vliegt dan 60m/s zet de thrust dan uit
+	        //  this.newThrust = 0;
+			//else
+	    	this.newThrust = configAP.getMaxThrust();
 			
 			System.out.println("Velocity: " + getProperties().getVelocity().length());
 			System.out.println("Thrust: " + newThrust);
@@ -162,7 +167,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 				this.cubePos = this.cubePositions.remove(0);
 //				this.cubePos = stubCube.translate(0, 0, -40);
 //				lockedOnTarget = false;
-//				this.pidHorStab.reset();
+				this.pidVerStab.reset();
 //	            this.pidWings.reset();
 			}
 			
@@ -253,7 +258,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	private PIDController pidHorStab;
 	private PIDController pidHorWing;
 	private PIDController pidHorGoal;
-	private PIDController pidVerGoal;
+	private PIDController pidVerStab;
 	private PIDController pidWings;
 	private PIDController pidRoll;
 	private PIDController pidThrust;
