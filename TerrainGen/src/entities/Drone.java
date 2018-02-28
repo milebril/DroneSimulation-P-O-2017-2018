@@ -20,6 +20,7 @@ import interfaces.AutopilotConfig;
 import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
 import models.RawModel;
+import models.TexturedModel;
 import physicsEngine.approximationMethods.EulerPrediction;
 import physicsEngine.approximationMethods.PredictionMethod;
 import renderEngine.DisplayManager;
@@ -36,10 +37,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 
 	private final PredictionMethod predictionMethod;
 	
-	
-	
-	
-	public Drone(RawModel model, Matrix4f pose, float scale,
+	public Drone(TexturedModel model, Matrix4f pose, float scale,
 				AutopilotConfig cfg, PredictionMethod predictionMethod) {
 		super(model, pose, scale);
 		

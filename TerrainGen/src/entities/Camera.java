@@ -42,7 +42,7 @@ public class Camera {
 	}
 
 	/**
-	 * Set pitch of camera
+	 * Set pitch of camera around y-axi
 	 * @param pitch in degrees
 	 */
 	public void setPitch(float pitch) {
@@ -71,6 +71,9 @@ public class Camera {
 			this.position.z += dz;
 	}
 
+	/**
+	 * Roll around the z-axis
+	 */
 	public void setRoll(float roll) {
 		this.roll = roll;
 	}
@@ -119,8 +122,11 @@ public class Camera {
 		return image;
 	}
 
-	public void setYaw(int i) {
-		this.yaw = i;
+	/**
+	 * Rotate around the x-axis
+	 */
+	public void setYaw(float f) {
+		this.yaw = f;
 		
 	}
 	

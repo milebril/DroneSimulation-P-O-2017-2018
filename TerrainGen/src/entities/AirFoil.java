@@ -162,8 +162,8 @@ public class AirFoil {
 		float aoa = (float) - Math.atan2(a, b);
 		//System.out.println(drone.getMaxAOA());
 		if (aoa > Math.toRadians(drone.getMaxAOA())) {
-			System.out.println(aoa);
-			System.exit(0);
+			System.err.println(aoa);
+			//System.exit(0); //TODO ignored
 		}
 
 //		System.out.println("Airfoil calculateAirfliff AOA: " + aoa);

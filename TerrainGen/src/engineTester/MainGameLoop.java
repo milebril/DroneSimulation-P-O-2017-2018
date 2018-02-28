@@ -1,5 +1,10 @@
 package engineTester;
 
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -7,6 +12,7 @@ import java.util.Random;
 import models.RawCubeModel;
 import models.RawModel;
 import models.TexturedModel;
+import physicsEngine.PhysicsEngine;
 import physicsEngine.approximationMethods.EulerPrediction;
 
 import org.lwjgl.input.Keyboard;
@@ -14,7 +20,9 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
+import org.opencv.core.Core;
 
+import autopilot.AutopilotConfigReader;
 import renderEngine.CubeRenderer;
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
@@ -30,32 +38,78 @@ import entities.Camera;
 import entities.Drone;
 import entities.Entity;
 import entities.Light;
+import interfaces.Autopilot;
+import interfaces.AutopilotConfig;
 import interfaces.AutopilotFactory;
+import interfaces.AutopilotInputs;
+import interfaces.AutopilotOutputs;
 
 public class MainGameLoop {
-
+	
+	private static final float STEP_TIME = 0.001f;
+	
+	//Key press lock
 	private static boolean lLock;
 	private static boolean sLock;
 	private static boolean oLock;
 	
+
+	public static AutopilotConfig autopilotConfig;
+	
+	private static Drone drone;
+	
 	//Entities lists
-	private static List<Entity> entities = new ArrayList<>();
-	private static List<Terrain> terrains = new ArrayList<>();
-	private static List<Entity> cubes = new ArrayList<>();
+	private static List<Entity> entities;
+	private static List<Terrain> terrains;
+	private static List<Entity> cubes;
 	
 	//Loader
 	private static Loader loader;
+	
+	//Autopilot
+	private static Autopilot autopilot;
+
+	//Camera Stuff
+	private static Camera chaseCam;
+	private static boolean chaseCameraLocked = true;
 
 	public static void main(String[] args) {
+		//Needed to load openCV
+		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		
+		//***INITIALIZE CONFIG***
+		try {
+			File config = new File("res/AutopilotConfig.cfg");
+			DataInputStream inputStream = new DataInputStream(new FileInputStream(config));
+			autopilotConfig = AutopilotConfigReader.read(inputStream);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		//***INITIALIZE LOADERS & SCREEN***
 		DisplayManager.createDisplay();
-		
-		//Initializing Objects
 		loader = new Loader();
+		entities = new ArrayList<>();
+		terrains = new ArrayList<>();
+		cubes = new ArrayList<>();
 		
+		//***INITIALIZE DRONEVIEW***
+		RawModel droneModel = OBJLoader.loadObjModel("tree", loader);
+		TexturedModel staticDroneModel = new TexturedModel(droneModel,new ModelTexture(loader.loadTexture("tree")));
+		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, 10, -10)), 1, autopilotConfig, new EulerPrediction(STEP_TIME));
+		drone.getPose().rotate((float) -(Math.PI/2), new Vector3f(1,0,0));
+		entities.add(drone);
+		
+		//***INITIALIZE CHASE-CAM***
+		chaseCam = new Camera();
+		chaseCam.setPosition(drone.getPosition().translate(0, 5, 10));
+		chaseCam.setYaw((float) -(Math.PI/9));
+		
+		//Load Trees
 		RawModel model = OBJLoader.loadObjModel("tree", loader);
-		
 		TexturedModel staticModel = new TexturedModel(model,new ModelTexture(loader.loadTexture("tree")));
-		
 		Random random = new Random();
 		for(int i=0;i<500;i++){
 			entities.add(new Entity(staticModel,
@@ -71,15 +125,20 @@ public class MainGameLoop {
 		terrains.add(new LandingStrip(-0.5f,-1,loader,new ModelTexture(loader.loadTexture("landing"))));
 		
 		Camera camera = new Camera(200, 200);	
+		camera.setPosition(drone.getPosition().translate(0, 0, -5));
 		MasterRenderer renderer = new MasterRenderer();
 		
 		//Cube Render
 		CubeShader cubeShader = new CubeShader();
 		CubeRenderer cubeRenderer = new CubeRenderer(cubeShader, 120, 120);
 		
-		Cube c = new Cube(1, 0, 0);
-		RawCubeModel cube = loader.loadToVAO(c.positions, c.colors);
-		Entity e = new Entity(cube, new Matrix4f().translate(new Vector3f(0, 4, -10)), 1);
+//		Cube c = new Cube(1, 0, 0);
+//		RawCubeModel cube = loader.loadToVAO(c.positions, c.colors);
+//		Entity e = new Entity(cube, new Matrix4f().translate(new Vector3f(0, 4, -10)), 1);
+		
+		/* INITIALIZE AUTOPILOT */
+		autopilot = AutopilotFactory.createAutopilot();
+		autopilot.simulationStarted(autopilotConfig, drone.getAutoPilotInputs());
 		
 		while(!Display.isCloseRequested()){
 			//CAMERA VIEW
@@ -96,10 +155,10 @@ public class MainGameLoop {
 			}
 			
 			for(Entity entity:entities){
-				//TODO
-//				renderer.processEntity(entity);
+				renderer.processEntity(entity);
 			}
 			renderer.render(light, camera);
+			camera.setPosition(drone.getPosition().translate(0, 0, -5));
 			
 			cubeShader.start();
 			cubeShader.loadViewMatrix(camera);
@@ -114,7 +173,7 @@ public class MainGameLoop {
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			renderer.prepareBlack();
 			
-			//BIG SCREEN
+			//***BIG SCREEN***
 			renderer.prepare();
 			GL11.glViewport(0, 200, Display.getWidth(), Display.getHeight() - 200);
 			GL11.glScissor(0, 200, Display.getWidth(), Display.getHeight() - 200);
@@ -126,18 +185,33 @@ public class MainGameLoop {
 			
 			for(Entity entity:entities){
 				//TODO
-//				renderer.processEntity(entity);
+				renderer.processEntity(entity);
 			}
-			renderer.render(light, camera);
+			renderer.render(light, chaseCam);
 			
 			cubeShader.start();
-			cubeShader.loadViewMatrix(camera);
+			cubeShader.loadViewMatrix(chaseCam);
 			for (Entity entity : cubes) {
 				cubeRenderer.render(entity, cubeShader);
 			}
 			cubeShader.stop();
 			
+			//***UPDATES***
+			float dt = DisplayManager.getFrameTimeSeconds();
+			if(!entities.isEmpty() && dt > 0.0001) {
+				
+				//applyphysics rekent de krachten uit en gaat dan de kinematische waarden van de drone
+				// aanpassen op basis daarvan 
+				PhysicsEngine.applyPhysics(drone, dt);
+				
+				//Autopilot stuff
+				AutopilotInputs inputs = drone.getAutoPilotInputs();
+				AutopilotOutputs outputs = autopilot.timePassed(inputs);
+				drone.setAutopilotOutouts(outputs);
+			}
+			
 			keyInputs();
+			removeCubes();
 			DisplayManager.updateDisplay();
 		}
 
@@ -147,37 +221,46 @@ public class MainGameLoop {
 		DisplayManager.closeDisplay();
 	}
 	
+	private static void removeCubes() {
+		List<Entity> toRemove = new ArrayList<>();
+		for (Entity e : cubes) {
+			if (getEuclidDist(drone.getPosition(), e.getPosition()) <= 4) {
+				toRemove.add(e);
+			}
+		}
+		
+		cubes.removeAll(toRemove);
+	}
+	
+	private static float getEuclidDist(Vector3f vec1, Vector3f vec2){
+		Vector3f temp = new Vector3f(0,0,0);
+		Vector3f.sub(vec2, vec1, temp);
+		return temp.length();
+	}
+	
 	public static void keyInputs() {
-		if (Keyboard.isKeyDown(Keyboard.KEY_Y)) {
-//			Vector3f.add(drone.getPosition(), new Vector3f(0, 150, -50), freeRoamCamera.getPosition());
-//			freeRoamCamera.setRotation((float) -(Math.PI / 2), 0, 0);
-		} else if (Keyboard.isKeyDown(Keyboard.KEY_X)) {
-//			Vector3f.add(drone.getPosition(), new Vector3f(100, 0, 0), freeRoamCamera.getPosition());
-//			freeRoamCamera.setRotation(0, (float) -(Math.PI / 2), 0);
-		} else if(Keyboard.isKeyDown(Keyboard.KEY_L)) {
+		if(Keyboard.isKeyDown(Keyboard.KEY_L)) {
 			/* Lock/Unlock on Third Person Camera */
 			if (!lLock) {
-//				freeRoamCameraLocked = !freeRoamCameraLocked;
+				chaseCameraLocked = !chaseCameraLocked;
 			}
 			lLock = true;
 		} else if (Keyboard.isKeyDown(Keyboard.KEY_O)) {
-			
+			//TODO
 			oLock = true;
 		} else if(Keyboard.isKeyDown(Keyboard.KEY_S)) {
 			if (!sLock) {
 				DisplayManager.start();
 			}
-			
 			sLock = true;
 		} else if(Keyboard.isKeyDown(Keyboard.KEY_R)) {
 			reset();
 		}else {
-//			if (freeRoamCameraLocked) {
-//				Vector3f.add(drone.getPosition(), new Vector3f(0, 0, 30), freeRoamCamera.getPosition());
-//				//freeRoamCamera.setRotation((float) -(Math.PI/6), 0, 0);
-//			} else {
-//				freeRoamCamera.roam();
-//			}
+			if (chaseCameraLocked) {
+				Vector3f.add(drone.getPosition(), new Vector3f(0, 5, 10), chaseCam.getPosition());
+			} else {
+				chaseCam.roam();
+			}
 			
 			lLock = false;
 			oLock = false;
