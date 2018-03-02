@@ -145,6 +145,25 @@ public class Tyre {
 	
 	// COMPRESSION
 	
+	/**
+	 * The save compression
+	 */
+	private double savedCompression;
+	
+	/**
+	 * Get the saved compression.
+	 */
+	public double getSavedCompression() {
+		return this.savedCompression;
+	}
+	
+	/**
+	 * Save a new compression.
+	 */
+	public void saveCompression(double compression) {
+		this.savedCompression = compression;
+	}
+	
 	/*
 	 * !! "Moddeleer elk wiel als een schijf..." !!
 	 * De indrukking van het wiel
@@ -187,27 +206,6 @@ public class Tyre {
 		else return radius - distance;
 	}
 	
-	// DELTA COMPRESSION
-	
-	/**
-	 * dD/dt
-	 */
-	private double deltaCompression;
-	
-	/**
-	 * Returns dD/dt.
-	 */
-	public double getDeltaCompression() {
-		return this.deltaCompression;
-	}
-	
-	/**
-	 * Set dD/dt.
-	 */
-	public void setDeltaCompression(double compression) {
-		this.deltaCompression = compression;
-	}
-	
 	
 	// GROUNDED
 	
@@ -217,5 +215,64 @@ public class Tyre {
 	public boolean isGrounded() {
 		return 0 < getCompression();
 	}
-
+	
+	/**
+	 * Returns at which position (in drone frame) this Tyre touches the ground and the
+	 * forward and sideward orientation: {grounded position, rolling orientation, sliding orientation}
+	 * Returns null if the Tyre is not grounded
+	 */
+	public Vector3f[] getGroundedProperties() {
+		if (!isGrounded()) return null;
+		
+		// normaal v.d. Tyre (in world frame)
+		Vector3f Tyrenormal = getDrone().transformToWorldFrame(new Vector3f(1, 0, 0));
+		
+		// normaal v.d. ground (in world frame)
+		Vector3f groundNormal = new Vector3f(0, 1, 0);
+		
+		// kruisproduct v.d. normalen geeft de orientatie v.d. intersection lijn (aka voorwaartse orientatie)
+		Vector3f intersectionOrientation = new Vector3f();
+		Vector3f.cross(groundNormal, Tyrenormal, intersectionOrientation);
+		intersectionOrientation.normalise();
+		
+		// Zoek een willekeurig punt op de intersection (geweten is dat y = 0 adhv het grondvlak)
+		Vector3f intersectionPoint = new Vector3f(1, 0, intersectionOrientation.z/intersectionOrientation.x);
+		
+		// Positie v.h. Tyre centrum t.o.v. het intersection point
+		Vector3f center = new Vector3f();
+		Vector3f.sub(getDrone().transformToWorldFrame(getPosition()), intersectionPoint, center);
+		
+		// projectie van v.h. relatieve tyre centrum op de intersection lijn en berekening van het raakpunt
+		intersectionOrientation.scale(Vector3f.dot(center, intersectionOrientation));
+		Vector3f projection = new Vector3f();
+		Vector3f.add(intersectionPoint, intersectionOrientation, projection);
+		projection = getDrone().transformToDroneFrame(projection);
+		
+		// zijwaartse orientatie = loodrechte op de intersectie lijn en de normaal v.h. grondvlak
+		intersectionOrientation.normalise();
+		Vector3f sideWays = new Vector3f();
+		Vector3f.cross(intersectionOrientation, new Vector3f(0, 1, 0), sideWays);
+		
+		// transform the results to drone frame
+		projection = getDrone().transformToDroneFrame(projection);
+		intersectionOrientation = getDrone().transformToDroneFrame(intersectionOrientation);
+		sideWays = getDrone().transformToDroneFrame(sideWays);
+		
+		return new Vector3f[] {projection, intersectionOrientation, sideWays};
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
