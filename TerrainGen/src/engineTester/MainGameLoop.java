@@ -1,13 +1,17 @@
 package engineTester;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import javax.swing.JFileChooser;
 
 import models.RawCubeModel;
 import models.RawModel;
@@ -44,6 +48,9 @@ import entities.Light;
 import fontMeshCreator.FontType;
 import fontMeshCreator.GUIText;
 import fontRendering.TextMaster;
+import guis.Button;
+import guis.GuiRenderer;
+import guis.GuiTexture;
 import interfaces.Autopilot;
 import interfaces.AutopilotConfig;
 import interfaces.AutopilotFactory;
@@ -77,6 +84,10 @@ public class MainGameLoop {
 	//Camera Stuff
 	private static Camera chaseCam;
 	private static boolean chaseCameraLocked = true;
+	
+	//Buttons
+	private static Button openFile;
+	private static Button randomCubes;
 
 	public static void main(String[] args) {
 		//Needed to load openCV
@@ -158,6 +169,16 @@ public class MainGameLoop {
 		autopilot = AutopilotFactory.createAutopilot();
 		autopilot.simulationStarted(autopilotConfig, drone.getAutoPilotInputs());
 		
+		//***INITIALIZE BUTTONS GUI***
+		List<GuiTexture> guis = new ArrayList<>();
+		GuiRenderer guiRenderer = new GuiRenderer(loader);
+		
+		createOpenFileButton();
+		openFile.show(guis);
+		
+		createRandomCubeButton();
+		randomCubes.show(guis);
+		
 		while(!Display.isCloseRequested()){
 			//CAMERA VIEW
 			renderer.prepare();
@@ -227,6 +248,15 @@ public class MainGameLoop {
 				cubeRenderer.render(entity, cubeShader);
 			}
 			cubeShader.stop();
+			
+			//***BUTTON GUI***
+			GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
+			GL11.glScissor(0, 0, Display.getWidth(), Display.getHeight());
+			GL11.glEnable(GL11.GL_SCISSOR_TEST);
+			
+			guiRenderer.render(guis);
+			openFile.checkHover();
+			randomCubes.checkHover();
 			
 			//***UPDATES***
 			float dt = DisplayManager.getFrameTimeSeconds();
@@ -375,5 +405,110 @@ public class MainGameLoop {
 		 }
 		 
 		 System.out.println("#####");
+	}
+	
+	private static void createOpenFileButton() {
+		JFileChooser fc = new JFileChooser();
+		openFile = new Button(loader, "openfile", new Vector2f(0.9f, 0.9f), new Vector2f(0.05f, 0.05f)) {
+			@Override
+			public void whileHover() { }
+
+			@Override
+			public void stopHover() {
+				this.setScale(new Vector2f(0.05f, 0.05f));
+			}
+
+			@Override
+			public void startHover() {
+				this.playHoverAnimation(0.01f);
+			}
+			
+			@Override
+			public void onClick() {
+				this.playerClickAnimation(0.02f);
+
+				int returnVal = fc.showOpenDialog(null);
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					File file = fc.getSelectedFile();
+					//Read file and load cubes
+					loadCubes(file);
+				} else {
+					System.out.println("Open command cancelled by user.");
+				}
+			}
+		};
+	}
+	
+	private static void createRandomCubeButton() {
+		randomCubes = new Button(loader, "random", new Vector2f(0.9f, 0.75f), new Vector2f(0.05f, 0.05f)) {
+			@Override
+			public void whileHover() {
+			}
+			
+			@Override
+			public void stopHover() {
+			}
+			
+			@Override
+			public void startHover() {
+			}
+			
+			@Override
+			public void onClick() {
+				System.out.println("hier");
+				generateRandomCubes();
+			}
+		};
+	}
+	
+
+	public static void loadCubes(File file) {
+		Random r = new Random();
+		
+		//reset entities first
+		entities = new ArrayList<>();
+		
+		int count = 0;
+		
+		try(BufferedReader br = new BufferedReader(new FileReader(file))) {
+		    for(String line; (line = br.readLine()) != null; ) {
+		        String[] s = line.split(" ");
+		        float x = Float.parseFloat(s[0]);
+		        float y = Float.parseFloat(s[1]);
+		        float z = Float.parseFloat(s[2]);
+		        
+		        Cube c = null;
+		        
+			    switch (count) {
+					case 0:
+						c = new Cube(1, 0, 0);
+						break;
+					case 1:
+						c = new Cube(0, 1, 0);
+						break;
+					case 2:
+						c = new Cube(1, 0, 1);
+						break;
+					case 3:
+						c = new Cube(1, 1, 0);
+						break;
+					case 4:
+						c = new Cube(0, 1, 1);
+						break;
+					default:
+						break;
+				}
+		        count++;
+		        
+				RawCubeModel model = loader.loadToVAO(c.positions, c.colors);
+		        
+				 cubes.add(new Entity(model, new Matrix4f().translate(new Vector3f(x, y, z)), 1));
+		    }
+		    // line is not visible here.
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
