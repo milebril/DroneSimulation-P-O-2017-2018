@@ -44,6 +44,12 @@ public class Loader {
 		return new RawCubeModel(vaoID, positions.length/3);
 	}
 	
+	public int loadToVAOText(float[] positions, float[] textureCoords) {
+		int vaoID = createVAO();
+		storeDataInAttributeList(0,2,positions);
+		storeDataInAttributeList(1,2,textureCoords);
+		return vaoID;
+	}
 	
 	public int loadTexture(String fileName) {
 		Texture texture = null;

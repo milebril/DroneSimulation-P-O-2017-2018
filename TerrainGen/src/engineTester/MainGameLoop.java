@@ -19,15 +19,18 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
+import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.opencv.core.Core;
 
 import autopilot.AutopilotConfigReader;
 import renderEngine.CubeRenderer;
 import renderEngine.DisplayManager;
+import renderEngine.EntityRenderer;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
 import renderEngine.OBJLoader;
+import shaders.StaticShader;
 import shaders.cubes.CubeShader;
 import terrains.LandingStrip;
 import terrains.Terrain;
@@ -38,6 +41,9 @@ import entities.Camera;
 import entities.Drone;
 import entities.Entity;
 import entities.Light;
+import fontMeshCreator.FontType;
+import fontMeshCreator.GUIText;
+import fontRendering.TextMaster;
 import interfaces.Autopilot;
 import interfaces.AutopilotConfig;
 import interfaces.AutopilotFactory;
@@ -52,7 +58,6 @@ public class MainGameLoop {
 	private static boolean lLock;
 	private static boolean sLock;
 	private static boolean oLock;
-	
 
 	public static AutopilotConfig autopilotConfig;
 	
@@ -91,6 +96,7 @@ public class MainGameLoop {
 		//***INITIALIZE LOADERS & SCREEN***
 		DisplayManager.createDisplay();
 		loader = new Loader();
+		TextMaster.init(loader);
 		entities = new ArrayList<>();
 		terrains = new ArrayList<>();
 		cubes = new ArrayList<>();
@@ -107,14 +113,26 @@ public class MainGameLoop {
 		chaseCam.setPosition(drone.getPosition().translate(0, 5, 10));
 		chaseCam.setYaw((float) -(Math.PI/9));
 		
+		//***INITIALIZE GUI-TEXT***
+		StaticShader shaderText = new StaticShader();
+
+		String speed = String.valueOf(Math.round(drone.getAbsVelocity()));
+		FontType font = new FontType(loader.loadTexture("verdana"), new File("res/verdana.fnt"));
+		GUIText textSpeed = new GUIText("Speed = " + speed + "m/s", 5, font, new Vector2f(0.01f,0), 1, true);
+		textSpeed.setColour(1, 1, 1);
+		
+		String xpos, ypos, zpos;
+		GUIText textPosition = new GUIText("" , 5, font, new Vector2f(0.9f,0.9f), 1, true);
+		textPosition.setColour(1, 0, 0);
+
 		//Load Trees
-		RawModel model = OBJLoader.loadObjModel("tree", loader);
-		TexturedModel staticModel = new TexturedModel(model,new ModelTexture(loader.loadTexture("tree")));
-		Random random = new Random();
-		for(int i=0;i<500;i++){
-			entities.add(new Entity(staticModel,
-					new Matrix4f().translate(new Vector3f(random.nextFloat()*800 - 400,0, random.nextFloat() * -600)), 1));
-		}
+//		RawModel model = OBJLoader.loadObjModel("tree", loader);
+//		TexturedModel staticModel = new TexturedModel(model,new ModelTexture(loader.loadTexture("tree")));
+//		Random random = new Random();
+//		for(int i=0;i<500;i++){
+//			entities.add(new Entity(staticModel,
+//					new Matrix4f().translate(new Vector3f(random.nextFloat()*800 - 400,0, random.nextFloat() * -600)), 1));
+//		}
 		
 		Light light = new Light(new Vector3f(20000,20000,2000),new Vector3f(1,1,1));
 		
@@ -173,12 +191,26 @@ public class MainGameLoop {
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			renderer.prepareBlack();
 			
+			speed = String.valueOf(Math.round(drone.getAbsVelocity()));
+			textSpeed .setString("Speed = " + speed + "m/s");
+			TextMaster.loadText(textSpeed);
+
+			xpos = String.valueOf(Math.round(drone.getPosition().x));
+			ypos = String.valueOf(Math.round(drone.getPosition().y));
+			zpos = String.valueOf(Math.round(drone.getPosition().z));
+			textPosition.setString("Position = ("+xpos+" , "+ypos+" , "+zpos +")");
+			TextMaster.loadText(textPosition);
+			
+			TextMaster.render();
+			TextMaster.removeText(textSpeed);
+			TextMaster.removeText(textPosition);
+			
 			//***BIG SCREEN***
 			renderer.prepare();
 			GL11.glViewport(0, 200, Display.getWidth(), Display.getHeight() - 200);
 			GL11.glScissor(0, 200, Display.getWidth(), Display.getHeight() - 200);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
-
+			//chaseCam.setPosition(chaseCam.getPosition().translate(0, -0.01f, -1));
 			for (Terrain t : terrains) {
 				renderer.processTerrain(t);
 			}
@@ -217,6 +249,7 @@ public class MainGameLoop {
 
 		renderer.cleanUp();
 		loader.cleanUp();
+		TextMaster.cleanUp();
 		cubeShader.cleanUp();
 		DisplayManager.closeDisplay();
 	}
@@ -274,17 +307,19 @@ public class MainGameLoop {
 		DisplayManager.reset();
 		
 		//Reset Cameras
-//		freeRoamCameraLocked = true;
+		chaseCameraLocked = true;
 //		viewState = ViewStates.CHASE;
 		
-		//Reset Drone
-//		Cuboid droneCube = new Cuboid(0, 0, 0);
-//		drone = new Drone(loader.loadToVAO(droneCube.positions, droneCube.colors, null),
-//				new Matrix4f().translate(new Vector3f(0, 0, 0)), 1, autopilotConfig, new EulerPrediction(STEP_TIME));
+		entities.remove(drone);
+		RawModel droneModel = OBJLoader.loadObjModel("tree", loader);
+		TexturedModel staticDroneModel = new TexturedModel(droneModel,new ModelTexture(loader.loadTexture("tree")));
+		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, 10, -10)), 1, autopilotConfig, new EulerPrediction(STEP_TIME));
+		drone.getPose().rotate((float) -(Math.PI/2), new Vector3f(1,0,0));
+		entities.add(drone);
 		
 		//Reset AP
-//		autopilot = AutopilotFactory.createAutopilot();
-//		autopilot.simulationStarted(autopilotConfig, drone.getAutoPilotInputs());
+		autopilot = AutopilotFactory.createAutopilot();
+		autopilot.simulationStarted(autopilotConfig, drone.getAutoPilotInputs());
 	}
 	
 	public static void generateRandomCubes() {
@@ -320,7 +355,7 @@ public class MainGameLoop {
 		      RawCubeModel model = loader.loadToVAO(c.positions, c.colors);
 		      float x = r.nextFloat()*20-10;
 		      x = 0;
-		      float y = ((float) r.nextInt(1000) / 500 - 1)*10;
+		      float y = ((float) r.nextInt(20));
 		      float z = i*-40;
 		      Vector3f position = new Vector3f(x,y,z);
 		      	
