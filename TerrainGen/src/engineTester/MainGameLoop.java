@@ -85,6 +85,16 @@ public class MainGameLoop {
 	private static Camera chaseCam;
 	private static boolean chaseCameraLocked = true;
 	
+	//Shaders
+	private static CubeShader cubeShader;
+	
+	//Renderers
+	private static MasterRenderer renderer;
+	private static CubeRenderer cubeRenderer;
+	
+	//Lights
+	private static Light light;
+	
 	//Buttons
 	private static Button openFile;
 	private static Button randomCubes;
@@ -145,7 +155,7 @@ public class MainGameLoop {
 //					new Matrix4f().translate(new Vector3f(random.nextFloat()*800 - 400,0, random.nextFloat() * -600)), 1));
 //		}
 		
-		Light light = new Light(new Vector3f(20000,20000,2000),new Vector3f(1,1,1));
+		light = new Light(new Vector3f(20000,20000,2000),new Vector3f(1,1,1));
 		
 		terrains.add(new Terrain(0,-1,loader,new ModelTexture(loader.loadTexture("greenScreen"))));
 		terrains.add(new Terrain(-1,-1,loader,new ModelTexture(loader.loadTexture("greenScreen"))));
@@ -155,11 +165,11 @@ public class MainGameLoop {
 		
 		Camera camera = new Camera(200, 200);	
 		camera.setPosition(drone.getPosition().translate(0, 0, -5));
-		MasterRenderer renderer = new MasterRenderer();
+		renderer = new MasterRenderer();
 		
 		//Cube Render
-		CubeShader cubeShader = new CubeShader();
-		CubeRenderer cubeRenderer = new CubeRenderer(cubeShader, 120, 120);
+		cubeShader = new CubeShader();
+		cubeRenderer = new CubeRenderer(cubeShader, 120, 120);
 		
 //		Cube c = new Cube(1, 0, 0);
 //		RawCubeModel cube = loader.loadToVAO(c.positions, c.colors);
@@ -186,25 +196,8 @@ public class MainGameLoop {
 			GL11.glScissor(0,0,200,200);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			//camera.setPosition(camera.getPosition().translate(0, -0.01f, -1));
-			cubeShader.start();
-			cubeShader.loadViewMatrix(camera);
-			
-			for (Terrain t : terrains) {
-				renderer.processTerrain(t);
-			}
-			
-			for(Entity entity:entities){
-				renderer.processEntity(entity);
-			}
-			renderer.render(light, camera);
+			renderEntities(camera);
 			camera.setPosition(drone.getPosition().translate(0, 0, -5));
-			
-			cubeShader.start();
-			cubeShader.loadViewMatrix(camera);
-			for (Entity entity : cubes) {
-				cubeRenderer.render(entity, cubeShader);
-			}
-			cubeShader.stop();
 			
 			//GUI TODO
 			GL11.glViewport(200, 0, Display.getWidth() - 200, 200);
@@ -232,22 +225,8 @@ public class MainGameLoop {
 			GL11.glScissor(0, 200, Display.getWidth(), Display.getHeight() - 200);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			//chaseCam.setPosition(chaseCam.getPosition().translate(0, -0.01f, -1));
-			for (Terrain t : terrains) {
-				renderer.processTerrain(t);
-			}
-			
-			for(Entity entity:entities){
-				//TODO
-				renderer.processEntity(entity);
-			}
-			renderer.render(light, chaseCam);
-			
-			cubeShader.start();
-			cubeShader.loadViewMatrix(chaseCam);
-			for (Entity entity : cubes) {
-				cubeRenderer.render(entity, cubeShader);
-			}
-			cubeShader.stop();
+			renderEntities(chaseCam);
+
 			
 			//***BUTTON GUI***
 			GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
@@ -282,6 +261,24 @@ public class MainGameLoop {
 		TextMaster.cleanUp();
 		cubeShader.cleanUp();
 		DisplayManager.closeDisplay();
+	}
+	
+	private static void renderEntities(Camera camera) {
+		for (Terrain t : terrains) {
+			renderer.processTerrain(t);
+		}
+		
+		for(Entity entity:entities){
+			renderer.processEntity(entity);
+		}
+		renderer.render(light, camera);
+		
+		cubeShader.start();
+		cubeShader.loadViewMatrix(camera);
+		for (Entity entity : cubes) {
+			cubeRenderer.render(entity, cubeShader);
+		}
+		cubeShader.stop();
 	}
 	
 	private static void removeCubes() {
