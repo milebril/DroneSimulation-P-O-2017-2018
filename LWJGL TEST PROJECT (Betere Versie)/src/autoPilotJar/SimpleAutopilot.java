@@ -24,6 +24,8 @@ import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
 import openCV.ImageProcessor;
 import openCV.RedCubeLocator;
+import path.MyPath;
+
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.AxisAngle4f;
 import javax.vecmath.Matrix4f;
@@ -31,15 +33,16 @@ import javax.vecmath.Matrix4f;
 public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	
 	private List<Vector3f> cubePositions = new ArrayList<>();
+	private MyPath path;
 	
 	public SimpleAutopilot() {
-		this.cubePositions.add(new Vector3f(  5,0,-80 )); 
-	    this.cubePositions.add(new Vector3f(  0,0,-160)); 
-	    this.cubePositions.add(new Vector3f( -5,0,-240)); 
-	    this.cubePositions.add(new Vector3f(-10,0,-320)); 
-	    this.cubePositions.add(new Vector3f( -5,0,-400)); 
+		float[] pathX = {  5,   0,  -5, -10,  -5};
+		float[] pathY = {  0,   0,   0,   0,   0};
+		float[] pathZ = {-80,-160,-240,-320,-400};
+		this.path = new MyPath(pathX,pathY,pathZ);
+		this.path.setIndex(0);
 		
-		this.cubePos = this.cubePositions.remove(0);
+		this.cubePos = new Vector3f(path.getCurrentX(), path.getCurrentY(),path.getCurrentZ());
 		
 		//Initialize PIDController for horizontalflight
 		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
@@ -164,7 +167,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			//CUBE REACHED
 			System.out.println("Size: " + this.cubePositions.size());
 			if(getEuclidDist(getProperties().getPosition(),cubePos) <= 4){
-				this.cubePos = this.cubePositions.remove(0);
+				this.path.setIndex(this.path.getIndex() + 1);
+				this.cubePos = new Vector3f(path.getCurrentX(), path.getCurrentY(), path.getCurrentZ());
 //				this.cubePos = stubCube.translate(0, 0, -40);
 //				lockedOnTarget = false;
 				this.pidVerStab.reset();
