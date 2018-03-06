@@ -35,7 +35,7 @@ public class OpenCVTest {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
 		
-		process("imageNew", (float)0.0, (float) 0.0, (float) 0.0);
+		process("image", (float)0.0, (float) 0.0, (float) 0.0);
 		
 		
 		
@@ -115,7 +115,7 @@ public class OpenCVTest {
 		System.out.println("hsv");
 		
 		for (int i = 0; i < colorHSVList.size(); i++){
-			System.out.println(colorHSVList.get(i)[0]);
+			System.out.println(colorHSVList.get(i)[0]+" "+colorHSVList.get(i)[1]+" "+colorHSVList.get(i)[2]);
 		}
 		
 		for (int i = 0; i < colorHSVList.size(); i++){
@@ -436,7 +436,7 @@ public class OpenCVTest {
 							}
 					}
 					if ( teller == 0 ) {
-						colorHSVList.add(new double[]{hsvMat.get(y, x)[0]});
+						colorHSVList.add(new double[]{hsvMat.get(y, x)[0],hsvMat.get(y, x)[1],hsvMat.get(y, x)[2]});
 					}
 
 					
