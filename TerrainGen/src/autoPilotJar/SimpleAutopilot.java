@@ -107,7 +107,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			
 			//System.out.println("Goal: " + this.cubePos);
 			//Set the horizontal stabilizer inclination
-			newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() + getVerAngle(), getProperties().getDeltaTime());
+			//newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() + getVerAngle(), getProperties().getDeltaTime());
+			newHorStabInclination = 0;
 			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
 			else if(newHorStabInclination < - Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
 			//System.out.println("Inclination horizontal stabiliser: " + newHorStabInclination);

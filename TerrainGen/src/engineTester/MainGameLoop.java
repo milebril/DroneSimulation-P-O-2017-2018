@@ -218,9 +218,6 @@ public class MainGameLoop {
 			textPosition.setString("Position = ("+xpos+" , "+ypos+" , "+zpos +")");
 			TextMaster.loadText(textPosition);
 			
-			System.out.println("Drone Pos" + drone.getPosition());
-			System.out.println("Drone:" + drone.getLinearVelocity()) ;
-			
 			TextMaster.render();
 			TextMaster.removeText(textSpeed);
 			TextMaster.removeText(textPosition);
@@ -255,6 +252,10 @@ public class MainGameLoop {
 				} catch (DroneCrashException e) {
 					System.out.println(e);
 				} // TODO: stop simulation (drone crashed)
+				
+				System.out.println("Drone Pos" + drone.getPosition());
+				System.out.println("Drone:" + drone.getLinearVelocity()) ;
+				System.out.println(autopilotConfig.getGravity());
 				
 				//Autopilot stuff
 				AutopilotInputs inputs = drone.getAutoPilotInputs();
