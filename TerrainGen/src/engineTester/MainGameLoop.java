@@ -132,8 +132,8 @@ public class MainGameLoop {
 		
 		//***INITIALIZE CHASE-CAM***
 		chaseCam = new Camera();
-		chaseCam.setPosition(drone.getPosition().translate(0, 1, 5));
-		chaseCam.setYaw((float) -(Math.PI/9));
+		chaseCam.setPosition(drone.getPosition().translate(0, 2, 10));
+		//chaseCam.setYaw((float) -(Math.PI/9));
 		
 		//***INITIALIZE GUI-TEXT***
 		StaticShader shaderText = new StaticShader();
@@ -226,9 +226,8 @@ public class MainGameLoop {
 			GL11.glScissor(0, 200, Display.getWidth(), Display.getHeight() - 200);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			//chaseCam.setPosition(chaseCam.getPosition().translate(0, -0.01f, -1));
-			chaseCam.setPosition(drone.getPosition().translate(0, 3, 5));
 			renderEntities(chaseCam);
-
+			chaseCam.setPosition(drone.getPosition().translate(0, 2, 10));
 			
 			//***BUTTON GUI***
 			GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
@@ -324,7 +323,7 @@ public class MainGameLoop {
 			reset();
 		}else {
 			if (chaseCameraLocked) {
-				Vector3f.add(drone.getPosition(), new Vector3f(0, 5, 10), chaseCam.getPosition());
+				Vector3f.add(drone.getPosition(), new Vector3f(0, 2, 10), chaseCam.getPosition());
 			} else {
 				chaseCam.roam();
 			}
@@ -338,7 +337,7 @@ public class MainGameLoop {
 	private static void reset() {
 		//Reset Cubes & Display
 		generateRandomCubes();
-		DisplayManager.reset();
+		//DisplayManager.reset();
 		
 		//Reset Cameras
 		chaseCameraLocked = true;
@@ -347,7 +346,7 @@ public class MainGameLoop {
 		entities.remove(drone);
 		RawModel droneModel = OBJLoader.loadObjModel("tree", loader);
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,new ModelTexture(loader.loadTexture("tree")));
-		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, 10, -10)), 1, autopilotConfig, new EulerPrediction(STEP_TIME));
+		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, 20, 0)), 1, autopilotConfig, new EulerPrediction(STEP_TIME));
 		drone.getPose().rotate((float) -(Math.PI/2), new Vector3f(1,0,0));
 		entities.add(drone);
 		
