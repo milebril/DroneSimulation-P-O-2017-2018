@@ -7,19 +7,11 @@ import models.TexturedModel;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
-/**
- * position of entity is stored in a 4x4 pose matrix
- * @author Jakob
- *
- */
 public class Entity {
-
-	private Matrix4f pose;
-
+	
 	public Entity(RawModel model, Matrix4f pose, float scale) {
 		this.model = model;
 		this.setPose(pose);
-//		this.orientation = orientation;
 		this.scale = scale;
 	}
 	
@@ -37,7 +29,8 @@ public class Entity {
 		this.scale = scale;
 	}
 
-	// The model of the entity
+	// MODEL
+	
 	private RawModel model;
 	private RawOBJModel objmodel;
 	private TexturedModel texModel;
@@ -58,70 +51,68 @@ public class Entity {
 		this.model = model;
 	}
 	
-	public void setOBJModel(RawOBJModel model) {
-		this.objmodel = model;
-	}
+	// POSE
 	
-	public Vector3f getPosition() {
-		return new Vector3f(this.getPose().m30, this.getPose().m31, this.getPose().m32);
-	}
-
-	public void translate(Vector3f vector) {
-		this.pose.translate(vector);
-	}
-
-//	public void increasePosition(Vector3f increment) {
-//		Vector3f newPosition = new Vector3f();
-//		Vector3f.add(this.getPosition(), increment, newPosition);
-//		setPosition(newPosition);
-//	}
+	/**
+	 * The pose matrix of the entity. This contains the 
+	 * position and orientation.
+	 */
+	private Matrix4f pose;
 	
-	
-	// the orientation of the entity
-//	private Matrix4f orientation;
-	
-//	public Vector3f getOrientation() {
-//		return new Vector3f(this.orientation.x, this.orientation.y, this.orientation.z);
-//	}
-//
-//	public void setOrientation(Vector3f vector) {
-//		this.orientation.set(vector.x, vector.y, vector.z);
-//	}
-	
-//	public void increaseOrientation(Vector3f increment) {
-//		Vector3f newOrientation = new Vector3f();
-//		Vector3f.add(this.getOrientation(), increment, newOrientation);
-//		setOrientation(newOrientation);
-//	}
-	
-	
-	// the scale of the entity
-	private float scale;
-
-	public float getScale() {
-		return scale;
-	}
-
-	public void setScale(float scale) {
-		this.scale = scale;
-	}
-
+	/**
+	 * Returns the pose matrix of this Entity.
+	 */
 	public Matrix4f getPose() {
 		return pose;
 	}
 	
-	/** 
-	 * rotates the entity given angles around the x- y- z axis of the world frame
-	 * @param angles
+	/**
+	 * Set the pose matrix of this Entity.
 	 */
-	public void rotate(float angle, Vector3f axis){
-		//System.out.println("entity rotate angle: " + angle + " axis: " + axis);
-		//System.out.println(this.getPose());
-		this.getPose().rotate(angle , axis);	
-	}
-
 	public void setPose(Matrix4f pose) {
 		this.pose = pose;
 	}
+	
+	/**
+	 * Returns the position of this Entity.
+	 */
+	public Vector3f getPosition() {
+		return new Vector3f(this.getPose().m30, this.getPose().m31, this.getPose().m32);
+	}
+	
+	/**
+	 * Translates this entity over the given vector.
+	 */
+	public void translate(Vector3f vector) {
+		this.pose.translate(vector);
+	}
+	
+	/** 
+	 * Rotates this entity for the given angle around the x- y- z axis of the world frame
+	 */
+	public void rotate(float angle, Vector3f axis){
+		this.getPose().rotate(angle , axis);	
+	}
+	
+	// SCALE
 
+	/**
+	 * The scale of this Entity.
+	 */
+	private float scale;
+	
+	/**
+	 * Returns the scale of this Entity.
+	 */
+	public float getScale() {
+		return scale;
+	}
+	
+	/**
+	 * Sets the scale of this Entity.
+	 */
+	public void setScale(float scale) {
+		this.scale = scale;
+	}
+	
 }

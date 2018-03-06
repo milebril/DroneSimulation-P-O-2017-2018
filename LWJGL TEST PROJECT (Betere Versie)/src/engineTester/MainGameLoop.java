@@ -1,6 +1,7 @@
 package engineTester;
 
 import models.RawModel;
+import physicsEngine.DroneCrashException;
 import physicsEngine.PhysicsEngine;
 import physicsEngine.approximationMethods.EulerPrediction;
 
@@ -151,9 +152,9 @@ public class MainGameLoop {
 		
 		//***INITIALIZE SIDEVIEW***
 		shaderSideView = new StaticShader();
-		renderSideView = new EntityRenderer(shaderSideView, 40, 20);
+		renderSideView = new Renderer(shaderSideView, 80, 20);
 		sideViewCamera = new Camera();
-		sideViewCamera.setPosition(new Vector3f(300,0,-100));
+		sideViewCamera.setPosition(new Vector3f(300,0,-200));
 		sideViewCamera.setRotation(0, (float) -(Math.PI / 2), 0);
 		
 		//***INITIALIZE GUI-TEXT***
@@ -235,16 +236,24 @@ public class MainGameLoop {
 			
 			//***UPDATES***
 			float dt = DisplayManager.getFrameTimeSeconds();
-			if(!entities.isEmpty()) {
+			System.out.println("dt: " + dt);
+			if(!entities.isEmpty() && dt > 0.00001) {
 				
 				//applyphysics rekent de krachten uit en gaat dan de kinematische waarden van de drone
 				// aanpassen op basis daarvan 
-				PhysicsEngine.applyPhysics(drone, dt);
+				try {
+					PhysicsEngine.applyPhysics(drone, dt);
+				} catch (DroneCrashException e) {
+					System.out.println(e);
+				} // TODO: stop simulation (drone crashed)
+				
 				
 				//Autopilot stuff
 				AutopilotInputs inputs = drone.getAutoPilotInputs();
 				AutopilotOutputs outputs = autopilot.timePassed(inputs);
 				drone.setAutopilotOutouts(outputs);
+				
+				
 			}
 			
 			keyInputs();
@@ -516,7 +525,7 @@ public class MainGameLoop {
 		      float x = r.nextFloat()*20-10;
 		      x = 0;
 		      float y = ((float) r.nextInt(1000) / 500 - 1)*10;
-		      float z = i*-40;
+		      float z = i*-80;
 		      Vector3f position = new Vector3f(x,y,z);
 		      	
 		      while(Math.sqrt(Math.pow(x - prevX, 2) + Math.pow(y - prevY, 2)) > 10) {
@@ -528,14 +537,9 @@ public class MainGameLoop {
 		      prevX = x;
 		      prevY = y;
 		      
-		      //Debug Print
-		      System.out.println(position);
-		      
 		      entities.add(new Entity(model, new Matrix4f().translate(position), 1));
 		      scaledEntities.add(new Entity(model, new Matrix4f().translate(position), 2));
 		 }
-		 
-		 System.out.println("#####");
 	}
 	
 	private static void reset() {
@@ -605,7 +609,6 @@ public class MainGameLoop {
 			
 			@Override
 			public void onClick() {
-				System.out.println("hier");
 				generateRandomCubes();
 			}
 		};

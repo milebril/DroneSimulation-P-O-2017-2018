@@ -4,9 +4,19 @@ import interfaces.AutopilotConfig;
 
 public class AutopilotConfigValues implements AutopilotConfig{
 
+	private String droneID = "";
 	private float gravity = 9.81f;
 	private float wingX = 15.0f;
 	private float tailSize = 10.0f;
+	private float wheelY = 1.23f;
+	private float frontWheelZ = 1.23f;
+	private float rearWheelZ = 1.23f;
+	private float rearWheelX = 1.23f;
+	private float tyreSlope = 1.23f;
+	private float dampSlope = 1.23f;
+	private float tyreRadius = 1.23f;
+	private float rMax = 1.23f;
+	private float fcMax = 1.23f;
 	private float engineMass = 50.0f;
 	private float wingMass = 70.0f;
 	private float tailMass = 100.0f;
@@ -19,6 +29,11 @@ public class AutopilotConfigValues implements AutopilotConfig{
 	private float verticalAngleOfView = 120.0f;
 	private int nbColumns = 200;
 	private int nbRows = 200;
+	
+	@Override
+	public String getDroneID() {
+		return this.droneID;
+	}
 	
 	@Override
 	public float getGravity() {
@@ -93,6 +108,51 @@ public class AutopilotConfigValues implements AutopilotConfig{
 	@Override
 	public int getNbRows() {
 		return this.nbRows;
+	}
+
+	@Override
+	public float getWheelY() {
+		return this.wheelY;
+	}
+
+	@Override
+	public float getFrontWheelZ() {
+		return this.frontWheelZ;
+	}
+
+	@Override
+	public float getRearWheelZ() {
+		return this.rearWheelZ;
+	}
+
+	@Override
+	public float getRearWheelX() {
+		return this.rearWheelX;
+	}
+
+	@Override
+	public float getTyreSlope() {
+		return this.tyreSlope;
+	}
+
+	@Override
+	public float getDampSlope() {
+		return this.dampSlope;
+	}
+
+	@Override
+	public float getTyreRadius() {
+		return this.tyreRadius;
+	}
+
+	@Override
+	public float getRMax() {
+		return this.rMax;
+	}
+
+	@Override
+	public float getFcMax() {
+		return this.fcMax;
 	}
 
 }

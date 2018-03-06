@@ -45,6 +45,7 @@ public class DisplayManager {
 		
 		long currentFrameTime = getCurrentTime();
 		delta = (currentFrameTime - lastFrameTime) / 1000f; // In seconds
+		delta = delta/4; //Slow down the simulation TODO: ik denk dat dit hier moet want anders gaat de AP verkeerde tijden berekenen.
 		lastFrameTime = currentFrameTime;
 		
 		elapsedTime += delta;
@@ -52,7 +53,7 @@ public class DisplayManager {
 	
 	public static float getFrameTimeSeconds() {
 		if (started) {
-			return (float) (delta);
+			return (float) (delta) ; //Simulatie wordt trager afgespeeld zodat het duidelijker is.
 		} else {
 			return 0;
 		}
