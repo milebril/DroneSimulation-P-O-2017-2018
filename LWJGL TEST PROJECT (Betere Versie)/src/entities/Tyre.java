@@ -176,8 +176,10 @@ public class Tyre {
 	/**
 	 * Returns how much this Tyre is compressed in function of its current location
 	 * and the ground level.
+	 * @Deprecated
 	 */
-	public double getCompression() {
+	@Deprecated
+	public double getCompressionOld() {
 		
 		// the position of this Tyre in world frame
 		Vector3f position = new Vector3f(0, 0, 0);
@@ -206,6 +208,24 @@ public class Tyre {
 		else return radius - distance;
 	}
 	
+	/**
+	 * Returns how much this Tyre is compressed in function of its current location
+	 * and the ground level.
+	 */
+	public double getCompression() {
+		
+		// the position of this Tyre in world frame
+		Vector3f position = new Vector3f(0, 0, 0);
+		Vector3f.add(getDrone().transformToWorldFrame(getPosition()), getDrone().getPosition(), position);
+		
+		double deltaY = position.y - PhysicsEngine.groundLevel;
+		
+		// if the center of the tyre is too far from the ground, the tyre can't be compressed
+		if (deltaY >= getRadius()) return 0;
+		
+		// else
+		else return (getRadius() - deltaY);
+	}
 	
 	// GROUNDED
 	
@@ -217,10 +237,26 @@ public class Tyre {
 	}
 	
 	/**
+	 * Returns where the drone touches the ground (in drone frame)
+	 * returns null if the tyre is not grounded.
+	 */
+	public Vector3f getGroundedPosition() {
+		if (!isGrounded()) return null;
+		else {
+			Vector3f worldPosition = getDrone().transformToWorldFrame(getPosition());
+			worldPosition.y = 0;
+			return getDrone().transformToDroneFrame(worldPosition);
+		}
+	}
+	
+	
+	/**
 	 * Returns at which position (in drone frame) this Tyre touches the ground and the
 	 * forward and sideward orientation: {grounded position, rolling orientation, sliding orientation}
 	 * Returns null if the Tyre is not grounded
+	 * @deprecated function was incorrect
 	 */
+	@Deprecated
 	public Vector3f[] getGroundedProperties() {
 		if (!isGrounded()) return null;
 		
@@ -260,13 +296,6 @@ public class Tyre {
 		
 		return new Vector3f[] {projection, intersectionOrientation, sideWays};
 	}
-	
-	
-	
-	
-	
-	
-	
 	
 	
 	

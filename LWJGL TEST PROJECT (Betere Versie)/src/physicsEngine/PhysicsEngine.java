@@ -125,6 +125,9 @@ public class PhysicsEngine {
 		Vector3f.add(force, gravitationD, force);
 		
 		// forces excersised by the Tyre compression and deltacompression
+		double[] compressionForces = new double[3];
+		int i = 0;
+		
 		for (Tyre tyre : drone.getTyres()) {
 			double oldCompression = tyre.getSavedCompression();
 			double compression = tyre.getCompression();
@@ -135,59 +138,88 @@ public class PhysicsEngine {
 			double comporessionForceSize = tyre.getTyreSlope()*compression + tyre.getDampSlope()*deltaCompression;
 			Vector3f compressionForce = new Vector3f(0, 0, 0);
 			compressionForce.y = (float) Math.abs(comporessionForceSize);
+			drone.transformToDroneFrame(compressionForce);
 			
 			Vector3f compressionTorque = new Vector3f();
-			Vector3f.cross(tyre.getPosition(), compressionForce, compressionTorque);
+			Vector3f.cross(tyre.getGroundedPosition(), compressionForce, compressionTorque);
 			
+			// optellen bij het totaal
 			Vector3f.add(force, compressionForce, force);
 			Vector3f.add(torque, compressionTorque, torque);
+			compressionForces[i] = Math.abs(comporessionForceSize);
+			i++;
 		}
+		
+		
 		
 		// forces excersised by the front Tyre brake force
 		if (drone.getFrontTyre().isGrounded()) {
-			Vector3f groundedPosition = drone.getFrontTyre().getGroundedProperties()[1];
-			Vector3f appliedForceW = drone.transformToWorldFrame(getForceAppliedAtPoint(groundedPosition, force, torque));
-			appliedForceW.y = 0; // kan geen rem kracht uitoefenen in de wereld y richting
-			Vector3f appliedForceD = drone.transformToDroneFrame(appliedForceW);
+			// richting van de remkracht (in wereldassenstelsel)
+			Vector3f brakeForce = drone.getVelocityOfPoint(drone.getFrontTyre().getGroundedPosition());
 			
-			// orientatie van de rem kracht is tegengesteld aan de uitgeoefende kracht.
-			Vector3f brakeForce = new Vector3f();
-			appliedForceD.negate(brakeForce);
+			// tegengestelde richting, y-component weglaten en normaliseren
+			brakeForce.x = - brakeForce.x;
+			brakeForce.y = 0;
+			brakeForce.z = - brakeForce.z;
 			brakeForce.normalise();
 			
-			// rem kracht is maximum gelijk aan de applied force
-			brakeForce.scale((float)Math.min(appliedForceD.length(), drone.getFrontTyre().getBrakingForce()));
+			// orientatie schalen met de remkracht
+			brakeForce.scale((float) drone.getFrontTyre().getBrakingForce());
+			
+			// naar drone assenstelsel
+			brakeForce = drone.transformToDroneFrame(brakeForce);
 			
 			// resulterende torque
 			Vector3f brakeTorque = new Vector3f();
-			Vector3f.cross(groundedPosition, brakeForce, brakeTorque);
+			Vector3f.cross(drone.getFrontTyre().getGroundedPosition(), brakeForce, brakeTorque);
 			
-			// optellen bij het geheel
+			// optellen bij het totaal
 			Vector3f.add(force, brakeForce, force);
 			Vector3f.add(torque, brakeTorque, torque);
 		}
 		
+		
 		// forces excersised by the rear Tyres brake force and wrijvingskracht
 		for (Tyre tyre : new Tyre[] {drone.getLeftTyre(), drone.getRightTyre()}) {
-			Vector3f[] groundedProperties = tyre.getGroundedProperties();
-			Vector3f groundedPosition = groundedProperties[0];
-			Vector3f rollingOrientation = groundedProperties[1];
-			Vector3f slidingOrientation = groundedProperties[2];
 			
-			Vector3f appliedForceD = getForceAppliedAtPoint(rollingOrientation, force, torque);
+			//transformeer de x-as van het drone as nr was en projecteren op het grondvlak + normaliseren
+			Vector3f forictionOrientation = drone.transformToWorldFrame(new Vector3f(1,0,0));
+			forictionOrientation.y = 0;
+			forictionOrientation.normalise();
 			
-			// braking force
-			// TODO: kracht (uit appliedForceD) berekenen die in de rollingOrientation wordt uitgeoefend
-			// 			(-> appliedForceD op rollingOrientation projecteren)
-			// 		 en dan de reactie-kracht hierop berekenen
+			//
+			Vector3f tyreVelocity = drone.getVelocityOfPoint(tyre.getGroundedPosition());		
 			
-			// wrijvingskracht
-			// TODO: kracht (uit appliedForceD) berekenen die in de slidingOrientation wordt uitgeoefend
-			// 			(-> appliedForceD op slidingOrientation projecteren)
-			// 		 en dan de reactie-kracht hierop berekenen
+			// de x-component van de dronespeed geprojecteerd op grondvlak x wrijvingscoefficient x normaalkracht. 
+			float N = (float) compressionForces[1];
+			double frictionForceSize = -Vector3f.dot(forictionOrientation, tyreVelocity)*N*tyre.getMaxFrictionCoeff();
 			
-			// optellen bij het geheel
-			// TODO: braking en sliding kracht optellen (force en torque)
+			forictionOrientation.scale((float) frictionForceSize);					
+			
+			Vector3f rollingOrientation = new Vector3f(0,0,0);
+			
+			if (drone.transformToDroneFrame(tyreVelocity).z > 0){
+				rollingOrientation.z = -1;
+			} else {
+				rollingOrientation.z = 1;
+			}
+			
+			rollingOrientation = drone.transformToWorldFrame(rollingOrientation);
+			rollingOrientation.y = 0;
+			rollingOrientation.normalise();
+			
+			rollingOrientation.scale((float) tyre.getBrakingForce());
+			
+			Vector3f totalTyreForce = new Vector3f();
+			Vector3f.add(rollingOrientation, forictionOrientation, totalTyreForce);
+			
+			// resulterende torque
+			Vector3f brakeTorque = new Vector3f();
+			Vector3f.cross(drone.getFrontTyre().getGroundedPosition(), totalTyreForce, brakeTorque);
+			
+			// optellen bij het totaal
+			Vector3f.add(force, totalTyreForce, force);
+			Vector3f.add(torque, brakeTorque, torque);
 		}
 		
 		
@@ -266,24 +298,6 @@ public class PhysicsEngine {
 	private static Vector3f average(Vector3f a, Vector3f b) {
 		return new Vector3f(a.x + (b.x - a.x) / 2, a.y + (b.y - a.y) / 2, a.z + (b.z - a.z) / 2);
 	}
-	
-	
-	/**
-	 * Returns the force that is applied at the given point by calculating the sum of the
-	 * given force and the force applied by the given torque
-	 */
-	private static Vector3f getForceAppliedAtPoint(Vector3f point, Vector3f force, Vector3f torque) {
-		// afstand torque axis <-> punt
-		double distance = Math.abs(torque.x*point.x + torque.y*point.y + torque.z*point.z) / torque.length();
-		
-		// TODO: torque to force
-		
-		
-		
-		return null;
-	}
-	
-	
 }
 
 
