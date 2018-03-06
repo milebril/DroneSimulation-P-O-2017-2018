@@ -28,7 +28,7 @@ public class Camera {
 	private int snapshotHeight;
 	
 	public Camera(){
-		position.y = 60;
+		position.y = 10;
 	}
 	
 	public Camera(int nbColumns, int nbRows) {

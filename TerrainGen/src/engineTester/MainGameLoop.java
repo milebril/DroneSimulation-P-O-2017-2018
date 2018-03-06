@@ -126,13 +126,13 @@ public class MainGameLoop {
 		//***INITIALIZE DRONEVIEW***
 		RawModel droneModel = OBJLoader.loadObjModel("tree", loader);
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,new ModelTexture(loader.loadTexture("tree")));
-		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, 10, -10)), 1, autopilotConfig, new EulerPrediction(STEP_TIME));
+		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, 20, 0)), 1, autopilotConfig, new EulerPrediction(STEP_TIME));
 		drone.getPose().rotate((float) -(Math.PI/2), new Vector3f(1,0,0));
 		entities.add(drone);
 		
 		//***INITIALIZE CHASE-CAM***
 		chaseCam = new Camera();
-		chaseCam.setPosition(drone.getPosition().translate(0, 5, 10));
+		chaseCam.setPosition(drone.getPosition().translate(0, 1, 5));
 		chaseCam.setYaw((float) -(Math.PI/9));
 		
 		//***INITIALIZE GUI-TEXT***
@@ -226,6 +226,7 @@ public class MainGameLoop {
 			GL11.glScissor(0, 200, Display.getWidth(), Display.getHeight() - 200);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			//chaseCam.setPosition(chaseCam.getPosition().translate(0, -0.01f, -1));
+			chaseCam.setPosition(drone.getPosition().translate(0, 3, 5));
 			renderEntities(chaseCam);
 
 			
@@ -469,7 +470,7 @@ public class MainGameLoop {
 		Random r = new Random();
 		
 		//reset entities first
-		entities = new ArrayList<>();
+		cubes = new ArrayList<>();
 		
 		int count = 0;
 		
@@ -505,7 +506,7 @@ public class MainGameLoop {
 		        
 				RawCubeModel model = loader.loadToVAO(c.positions, c.colors);
 		        
-				 cubes.add(new Entity(model, new Matrix4f().translate(new Vector3f(x, y, z)), 1));
+				cubes.add(new Entity(model, new Matrix4f().translate(new Vector3f(x, y, z)), 1));
 		    }
 		    // line is not visible here.
 		} catch (FileNotFoundException e) {
