@@ -6,48 +6,48 @@ public class generateColors {
 	 */
 	public static float[] generateColors(float r, float g, float b) {
 		float[] colours = new float[] {
-				//Links
-				0.3f*r, 0.3f*g, 0.3f*b,
-				0.3f*r, 0.3f*g, 0.3f*b,
-				0.3f*r, 0.3f*g, 0.3f*b,
-				0.3f*r, 0.3f*g, 0.3f*b,
-				0.3f*r, 0.3f*g, 0.3f*b,
-				0.3f*r, 0.3f*g, 0.3f*b,
-				//Achter
+				//Links of Negatieve X
+				0.25f*r, 0.25f*g, 0.25f*b,
+				0.25f*r, 0.25f*g, 0.25f*b,
+				0.25f*r, 0.25f*g, 0.25f*b,
+				0.25f*r, 0.25f*g, 0.25f*b,
+				0.25f*r, 0.25f*g, 0.25f*b,
+				0.25f*r, 0.25f*g, 0.25f*b,
+				//Achter of Negatieve Z
+				0.30f*r, 0.30f*g, 0.30f*b,
+				0.30f*r, 0.30f*g, 0.30f*b,
+				0.30f*r, 0.30f*g, 0.30f*b,
+				0.30f*r, 0.30f*g, 0.30f*b,
+				0.30f*r, 0.30f*g, 0.30f*b,
+				0.30f*r, 0.30f*g, 0.30f*b,
+				//Rechts of Positieve X
+				0.40f*r, 0.40f*g, 0.40f*b,
+				0.40f*r, 0.40f*g, 0.40f*b,
+				0.40f*r, 0.40f*g, 0.40f*b,
+				0.40f*r, 0.40f*g, 0.40f*b,
+				0.40f*r, 0.40f*g, 0.40f*b,
+				0.40f*r, 0.40f*g, 0.40f*b,
+				//Voor of Positieve Z
+				0.35f*r, 0.35f*g, 0.35f*b,
+				0.35f*r, 0.35f*g, 0.35f*b,
+				0.35f*r, 0.35f*g, 0.35f*b,
+				0.35f*r, 0.35f*g, 0.35f*b,
+				0.35f*r, 0.35f*g, 0.35f*b,
+				0.35f*r, 0.35f*g, 0.35f*b,
+				//Onder of Negatieve Y
+				0.20f*r, 0.20f*g, 0.20f*b,
+				0.20f*r, 0.20f*g, 0.20f*b,
+				0.20f*r, 0.20f*g, 0.20f*b,
+				0.20f*r, 0.20f*g, 0.20f*b,
+				0.20f*r, 0.20f*g, 0.20f*b,
+				0.20f*r, 0.20f*g, 0.20f*b,
+				//Boven of Positieve Y
 				0.45f*r, 0.45f*g, 0.45f*b,
 				0.45f*r, 0.45f*g, 0.45f*b,
 				0.45f*r, 0.45f*g, 0.45f*b,
 				0.45f*r, 0.45f*g, 0.45f*b,
 				0.45f*r, 0.45f*g, 0.45f*b,
 				0.45f*r, 0.45f*g, 0.45f*b,
-				//Rechts
-				0.85f*r, 0.85f*g, 0.85f*b,
-				0.85f*r, 0.85f*g, 0.85f*b,
-				0.85f*r, 0.85f*g, 0.85f*b,
-				0.85f*r, 0.85f*g, 0.85f*b,
-				0.85f*r, 0.85f*g, 0.85f*b,
-				0.85f*r, 0.85f*g, 0.85f*b,
-				//Voor
-				0.70f*r, 0.70f*g, 0.70f*b,
-				0.70f*r, 0.70f*g, 0.70f*b,
-				0.70f*r, 0.70f*g, 0.70f*b,
-				0.70f*r, 0.70f*g, 0.70f*b,
-				0.70f*r, 0.70f*g, 0.70f*b,
-				0.70f*r, 0.70f*g, 0.70f*b,
-				//Onder
-				0.15f*r, 0.15f*g, 0.15f*b,
-				0.15f*r, 0.15f*g, 0.15f*b,
-				0.15f*r, 0.15f*g, 0.15f*b,
-				0.15f*r, 0.15f*g, 0.15f*b,
-				0.15f*r, 0.15f*g, 0.15f*b,
-				0.15f*r, 0.15f*g, 0.15f*b,
-				//Boven
-				1.0f*r, 1.0f*g, 1.0f*b,
-				1.0f*r, 1.0f*g, 1.0f*b,
-				1.0f*r, 1.0f*g, 1.0f*b,
-				1.0f*r, 1.0f*g, 1.0f*b,
-				1.0f*r, 1.0f*g, 1.0f*b,
-				1.0f*r, 1.0f*g, 1.0f*b,
 		};
 		
 		return colours;

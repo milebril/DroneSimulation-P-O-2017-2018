@@ -20,7 +20,7 @@ import entities.Light;
 
 public class MasterRenderer {
 	
-	private static final float FOV = 70;
+	private static final float FOV = 60;
 	private static final float NEAR_PLANE = 0.1f;
 	private static final float FAR_PLANE = 1000;
 	
@@ -44,7 +44,7 @@ public class MasterRenderer {
 		terrainRenderer = new TerrainRenderer(terrainShader,projectionMatrix);
 	}
 	
-	public void render(Light sun,Camera camera){
+	public void render(Light sun,Camera camera) {
 		prepare();
 		shader.start();
 		shader.loadLight(sun);

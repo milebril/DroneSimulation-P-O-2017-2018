@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.lwjgl.Sys;
 import org.lwjgl.opengl.AMDBlendMinmaxFactor;
 import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Vector3f;
@@ -36,8 +37,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	private MyPath path;
 	
 	public SimpleAutopilot() {
-		float[] pathX = {  5,   0,  -5, -10,  -5};
-		float[] pathY = {  20,   20,   20,   20,   20};
+		float[] pathX = {  0,   0,  0, 0, 0};
+		float[] pathY = {30, 30, 30, 30, 30};
 		float[] pathZ = {-80,-160,-240,-320,-400};
 		this.path = new MyPath(pathX,pathY,pathZ);
 		this.path.setIndex(0);
@@ -98,15 +99,19 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
 		this.inputAP = inputs;
 		//System.out.println("Roll: " + inputs.getRoll());
-		
+		setDroneProperties(inputs);
 		if (this.inputAP.getElapsedTime() > 0.0001) {
-			setDroneProperties(inputs);
+			
+			System.out.println("AP Position:" + properties.getPosition());
+			System.out.println("AP:" + properties.getVelocity());
+			
 			//System.out.println("Goal: " + this.cubePos);
 			//Set the horizontal stabilizer inclination
 			newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() + getVerAngle(), getProperties().getDeltaTime());
 			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
 			else if(newHorStabInclination < - Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
 			//System.out.println("Inclination horizontal stabiliser: " + newHorStabInclination);
+			System.out.println("horstab: " + newHorStabInclination);
 			
 			//Set the vertical stabilizer inclination
 			newVerStabInclination += pidVerStab.calculateChange(inputAP.getHeading() - getHorAngle(), getProperties().getDeltaTime());
@@ -127,7 +132,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			//else
 	    		this.newThrust = configAP.getMaxThrust();
 			
-			System.out.println("Velocity: " + getProperties().getVelocity().length());
+			//System.out.println("Velocity: " + getProperties().getVelocity().length());
 		//	System.out.println("Thrust: " + newThrust);
 			
 //			cubePositions = cubeLocator.getCoordinatesOfCube();
@@ -165,7 +170,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 //			}
 			
 			//CUBE REACHED
-			System.out.println("Size: " + this.cubePositions.size());
+			//System.out.println("Size: " + this.cubePositions.size());
 			if(getEuclidDist(getProperties().getPosition(),cubePos) <= 4){
 				this.path.setIndex(this.path.getIndex() + 1);
 				this.cubePos = new Vector3f(path.getCurrentX(), path.getCurrentY(), path.getCurrentZ());
@@ -588,6 +593,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			
 			// calculate other properties
 			this.deltaTime = this.elapsedTime - previousProperties.getElapsedTime();
+			System.out.println(elapsedTime + " " + deltaTime);
+			
 			this.velocity = calculateVelocity(this.position, previousProperties.getPosition(), this.deltaTime);
 			this.orientationMatrix = calculateOrientationMatrix(heading, pitch, roll);
 			this.rotationSpeed = calculateRotationSpeed(this.orientationMatrix, previousProperties.getOrientationMatrix(), this.deltaTime);
@@ -597,7 +604,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			// save give properties
 			this.image = null;
 			this.elapsedTime = 0;
-			this.position = new Vector3f(0, 0, 0);
+			this.position = new Vector3f(0, 20, 0);
 			this.heading = 0;
 			this.pitch = 0;
 			this.roll = 0;
@@ -731,7 +738,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			Vector3f.sub(position, previousPosition, diff);
 			if (deltaTime != 0) diff.scale(1/deltaTime);
 			else diff = new Vector3f(0, 0, 0);
-			System.out.println("div: " + diff );
+			System.out.println("speed" + deltaTime + diff);
 			return diff;
 		}
 		

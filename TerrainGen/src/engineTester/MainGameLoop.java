@@ -200,6 +200,7 @@ public class MainGameLoop {
 			//camera.setPosition(camera.getPosition().translate(0, -0.01f, -1));
 			renderEntities(camera);
 			camera.setPosition(drone.getPosition().translate(0, 0, -5));
+			//drone.rotate(0.01f, new Vector3f(1, 0, 0));
 			
 			//GUI TODO
 			GL11.glViewport(200, 0, Display.getWidth() - 200, 200);
@@ -211,13 +212,14 @@ public class MainGameLoop {
 			textSpeed .setString("Speed = " + speed + "m/s");
 			TextMaster.loadText(textSpeed);
 			
-			System.out.println(speed);
-
 			xpos = String.valueOf(Math.round(drone.getPosition().x));
 			ypos = String.valueOf(Math.round(drone.getPosition().y));
 			zpos = String.valueOf(Math.round(drone.getPosition().z));
 			textPosition.setString("Position = ("+xpos+" , "+ypos+" , "+zpos +")");
 			TextMaster.loadText(textPosition);
+			
+			System.out.println("Drone Pos" + drone.getPosition());
+			System.out.println("Drone:" + drone.getLinearVelocity()) ;
 			
 			TextMaster.render();
 			TextMaster.removeText(textSpeed);
@@ -243,8 +245,8 @@ public class MainGameLoop {
 			
 			//***UPDATES***
 			float dt = DisplayManager.getFrameTimeSeconds();
-			System.out.println("dt: " + dt);
 			if(!entities.isEmpty() && dt > 0.00001) {
+				System.out.println("st" + dt);
 				
 				//applyphysics rekent de krachten uit en gaat dan de kinematische waarden van de drone
 				// aanpassen op basis daarvan 
@@ -253,7 +255,6 @@ public class MainGameLoop {
 				} catch (DroneCrashException e) {
 					System.out.println(e);
 				} // TODO: stop simulation (drone crashed)
-				
 				
 				//Autopilot stuff
 				AutopilotInputs inputs = drone.getAutoPilotInputs();
@@ -264,6 +265,8 @@ public class MainGameLoop {
 			keyInputs();
 			removeCubes();
 			DisplayManager.updateDisplay();
+			
+			System.out.println("+++++++");
 		}
 
 		renderer.cleanUp();
