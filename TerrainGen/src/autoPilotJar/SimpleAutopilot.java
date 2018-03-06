@@ -37,7 +37,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	
 	public SimpleAutopilot() {
 		float[] pathX = {  5,   0,  -5, -10,  -5};
-		float[] pathY = {  0,   0,   0,   0,   0};
+		float[] pathY = {  20,   20,   20,   20,   20};
 		float[] pathZ = {-80,-160,-240,-320,-400};
 		this.path = new MyPath(pathX,pathY,pathZ);
 		this.path.setIndex(0);
@@ -97,16 +97,16 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	@Override
 	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
 		this.inputAP = inputs;
-		System.out.println("Roll: " + inputs.getRoll());
+		//System.out.println("Roll: " + inputs.getRoll());
 		
-		if (this.inputAP.getElapsedTime() > 0.0000001) {
+		if (this.inputAP.getElapsedTime() > 0.0001) {
 			setDroneProperties(inputs);
-			System.out.println("Goal: " + this.cubePos);
+			//System.out.println("Goal: " + this.cubePos);
 			//Set the horizontal stabilizer inclination
 			newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() + getVerAngle(), getProperties().getDeltaTime());
 			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
 			else if(newHorStabInclination < - Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
-			System.out.println("Inclination horizontal stabiliser: " + newHorStabInclination);
+			//System.out.println("Inclination horizontal stabiliser: " + newHorStabInclination);
 			
 			//Set the vertical stabilizer inclination
 			newVerStabInclination += pidVerStab.calculateChange(inputAP.getHeading() - getHorAngle(), getProperties().getDeltaTime());
@@ -114,21 +114,21 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			else if(newVerStabInclination < - Math.PI/6) newVerStabInclination = (float) -(Math.PI/6);
 			
 			//Set the wing inclination
-			newLeftWingInclination = (float) Math.toRadians(4); //met een inclination van 4graden stijgt hij 5 meter over 200 meter
+			//newLeftWingInclination = (float) Math.toRadians(4); //met een inclination van 4graden stijgt hij 5 meter over 200 meter
 //			newLeftWingInclination += pidRoll.calculateChange(inputAP.getRoll(), getProperties().getDeltaTime());
 //			if(newLeftWingInclination > Math.PI/6) newLeftWingInclination = (float) (Math.PI/6);
 //			else if(newLeftWingInclination < - Math.PI/6) newLeftWingInclination = (float) -(Math.PI/6);
 			
-			newRightWingInclination = (float) Math.toRadians(4);
+			//newRightWingInclination = (float) Math.toRadians(4);
 			
 			//Set the thrust force
 			//if (getProperties().getVelocity().length() > 60) //als de drone sneller vliegt dan 60m/s zet de thrust dan uit
 	        //  this.newThrust = 0;
 			//else
-	    	this.newThrust = configAP.getMaxThrust();
+	    		this.newThrust = configAP.getMaxThrust();
 			
 			System.out.println("Velocity: " + getProperties().getVelocity().length());
-			System.out.println("Thrust: " + newThrust);
+		//	System.out.println("Thrust: " + newThrust);
 			
 //			cubePositions = cubeLocator.getCoordinatesOfCube();
 //			cubePositions.sort(new Comparator<Vector3f>() {
@@ -731,6 +731,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			Vector3f.sub(position, previousPosition, diff);
 			if (deltaTime != 0) diff.scale(1/deltaTime);
 			else diff = new Vector3f(0, 0, 0);
+			System.out.println("div: " + diff );
 			return diff;
 		}
 		

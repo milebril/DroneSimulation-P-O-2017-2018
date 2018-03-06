@@ -209,7 +209,7 @@ public class AirFoil {
 		float aoa = (float) - Math.atan2(a, b);
 		//System.out.println(drone.getMaxAOA());
 		if (aoa > Math.toRadians(drone.getMaxAOA())) {
-			System.err.println(aoa);
+			//System.err.println(aoa);
 			//System.exit(0); //TODO
 		}
 

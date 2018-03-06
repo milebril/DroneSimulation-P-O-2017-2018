@@ -126,7 +126,8 @@ public class MainGameLoop {
 		//***INITIALIZE DRONEVIEW***
 		RawModel droneModel = OBJLoader.loadObjModel("tree", loader);
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,new ModelTexture(loader.loadTexture("tree")));
-		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, 20, 0)), 1, autopilotConfig, new EulerPrediction(STEP_TIME));
+		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, 20, 0)), 1,
+				autopilotConfig, new EulerPrediction(STEP_TIME));
 		drone.getPose().rotate((float) -(Math.PI/2), new Vector3f(1,0,0));
 		entities.add(drone);
 		
@@ -209,6 +210,8 @@ public class MainGameLoop {
 			speed = String.valueOf(Math.round(drone.getAbsVelocity()));
 			textSpeed .setString("Speed = " + speed + "m/s");
 			TextMaster.loadText(textSpeed);
+			
+			System.out.println(speed);
 
 			xpos = String.valueOf(Math.round(drone.getPosition().x));
 			ypos = String.valueOf(Math.round(drone.getPosition().y));
@@ -240,16 +243,17 @@ public class MainGameLoop {
 			
 			//***UPDATES***
 			float dt = DisplayManager.getFrameTimeSeconds();
-			if(!entities.isEmpty() && dt > 0.0001) {
+			System.out.println("dt: " + dt);
+			if(!entities.isEmpty() && dt > 0.00001) {
 				
 				//applyphysics rekent de krachten uit en gaat dan de kinematische waarden van de drone
 				// aanpassen op basis daarvan 
-				
 				try {
 					PhysicsEngine.applyPhysics(drone, dt);
 				} catch (DroneCrashException e) {
-					e.printStackTrace();
-				}
+					System.out.println(e);
+				} // TODO: stop simulation (drone crashed)
+				
 				
 				//Autopilot stuff
 				AutopilotInputs inputs = drone.getAutoPilotInputs();

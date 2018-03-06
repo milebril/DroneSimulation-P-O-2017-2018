@@ -7,20 +7,10 @@ import models.TexturedModel;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
-/**
- * position of entity is stored in a 4x4 pose matrix
- *
- */
 public class Entity {
-
+	
 	public Entity(RawModel model, Matrix4f pose, float scale) {
 		this.model = model;
-		this.setPose(pose);
-		this.scale = scale;
-	}
-	
-	public Entity(TexturedModel model, Matrix4f pose, float scale) {
-		this.texModel = model;
 		this.setPose(pose);
 		this.scale = scale;
 	}
@@ -28,6 +18,14 @@ public class Entity {
 	public Entity(RawCubeModel model, Matrix4f pose, float scale) {
 		this.cubeModel = model;
 		this.setPose(pose);
+//		this.orientation = orientation;
+		this.scale = scale;
+	}
+	
+	public Entity(TexturedModel model, Matrix4f pose, float scale) {
+		this.texModel = model;
+		this.setPose(pose);
+//		this.orientation = orientation;
 		this.scale = scale;
 	}
 
@@ -116,4 +114,5 @@ public class Entity {
 	public void setScale(float scale) {
 		this.scale = scale;
 	}
+	
 }
