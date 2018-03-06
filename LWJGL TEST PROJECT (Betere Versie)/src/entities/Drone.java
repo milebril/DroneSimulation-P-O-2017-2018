@@ -154,7 +154,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	
 	/**
 	 * Returns a copy of the tyres array.
-	 * (in order [leftwing, rightwing, hor. stabilizer, vert. stabilizer])
+	 * (in order (in order [front wheel, rear left wheel, rear right wheel])
 	 */
 	public Tyre[] getTyres(){
 		return this.tyres.clone();
@@ -255,7 +255,25 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	public void setAngularVelocity(Vector3f vector) {
 		this.angularVelocityW.set(vector.x, vector.y, vector.z);
 	}
-
+	
+	// VELOCITY OF A POINT
+	
+	/**
+	 * Returns the velocity (in world frame) of the point at the given coordinates (in drone frame)
+	 * @param point a point in de drone frame
+	 * @return a velocity in world frame
+	 */
+	public Vector3f getVelocityOfPoint(Vector3f point) {
+		Vector3f rotVelocity = new Vector3f();
+		Vector3f.cross(getAngularVelocity(), transformToWorldFrame(point) , rotVelocity);
+		
+		Vector3f totalVelocity = new Vector3f();
+		Vector3f.add(rotVelocity, getLinearVelocity(), totalVelocity);
+		
+		return totalVelocity;
+	}
+	
+	
 	// TAILSIZE
 	
 	/**

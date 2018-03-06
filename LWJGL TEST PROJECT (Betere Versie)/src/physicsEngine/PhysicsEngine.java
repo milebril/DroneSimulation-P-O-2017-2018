@@ -30,7 +30,7 @@ public class PhysicsEngine {
 		}
 		
 		// huidige versnellingen bepalen
-		Vector3f[] currentAccelerationsD = calculateAccelerations(drone);
+		Vector3f[] currentAccelerationsD = calculateAccelerations(drone, h);
 		
 		// snelheid voorspellen in functie van de huidige vernsellingen en posities
 		Vector3f[] newVelocities = drone.getPredictionMethod().predictVelocity(
@@ -89,7 +89,7 @@ public class PhysicsEngine {
 	 * @return array with force and torque on the drone (in drone frame)
 	 * 		 | Vector3f[]{total force, total torque} (in drone frame)
 	 */
-	private static Vector3f[] calculateForces(Drone drone){
+	private static Vector3f[] calculateForces(Drone drone, float stepsize){
 		
 		// The total force and torque that are exercised on the given Drone (in drone frame)
 		Vector3f force = new Vector3f(0, 0, 0);
@@ -123,6 +123,105 @@ public class PhysicsEngine {
 		Vector3f gravitationD = drone.transformToDroneFrame(new Vector3f(0, - drone.getMass()*drone.getGravity(), 0));
 		Vector3f.add(force, gravitationD, force);
 		
+		// forces excersised by the Tyre compression and deltacompression
+		double[] compressionForces = new double[3];
+		int i = 0;
+		
+		for (Tyre tyre : drone.getTyres()) {
+			double oldCompression = tyre.getSavedCompression();
+			double compression = tyre.getCompression();
+			tyre.saveCompression(compression);
+			
+			double deltaCompression = (compression - oldCompression) / stepsize;
+			
+			double comporessionForceSize = tyre.getTyreSlope()*compression + tyre.getDampSlope()*deltaCompression;
+			Vector3f compressionForce = new Vector3f(0, 0, 0);
+			compressionForce.y = (float) Math.abs(comporessionForceSize);
+			drone.transformToDroneFrame(compressionForce);
+			
+			Vector3f compressionTorque = new Vector3f();
+			Vector3f.cross(tyre.getGroundedPosition(), compressionForce, compressionTorque);
+			
+			// optellen bij het totaal
+			Vector3f.add(force, compressionForce, force);
+			Vector3f.add(torque, compressionTorque, torque);
+			compressionForces[i] = Math.abs(comporessionForceSize);
+			i++;
+		}
+		
+		
+		
+		// forces excersised by the front Tyre brake force
+		if (drone.getFrontTyre().isGrounded()) {
+			// richting van de remkracht (in wereldassenstelsel)
+			Vector3f brakeForce = drone.getVelocityOfPoint(drone.getFrontTyre().getGroundedPosition());
+			
+			// tegengestelde richting, y-component weglaten en normaliseren
+			brakeForce.x = - brakeForce.x;
+			brakeForce.y = 0;
+			brakeForce.z = - brakeForce.z;
+			brakeForce.normalise();
+			
+			// orientatie schalen met de remkracht
+			brakeForce.scale((float) drone.getFrontTyre().getBrakingForce());
+			
+			// naar drone assenstelsel
+			brakeForce = drone.transformToDroneFrame(brakeForce);
+			
+			// resulterende torque
+			Vector3f brakeTorque = new Vector3f();
+			Vector3f.cross(drone.getFrontTyre().getGroundedPosition(), brakeForce, brakeTorque);
+			
+			// optellen bij het totaal
+			Vector3f.add(force, brakeForce, force);
+			Vector3f.add(torque, brakeTorque, torque);
+		}
+		
+		
+		// forces excersised by the rear Tyres brake force and wrijvingskracht
+		for (Tyre tyre : new Tyre[] {drone.getLeftTyre(), drone.getRightTyre()}) {
+			
+			//transformeer de x-as van het drone as nr was en projecteren op het grondvlak + normaliseren
+			Vector3f forictionOrientation = drone.transformToWorldFrame(new Vector3f(1,0,0));
+			forictionOrientation.y = 0;
+			forictionOrientation.normalise();
+			
+			//
+			Vector3f tyreVelocity = drone.getVelocityOfPoint(tyre.getGroundedPosition());		
+			
+			// de x-component van de dronespeed geprojecteerd op grondvlak x wrijvingscoefficient x normaalkracht. 
+			float N = (float) compressionForces[1];
+			double frictionForceSize = -Vector3f.dot(forictionOrientation, tyreVelocity)*N*tyre.getMaxFrictionCoeff();
+			
+			forictionOrientation.scale((float) frictionForceSize);					
+			
+			Vector3f rollingOrientation = new Vector3f(0,0,0);
+			
+			if (drone.transformToDroneFrame(tyreVelocity).z > 0){
+				rollingOrientation.z = -1;
+			} else {
+				rollingOrientation.z = 1;
+			}
+			
+			rollingOrientation = drone.transformToWorldFrame(rollingOrientation);
+			rollingOrientation.y = 0;
+			rollingOrientation.normalise();
+			
+			rollingOrientation.scale((float) tyre.getBrakingForce());
+			
+			Vector3f totalTyreForce = new Vector3f();
+			Vector3f.add(rollingOrientation, forictionOrientation, totalTyreForce);
+			
+			// resulterende torque
+			Vector3f brakeTorque = new Vector3f();
+			Vector3f.cross(drone.getFrontTyre().getGroundedPosition(), totalTyreForce, brakeTorque);
+			
+			// optellen bij het totaal
+			Vector3f.add(force, totalTyreForce, force);
+			Vector3f.add(torque, brakeTorque, torque);
+		}
+		
+		
 		// return the results
 		return new Vector3f[]{force, torque};
 	}
@@ -131,8 +230,8 @@ public class PhysicsEngine {
 	 * Calculates and returns the linear and angular accelerations of the drone (in drone frame).
 	 * @return The linear and angular accelerations of the drone (in drone frame)
 	 */
-	private static Vector3f[] calculateAccelerations(Drone drone) {
-		return calculateAccelerations(drone, calculateForces(drone));
+	private static Vector3f[] calculateAccelerations(Drone drone, float stepsize) {
+		return calculateAccelerations(drone, calculateForces(drone, stepsize));
 	}
 	
 	/**
