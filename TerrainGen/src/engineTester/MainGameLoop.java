@@ -16,6 +16,7 @@ import javax.swing.JFileChooser;
 import models.RawCubeModel;
 import models.RawModel;
 import models.TexturedModel;
+import physicsEngine.DroneCrashException;
 import physicsEngine.PhysicsEngine;
 import physicsEngine.approximationMethods.EulerPrediction;
 
@@ -243,7 +244,12 @@ public class MainGameLoop {
 				
 				//applyphysics rekent de krachten uit en gaat dan de kinematische waarden van de drone
 				// aanpassen op basis daarvan 
-				PhysicsEngine.applyPhysics(drone, dt);
+				
+				try {
+					PhysicsEngine.applyPhysics(drone, dt);
+				} catch (DroneCrashException e) {
+					e.printStackTrace();
+				}
 				
 				//Autopilot stuff
 				AutopilotInputs inputs = drone.getAutoPilotInputs();

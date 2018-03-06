@@ -3,14 +3,22 @@ package physicsEngine;
 import org.lwjgl.util.vector.Vector3f;
 import entities.AirFoil;
 import entities.Drone;
+import entities.Tyre;
 
 public class PhysicsEngine {
 	
 	/**
-	 * Applies physics to the given drone for dt seconds, translating the drone dt seconds into the future.
+	 * At which y-value the ground level is.
 	 */
-	public static void applyPhysics (Drone drone, float dt) {
-		
+	public static double groundLevel = 0;
+	
+	// MAIN
+	
+	/**
+	 * Applies physics to the given drone for dt seconds, translating the drone dt seconds into the future.
+	 * @throws DroneCrashException if the Drone crashes
+	 */
+	public static void applyPhysics (Drone drone, float dt) throws DroneCrashException {
 		// stepsize bepalen
 		float h;
 		if(dt - drone.getPredictionMethod().getStepSize() >= 0){
@@ -46,11 +54,33 @@ public class PhysicsEngine {
 			drone.rotate(deltaPositions[1].length(), rotationAxis);
 		}
 		
+		// checken of de drone crasht
+//		Vector3f leftWingCenterOfMass = new Vector3f(0,0,0);
+//		Vector3f.add(drone.transformToWorldFrame(drone.getLeftWing().getCenterOfMass()), drone.getPosition(), leftWingCenterOfMass);
+//		Vector3f rightWingCenterOfMass = new Vector3f(0,0,0);
+//		Vector3f.add(drone.transformToWorldFrame(drone.getRightWing().getCenterOfMass()), drone.getPosition(), rightWingCenterOfMass);
+//		if (drone.transformToWorldFrame(drone.getEnginePosition()).y <= groundLevel) {
+//			throw new DroneCrashException("Drone Crashed: the engine hit the ground!");
+//		} else if (drone.transformToWorldFrame(drone.getTailMassPosition()).y <= groundLevel) {
+//			throw new DroneCrashException("Drone Crashed: the tail hit the ground!");
+//		} else if (leftWingCenterOfMass.y <= groundLevel) {
+//			throw new DroneCrashException("Drone Crashed: the left wing hit the ground!");
+//		} else if (rightWingCenterOfMass.y <= groundLevel) {
+//			throw new DroneCrashException("Drone Crashed: the right wing hit the ground!");
+//		}
+//		for (Tyre tyre : drone.getTyres()) {
+//			if (tyre.getRadius() < tyre.getCompression()) {
+//				throw new DroneCrashException("Drone Crashed: tyre compressed too much!");
+//			}
+//		}
+//		
+		
 		//recursieve oproep
 		PhysicsEngine.applyPhysics(drone, (dt - h));
 	}
 	
-
+	// ACCELERATIONS
+	
 	/**
 	 * All the forces and torques exercised on the drone are calculated, added together and then
 	 * returned in an array.
@@ -98,6 +128,14 @@ public class PhysicsEngine {
 	}
 	
 	/**
+	 * Calculates and returns the linear and angular accelerations of the drone (in drone frame).
+	 * @return The linear and angular accelerations of the drone (in drone frame)
+	 */
+	private static Vector3f[] calculateAccelerations(Drone drone) {
+		return calculateAccelerations(drone, calculateForces(drone));
+	}
+	
+	/**
 	 * Calculates and returns the linear and angular accelerations of the drone (in drone frame). 
 	 * The given forces Vector3f[] array is assumed to contain the forces at index 0 and 
 	 * torque at index 1, both in drone frame.
@@ -126,13 +164,7 @@ public class PhysicsEngine {
 		return new Vector3f[]{linearAccelerationD, angularAccelerationD};
 	}
 	
-	/**
-	 * Calculates and returns the linear and angular accelerations of the drone (in drone frame).
-	 * @return The linear and angular accelerations of the drone (in drone frame)
-	 */
-	private static Vector3f[] calculateAccelerations(Drone drone) {
-		return calculateAccelerations(drone, calculateForces(drone));
-	}
+	// POSITION
 	
 	/**
 	 * Calculates and returns the translation and rotation of the drone given its new velocities (in world frame).
