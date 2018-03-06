@@ -166,7 +166,7 @@ public class ImageProcessor {
 							}
 					}
 					if ( teller == 0 ) {
-						colorHSVList.add(new double[]{hsvMat.get(y, x)[0]});
+						colorHSVList.add(new double[]{hsvMat.get(y, x)[0],hsvMat.get(y, x)[1],hsvMat.get(y, x)[2]});
 					}
 
 					
@@ -174,7 +174,12 @@ public class ImageProcessor {
 				
 			}
 		}
-		
+	for (int i = 0; i < colorHSVList.size(); i++){
+		if (colorHSVList.get(i)[2]>=128.0){
+			colorHSVList.remove(i);
+			i -= 1;
+		}
+	}		
 
     return colorHSVList;
    
