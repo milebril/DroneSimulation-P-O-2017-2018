@@ -8,7 +8,8 @@ import interfaces.AutopilotConfig;
 import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
 
-public class TakeOffAutopilot implements Autopilot, AutopilotOutputs{
+public class LandingAutopilot implements Autopilot, AutopilotOutputs{
+
 	
 	private float newThrust = 0;
 	private float newLeftWingInclination = 0;
@@ -218,7 +219,7 @@ public class TakeOffAutopilot implements Autopilot, AutopilotOutputs{
 	
 	private PIDController pidThrust;
 	
-	public TakeOffAutopilot() {
+	public LandingAutopilot() {
 		//Set initial Positions
 		currentPosition = new Vector3f(0,0,0);
 		prevPosition = new Vector3f(0,0,0);
@@ -231,5 +232,4 @@ public class TakeOffAutopilot implements Autopilot, AutopilotOutputs{
 		this.pidThrust = new PIDController(1.0f, 0.0f, 3.0f, -10, 10);
 		//initialize();
 	}
-
 }

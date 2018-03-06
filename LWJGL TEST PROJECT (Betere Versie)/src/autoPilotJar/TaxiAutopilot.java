@@ -111,19 +111,17 @@ public class TaxiAutopilot implements Autopilot, AutopilotOutputs{
 			setRoll(inputAP.getRoll());
 			setCurrentOrientation();
 			
-			//if (this.getHeading() - this.getHorAngle() > 0.001) {
+			if (this.getHeading() - this.getHorAngle() > 0.001) {
 				//rechter achterrem vollenbak open en thrust ni te hoog (zodat de drone zich draait naar het doel
-			//	this.newThrust = configAP.getMaxThrust();
-			//} else if (this.getHeading() - this.getHorAngle() < 0.001) {
+				this.newThrust = 200;
+			} else if (this.getHeading() - this.getHorAngle() < 0.001) {
 				//linker achterrem op en thrust ni te hoog
-			//	this.newThrust = configAP.getMaxThrust();
-			//} else if (this.getSpeed() > 50) { 
-			//	this.newLeftWingInclination = (float)0.1;
-			//    this.newRightWingInclination = (float)0.1;
+				this.newThrust = 200;
+			} else if (this.getSpeed() > 50) { 
+				this.newThrust = 0;
 		         
-			//} else {this.newThrust = configAP.getMaxThrust();} 
+			} else {this.newThrust = configAP.getMaxThrust();} 
 			
-			this.newThrust = configAP.getMaxThrust();
 			this.prevPosition = new Vector3f(currentPosition.x, currentPosition.y, currentPosition.z);
 			this.newLeftWingInclination = (float)0;
 		    this.newRightWingInclination = (float)0;
