@@ -154,7 +154,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	
 	/**
 	 * Returns a copy of the tyres array.
-	 * (in order [leftwing, rightwing, hor. stabilizer, vert. stabilizer])
+	 * (in order (in order [front wheel, rear left wheel, rear right wheel])
 	 */
 	public Tyre[] getTyres(){
 		return this.tyres.clone();
