@@ -32,7 +32,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 				AutopilotConfig cfg, PredictionMethod predictionMethod) {
 		super(model, pose, scale);
 		
-		this.linearVelocityW = new Vector3f(0.0f,0.0f, -100.0f);
+		this.linearVelocityW = new Vector3f(0.0f,0.0f, -60.0f);
 
 		this.angularVelocityW = new Vector3f(0f, 0f, 0f);
 		
