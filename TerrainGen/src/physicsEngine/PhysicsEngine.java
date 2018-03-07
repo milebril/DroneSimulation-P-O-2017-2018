@@ -124,10 +124,15 @@ public class PhysicsEngine {
 		Vector3f.add(force, gravitationD, force);
 		
 		// forces excersised by the Tyre compression and deltacompression
-		double[] compressionForces = new double[3];
+		double[] compressionForces = new double[] {0, 0, 0};
 		int i = 0;
 		
 		for (Tyre tyre : drone.getTyres()) {
+			
+			// if the tyre is not grounded, there will be no compression forces -> start next iteration of for loop
+			if (!tyre.isGrounded()) continue;
+			
+			
 			double oldCompression = tyre.getSavedCompression();
 			double compression = tyre.getCompression();
 			tyre.saveCompression(compression);
@@ -180,6 +185,9 @@ public class PhysicsEngine {
 		
 		// forces excersised by the rear Tyres brake force and wrijvingskracht
 		for (Tyre tyre : new Tyre[] {drone.getLeftTyre(), drone.getRightTyre()}) {
+
+			// if the tyre is not grounded, there will be no compression forces -> start next iteration of for loop
+			if (!tyre.isGrounded()) continue;
 			
 			//transformeer de x-as van het drone as nr was en projecteren op het grondvlak + normaliseren
 			Vector3f forictionOrientation = drone.transformToWorldFrame(new Vector3f(1,0,0));
