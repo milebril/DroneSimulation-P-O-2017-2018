@@ -73,12 +73,10 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		this.predictionMethod = predictionMethod;
 		
 		// Tyres
-		// TODO: de nieuwe inputreader fixen
-		/* 
-		Tyre frontTyre = new Tyre(this, new Vector3f(0, cfg.getWheelY(), cfg.getFrontWheelZ()), cfg.getTyreRadius(), cfg.getRMax(), cfg.getFcMax(), cfg.getTyreSlope(), cfg.getDampSlope());
-		Tyre leftTyre = new Tyre(this, new Vector3f(-cfg.getRearWheelX(), cfg.getWheelY(), cfg.getRearWheelZ()), cfg.getTyreRadius(), cfg.getRMax(), cfg.getFcMax(), cfg.getTyreSlope(), cfg.getDampSlope());
-		Tyre rightTyre = new Tyre(this, new Vector3f(cfg.getRearWheelX(), cfg.getWheelY(), cfg.getRearWheelZ()), cfg.getTyreRadius(), cfg.getRMax(), cfg.getFcMax(), cfg.getTyreSlope(), cfg.getDampSlope());
-		*/
+		tyres[0] = new Tyre(this, new Vector3f(0, cfg.getWheelY(), cfg.getFrontWheelZ()), cfg.getTyreRadius(), cfg.getRMax(), cfg.getFcMax(), cfg.getTyreSlope(), cfg.getDampSlope());
+		tyres[1] = new Tyre(this, new Vector3f(-cfg.getRearWheelX(), cfg.getWheelY(), cfg.getRearWheelZ()), cfg.getTyreRadius(), cfg.getRMax(), cfg.getFcMax(), cfg.getTyreSlope(), cfg.getDampSlope());
+		tyres[2] = new Tyre(this, new Vector3f(cfg.getRearWheelX(), cfg.getWheelY(), cfg.getRearWheelZ()), cfg.getTyreRadius(), cfg.getRMax(), cfg.getFcMax(), cfg.getTyreSlope(), cfg.getDampSlope());
+		
 		
 	}
 	
