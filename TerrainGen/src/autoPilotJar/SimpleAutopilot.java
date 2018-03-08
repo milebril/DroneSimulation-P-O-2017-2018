@@ -36,7 +36,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	private MyPath path;
 	
 	public SimpleAutopilot() {
-		float[] pathX = {  5,   0,  -5, -10,  -5};
+		float[] pathX = {  0,   0,  0, 0,  0};
 		float[] pathY = {  20,   20,   20,   20,   20};
 		float[] pathZ = {-80,-160,-240,-320,-400};
 		this.path = new MyPath(pathX,pathY,pathZ);
@@ -95,7 +95,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	@Override
 	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
 		this.inputAP = inputs;
-		System.out.println("Roll: " + inputs.getRoll());
+		//System.out.println("Roll: " + inputs.getRoll());
 		
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
 			setDroneProperties(inputs);
@@ -125,8 +125,10 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			//else
 	    	this.newThrust = configAP.getMaxThrust();
 			
-			System.out.println("Velocity: " + getProperties().getVelocity().length());
-			System.out.println("Thrust: " + newThrust);
+//			System.out.println("Velocity: " + getProperties().getVelocity().length());
+//			System.out.println("Thrust: " + newThrust);
+	    	
+	    	System.out.println(getProperties().getPitch());
 			
 //			cubePositions = cubeLocator.getCoordinatesOfCube();
 //			cubePositions.sort(new Comparator<Vector3f>() {

@@ -128,7 +128,7 @@ public class MainGameLoop {
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,new ModelTexture(loader.loadTexture("tree")));
 		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, 20, 0)), 1,
 				autopilotConfig, new EulerPrediction(STEP_TIME));
-		drone.getPose().rotate((float) -(Math.PI/2), new Vector3f(1,0,0));
+		//drone.getPose().rotate((float) -(Math.PI/2), new Vector3f(1,0,0)); //TODO Entity pose!!!
 		entities.add(drone);
 		
 		//***INITIALIZE CHASE-CAM***
@@ -243,7 +243,7 @@ public class MainGameLoop {
 			//***UPDATES***
 			float dt = DisplayManager.getFrameTimeSeconds();
 			if(!entities.isEmpty() && dt > 0.00001) {
-				System.out.println("st" + dt);
+				//System.out.println("st" + dt);
 				
 				//applyphysics rekent de krachten uit en gaat dan de kinematische waarden van de drone
 				// aanpassen op basis daarvan 
@@ -253,9 +253,9 @@ public class MainGameLoop {
 					System.out.println(e);
 				} // TODO: stop simulation (drone crashed)
 				
-				System.out.println("Drone Pos" + drone.getPosition());
-				System.out.println("Drone:" + drone.getLinearVelocity()) ;
-				System.out.println(autopilotConfig.getGravity());
+//				System.out.println("Drone Pos" + drone.getPosition());
+//				System.out.println("Drone:" + drone.getLinearVelocity()) ;
+				System.out.println("Gravitt: " + autopilotConfig.getGravity());
 				
 				//Autopilot stuff
 				AutopilotInputs inputs = drone.getAutoPilotInputs();

@@ -632,7 +632,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		
 		Vector3f headingVector = this.getHeadingVector();
 		Vector3f forwardVector = this.getForwardVector();
-		return (float) Math.atan2(forwardVector.y, Vector3f.dot(headingVector, forwardVector));
+		return (float) (Math.atan2(forwardVector.y, Vector3f.dot(headingVector, forwardVector)));
 	}
 
 	/**
