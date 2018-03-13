@@ -64,9 +64,9 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	
 	
 	public SimpleAutopilot() {
-		float[] pathX = {  0,  0, 0, 0, 0};
-		float[] pathY = { 20, 20, 20, 20, 20};
-		float[] pathZ = {-480,-560,-640,-720,-800};
+		float[] pathX = {  0,  10, 20, 30, 40 ,50};
+		float[] pathY = { 20, 20, 20, 20, 20, 20};
+		float[] pathZ = {-480,-560,-640,-720,-800, -1000};
 		this.path = new MyPath(pathX,pathY,pathZ);
 		this.path.setIndex(0);
 		
@@ -144,9 +144,9 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			System.out.println("Inclination horizontal stabiliser: " + newHorStabInclination);
 			
 			//Set the vertical stabilizer inclination
-//			newVerStabInclination += pidVerStab.calculateChange(inputAP.getHeading() - getHorAngle(), getProperties().getDeltaTime());
-//			if(newVerStabInclination > Math.PI/6) newVerStabInclination = (float) (Math.PI/6);
-//			else if(newVerStabInclination < - Math.PI/6) newVerStabInclination = (float) -(Math.PI/6);
+			newVerStabInclination += pidVerStab.calculateChange(inputAP.getHeading() - getHorAngle(), getProperties().getDeltaTime());
+			if(newVerStabInclination > Math.PI/6) newVerStabInclination = (float) (Math.PI/6);
+			else if(newVerStabInclination < - Math.PI/6) newVerStabInclination = (float) -(Math.PI/6);
 			
 			//Set the wing inclination
 //			newLeftWingInclination = (float) Math.toRadians(4); //met een inclination van 4graden stijgt hij 5 meter over 200 meter

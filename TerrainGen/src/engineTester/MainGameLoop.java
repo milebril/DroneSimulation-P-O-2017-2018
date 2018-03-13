@@ -126,7 +126,7 @@ public class MainGameLoop {
 		//***INITIALIZE DRONEVIEW***
 		RawModel droneModel = OBJLoader.loadObjModel("tree", loader);
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,new ModelTexture(loader.loadTexture("tree")));
-		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, (int)PhysicsEngine.groundLevel -autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius(), -30)), 1,
+		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, (int)PhysicsEngine.groundLevel -autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius() + 100, -30)), 1,
 				autopilotConfig, new EulerPrediction(STEP_TIME));
 		entities.add(drone);
 		
@@ -196,11 +196,12 @@ public class MainGameLoop {
 		Cube c = new Cube(1, 1, 0);
 		RawCubeModel cube = loader.loadToVAO(c.positions, c.colors);
 //		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(6, 3, -20)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 10, -480)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 19, -560)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 15, -640)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 28, -720)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 18, -800)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -480)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(10, 20, -560)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(20, 20, -640)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(30, 20, -720)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(40, 20, -800)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(50, 20, -1000)), 1));
 		
 		/* INITIALIZE AUTOPILOT */
 		autopilot = AutopilotFactory.createAutopilot();
@@ -301,9 +302,9 @@ public class MainGameLoop {
 				} // TODO: stop simulation (drone crashed)
 				
 				//Autopilot stuff
-				AutopilotInputs inputs = drone.getAutoPilotInputs();
-				AutopilotOutputs outputs = autopilot.timePassed(inputs);
-				drone.setAutopilotOutouts(outputs);
+//				AutopilotInputs inputs = drone.getAutoPilotInputs();
+//				AutopilotOutputs outputs = autopilot.timePassed(inputs);
+//				drone.setAutopilotOutouts(outputs);
 			}
 			
 			keyInputs();
