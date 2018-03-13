@@ -126,7 +126,7 @@ public class MainGameLoop {
 		//***INITIALIZE DRONEVIEW***
 		RawModel droneModel = OBJLoader.loadObjModel("tree", loader);
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,new ModelTexture(loader.loadTexture("tree")));
-		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, 20, 0)), 1,
+		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, 20, -30)), 1,
 				autopilotConfig, new EulerPrediction(STEP_TIME));
 		//drone.getPose().rotate((float) -(Math.PI/2), new Vector3f(1,0,0)); //TODO Entity pose!!!
 		entities.add(drone);
@@ -134,7 +134,6 @@ public class MainGameLoop {
 		//***INITIALIZE CHASE-CAM***
 		chaseCam = new Camera();
 		chaseCam.setPosition(drone.getPosition().translate(0, 2, 10));
-		//chaseCam.setYaw((float) -(Math.PI/9));
 		
 		//***INITIALIZE GUI-TEXT***
 		String speed = String.valueOf(Math.round(drone.getAbsVelocity()));
@@ -171,8 +170,13 @@ public class MainGameLoop {
 		cubeShader = new CubeShader();
 		cubeRenderer = new CubeRenderer(cubeShader, 120, 120);
 		
-//		Cube c = new Cube(1, 0, 0);
-//		RawCubeModel cube = loader.loadToVAO(c.positions, c.colors);
+		Cube c = new Cube(1, 0, 0);
+		RawCubeModel cube = loader.loadToVAO(c.positions, c.colors);
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -80)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -160)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -240)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -320)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -400)), 1));
 //		Entity e = new Entity(cube, new Matrix4f().translate(new Vector3f(0, 4, -10)), 1);
 		
 		/* INITIALIZE AUTOPILOT */
@@ -240,8 +244,6 @@ public class MainGameLoop {
 			//***UPDATES***
 			float dt = DisplayManager.getFrameTimeSeconds();
 			if(!entities.isEmpty() && dt > 0.00001) {
-				//System.out.println("st" + dt);
-				
 				//applyphysics rekent de krachten uit en gaat dan de kinematische waarden van de drone
 				// aanpassen op basis daarvan 
 				try {
@@ -249,10 +251,6 @@ public class MainGameLoop {
 				} catch (DroneCrashException e) {
 					System.out.println(e);
 				} // TODO: stop simulation (drone crashed)
-				
-//				System.out.println("Drone Pos" + drone.getPosition());
-//				System.out.println("Drone:" + drone.getLinearVelocity()) ;
-				System.out.println("Gravitt: " + autopilotConfig.getGravity());
 				
 				//Autopilot stuff
 //				AutopilotInputs inputs = drone.getAutoPilotInputs();
@@ -264,7 +262,6 @@ public class MainGameLoop {
 			removeCubes();
 			DisplayManager.updateDisplay();
 			
-			System.out.println("+++++++");
 		}
 
 		renderer.cleanUp();
@@ -352,7 +349,7 @@ public class MainGameLoop {
 		RawModel droneModel = OBJLoader.loadObjModel("tree", loader);
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,new ModelTexture(loader.loadTexture("tree")));
 		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, 20, 0)), 1, autopilotConfig, new EulerPrediction(STEP_TIME));
-		drone.getPose().rotate((float) -(Math.PI/2), new Vector3f(1,0,0));
+		//drone.getPose().rotate((float) -(Math.PI/2), new Vector3f(1,0,0));
 		entities.add(drone);
 		
 		//Reset AP

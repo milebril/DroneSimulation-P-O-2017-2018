@@ -76,6 +76,8 @@ public class PhysicsEngine {
 //		
 		
 		//recursieve oproep
+		System.out.println("---------------------------------------------------------------------------------------------------");
+
 		PhysicsEngine.applyPhysics(drone, (dt - h));
 	}
 	
@@ -128,6 +130,8 @@ public class PhysicsEngine {
 		int i = 0;
 		
 		for (Tyre tyre : drone.getTyres()) {
+			
+			System.out.println("PE calc forces: tyre get compression getCompression: " + tyre.getCompression());
 			
 			// if the tyre is not grounded, there will be no compression forces -> start next iteration of for loop
 			if (!tyre.isGrounded()) continue;
