@@ -126,9 +126,8 @@ public class MainGameLoop {
 		//***INITIALIZE DRONEVIEW***
 		RawModel droneModel = OBJLoader.loadObjModel("tree", loader);
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,new ModelTexture(loader.loadTexture("tree")));
-		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, 20, -30)), 1,
+		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, 20, 0)), 1,
 				autopilotConfig, new EulerPrediction(STEP_TIME));
-		//drone.getPose().rotate((float) -(Math.PI/2), new Vector3f(1,0,0)); //TODO Entity pose!!!
 		entities.add(drone);
 		
 		//***INITIALIZE CHASE-CAM***
@@ -170,14 +169,13 @@ public class MainGameLoop {
 		cubeShader = new CubeShader();
 		cubeRenderer = new CubeRenderer(cubeShader, 120, 120);
 		
-		Cube c = new Cube(1, 0, 0);
+		Cube c = new Cube(1, 1, 0);
 		RawCubeModel cube = loader.loadToVAO(c.positions, c.colors);
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -80)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -160)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -240)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -320)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -400)), 1));
-//		Entity e = new Entity(cube, new Matrix4f().translate(new Vector3f(0, 4, -10)), 1);
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 12, -80)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 19, -160)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 15, -240)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 28, -320)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 18, -400)), 1));
 		
 		/* INITIALIZE AUTOPILOT */
 		autopilot = AutopilotFactory.createAutopilot();
@@ -292,7 +290,7 @@ public class MainGameLoop {
 	private static void removeCubes() {
 		List<Entity> toRemove = new ArrayList<>();
 		for (Entity e : cubes) {
-			if (getEuclidDist(drone.getPosition(), e.getPosition()) <= 4) {
+			if (getEuclidDist(drone.getPosition(), e.getPosition()) <= 3) {
 				toRemove.add(e);
 			}
 		}
