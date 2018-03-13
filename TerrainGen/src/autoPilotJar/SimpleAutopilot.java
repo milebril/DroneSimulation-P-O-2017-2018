@@ -34,10 +34,12 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	
 	private List<Vector3f> cubePositions = new ArrayList<>();
 	private MyPath path;
+	private float maxY = 20;
+	private float minY = 20;
 	
 	public SimpleAutopilot() {
 		float[] pathX = {  0,   0,  0, 0,  0};
-		float[] pathY = {  20,   20,   20,   20,   20};
+		float[] pathY = {  10,   19,   15,   28,   18};
 		float[] pathZ = {-80,-160,-240,-320,-400};
 		this.path = new MyPath(pathX,pathY,pathZ);
 		this.path.setIndex(0);
@@ -46,7 +48,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		
 		//Initialize PIDController for horizontalflight
 		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
-		this.pidHorStab = new PIDController(1.0f,0.0f,1.0f, (float) (Math.PI / 180), 0);
+		this.pidHorStab = new PIDController(1.3f,0.1f,1.0f, (float) (Math.PI / 180), 0);
 		this.pidVerStab = new PIDController(2.5f,0.0f,2.0f, (float) (Math.PI / 180), 0);
 		
 		//PID for Roll (als we dat ooit gaan gebruiken)
@@ -96,6 +98,14 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
 		this.inputAP = inputs;
 		//System.out.println("Roll: " + inputs.getRoll());
+		if(inputs.getY() > this.maxY)
+				this.maxY = inputs.getY();
+		
+		if(inputs.getY() < this.minY)
+				this.minY = inputs.getY();
+		
+		System.out.println("Max Y: " + this.maxY);
+		System.out.println("Min Y: " + this.minY);
 		
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
 			setDroneProperties(inputs);
