@@ -12,10 +12,12 @@ import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.util.vector.Matrix4f;
+import org.lwjgl.util.vector.Vector3f;
 
 import shaders.StaticShader;
 import textures.ModelTexture;
 import toolbox.Maths;
+import entities.Drone;
 import entities.Entity;
 
 public class EntityRenderer {
@@ -62,7 +64,15 @@ public class EntityRenderer {
 	}
 
 	private void prepareInstance(Entity entity) {
-		Matrix4f transformationMatrix = entity.getPose();
+		Matrix4f transformationMatrix;
+		if (entity instanceof Drone) {
+			Matrix4f pose = new Matrix4f(entity.getPose());
+			pose.rotate((float) -(Math.PI/2), new Vector3f(1,0,0));
+			transformationMatrix = pose;
+		} else {
+			transformationMatrix = entity.getPose();
+		}
+		
 		shader.loadTransformationMatrix(transformationMatrix);
 	}
 
