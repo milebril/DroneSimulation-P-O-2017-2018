@@ -253,16 +253,15 @@ public class MainGameLoop {
 				} // TODO: stop simulation (drone crashed)
 				
 				//Autopilot stuff
-				AutopilotInputs inputs = drone.getAutoPilotInputs();
-				AutopilotOutputs outputs = autopilot.timePassed(inputs);
-				drone.setAutopilotOutouts(outputs);
+//				AutopilotInputs inputs = drone.getAutoPilotInputs();
+//				AutopilotOutputs outputs = autopilot.timePassed(inputs);
+//				drone.setAutopilotOutouts(outputs);
 			}
 			
 			keyInputs();
 			removeCubes();
 			DisplayManager.updateDisplay();
 			
-			System.out.println("+++++++");
 		}
 
 		renderer.cleanUp();
