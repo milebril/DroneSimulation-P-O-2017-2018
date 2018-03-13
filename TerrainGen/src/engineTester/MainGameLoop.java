@@ -174,11 +174,11 @@ public class MainGameLoop {
 		Cube c = new Cube(1, 1, 0);
 		RawCubeModel cube = loader.loadToVAO(c.positions, c.colors);
 //		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(6, 3, -20)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 10, -80)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 19, -160)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 15, -240)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 28, -320)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 18, -400)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 10, -480)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 19, -560)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 15, -640)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 28, -720)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 18, -800)), 1));
 		
 		/* INITIALIZE AUTOPILOT */
 		autopilot = AutopilotFactory.createAutopilot();
