@@ -16,7 +16,6 @@ public class TaxiAutopilot implements Autopilot, AutopilotOutputs {
 	private float newRightWingInclination = 0;
 	private float newHorStabInclination = 0;
 	private float newVerStabInclination = 0;
-	private float fcMax;
 	private float newLeftBrake = 0;
 	private float newRightBrake = 0;
 	private float newFrontBrake = 0;
