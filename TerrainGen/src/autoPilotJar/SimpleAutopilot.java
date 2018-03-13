@@ -35,13 +35,13 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	private MyPath path;
 	private float maxX = 0;
 	private float minX = 0;
-	
-	//Aanpassen als we naar nieuwe cubus moeten gaan
+
+	// Aanpassen als we naar nieuwe cubus moeten gaan
 	private Vector3f stubCube = new Vector3f(0, 0, -40);
 	private Vector3f cubePos = stubCube;
-	
+
 	private float heightGoal = 1;
-	
+
 	private ImageProcessor cubeLocator;
 	private PIDController pidHorStab;
 	private PIDController pidHorWing;
@@ -50,48 +50,51 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	private PIDController pidWings;
 	private PIDController pidRoll;
 	private PIDController pidThrust;
-	
-	/* Variables to send back to drone	 
-	 * Initialy All inclinations are 0
+
+	/*
+	 * Variables to send back to drone Initialy All inclinations are 0
 	 */
 	private float newThrust = 0;
 	private float newLeftWingInclination = 0;
 	private float newRightWingInclination = 0;
 	private float newHorStabInclination = 0;
 	private float newVerStabInclination = 0;
-	
-	
-	
-	public SimpleAutopilot() {
-		float[] pathX = {  0,   0,  0, 0,  0};
-		float[] pathY = {  20,   20,   20,   20,   20};
-		float[] pathZ = {-80,-160,-240,-320,-400};
-		this.path = new MyPath(pathX,pathY,pathZ);
-		this.path.setIndex(0);
-		
-		this.cubePos = new Vector3f(path.getCurrentX(), path.getCurrentY(),path.getCurrentZ());
-		
-		//Initialize PIDController for horizontalflight
-		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
-		this.pidHorStab = new PIDController(1.0f,0.0f,1.0f, (float) (Math.PI / 180), 0);
-		this.pidVerStab = new PIDController(2.5f,0.0f,2.0f, (float) (Math.PI / 180), 0);
-		
-		//PID for Roll (als we dat ooit gaan gebruiken)
-		//this.pidWings = new PIDController(1.0f,0.0f,5.0f,(float) Math.toRadians(1),0);
-        this.pidRoll = new PIDController(0.0f,0.5f,1.0f,(float) Math.toRadians(1),0);
 
-		
-		//Initialize AP with configfile TODO: mag deze lijn weg?
-		
-		//Initialize PIDController for Thrust
-		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
-		//this.pidThrust = new PIDController(1.0f, 0.0f, 3.0f, -10, 10);
+	private float newLeftBrake = 0;
+	private float newRightBrake = 0;
+	private float newFrontBrake = 0;
+	private AutopilotStages stages = AutopilotStages.TAXI;
+
+	public SimpleAutopilot() {
+		float[] pathX = { 0, 0, 0, 0, 0 };
+		float[] pathY = { 20, 20, 20, 20, 20 };
+		float[] pathZ = { -80, -160, -240, -320, -400 };
+		this.path = new MyPath(pathX, pathY, pathZ);
+		this.path.setIndex(0);
+
+		this.cubePos = new Vector3f(path.getCurrentX(), path.getCurrentY(), path.getCurrentZ());
+
+		// Initialize PIDController for horizontalflight
+		// PIDController(float K-Proportional, float K-Integral, float K-Derivative,
+		// float changeFactor, float goal)
+		this.pidHorStab = new PIDController(1.0f, 0.0f, 1.0f, (float) (Math.PI / 180), 0);
+		this.pidVerStab = new PIDController(2.5f, 0.0f, 2.0f, (float) (Math.PI / 180), 0);
+
+		// PID for Roll (als we dat ooit gaan gebruiken)
+		// this.pidWings = new PIDController(1.0f,0.0f,5.0f,(float)
+		// Math.toRadians(1),0);
+		this.pidRoll = new PIDController(0.0f, 0.5f, 1.0f, (float) Math.toRadians(1), 0);
+
+		// Initialize AP with configfile TODO: mag deze lijn weg?
+
+		// Initialize PIDController for Thrust
+		// PIDController(float K-Proportional, float K-Integral, float K-Derivative,
+		// float changeFactor, float goal)
+		// this.pidThrust = new PIDController(1.0f, 0.0f, 3.0f, -10, 10);
 	}
-	
-	
+
 	private boolean heightGoalReached = false;
-	
-	
+
 	// Autopilot communication
 
 	/**
@@ -117,39 +120,42 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	public AutopilotInputs getInput() {
 		return this.inputAP;
 	}
-	
+
 	@Override
 	public AutopilotOutputs simulationStarted(AutopilotConfig config, AutopilotInputs inputs) {
 		this.configAP = config;
 		this.inputAP = inputs;
-		
+
 		cubeLocator = new ImageProcessor(this);
-		
+
 		return this;
 	}
-	
+
 	@Override
 	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
 		this.inputAP = inputs;
-		//System.out.println("Roll: " + inputs.getRoll());
-		if(inputs.getY() > this.maxX)
-				this.maxX = inputs.getY();
-		
-		if(inputs.getY() < this.minX)
-				this.minX = inputs.getY();
-		
+		// System.out.println("Roll: " + inputs.getRoll());
+		if (inputs.getY() > this.maxX)
+			this.maxX = inputs.getY();
+
+		if (inputs.getY() < this.minX)
+			this.minX = inputs.getY();
+
 		System.out.println("Max X: " + this.maxX);
 		System.out.println("Min X: " + this.minX);
-		
+
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
 			setDroneProperties(inputs);
 			System.out.println("Goal: " + this.cubePos);
-			//Set the horizontal stabilizer inclination
-			newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() + getVerAngle(), getProperties().getDeltaTime());
-			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
-			else if(newHorStabInclination < - Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
+			// Set the horizontal stabilizer inclination
+			newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() + getVerAngle(),
+					getProperties().getDeltaTime());
+			if (newHorStabInclination > Math.PI / 6)
+				newHorStabInclination = (float) (Math.PI / 6);
+			else if (newHorStabInclination < -Math.PI / 6)
+				newHorStabInclination = (float) -(Math.PI / 6);
 			System.out.println("Inclination horizontal stabiliser: " + newHorStabInclination);
-			
+
 			if (getProperties().getVelocity().length() > 80) // als de drone sneller vliegt dan 60m/s zet de thrust dan
 				this.newThrust = 0;
 			else
@@ -157,20 +163,18 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			newLeftWingInclination = 0;
 			newRightWingInclination = 0;
 			System.out.println(getProperties().getVelocity().length());
-				newLeftWingInclination = (float) Math.toRadians(20);
+			newLeftWingInclination = (float) Math.toRadians(20);
 			if (getProperties().getVelocity().length() > 40 && inputs.getY() < 10) {
-			
-			
+
 				newRightWingInclination = (float) Math.toRadians(20);
-			} else if(getProperties().getVelocity().length() > 40 && inputs.getY() > 10) {
+			} else if (getProperties().getVelocity().length() > 40 && inputs.getY() > 10) {
 				newLeftWingInclination = (float) Math.toRadians(4);
 				newRightWingInclination = (float) Math.toRadians(4);
 			}
 
-			switch (this.stage) {
+			switch (this.stages) {
 			case FLYING:
 
-				
 				System.out.println("Goal: " + this.cubePos);
 				// Set the horizontal stabilizer inclination
 				newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() + getVerAngle(),
@@ -268,7 +272,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 					this.newRightBrake = 0;
 					this.newFrontBrake = 0;
 					this.newThrust = 200;
-					
+
 					// rechter achterrem vollenbak open en thrust ni te hoog (zodat de drone zich
 					// draait naar het doel
 				} else if (inputs.getHeading() - this.getHorAngle() < 0.01) {
@@ -306,50 +310,14 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 				}
 
 			case LANDING:
-				// nog niet ge�mplementeerd 
+				// nog niet ge�mplementeerd
 			}
 		}
 
 		return this;
 	}
-	
-	@Override
-	public AutopilotOutputs simulationStarted(AutopilotConfig config, AutopilotInputs inputs) {
-		this.configAP = config;
-		this.inputAP = inputs;
-		
-		cubeLocator = new ImageProcessor(this);
-		
-		return this;
-	}
-	
-	
-	//Aanpassen als we naar nieuwe cubus moeten gaan
-	private Vector3f stubCube = new Vector3f(0, 0, -40);
-	private Vector3f cubePos = stubCube;
-	
-	private float heightGoal = 1;
-	
-	private ImageProcessor cubeLocator;
-	private PIDController pidHorStab;
-	private PIDController pidHorWing;
-	private PIDController pidHorGoal;
-	private PIDController pidVerStab;
-	private PIDController pidWings;
-	private PIDController pidRoll;
-	private PIDController pidThrust;
-	
-	/* Variables to send back to drone	 
-	 * Initialy All inclinations are 0
-	 */
-	private float newThrust = 0;
-	private float newLeftWingInclination = 0;
-	private float newRightWingInclination = 0;
-	private float newHorStabInclination = 0;
-	private float newVerStabInclination = 0;
-	
-	
-	private float getVerAngle(){
+
+	private float getVerAngle() {
 		float overstaande = cubePos.getY() - getProperties().getPosition().getY();
 		float aanliggende = cubePos.getZ() - getProperties().getPosition().getZ();
 		return (float) Math.atan(overstaande / aanliggende);
@@ -377,11 +345,12 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see interfaces.AutopilotOutputs
 	 * 
 	 * Zo kunnen we this returnen ipv altijd new AutopilotOutputs
 	 */
-	
+
 	@Override
 	public float getThrust() {
 		return newThrust;
@@ -406,8 +375,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	public float getVerStabInclination() {
 		return newVerStabInclination;
 	}
-	
-	
+
 	// MAX AIRFOIL INCLINATION
 
 	/**
@@ -519,7 +487,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	public float[] getMaxInclinationVertStab() {
 		return getMaxInclination(new Vector3f(0, 0, getConfig().getTailSize()), AirfoilOrientation.VERTICAL);
 	}
-	
+
 	// DRONE PROPERTIES
 
 	/**
@@ -558,295 +526,27 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	public DroneProperties getPreviousProperties() {
 		return this.previousProperties;
 	}
-	
-	/**
-	 * A class for saving the properties of the drone. Used for saving the properties of
-	 * the current and previous iteration.
-	 *
-	 */
-	class DroneProperties {
-		
-		public DroneProperties(AutopilotInputs inputs, DroneProperties previousProperties) {
-			// save give properties
-			this.image = inputs.getImage();
-			this.elapsedTime = inputs.getElapsedTime();
-			this.position = new Vector3f(inputs.getX(), inputs.getY(), inputs.getZ());
-			this.heading = inputs.getHeading();
-			this.pitch = inputs.getPitch();
-			this.roll = inputs.getRoll();
-			
-			// calculate other properties
-			this.deltaTime = this.elapsedTime - previousProperties.getElapsedTime();
-			this.velocity = calculateVelocity(this.position, previousProperties.getPosition(), this.deltaTime);
-			this.orientationMatrix = calculateOrientationMatrix(heading, pitch, roll);
-			this.rotationSpeed = calculateRotationSpeed(this.orientationMatrix, previousProperties.getOrientationMatrix(), this.deltaTime);
-		}
-		
-		public DroneProperties() {
-			// save give properties
-			this.image = null;
-			this.elapsedTime = 0;
-			this.position = new Vector3f(0, 0, 0);
-			this.heading = 0;
-			this.pitch = 0;
-			this.roll = 0;
-			
-			// calculate other properties
-			this.deltaTime = 0;
-			this.velocity = new Vector3f(0, 0, 0);
-			this.orientationMatrix = new Matrix3f();
-			this.rotationSpeed = new Vector3f(0, 0, 0);
-		}
-		
-		
-		// GIVEN PROPERTIES
-		
-		// Image
-		
-		/**
-		 * The image captured by the drone
-		 */
-		private final byte[] image;
-		
-		/**
-		 * Returns the image.
-		 */
-		public byte[] getImage() {
-			return this.image;
-		}
-		
-		// Time
-		
-		/**
-		 * The elapsed time property
-		 */
-		private final float elapsedTime;
-		
-		/**
-		 * Returns the elapsed time property
-		 */
-		public float getElapsedTime() {
-			return this.elapsedTime;
-		}
-		
-		// Position
-		
-		/**
-		 * The position property
-		 */
-		private final Vector3f position;
-		
-		/**
-		 * Returns the position property.
-		 */
-		public Vector3f getPosition() {
-			return this.position;
-		}
-		
-		// Heading, pitch and roll
-		
-		/**
-		 * The heading property
-		 */
-		private final float heading;
-		
-		/**
-		 * Returns the heading property.
-		 */
-		public float getHeading() {
-			return this.heading;
-		}
-		
-		/**
-		 * The pitch property
-		 */
-		private final float pitch;
-		
-		/**
-		 * Returns the pitch property.
-		 */
-		public float getPitch() {
-			return this.pitch;
-		}
-		
-		/**
-		 * The roll property
-		 */
-		private final float roll;
-		
-		/**
-		 * Returns the roll property.
-		 */
-		public float getRoll() {
-			return this.roll;
-		}
-		
-		
-		// CALCULATED PROPERTIES
-		
-		// Delta time
-		
-		/**
-		 * Delta time since the previous DroneProperties object
-		 */
-		private final float deltaTime;
-		
-		/**
-		 * Returns delta time.
-		 */
-		public float getDeltaTime() {
-			return this.deltaTime;
-		}
-		
-		// Speed vector
-		
-		/**
-		 * The velocity property
-		 */
-		private final Vector3f velocity;
-		
-		/**
-		 * Returns the velocity property.
-		 */
-		public Vector3f getVelocity() {
-			return new Vector3f(velocity.x, velocity.y, velocity.z);
-		}
-		
-		/**
-		 * Calulates the velocity vector.
-		 */
-		private Vector3f calculateVelocity(Vector3f position, Vector3f previousPosition, float deltaTime) {
-			Vector3f diff = new Vector3f();
-			Vector3f.sub(position, previousPosition, diff);
-			if (deltaTime != 0) diff.scale(1/deltaTime);
-			else diff = new Vector3f(0, 0, 0);
-			return diff;
-		}
-		
-		// Orientation matrix
-		
-		/**
-		 * The orientation matrix.
-		 */
-		private final Matrix3f orientationMatrix;
-		
-		/**
-		 * Returns a copy of the orientation matrix.
-		 */
-		public Matrix3f getOrientationMatrix() {
-			Matrix3f matrixCopy = new Matrix3f();
-			matrixCopy.m00 = orientationMatrix.m00;
-			matrixCopy.m01 = orientationMatrix.m01;
-			matrixCopy.m02 = orientationMatrix.m02;
-			matrixCopy.m10 = orientationMatrix.m10;
-			matrixCopy.m11 = orientationMatrix.m11;
-			matrixCopy.m12 = orientationMatrix.m12;
-			matrixCopy.m20 = orientationMatrix.m20;
-			matrixCopy.m21 = orientationMatrix.m21;
-			matrixCopy.m22 = orientationMatrix.m22;
-			return matrixCopy;
-		}
-		
-		/**
-		 * Calculates the orientation matrix.
-		 */
-		private Matrix3f calculateOrientationMatrix(float heading, float pitch, float roll) {
-			
-			//lwjgl matrix
-			Matrix3f orientation = new Matrix3f();
-			
-			//pitch rotatie
-			Matrix3f xRot = new Matrix3f();
-			xRot.m11 = (float) Math.cos(pitch);
-			xRot.m22 = (float) Math.cos(pitch);
-			xRot.m21 = (float) - Math.sin(pitch);
-			xRot.m12 = (float) Math.sin(pitch);
-			//heading rotatie rond y-as
-			Matrix3f yRot = new Matrix3f();
-			yRot.m00 = (float) Math.cos(heading);
-			yRot.m22 = (float) Math.cos(heading);
-			yRot.m20 = (float) Math.sin(heading);
-			yRot.m02 = (float) - Math.sin(heading);
-			//roll rond z-as
-			Matrix3f zRot = new Matrix3f();
-			zRot.m00 = (float) Math.cos(roll);
-			zRot.m11 = (float) Math.cos(roll);
-			zRot.m10 = (float) - Math.sin(roll);
-			zRot.m01 = (float) Math.sin(roll);
-			
-			Matrix3f temp = new Matrix3f();
-			Matrix3f.mul(zRot, xRot, temp);
-			Matrix3f.mul(temp, yRot, orientation);
-			
-			// de nieuwe setten
-			return orientation;
-		}
-		
-		// Rotation speed
-		
-		/**
-		 * The rotation speed property.
-		 */
-		private final Vector3f rotationSpeed;
-		
-		/**
-		 * Returns a copy of the rotation speed property vector.
-		 */
-		public Vector3f getRotationSpeed() {
-			return new Vector3f(rotationSpeed.x, rotationSpeed.y, rotationSpeed.z);
-		}
-		
-		/**
-		 * Calculates the rotation speed property using the current orientation, previous orientation and delta time.
-		 */
-		private Vector3f calculateRotationSpeed(Matrix3f orientation, Matrix3f previousOrientation, float deltaTime){
-			
-			//oppassen want 4x4 matrix is niet zomaar inverteerbaar om tegenstelde orientatie te krijgen
-			previousOrientation.transpose(); 
-			Matrix3f diff = new Matrix3f();
-			
-			Matrix3f.mul(orientation, previousOrientation, diff);
-			
-			//enkel hier de brakke library gebruiken:
-			AxisAngle4f rotation = new AxisAngle4f();
-			// eerst omzetten naar andere Matrixtype, lwjgl is column major, javax row major
-			Matrix4f javaxCopy = new Matrix4f(	diff.m00, diff.m10, diff.m20, 0,
-												diff.m01, diff.m11, diff.m21, 0,
-												diff.m02, diff.m12, diff.m22, 0,
-												0, 		  0, 		0, 		  1);
-			rotation.set(javaxCopy);
-			float[] result = new float[4];
-			rotation.get(result);
-			//hier er terug uit in array result
-			
-			result[3] /= deltaTime;
-			
-			Vector3f speed = new Vector3f(result[0], result[1], result[2]);
-			speed.scale(result[3]);
-			
-			return speed;
-		}
-		
-	}
 
 	@Override
 	public float getFrontBrakeForce() {
 		// TODO Auto-generated method stub
-		return 0;
+		return this.newFrontBrake;
 	}
-
 
 	@Override
 	public float getLeftBrakeForce() {
 		// TODO Auto-generated method stub
-		return 0;
+		return this.newLeftBrake;
 	}
-
 
 	@Override
 	public float getRightBrakeForce() {
 		// TODO Auto-generated method stub
-		return 0;
+		return this.newRightBrake;
 	}
 	
+	  public float getFcMax() { 
+		    return this.configAP.getFcMax(); 
+		  } 
+
 }
