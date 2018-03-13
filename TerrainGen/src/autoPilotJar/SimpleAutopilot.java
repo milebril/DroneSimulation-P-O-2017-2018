@@ -164,13 +164,17 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			else
 				this.newThrust = configAP.getMaxThrust();
 			
+			newLeftWingInclination = 0;
+			newRightWingInclination = 0;
+			
 			System.out.println(getProperties().getVelocity().length());
-			
-//			if (getProperties().getVelocity().length() > 40 ) {
-//				newLeftWingInclination = (float) Math.toRadians(20);
-//				newRightWingInclination = (float) Math.toRadians(20);
-//			}
-			
+			if (getProperties().getVelocity().length() > 40 && inputs.getY() < 10) {
+				newLeftWingInclination = (float) Math.toRadians(20);
+				newRightWingInclination = (float) Math.toRadians(20);
+			} else if(getProperties().getVelocity().length() > 40 && inputs.getY() > 10) {
+				newLeftWingInclination = (float) Math.toRadians(4);
+				newRightWingInclination = (float) Math.toRadians(4);
+			}
 			
 //			System.out.println("Velocity: " + getProperties().getVelocity().length());
 //			System.out.println("Thrust: " + newThrust);
