@@ -137,14 +137,36 @@ public class MainGameLoop {
 		chaseCam.setPosition(drone.getPosition().translate(0, 2, 10));
 		
 		//***INITIALIZE GUI-TEXT***
-		String speed = String.valueOf(Math.round(drone.getAbsVelocity()));
 		FontType font = new FontType(loader.loadTexture("verdana"), new File("res/verdana.fnt"));
-		GUIText textSpeed = new GUIText("Speed = " + speed + "m/s", 5, font, new Vector2f(0,0), 1, false);
+		
+		//Speed text
+		String speed = String.valueOf(Math.round(drone.getAbsVelocity()));
+		GUIText textSpeed = new GUIText("Speed = " + speed + "m/s", 3, font, new Vector2f(0,0), 1, false);
 		textSpeed.setColour(0, 0, 0);
 		
+		//Position text
 		String xpos, ypos, zpos;
-		GUIText textPosition = new GUIText("" , 5, font, new Vector2f(0,0.15f), 1, false);
+		GUIText textPosition = new GUIText("" , 3, font, new Vector2f(0,0.15f), 1, false);
 		textPosition.setColour(0, 0, 0);
+		
+		//Wing inclinations text
+		String leftWingInc = String.valueOf(drone.getLeftWing().getInclination());
+		GUIText textLeftWing = new GUIText("Left wing inclination = " + leftWingInc + "rad", 3, font, new Vector2f(0,0.3f),1,false);
+		textLeftWing.setColour(1, 0, 0);
+		
+		String rightWingInc = String.valueOf(drone.getRightWing().getInclination());
+		GUIText textRightWing = new GUIText("Right wing inclination = " + rightWingInc + "rad", 3, font, new Vector2f(0,0.45f),1,false);
+		textRightWing.setColour(1, 0, 0);
+		
+		String horzStab = String.valueOf(drone.getHorizStabilizer().getInclination());
+		GUIText textHorzStab = new GUIText("Horizontal stabilizer inclination = " + horzStab + "rad", 3, font, new Vector2f(0,0.60f), 1, false);
+		textHorzStab.setColour(1, 0, 0);
+		
+		String vertStab = String.valueOf(drone.getVertStabilizer().getInclination());
+		GUIText textVertStab = new GUIText("Vertical stabilizer inclination = " + vertStab + "rad", 3, font, new Vector2f(0,0.75f), 1, false);
+		textVertStab.setColour(1, 0, 0);
+		
+		
 
 		//Load Trees
 //		RawModel model = OBJLoader.loadObjModel("tree", loader);
@@ -218,10 +240,11 @@ public class MainGameLoop {
 			//drone.rotate(0.01f, new Vector3f(1, 0, 0));
 			
 			//GUI
-			GL11.glViewport(200, 0, 400, 200);
-			GL11.glScissor(200, 0, 400, 200);
+			GL11.glViewport(200, 0, 600, 200);
+			GL11.glScissor(200, 0, 600, 200);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			renderer.prepareBlack();
+			
 			
 			speed = String.valueOf(Math.round(drone.getAbsVelocity()));
 			textSpeed .setString("Speed = " + speed + "m/s");
@@ -233,9 +256,29 @@ public class MainGameLoop {
 			textPosition.setString("Position = ("+xpos+" , "+ypos+" , "+zpos +")");
 			TextMaster.loadText(textPosition);
 			
+			leftWingInc = String.valueOf(Math.round(drone.getLeftWing().getInclination()*100.0)/100.0);
+			textLeftWing.setString("Left wing inclination = " + leftWingInc + "rad");
+			TextMaster.loadText(textLeftWing);
+			
+			rightWingInc = String.valueOf(Math.round(drone.getRightWing().getInclination()*100.0)/100.0);
+			textRightWing.setString("Right wing inclination = " + rightWingInc + "rad");
+			TextMaster.loadText(textRightWing);
+			
+			horzStab = String.valueOf(Math.round(drone.getHorizStabilizer().getInclination()*100.0)/100.0);
+			textHorzStab.setString("Horizontal stabilizer inclination = " + horzStab + "rad");
+			TextMaster.loadText(textHorzStab);
+			
+			vertStab = String.valueOf(Math.round(drone.getVertStabilizer().getInclination()*100.0)/100.0);
+			textVertStab.setString("Vertical stabilizer inclination = " + vertStab + "rad");
+			TextMaster.loadText(textVertStab);
+			
 			TextMaster.render();
 			TextMaster.removeText(textSpeed);
 			TextMaster.removeText(textPosition);
+			TextMaster.removeText(textLeftWing);
+			TextMaster.removeText(textRightWing);
+			TextMaster.removeText(textHorzStab);
+			TextMaster.removeText(textVertStab);
 			
 			//***BUTTON GUI***
 			GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
