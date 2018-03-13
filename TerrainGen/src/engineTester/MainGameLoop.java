@@ -137,16 +137,14 @@ public class MainGameLoop {
 		//chaseCam.setYaw((float) -(Math.PI/9));
 		
 		//***INITIALIZE GUI-TEXT***
-		StaticShader shaderText = new StaticShader();
-
 		String speed = String.valueOf(Math.round(drone.getAbsVelocity()));
 		FontType font = new FontType(loader.loadTexture("verdana"), new File("res/verdana.fnt"));
-		GUIText textSpeed = new GUIText("Speed = " + speed + "m/s", 5, font, new Vector2f(0.01f,0), 1, true);
-		textSpeed.setColour(1, 1, 1);
+		GUIText textSpeed = new GUIText("Speed = " + speed + "m/s", 5, font, new Vector2f(0,0), 1, false);
+		textSpeed.setColour(0, 0, 0);
 		
 		String xpos, ypos, zpos;
-		GUIText textPosition = new GUIText("" , 5, font, new Vector2f(0.9f,0.9f), 1, true);
-		textPosition.setColour(1, 0, 0);
+		GUIText textPosition = new GUIText("" , 5, font, new Vector2f(0,0.15f), 1, false);
+		textPosition.setColour(0, 0, 0);
 
 		//Load Trees
 //		RawModel model = OBJLoader.loadObjModel("tree", loader);
@@ -192,8 +190,16 @@ public class MainGameLoop {
 		randomCubes.show(guis);
 		
 		while(!Display.isCloseRequested()){
-			//CAMERA VIEW
+			//***BIG SCREEN***
 			renderer.prepare();
+			GL11.glViewport(0, 200, Display.getWidth(), Display.getHeight() - 200);
+			GL11.glScissor(0, 200, Display.getWidth(), Display.getHeight() - 200);
+			GL11.glEnable(GL11.GL_SCISSOR_TEST);
+			//chaseCam.setPosition(chaseCam.getPosition().translate(0, -0.01f, -1));
+			renderEntities(chaseCam);
+			chaseCam.setPosition(drone.getPosition().translate(0, 2, 10));
+			
+			//CAMERA VIEW
 			GL11.glViewport(0, 0, 200, 200);
 			GL11.glScissor(0,0,200,200);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
@@ -202,9 +208,9 @@ public class MainGameLoop {
 			camera.setPosition(drone.getPosition().translate(0, 0, -5));
 			//drone.rotate(0.01f, new Vector3f(1, 0, 0));
 			
-			//GUI TODO
-			GL11.glViewport(200, 0, Display.getWidth() - 200, 200);
-			GL11.glScissor(200, 0, Display.getWidth() - 200, 200);
+			//GUI
+			GL11.glViewport(200, 0, 400, 200);
+			GL11.glScissor(200, 0, 400, 200);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			renderer.prepareBlack();
 			
@@ -221,15 +227,6 @@ public class MainGameLoop {
 			TextMaster.render();
 			TextMaster.removeText(textSpeed);
 			TextMaster.removeText(textPosition);
-			
-			//***BIG SCREEN***
-			renderer.prepare();
-			GL11.glViewport(0, 200, Display.getWidth(), Display.getHeight() - 200);
-			GL11.glScissor(0, 200, Display.getWidth(), Display.getHeight() - 200);
-			GL11.glEnable(GL11.GL_SCISSOR_TEST);
-			//chaseCam.setPosition(chaseCam.getPosition().translate(0, -0.01f, -1));
-			renderEntities(chaseCam);
-			chaseCam.setPosition(drone.getPosition().translate(0, 2, 10));
 			
 			//***BUTTON GUI***
 			GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
