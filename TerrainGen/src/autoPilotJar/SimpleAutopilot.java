@@ -34,8 +34,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	
 	private List<Vector3f> cubePositions = new ArrayList<>();
 	private MyPath path;
-	private float maxY = 20;
-	private float minY = 20;
+	private float maxX = 0;
+	private float minX = 0;
 	
 	//Aanpassen als we naar nieuwe cubus moeten gaan
 	private Vector3f stubCube = new Vector3f(0, 0, -40);
@@ -64,8 +64,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	
 	
 	public SimpleAutopilot() {
-		float[] pathX = {  0,   0,  0, 0,  0};
-		float[] pathY = {  10,   19,   15,   28,   18};
+		float[] pathX = {  5,  0, -5,-10, -5};
+		float[] pathY = { 20, 20, 20, 20, 20};
 		float[] pathZ = {-80,-160,-240,-320,-400};
 		this.path = new MyPath(pathX,pathY,pathZ);
 		this.path.setIndex(0);
@@ -126,14 +126,14 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
 		this.inputAP = inputs;
 		//System.out.println("Roll: " + inputs.getRoll());
-		if(inputs.getY() > this.maxY)
-				this.maxY = inputs.getY();
+		if(inputs.getY() > this.maxX)
+				this.maxX = inputs.getY();
 		
-		if(inputs.getY() < this.minY)
-				this.minY = inputs.getY();
+		if(inputs.getY() < this.minX)
+				this.minX = inputs.getY();
 		
-		System.out.println("Max Y: " + this.maxY);
-		System.out.println("Min Y: " + this.minY);
+		System.out.println("Max X: " + this.maxX);
+		System.out.println("Min X: " + this.minX);
 		
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
 			setDroneProperties(inputs);
