@@ -74,16 +74,13 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		
 		//Initialize PIDController for horizontalflight
 		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
-		this.pidHorStab = new PIDController(1.3f,0.1f,1.0f, (float) (Math.PI / 180), 0);
+		this.pidHorStab = new PIDController(1.45f,0.01f,1.0f, (float) (Math.PI / 180), 0);
 		this.pidVerStab = new PIDController(2.5f,0.0f,2.0f, (float) (Math.PI / 180), 0);
 		
 		//PID for Roll (als we dat ooit gaan gebruiken)
 		//this.pidWings = new PIDController(1.0f,0.0f,5.0f,(float) Math.toRadians(1),0);
         this.pidRoll = new PIDController(0.0f,0.5f,1.0f,(float) Math.toRadians(1),0);
 
-		
-		//Initialize AP with configfile TODO: mag deze lijn weg?
-		
 		//Initialize PIDController for Thrust
 		//PIDController(float K-Proportional, float K-Integral, float K-Derivative, float changeFactor, float goal)
 		//this.pidThrust = new PIDController(1.0f, 0.0f, 3.0f, -10, 10);
@@ -140,7 +137,6 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
 			setDroneProperties(inputs);
-			System.out.println("Goal: " + this.cubePos);
 			//Set the horizontal stabilizer inclination
 			newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() + getVerAngle(), getProperties().getDeltaTime());
 			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
@@ -148,25 +144,29 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			System.out.println("Inclination horizontal stabiliser: " + newHorStabInclination);
 			
 			//Set the vertical stabilizer inclination
-			newVerStabInclination += pidVerStab.calculateChange(inputAP.getHeading() - getHorAngle(), getProperties().getDeltaTime());
-			if(newVerStabInclination > Math.PI/6) newVerStabInclination = (float) (Math.PI/6);
-			else if(newVerStabInclination < - Math.PI/6) newVerStabInclination = (float) -(Math.PI/6);
+//			newVerStabInclination += pidVerStab.calculateChange(inputAP.getHeading() - getHorAngle(), getProperties().getDeltaTime());
+//			if(newVerStabInclination > Math.PI/6) newVerStabInclination = (float) (Math.PI/6);
+//			else if(newVerStabInclination < - Math.PI/6) newVerStabInclination = (float) -(Math.PI/6);
 			
 			//Set the wing inclination
 //			newLeftWingInclination = (float) Math.toRadians(4); //met een inclination van 4graden stijgt hij 5 meter over 200 meter
-			newLeftWingInclination = newHorStabInclination / 10;
+			//newLeftWingInclination = newHorStabInclination / 10;
 //			newLeftWingInclination += pidRoll.calculateChange(inputAP.getRoll(), getProperties().getDeltaTime());
 //			if(newLeftWingInclination > Math.PI/6) newLeftWingInclination = (float) (Math.PI/6);
 //			else if(newLeftWingInclination < - Math.PI/6) newLeftWingInclination = (float) -(Math.PI/6);
 			
 //			newRightWingInclination = (float) Math.toRadians(4);
-			newRightWingInclination = newHorStabInclination / 10;
+			//newRightWingInclination = newHorStabInclination / 10;
 			
 			//Set the thrust force
-			//if (getProperties().getVelocity().length() > 60) //als de drone sneller vliegt dan 60m/s zet de thrust dan uit
-	        //  this.newThrust = 0;
-			//else
-			this.newThrust = configAP.getMaxThrust();
+			if (getProperties().getVelocity().length() > 80) // als de drone sneller vliegt dan 60m/s zet de thrust dan
+				this.newThrust = 0;
+			else
+				this.newThrust = configAP.getMaxThrust();
+			
+//			newLeftWingInclination = (float) Math.toRadians(30);
+//			newRightWingInclination = (float) Math.toRadians(30);
+			
 			
 //			System.out.println("Velocity: " + getProperties().getVelocity().length());
 //			System.out.println("Thrust: " + newThrust);
@@ -206,14 +206,11 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 //			}
 			
 			//CUBE REACHED
-			System.out.println("Size: " + this.cubePositions.size());
 			if(getEuclidDist(getProperties().getPosition(),cubePos) <= 4){
 				this.path.setIndex(this.path.getIndex() + 1);
 				this.cubePos = new Vector3f(path.getCurrentX(), path.getCurrentY(), path.getCurrentZ());
-//				this.cubePos = stubCube.translate(0, 0, -40);
-//				lockedOnTarget = false;
+				this.pidHorStab.reset();
 				this.pidVerStab.reset();
-//	            this.pidWings.reset();
 			}
 			
 			//REMOVE THIS AFTER TESTING:

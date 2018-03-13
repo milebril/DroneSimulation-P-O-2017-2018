@@ -1,4 +1,4 @@
-package path;
+package interfaces;
 
 public interface Path {
     float[] getX();

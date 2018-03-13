@@ -1,5 +1,7 @@
 package path;
 
+import interfaces.Path;
+
 public class MyPath implements Path{
 	
 	private float[] x;

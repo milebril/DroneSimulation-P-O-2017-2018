@@ -1,5 +1,7 @@
 package path;
 
+import interfaces.Path;
+
 public class PathWriter {
     private static void writeByteArray(java.io.DataOutputStream stream, byte[] array) throws java.io.IOException {
         stream.writeInt(array.length);

@@ -171,7 +171,8 @@ public class MainGameLoop {
 		
 		Cube c = new Cube(1, 1, 0);
 		RawCubeModel cube = loader.loadToVAO(c.positions, c.colors);
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 12, -80)), 1));
+//		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(6, 3, -20)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 10, -80)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 19, -160)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 15, -240)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 28, -320)), 1));
@@ -192,6 +193,10 @@ public class MainGameLoop {
 		randomCubes.show(guis);
 		
 		while(!Display.isCloseRequested()){
+			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
+				camera.takeSnapshot();
+			}
+				
 			//***BIG SCREEN***
 			renderer.prepare();
 			GL11.glViewport(0, 200, Display.getWidth(), Display.getHeight() - 200);
