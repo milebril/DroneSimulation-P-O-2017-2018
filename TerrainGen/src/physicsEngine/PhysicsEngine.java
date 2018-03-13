@@ -10,7 +10,7 @@ public class PhysicsEngine {
 	/**
 	 * At which y-value the ground level is.
 	 */
-	public static double groundLevel = 0;
+	public static double groundLevel = 1;
 
 	// MAIN
 
@@ -170,7 +170,7 @@ public class PhysicsEngine {
 			Vector3f lever = tyre.getGroundedPosition();
 			
 			System.out.println("pe calc forces tyre lever: " + lever.x + " " + lever.y + " " + lever.z);
-
+			System.out.println("pe calc forces tyre get pos: " + tyre.getPosition().x + " "+ tyre.getPosition().y + " "+ tyre.getPosition().z);
 			// optellen bij het totaal
 			System.out.println(
 					"PE calc forces total force w/o tyre: " + force.getX() + " " + force.getY() + " " + force.getZ());
