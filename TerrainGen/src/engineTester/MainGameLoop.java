@@ -252,7 +252,7 @@ public class MainGameLoop {
 				
 //				System.out.println("Drone Pos" + drone.getPosition());
 //				System.out.println("Drone:" + drone.getLinearVelocity()) ;
-				System.out.println("Gravitt: " + autopilotConfig.getGravity());
+//				System.out.println("Gravitt: " + autopilotConfig.getGravity());
 				
 				//Autopilot stuff
 //				AutopilotInputs inputs = drone.getAutoPilotInputs();
@@ -264,7 +264,6 @@ public class MainGameLoop {
 			removeCubes();
 			DisplayManager.updateDisplay();
 			
-			System.out.println("+++++++");
 		}
 
 		renderer.cleanUp();
