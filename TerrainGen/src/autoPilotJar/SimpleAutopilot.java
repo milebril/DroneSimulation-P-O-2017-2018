@@ -64,7 +64,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	
 	
 	public SimpleAutopilot() {
-		float[] pathX = {  5,  0, -5,-10, -5};
+		float[] pathX = {  0,  0, 0, 0, 0};
 		float[] pathY = { 20, 20, 20, 20, 20};
 		float[] pathZ = {-80,-160,-240,-320,-400};
 		this.path = new MyPath(pathX,pathY,pathZ);
@@ -138,10 +138,10 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
 			setDroneProperties(inputs);
 			//Set the horizontal stabilizer inclination
-			newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() + getVerAngle(), getProperties().getDeltaTime());
-			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
-			else if(newHorStabInclination < - Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
-			System.out.println("Inclination horizontal stabiliser: " + newHorStabInclination);
+//			newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() + getVerAngle(), getProperties().getDeltaTime());
+//			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
+//			else if(newHorStabInclination < - Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
+//			System.out.println("Inclination horizontal stabiliser: " + newHorStabInclination);
 			
 			//Set the vertical stabilizer inclination
 //			newVerStabInclination += pidVerStab.calculateChange(inputAP.getHeading() - getHorAngle(), getProperties().getDeltaTime());
@@ -164,8 +164,10 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			else
 				this.newThrust = configAP.getMaxThrust();
 			
-//			newLeftWingInclination = (float) Math.toRadians(30);
-//			newRightWingInclination = (float) Math.toRadians(30);
+			System.out.println(getProperties().getVelocity().length());
+			
+			newLeftWingInclination = (float) Math.toRadians(30);
+			newRightWingInclination = (float) Math.toRadians(30);
 			
 			
 //			System.out.println("Velocity: " + getProperties().getVelocity().length());
