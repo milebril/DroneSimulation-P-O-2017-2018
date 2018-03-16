@@ -1,5 +1,5 @@
 package autoPilotJar;
 
 public enum AutopilotStages {
-	FLYING, TAXI, TAKEOFF, LANDING
+	FLYING, TAXI, TAKE_OFF, LANDING
 }

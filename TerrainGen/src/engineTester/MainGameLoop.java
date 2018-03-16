@@ -197,11 +197,11 @@ public class MainGameLoop {
 		RawCubeModel cube = loader.loadToVAO(c.positions, c.colors);
 //		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(6, 3, -20)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -480)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(10, 20, -560)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(20, 20, -640)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(30, 20, -720)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(40, 20, -800)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(50, 20, -1000)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -560)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -640)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -720)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -800)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -1000)), 1));
 		
 		/* INITIALIZE AUTOPILOT */
 		autopilot = AutopilotFactory.createAutopilot();
@@ -302,9 +302,9 @@ public class MainGameLoop {
 				} // TODO: stop simulation (drone crashed)
 				
 				//Autopilot stuff
-//				AutopilotInputs inputs = drone.getAutoPilotInputs();
-//				AutopilotOutputs outputs = autopilot.timePassed(inputs);
-//				drone.setAutopilotOutouts(outputs);
+				AutopilotInputs inputs = drone.getAutoPilotInputs();
+				AutopilotOutputs outputs = autopilot.timePassed(inputs);
+				drone.setAutopilotOutouts(outputs);
 			}
 			
 			keyInputs();

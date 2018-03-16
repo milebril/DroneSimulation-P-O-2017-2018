@@ -6,7 +6,8 @@ import autoPilotJar.TaxiAutopilot;
 public class AutopilotFactory {
 	
 	public static Autopilot createAutopilot() {
-		return new TaxiAutopilot();
+		//return new TaxiAutopilot();
+		return new SimpleAutopilot();
 	}
 	
 }

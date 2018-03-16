@@ -63,12 +63,12 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	private float newLeftBrake = 0;
 	private float newRightBrake = 0;
 	private float newFrontBrake = 0;
-	private AutopilotStages stages = AutopilotStages.TAXI;
+	private AutopilotStages stages = AutopilotStages.TAKE_OFF;
 
 	public SimpleAutopilot() {
-		float[] pathX = { 0, 0, 0, 0, 0 };
-		float[] pathY = { 20, 20, 20, 20, 20 };
-		float[] pathZ = { -80, -160, -240, -320, -400 };
+		float[] pathX = { 0, 0, 0, 0, 0, 0 };
+		float[] pathY = { 20, 20, 20, 20, 20, 20 };
+		float[] pathZ = { -480, -560, -640, -720, -800, -1000 };
 		this.path = new MyPath(pathX, pathY, pathZ);
 		this.path.setIndex(0);
 
@@ -77,7 +77,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		// Initialize PIDController for horizontalflight
 		// PIDController(float K-Proportional, float K-Integral, float K-Derivative,
 		// float changeFactor, float goal)
-		this.pidHorStab = new PIDController(1.0f, 0.0f, 1.0f, (float) (Math.PI / 180), 0);
+		this.pidHorStab = new PIDController(1.45f, 0.01f, 1.0f, (float) (Math.PI / 180), 0);
 		this.pidVerStab = new PIDController(2.5f, 0.0f, 2.0f, (float) (Math.PI / 180), 0);
 
 		// PID for Roll (als we dat ooit gaan gebruiken)
@@ -146,36 +146,40 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
 			setDroneProperties(inputs);
-			System.out.println("Goal: " + this.cubePos);
+			// System.out.println("Goal: " + this.cubePos);
 			// Set the horizontal stabilizer inclination
-			newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() + getVerAngle(),
-					getProperties().getDeltaTime());
-			if (newHorStabInclination > Math.PI / 6)
-				newHorStabInclination = (float) (Math.PI / 6);
-			else if (newHorStabInclination < -Math.PI / 6)
-				newHorStabInclination = (float) -(Math.PI / 6);
-			System.out.println("Inclination horizontal stabiliser: " + newHorStabInclination);
+			// newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() +
+			// getVerAngle(),
+			// getProperties().getDeltaTime());
+			//
+			// if (newHorStabInclination > Math.PI / 6)
+			// newHorStabInclination = (float) (Math.PI / 6);
+			// else if (newHorStabInclination < -Math.PI / 6)
+			// newHorStabInclination = (float) -(Math.PI / 6);
+			// System.out.println("Inclination horizontal stabiliser: " +
+			// newHorStabInclination);
 
 			if (getProperties().getVelocity().length() > 80) // als de drone sneller vliegt dan 60m/s zet de thrust dan
 				this.newThrust = 0;
 			else
 				this.newThrust = configAP.getMaxThrust();
-			newLeftWingInclination = 0;
-			newRightWingInclination = 0;
-			System.out.println(getProperties().getVelocity().length());
-			newLeftWingInclination = (float) Math.toRadians(20);
-			if (getProperties().getVelocity().length() > 40 && inputs.getY() < 10) {
 
-				newRightWingInclination = (float) Math.toRadians(20);
-			} else if (getProperties().getVelocity().length() > 40 && inputs.getY() > 10) {
-				newLeftWingInclination = (float) Math.toRadians(4);
-				newRightWingInclination = (float) Math.toRadians(4);
-			}
+			// newLeftWingInclination = 0;
+			// newRightWingInclination = 0;
+			System.out.println(stages);
+			switch (stages) {
+			case TAKE_OFF:
+				if (getProperties().getVelocity().length() > 40) {
+					newLeftWingInclination = (float) Math.toRadians(20);
+					newRightWingInclination = (float) Math.toRadians(20);
+				}
 
-			switch (this.stages) {
+				if (getProperties().getPosition().getY() > 10) {
+					stages = AutopilotStages.FLYING;
+				}
+
+				break;
 			case FLYING:
-
-				System.out.println("Goal: " + this.cubePos);
 				// Set the horizontal stabilizer inclination
 				newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() + getVerAngle(),
 						getProperties().getDeltaTime());
@@ -183,135 +187,175 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 					newHorStabInclination = (float) (Math.PI / 6);
 				else if (newHorStabInclination < -Math.PI / 6)
 					newHorStabInclination = (float) -(Math.PI / 6);
-				System.out.println("Inclination horizontal stabiliser: " + newHorStabInclination);
 
-				// Set the vertical stabilizer inclination
-				newVerStabInclination += pidVerStab.calculateChange(inputAP.getHeading() - getHorAngle(),
-						getProperties().getDeltaTime());
-				if (newVerStabInclination > Math.PI / 6)
-					newVerStabInclination = (float) (Math.PI / 6);
-				else if (newVerStabInclination < -Math.PI / 6)
-					newVerStabInclination = (float) -(Math.PI / 6);
+				newLeftWingInclination = 0;
+				newRightWingInclination = 0;
 
-				// Set the wing inclination
-				newLeftWingInclination = (float) Math.toRadians(4); // met een inclination van 4graden stijgt hij 5
-																	// meter over 200 meter
-				// newLeftWingInclination += pidRoll.calculateChange(inputAP.getRoll(),
-				// getProperties().getDeltaTime());
-				// if(newLeftWingInclination > Math.PI/6) newLeftWingInclination = (float)
-				// (Math.PI/6);
-				// else if(newLeftWingInclination < - Math.PI/6) newLeftWingInclination =
-				// (float) -(Math.PI/6);
+//				if (getProperties().getVelocity().length() > 40 && inputs.getY() > 10) {
+//					newLeftWingInclination = (float) Math.toRadians(4);
+//					newRightWingInclination = (float) Math.toRadians(4);
+//				}
 
-				newRightWingInclination = (float) Math.toRadians(4);
-
-				// Set the thrust force
-				// if (getProperties().getVelocity().length() > 60) //als de drone sneller
-				// vliegt dan 60m/s zet de thrust dan uit
-				// this.newThrust = 0;
-				// else
-				this.newThrust = configAP.getMaxThrust();
-
-				// System.out.println("Velocity: " + getProperties().getVelocity().length());
-				// System.out.println("Thrust: " + newThrust);
-
-				System.out.println(getProperties().getPitch());
-
-				// cubePositions = cubeLocator.getCoordinatesOfCube();
-				// cubePositions.sort(new Comparator<Vector3f>() {
-				// @Override
-				// public int compare(Vector3f o1, Vector3f o2) {
-				// return -Float.compare(o1.z, o2.z);
-				// }
-				// });
-
-				// Lock next target
-				// if (cubePositions.size() > 0) {
-				// Vector3f temp = cubePositions.get(0);
-				// if ((int) (temp.z / -40) > blockCount) {
-				// blockCount++;
-				// cubePos = new Vector3f(Math.round(temp.x), Math.round(temp.y), ((int) (temp.z
-				// / 40)) * 40);
-				// System.out.println("Schatting: " + cubePos);
-				// System.out.println("Z POS: " + getProperties().getPosition().z);
-				// System.out.println(inputAP.getElapsedTime());
-				// System.out.println(blockCount);
-				// }
-
-				// if (!lockedOnTarget && getEuclidDist(getProperties().getPosition(), cubePos)
-				// <= 15) {
-				// lockedOnTarget = true;
-				// cubePos = new Vector3f((cubePositions.get(0).x + cubePos.x) / 2f,
-				// (cubePositions.get(0).y + cubePos.y) / 2f, ((int) (cubePos.z / 40)) * 40 ) ;
-				// cubePos = cubePositions.get(0);
-				// cubePos.z = ((int) (cubePos.z / 40)) * 40;
-				// System.out.println("Lock: " + cubePos);
-				// }
-				// }
-
-				// if (cubePositions.size() > 0) {
-				// cubePos = cubePositions.get(0);
-				// }
-
-				// CUBE REACHED
-				System.out.println("Size: " + this.cubePositions.size());
-				if (getEuclidDist(getProperties().getPosition(), cubePos) <= 4) {
+				if (getEuclidDist(getProperties().getPosition(), cubePos) <= 5) {
 					this.path.setIndex(this.path.getIndex() + 1);
 					this.cubePos = new Vector3f(path.getCurrentX(), path.getCurrentY(), path.getCurrentZ());
-					// this.cubePos = stubCube.translate(0, 0, -40);
-					// lockedOnTarget = false;
+					this.pidHorStab.reset();
 					this.pidVerStab.reset();
-					// this.pidWings.reset();
 				}
 
-				// REMOVE THIS AFTER TESTING:
-				// this.newThrust = configAP.getMaxThrust();
-			case TAXI:
-				if (inputs.getHeading() - this.getHorAngle() > 0.01) {
-					this.newLeftBrake = getFcMax();
-					this.newRightBrake = 0;
-					this.newFrontBrake = 0;
-					this.newThrust = 200;
-
-					// rechter achterrem vollenbak open en thrust ni te hoog (zodat de drone zich
-					// draait naar het doel
-				} else if (inputs.getHeading() - this.getHorAngle() < 0.01) {
-					this.newLeftBrake = 0;
-					this.newRightBrake = getFcMax();
-					this.newFrontBrake = 0;
-					this.newThrust = 200;
-				} else if (getProperties().getVelocity().length() > 50) {
-					this.newThrust = 0;
-
-				} else {
-					this.newThrust = configAP.getMaxThrust();
-				}
-
-				this.newLeftWingInclination = (float) 0;
-				this.newRightWingInclination = (float) 0;
-				this.newHorStabInclination = (float) 0;
-				this.newVerStabInclination = 0;
-
-			case TAKEOFF:
-				// versnel tot 60m/s en stijg dan op
-				this.newHorStabInclination = 0;
-				this.newVerStabInclination = 0;
-				this.newFrontBrake = 0;
-				this.newLeftBrake = 0;
-				this.newRightBrake = 0;
-				this.newThrust = configAP.getMaxThrust();
-				if (getProperties().getVelocity().length() < 60) {
-					this.newLeftWingInclination = (float) 0;
-					this.newRightWingInclination = (float) 0;
-				} else {
-					this.newLeftWingInclination = (float) 0.2;
-					this.newRightWingInclination = (float) 0.2;
-
-				}
-
-			case LANDING:
-				// nog niet ge�mplementeerd
+				break;
+			default:
+				break;
 			}
+
+			// switch (this.stages) {
+			// case FLYING:
+			//
+			// System.out.println("Goal: " + this.cubePos);
+			// // Set the horizontal stabilizer inclination
+			// newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() +
+			// getVerAngle(),
+			// getProperties().getDeltaTime());
+			// if (newHorStabInclination > Math.PI / 6)
+			// newHorStabInclination = (float) (Math.PI / 6);
+			// else if (newHorStabInclination < -Math.PI / 6)
+			// newHorStabInclination = (float) -(Math.PI / 6);
+			// System.out.println("Inclination horizontal stabiliser: " +
+			// newHorStabInclination);
+			//
+			// // Set the vertical stabilizer inclination
+			// newVerStabInclination += pidVerStab.calculateChange(inputAP.getHeading() -
+			// getHorAngle(),
+			// getProperties().getDeltaTime());
+			// if (newVerStabInclination > Math.PI / 6)
+			// newVerStabInclination = (float) (Math.PI / 6);
+			// else if (newVerStabInclination < -Math.PI / 6)
+			// newVerStabInclination = (float) -(Math.PI / 6);
+			//
+			// // Set the wing inclination
+			// newLeftWingInclination = (float) Math.toRadians(4); // met een inclination
+			// van 4graden stijgt hij 5
+			// // meter over 200 meter
+			// // newLeftWingInclination += pidRoll.calculateChange(inputAP.getRoll(),
+			// // getProperties().getDeltaTime());
+			// // if(newLeftWingInclination > Math.PI/6) newLeftWingInclination = (float)
+			// // (Math.PI/6);
+			// // else if(newLeftWingInclination < - Math.PI/6) newLeftWingInclination =
+			// // (float) -(Math.PI/6);
+			//
+			// newRightWingInclination = (float) Math.toRadians(4);
+			//
+			// // Set the thrust force
+			// // if (getProperties().getVelocity().length() > 60) //als de drone sneller
+			// // vliegt dan 60m/s zet de thrust dan uit
+			// // this.newThrust = 0;
+			// // else
+			// this.newThrust = configAP.getMaxThrust();
+			//
+			// // System.out.println("Velocity: " + getProperties().getVelocity().length());
+			// // System.out.println("Thrust: " + newThrust);
+			//
+			// System.out.println(getProperties().getPitch());
+			//
+			// // cubePositions = cubeLocator.getCoordinatesOfCube();
+			// // cubePositions.sort(new Comparator<Vector3f>() {
+			// // @Override
+			// // public int compare(Vector3f o1, Vector3f o2) {
+			// // return -Float.compare(o1.z, o2.z);
+			// // }
+			// // });
+			//
+			// // Lock next target
+			// // if (cubePositions.size() > 0) {
+			// // Vector3f temp = cubePositions.get(0);
+			// // if ((int) (temp.z / -40) > blockCount) {
+			// // blockCount++;
+			// // cubePos = new Vector3f(Math.round(temp.x), Math.round(temp.y), ((int)
+			// (temp.z
+			// // / 40)) * 40);
+			// // System.out.println("Schatting: " + cubePos);
+			// // System.out.println("Z POS: " + getProperties().getPosition().z);
+			// // System.out.println(inputAP.getElapsedTime());
+			// // System.out.println(blockCount);
+			// // }
+			//
+			// // if (!lockedOnTarget && getEuclidDist(getProperties().getPosition(),
+			// cubePos)
+			// // <= 15) {
+			// // lockedOnTarget = true;
+			// // cubePos = new Vector3f((cubePositions.get(0).x + cubePos.x) / 2f,
+			// // (cubePositions.get(0).y + cubePos.y) / 2f, ((int) (cubePos.z / 40)) * 40 )
+			// ;
+			// // cubePos = cubePositions.get(0);
+			// // cubePos.z = ((int) (cubePos.z / 40)) * 40;
+			// // System.out.println("Lock: " + cubePos);
+			// // }
+			// // }
+			//
+			// // if (cubePositions.size() > 0) {
+			// // cubePos = cubePositions.get(0);
+			// // }
+			//
+			// // CUBE REACHED
+			// System.out.println("Size: " + this.cubePositions.size());
+			// if (getEuclidDist(getProperties().getPosition(), cubePos) <= 4) {
+			// this.path.setIndex(this.path.getIndex() + 1);
+			// this.cubePos = new Vector3f(path.getCurrentX(), path.getCurrentY(),
+			// path.getCurrentZ());
+			// // this.cubePos = stubCube.translate(0, 0, -40);
+			// // lockedOnTarget = false;
+			// this.pidVerStab.reset();
+			// // this.pidWings.reset();
+			// }
+			//
+			// // REMOVE THIS AFTER TESTING:
+			// // this.newThrust = configAP.getMaxThrust();
+			// case TAXI:
+			// if (inputs.getHeading() - this.getHorAngle() > 0.01) {
+			// this.newLeftBrake = getFcMax();
+			// this.newRightBrake = 0;
+			// this.newFrontBrake = 0;
+			// this.newThrust = 200;
+			//
+			// // rechter achterrem vollenbak open en thrust ni te hoog (zodat de drone zich
+			// // draait naar het doel
+			// } else if (inputs.getHeading() - this.getHorAngle() < 0.01) {
+			// this.newLeftBrake = 0;
+			// this.newRightBrake = getFcMax();
+			// this.newFrontBrake = 0;
+			// this.newThrust = 200;
+			// } else if (getProperties().getVelocity().length() > 50) {
+			// this.newThrust = 0;
+			//
+			// } else {
+			// this.newThrust = configAP.getMaxThrust();
+			// }
+			//
+			// this.newLeftWingInclination = (float) 0;
+			// this.newRightWingInclination = (float) 0;
+			// this.newHorStabInclination = (float) 0;
+			// this.newVerStabInclination = 0;
+			//
+			// case TAKEOFF:
+			// // versnel tot 60m/s en stijg dan op
+			// this.newHorStabInclination = 0;
+			// this.newVerStabInclination = 0;
+			// this.newFrontBrake = 0;
+			// this.newLeftBrake = 0;
+			// this.newRightBrake = 0;
+			// this.newThrust = configAP.getMaxThrust();
+			// if (getProperties().getVelocity().length() < 60) {
+			// this.newLeftWingInclination = (float) 0;
+			// this.newRightWingInclination = (float) 0;
+			// } else {
+			// this.newLeftWingInclination = (float) 0.2;
+			// this.newRightWingInclination = (float) 0.2;
+			//
+			// }
+			//
+			// case LANDING:
+			// // nog niet ge�mplementeerd
+			// }
 		}
 
 		return this;
@@ -544,9 +588,9 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		// TODO Auto-generated method stub
 		return this.newRightBrake;
 	}
-	
-	  public float getFcMax() { 
-		    return this.configAP.getFcMax(); 
-		  } 
+
+	public float getFcMax() {
+		return this.configAP.getFcMax();
+	}
 
 }

@@ -89,9 +89,6 @@ public class PhysicsEngine {
 		//
 
 		// recursieve oproep
-		System.out.println(
-				"---------------------------------------------------------------------------------------------------");
-
 		PhysicsEngine.applyPhysics(drone, (dt - h));
 	}
 
@@ -145,9 +142,6 @@ public class PhysicsEngine {
 		int i = 0;
 
 		for (Tyre tyre : drone.getTyres()) {
-
-			System.out.println("PE calc forces: tyre get compression getCompression: " + tyre.getCompression());
-
 			// if the tyre is not grounded, there will be no compression forces
 			// -> start next iteration of for loop
 			if (!tyre.isGrounded())
@@ -169,14 +163,7 @@ public class PhysicsEngine {
 			
 			Vector3f lever = tyre.getGroundedPosition();
 			
-			System.out.println("pe calc forces tyre lever: " + lever.x + " " + lever.y + " " + lever.z);
-			System.out.println("pe calc forces tyre get pos: " + tyre.getPosition().x + " "+ tyre.getPosition().y + " "+ tyre.getPosition().z);
 			// optellen bij het totaal
-			System.out.println(
-					"PE calc forces total force w/o tyre: " + force.getX() + " " + force.getY() + " " + force.getZ());
-			System.out.println("PE calc forces tyreforce: " + compressionForce.getX() + " " + compressionForce.getY()
-					+ " " + compressionForce.getZ());
-
 			Vector3f.add(force, compressionForce, force);
 			Vector3f.add(torque, compressionTorque, torque);
 			compressionForces[i] = Math.abs(comporessionForceSize);
