@@ -32,7 +32,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 				AutopilotConfig cfg, PredictionMethod predictionMethod) {
 		super(model, pose, scale);
 		
-		this.linearVelocityW = new Vector3f(0.0f,0.0f, -0.0f);
+		this.linearVelocityW = new Vector3f(0.0f,0.0f, -50.0f);
 
 		this.angularVelocityW = new Vector3f(0f, 0f, 0f);
 		
@@ -604,7 +604,6 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		result.m20 = matrix4.m20;
 		result.m21 = matrix4.m21;
 		result.m22 = matrix4.m22;
-		//System.out.println("Drone calculatedtowtransformationmatrix matrix: " + result);
 		return result;
 	}
 

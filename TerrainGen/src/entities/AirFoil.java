@@ -127,7 +127,6 @@ public class AirFoil {
 	 * can be shortcut without matrices.
 	 */
 	public Vector3f calculateAttackVector(){
-//		System.out.println("Airfoil.calculateATtackvector: inclination: " + this.getInclination());
 		Vector3f result =  new Vector3f();
 		if( this.getRotAxis().x == 1){
 			result.x = 0;
@@ -140,7 +139,6 @@ public class AirFoil {
 			result.z = (float) - Math.cos(this.getInclination());			
 		}
 		
-		//System.out.println("Airfoil.ccalculateATtackvector attacvecor: " + result);
 		return result;		
 	}
 	
@@ -207,7 +205,6 @@ public class AirFoil {
 		
 //		float aoa = this.calculateAOA(projectedAirspeedVectorD, normalD, attackVectorD);
 		float aoa = (float) - Math.atan2(a, b);
-		//System.out.println(drone.getMaxAOA());
 		if (aoa > Math.toRadians(drone.getMaxAOA())) {
 			//System.err.println(aoa);
 			//System.exit(0); //TODO

@@ -1,40 +1,25 @@
 package autoPilotJar;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.lang.reflect.GenericArrayType;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 
-import org.lwjgl.opengl.AMDBlendMinmaxFactor;
 import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Vector3f;
 
-import autopilot.AutopilotConfigReader;
 import interfaces.Autopilot;
 import interfaces.AutopilotConfig;
 import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
 import openCV.ImageProcessor;
-import openCV.RedCubeLocator;
 import path.MyPath;
-
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.AxisAngle4f;
-import javax.vecmath.Matrix4f;
 
 public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 
 	private List<Vector3f> cubePositions = new ArrayList<>();
 	private MyPath path;
-	private float maxX = 0;
-	private float minX = 0;
+	public float minY = 20;
+	public float maxY = 20;
 
 	// Aanpassen als we naar nieuwe cubus moeten gaan
 	private Vector3f stubCube = new Vector3f(0, 0, -40);
@@ -51,6 +36,9 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	private PIDController pidRoll;
 	private PIDController pidThrust;
 
+	private boolean isFinished = false;
+	public boolean failed = false;
+
 	/*
 	 * Variables to send back to drone Initialy All inclinations are 0
 	 */
@@ -63,12 +51,14 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	private float newLeftBrake = 0;
 	private float newRightBrake = 0;
 	private float newFrontBrake = 0;
-	private AutopilotStages stages = AutopilotStages.TAKE_OFF;
+	private AutopilotStages stages = AutopilotStages.FLYING;
+	
+	public float p, i, d;
 
 	public SimpleAutopilot() {
 		float[] pathX = { 0, 0, 0, 0, 0, 0 };
-		float[] pathY = { 20, 20, 20, 20, 20, 20 };
-		float[] pathZ = { -480, -560, -640, -720, -800, -1000 };
+		float[] pathY = { 25, 20, 15, 10, 16, 14 };
+		float[] pathZ = { -80, -160, -240, -320, -400, -480 };
 		this.path = new MyPath(pathX, pathY, pathZ);
 		this.path.setIndex(0);
 
@@ -77,7 +67,14 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		// Initialize PIDController for horizontalflight
 		// PIDController(float K-Proportional, float K-Integral, float K-Derivative,
 		// float changeFactor, float goal)
-		this.pidHorStab = new PIDController(1.45f, 0.01f, 1.0f, (float) (Math.PI / 180), 0);
+		Random r = new Random();
+		p = 1 + r.nextFloat();
+		i = Math.abs(r.nextFloat() - 0.5f);
+		d = 1 + r.nextFloat();
+		
+		this.pidHorStab = new PIDController(p, i, d, (float) (Math.PI / 180), 0);
+//		this.pidHorStab = new PIDController(1.0532867f, 0.033028185f, 1.0589304f, (float) (Math.PI / 180), 0);
+		
 		this.pidVerStab = new PIDController(2.5f, 0.0f, 2.0f, (float) (Math.PI / 180), 0);
 
 		// PID for Roll (als we dat ooit gaan gebruiken)
@@ -131,33 +128,22 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		return this;
 	}
 
+	private int checkpoint = -80;
+	
 	@Override
 	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
 		this.inputAP = inputs;
-		// System.out.println("Roll: " + inputs.getRoll());
-		if (inputs.getY() > this.maxX)
-			this.maxX = inputs.getY();
+		if (inputs.getY() > this.maxY)
+			this.maxY = inputs.getY();
 
-		if (inputs.getY() < this.minX)
-			this.minX = inputs.getY();
+		if (inputs.getY() < this.minY)
+			this.minY = inputs.getY();
 
-		System.out.println("Max X: " + this.maxX);
-		System.out.println("Min X: " + this.minX);
+		// System.out.println("Max X: " + this.maxY);
+		// System.out.println("Min X: " + this.maxY);
 
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
 			setDroneProperties(inputs);
-			// System.out.println("Goal: " + this.cubePos);
-			// Set the horizontal stabilizer inclination
-			// newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() +
-			// getVerAngle(),
-			// getProperties().getDeltaTime());
-			//
-			// if (newHorStabInclination > Math.PI / 6)
-			// newHorStabInclination = (float) (Math.PI / 6);
-			// else if (newHorStabInclination < -Math.PI / 6)
-			// newHorStabInclination = (float) -(Math.PI / 6);
-			// System.out.println("Inclination horizontal stabiliser: " +
-			// newHorStabInclination);
 
 			if (getProperties().getVelocity().length() > 80) // als de drone sneller vliegt dan 60m/s zet de thrust dan
 				this.newThrust = 0;
@@ -166,10 +152,9 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 
 			// newLeftWingInclination = 0;
 			// newRightWingInclination = 0;
-			System.out.println(stages);
 			switch (stages) {
 			case TAKE_OFF:
-				if (getProperties().getVelocity().length() > 40) {
+				if (getProperties().getVelocity().length() > 50) {
 					newLeftWingInclination = (float) Math.toRadians(20);
 					newRightWingInclination = (float) Math.toRadians(20);
 				}
@@ -191,16 +176,29 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 				newLeftWingInclination = 0;
 				newRightWingInclination = 0;
 
-//				if (getProperties().getVelocity().length() > 40 && inputs.getY() > 10) {
-//					newLeftWingInclination = (float) Math.toRadians(4);
-//					newRightWingInclination = (float) Math.toRadians(4);
-//				}
+				// if (getProperties().getVelocity().length() > 40 && inputs.getY() > 10) {
+				// newLeftWingInclination = (float) Math.toRadians(4);
+				// newRightWingInclination = (float) Math.toRadians(4);
+				// }
 
 				if (getEuclidDist(getProperties().getPosition(), cubePos) <= 5) {
-					this.path.setIndex(this.path.getIndex() + 1);
-					this.cubePos = new Vector3f(path.getCurrentX(), path.getCurrentY(), path.getCurrentZ());
-					this.pidHorStab.reset();
-					this.pidVerStab.reset();
+					if (path.getIndex() <= 4) {
+						this.path.setIndex(this.path.getIndex() + 1);
+						this.cubePos = new Vector3f(path.getCurrentX(), path.getCurrentY(), path.getCurrentZ());
+						this.pidHorStab.reset();
+						this.pidVerStab.reset();
+						System.out.println("Reached cube at: " + -80 * path.getIndex());
+					} else {
+						System.out.println("Fininshed");
+						isFinished = true;
+						System.out.println(maxY + " " + minY);
+					}
+					checkpoint = -80 * (path.getIndex()+1);
+				}
+				
+				if (properties.getPosition().z < (checkpoint)) {
+					failed = true;
+					System.out.println("Path failed");
 				}
 
 				break;
@@ -211,7 +209,6 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			// switch (this.stages) {
 			// case FLYING:
 			//
-			// System.out.println("Goal: " + this.cubePos);
 			// // Set the horizontal stabilizer inclination
 			// newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() +
 			// getVerAngle(),
@@ -220,7 +217,6 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			// newHorStabInclination = (float) (Math.PI / 6);
 			// else if (newHorStabInclination < -Math.PI / 6)
 			// newHorStabInclination = (float) -(Math.PI / 6);
-			// System.out.println("Inclination horizontal stabiliser: " +
 			// newHorStabInclination);
 			//
 			// // Set the vertical stabilizer inclination
@@ -252,11 +248,6 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			// // else
 			// this.newThrust = configAP.getMaxThrust();
 			//
-			// // System.out.println("Velocity: " + getProperties().getVelocity().length());
-			// // System.out.println("Thrust: " + newThrust);
-			//
-			// System.out.println(getProperties().getPitch());
-			//
 			// // cubePositions = cubeLocator.getCoordinatesOfCube();
 			// // cubePositions.sort(new Comparator<Vector3f>() {
 			// // @Override
@@ -273,10 +264,6 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			// // cubePos = new Vector3f(Math.round(temp.x), Math.round(temp.y), ((int)
 			// (temp.z
 			// // / 40)) * 40);
-			// // System.out.println("Schatting: " + cubePos);
-			// // System.out.println("Z POS: " + getProperties().getPosition().z);
-			// // System.out.println(inputAP.getElapsedTime());
-			// // System.out.println(blockCount);
 			// // }
 			//
 			// // if (!lockedOnTarget && getEuclidDist(getProperties().getPosition(),
@@ -288,7 +275,6 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			// ;
 			// // cubePos = cubePositions.get(0);
 			// // cubePos.z = ((int) (cubePos.z / 40)) * 40;
-			// // System.out.println("Lock: " + cubePos);
 			// // }
 			// // }
 			//
@@ -297,7 +283,6 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			// // }
 			//
 			// // CUBE REACHED
-			// System.out.println("Size: " + this.cubePositions.size());
 			// if (getEuclidDist(getProperties().getPosition(), cubePos) <= 4) {
 			// this.path.setIndex(this.path.getIndex() + 1);
 			// this.cubePos = new Vector3f(path.getCurrentX(), path.getCurrentY(),
@@ -591,6 +576,10 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 
 	public float getFcMax() {
 		return this.configAP.getFcMax();
+	}
+
+	public boolean isFinished() {
+		return this.isFinished;
 	}
 
 }

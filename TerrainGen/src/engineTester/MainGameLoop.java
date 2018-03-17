@@ -28,6 +28,7 @@ import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.opencv.core.Core;
 
+import autoPilotJar.SimpleAutopilot;
 import autopilot.AutopilotConfigReader;
 import renderEngine.CubeRenderer;
 import renderEngine.DisplayManager;
@@ -126,11 +127,9 @@ public class MainGameLoop {
 		//***INITIALIZE DRONEVIEW***
 		RawModel droneModel = OBJLoader.loadObjModel("tree", loader);
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,new ModelTexture(loader.loadTexture("tree")));
-		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, (int)PhysicsEngine.groundLevel -autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius(), -30)), 1,
+		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, (int)PhysicsEngine.groundLevel -autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius() + 20, 0)), 1,
 				autopilotConfig, new EulerPrediction(STEP_TIME));
 		entities.add(drone);
-		
-		System.out.println("maingameloop main loop dronemass: " + drone.getMass());
 		
 		//***INITIALIZE CHASE-CAM***
 		chaseCam = new Camera();
@@ -195,13 +194,12 @@ public class MainGameLoop {
 		
 		Cube c = new Cube(1, 1, 0);
 		RawCubeModel cube = loader.loadToVAO(c.positions, c.colors);
-//		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(6, 3, -20)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -480)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -560)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -640)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -720)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -800)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -1000)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 25, -80)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -160)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 15, -240)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 10, -320)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 16, -400)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 14, -480)), 1));
 		
 		/* INITIALIZE AUTOPILOT */
 		autopilot = AutopilotFactory.createAutopilot();
@@ -292,13 +290,13 @@ public class MainGameLoop {
 			
 			//***UPDATES***
 			float dt = DisplayManager.getFrameTimeSeconds();
-			if(!entities.isEmpty() && dt > 0.00001) {
+			if(!entities.isEmpty() && dt > 0.00001 && !((SimpleAutopilot) autopilot).isFinished()) {
 				//applyphysics rekent de krachten uit en gaat dan de kinematische waarden van de drone
 				// aanpassen op basis daarvan 
 				try {
 					PhysicsEngine.applyPhysics(drone, dt);
 				} catch (DroneCrashException e) {
-					System.out.println(e);
+					System.err.println(e);
 				} // TODO: stop simulation (drone crashed)
 				
 				//Autopilot stuff
@@ -452,13 +450,9 @@ public class MainGameLoop {
 		      prevX = x;
 		      prevY = y;
 		      
-		      //Debug Print
-		      System.out.println(position);
-		      
 		      cubes.add(new Entity(model, new Matrix4f().translate(position), 1));
 		 }
 		 
-		 System.out.println("#####");
 	}
 	
 	private static void createOpenFileButton() {
@@ -509,7 +503,6 @@ public class MainGameLoop {
 			
 			@Override
 			public void onClick() {
-				System.out.println("hier");
 				generateRandomCubes();
 			}
 		};
