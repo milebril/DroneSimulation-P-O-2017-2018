@@ -82,8 +82,6 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		// Math.toRadians(1),0);
 		this.pidRoll = new PIDController(0.0f, 0.5f, 1.0f, (float) Math.toRadians(1), 0);
 
-		// Initialize AP with configfile TODO: mag deze lijn weg?
-
 		// Initialize PIDController for Thrust
 		// PIDController(float K-Proportional, float K-Integral, float K-Derivative,
 		// float changeFactor, float goal)
@@ -558,19 +556,16 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 
 	@Override
 	public float getFrontBrakeForce() {
-		// TODO Auto-generated method stub
 		return this.newFrontBrake;
 	}
 
 	@Override
 	public float getLeftBrakeForce() {
-		// TODO Auto-generated method stub
 		return this.newLeftBrake;
 	}
 
 	@Override
 	public float getRightBrakeForce() {
-		// TODO Auto-generated method stub
 		return this.newRightBrake;
 	}
 
