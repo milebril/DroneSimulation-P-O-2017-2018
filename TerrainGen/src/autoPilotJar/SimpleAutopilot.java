@@ -49,14 +49,16 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	protected float newVerStabInclination = 0;	private float newLeftBrake = 0;
 	private float newRightBrake = 0;
 	private float newFrontBrake = 0;
-	private AutopilotStages stages = AutopilotStages.FLYING;
+	private AutopilotStages stage = AutopilotStages.FLYING;
 	
 	public float p, i, d;
 	
 	private FlyingAutopilot flyingAP;
+	private TakeOffAutopilot takeOffAP;
 
 	public SimpleAutopilot() {
 		flyingAP = new FlyingAutopilot();
+		takeOffAP = new TakeOffAutopilot(this);
 		
 //		float[] pathX = { 0, 0, 0, 0, 0, 0 };
 //		float[] pathY = { 25, 10, 30, 60, 30, 20 };
@@ -154,18 +156,9 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 
 			// newLeftWingInclination = 0;
 			// newRightWingInclination = 0;
-			switch (stages) {
+			switch (stage) {
 			case TAKE_OFF:
-				if (getProperties().getVelocity().length() > 50) {
-					newLeftWingInclination = (float) Math.toRadians(20);
-					newRightWingInclination = (float) Math.toRadians(20);
-				}
-
-				if (getProperties().getPosition().getY() > 10) {
-					stages = AutopilotStages.FLYING;
-				}
-
-				break;
+				return takeOffAP.timePassed(properties);
 			case FLYING:
 				return flyingAP.timePassed(properties);
 			default:
@@ -545,4 +538,11 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		return this.isFinished;
 	}
 
+	public AutopilotStages getStage() {
+		return this.stage;
+	}
+	
+	public void setStage(AutopilotStages stage) {
+		this.stage = stage;
+	}
 }
