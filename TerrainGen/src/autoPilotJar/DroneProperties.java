@@ -7,7 +7,8 @@ import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Vector3f;
 
 import interfaces.AutopilotInputs;
-public class DroneProperties {
+import interfaces.AutopilotOutputs;
+public class DroneProperties implements AutopilotOutputs{
 	
 	/**
 	 * A class for saving the properties of the drone. Used for saving the properties of
@@ -22,10 +23,16 @@ public class DroneProperties {
 		this.heading = inputs.getHeading();
 		this.pitch = inputs.getPitch();
 		this.roll = inputs.getRoll();
+		this.maxThrust = 2000;
 		
 		this.frontBrakeForce = previousProperties.getFrontBrakeForce();
 		this.leftBrakeForce = previousProperties.getLeftBrakeForce();
 		this.rightBrakeForce = previousProperties.getRightBrakeForce();
+		
+		this.leftWingInclination = previousProperties.getLeftWingInclination();
+		this.rightWingInclination = previousProperties.getRightWingInclination();
+		this.horStabInclination = previousProperties.getHorStabInclination();
+		this.verStabInclination = previousProperties.getVerStabInclination();
 		
 		// calculate other properties
 		this.deltaTime = this.elapsedTime - previousProperties.getElapsedTime();
@@ -42,10 +49,18 @@ public class DroneProperties {
 		this.heading = 0;
 		this.pitch = 0;
 		this.roll = 0;
+		this.maxThrust = 2000; //TODO
 		
+		//Initialize brakes to 0
 		this.frontBrakeForce = 0;
 		this.leftBrakeForce = 0;
 		this.rightBrakeForce = 0;
+		
+		//Initialize wings to 0
+		this.leftWingInclination = 0;
+		this.rightWingInclination = 0;
+		this.horStabInclination = 0;
+		this.verStabInclination = 0;
 		
 		// calculate other properties
 		this.deltaTime = 0;
@@ -298,5 +313,65 @@ public class DroneProperties {
 		speed.scale(result[3]);
 		
 		return speed;
+	}
+	
+	//THRUST
+	
+	private float thrust;
+	private float maxThrust;
+	
+	public void setThrust(float thrust) {
+		this.thrust = thrust;
+	}
+
+	@Override
+	public float getThrust() {
+		return thrust;
+	}
+	
+	public float getMaxThrust() {
+		return maxThrust;
+	}
+ 	
+	//INCLINATIONS OF WINGS
+	private float leftWingInclination;
+	private float rightWingInclination;
+	private float horStabInclination;
+	private float verStabInclination;
+	
+	public void setLeftWingInclination(float angle) {
+		this.leftWingInclination = angle;
+	}
+
+	@Override
+	public float getLeftWingInclination() {
+		return leftWingInclination;
+	}
+	
+	public void setRightWingInclination(float angle) {
+		this.rightWingInclination = angle;
+	}
+
+	@Override
+	public float getRightWingInclination() {
+		return rightWingInclination;
+	}
+	
+	public void setHorStabInclination(float angle) {
+		this.horStabInclination = angle;
+	}
+
+	@Override
+	public float getHorStabInclination() {
+		return horStabInclination;
+	}
+	
+	public void setVerStabInclination(float angle) {
+		this.verStabInclination = angle;
+	}
+
+	@Override
+	public float getVerStabInclination() {
+		return verStabInclination;
 	}
 }

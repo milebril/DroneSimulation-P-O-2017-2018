@@ -23,12 +23,12 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 
 	// Aanpassen als we naar nieuwe cubus moeten gaan
 	private Vector3f stubCube = new Vector3f(0, 0, -40);
-	private Vector3f cubePos = stubCube;
+	protected Vector3f cubePos = stubCube;
 
 	private float heightGoal = 1;
 
 	private ImageProcessor cubeLocator;
-	private PIDController pidHorStab;
+	protected PIDController pidHorStab;
 	private PIDController pidHorWing;
 	private PIDController pidHorGoal;
 	private PIDController pidVerStab;
@@ -36,34 +36,36 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	private PIDController pidRoll;
 	private PIDController pidThrust;
 
-	private boolean isFinished = false;
+	protected boolean isFinished = false;
 	public boolean failed = false;
 
 	/*
 	 * Variables to send back to drone Initialy All inclinations are 0
 	 */
 	private float newThrust = 0;
-	private float newLeftWingInclination = 0;
-	private float newRightWingInclination = 0;
-	private float newHorStabInclination = 0;
-	private float newVerStabInclination = 0;
-
-	private float newLeftBrake = 0;
+	protected float newLeftWingInclination = 0;
+	protected float newRightWingInclination = 0;
+	protected float newHorStabInclination = 0;
+	protected float newVerStabInclination = 0;	private float newLeftBrake = 0;
 	private float newRightBrake = 0;
 	private float newFrontBrake = 0;
-	private AutopilotStages stages = AutopilotStages.TAKE_OFF;
+	private AutopilotStages stages = AutopilotStages.FLYING;
 	
 	public float p, i, d;
+	
+	private FlyingAutopilot flyingAP;
 
 	public SimpleAutopilot() {
-		float[] pathX = { 0, 0, 0, 0, 0, 0 };
-		float[] pathY = { 25, 10, 30, 60, 30, 20 };
-		float[] pathZ = { -80, -160, -240, -320, -400, -480 };
-//		float[] pathZ = { -480, -560, -640, -720, -800, -880 };
-		this.path = new MyPath(pathX, pathY, pathZ);
-		this.path.setIndex(0);
+		flyingAP = new FlyingAutopilot(this);
+		
+//		float[] pathX = { 0, 0, 0, 0, 0, 0 };
+//		float[] pathY = { 25, 10, 30, 60, 30, 20 };
+//		float[] pathZ = { -80, -160, -240, -320, -400, -480 };
+////		float[] pathZ = { -480, -560, -640, -720, -800, -880 };
+//		this.path = new MyPath(pathX, pathY, pathZ);
+//		this.path.setIndex(0);
 
-		this.cubePos = new Vector3f(path.getCurrentX(), path.getCurrentY(), path.getCurrentZ());
+		//this.cubePos = new Vector3f(path.getCurrentX(), path.getCurrentY(), path.getCurrentZ());
 
 		// Initialize PIDController for horizontalflight
 		// PIDController(float K-Proportional, float K-Integral, float K-Derivative,
@@ -92,14 +94,12 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		// this.pidThrust = new PIDController(1.0f, 0.0f, 3.0f, -10, 10);
 	}
 
-	private boolean heightGoalReached = false;
-
 	// Autopilot communication
 
 	/**
 	 * The Autopilot config
 	 */
-	private AutopilotConfig configAP;
+	protected AutopilotConfig configAP;
 
 	/**
 	 * Getter for the Autopilot config
@@ -111,7 +111,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	/**
 	 * The Autopilot input
 	 */
-	private AutopilotInputs inputAP;
+	protected AutopilotInputs inputAP;
 
 	/**
 	 * Getter for the Autopilot input
@@ -130,7 +130,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		return this;
 	}
 
-	private int checkpoint = -80;
+	protected int checkpoint = -80;
 	
 	@Override
 	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
@@ -167,43 +167,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 
 				break;
 			case FLYING:
-				// Set the horizontal stabilizer inclination
-				newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() + getVerAngle(),
-						getProperties().getDeltaTime());
-				if (newHorStabInclination > Math.PI / 6)
-					newHorStabInclination = (float) (Math.PI / 6);
-				else if (newHorStabInclination < -Math.PI / 6)
-					newHorStabInclination = (float) -(Math.PI / 6);
-
-				newLeftWingInclination = 0;
-				newRightWingInclination = 0;
-
-				// if (getProperties().getVelocity().length() > 40 && inputs.getY() > 10) {
-				// newLeftWingInclination = (float) Math.toRadians(4);
-				// newRightWingInclination = (float) Math.toRadians(4);
-				// }
-
-				if (getEuclidDist(getProperties().getPosition(), cubePos) <= 3) {
-					if (path.getIndex() <= 4) {
-						this.path.setIndex(this.path.getIndex() + 1);
-						this.cubePos = new Vector3f(path.getCurrentX(), path.getCurrentY(), path.getCurrentZ());
-						this.pidHorStab.reset();
-						this.pidVerStab.reset();
-						System.out.println("Reached cube at: " + properties.getPosition());
-					} else {
-						System.out.println("Fininshed");
-						isFinished = true;
-						System.out.println(maxY + " " + minY);
-					}
-					checkpoint = -80 * (path.getIndex()+1);
-				}
-				
-				if (properties.getPosition().z < (checkpoint)) {
-					failed = true;
-					System.out.println("Path failed");
-				}
-
-				break;
+				return flyingAP.timePassed(properties);
 			default:
 				break;
 			}
@@ -348,7 +312,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		return this;
 	}
 
-	private float getVerAngle() {
+	protected float getVerAngle() {
 		float overstaande = cubePos.getY() - getProperties().getPosition().getY();
 		float aanliggende = cubePos.getZ() - getProperties().getPosition().getZ();
 		return (float) Math.atan(overstaande / aanliggende);
