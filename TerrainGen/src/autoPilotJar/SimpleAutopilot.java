@@ -51,14 +51,15 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	private float newLeftBrake = 0;
 	private float newRightBrake = 0;
 	private float newFrontBrake = 0;
-	private AutopilotStages stages = AutopilotStages.FLYING;
+	private AutopilotStages stages = AutopilotStages.TAKE_OFF;
 	
 	public float p, i, d;
 
 	public SimpleAutopilot() {
 		float[] pathX = { 0, 0, 0, 0, 0, 0 };
-		float[] pathY = { 25, 20, 15, 10, 16, 14 };
+		float[] pathY = { 25, 10, 30, 60, 30, 20 };
 		float[] pathZ = { -80, -160, -240, -320, -400, -480 };
+//		float[] pathZ = { -480, -560, -640, -720, -800, -880 };
 		this.path = new MyPath(pathX, pathY, pathZ);
 		this.path.setIndex(0);
 
@@ -68,12 +69,15 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		// PIDController(float K-Proportional, float K-Integral, float K-Derivative,
 		// float changeFactor, float goal)
 		Random r = new Random();
+//		p = 1.1233587f + (r.nextFloat() - 0.5f) / 100;
+//		i = 0.30645216f + (r.nextFloat() - 0.5f) / 100;
+//		d = 1.1156111f + (r.nextFloat() - 0.5f) / 100;
 		p = 1 + r.nextFloat();
 		i = Math.abs(r.nextFloat() - 0.5f);
 		d = 1 + r.nextFloat();
 		
 		this.pidHorStab = new PIDController(p, i, d, (float) (Math.PI / 180), 0);
-//		this.pidHorStab = new PIDController(1.0532867f, 0.033028185f, 1.0589304f, (float) (Math.PI / 180), 0);
+//		this.pidHorStab = new PIDController(1.1233587f, 0.30645216f, 1.1156111f, (float) (Math.PI / 180), 0);
 		
 		this.pidVerStab = new PIDController(2.5f, 0.0f, 2.0f, (float) (Math.PI / 180), 0);
 
@@ -179,13 +183,13 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 				// newRightWingInclination = (float) Math.toRadians(4);
 				// }
 
-				if (getEuclidDist(getProperties().getPosition(), cubePos) <= 5) {
+				if (getEuclidDist(getProperties().getPosition(), cubePos) <= 3) {
 					if (path.getIndex() <= 4) {
 						this.path.setIndex(this.path.getIndex() + 1);
 						this.cubePos = new Vector3f(path.getCurrentX(), path.getCurrentY(), path.getCurrentZ());
 						this.pidHorStab.reset();
 						this.pidVerStab.reset();
-						System.out.println("Reached cube at: " + -80 * path.getIndex());
+						System.out.println("Reached cube at: " + properties.getPosition());
 					} else {
 						System.out.println("Fininshed");
 						isFinished = true;

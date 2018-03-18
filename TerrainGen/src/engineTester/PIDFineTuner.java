@@ -68,11 +68,11 @@ public class PIDFineTuner {
 		autopilots = new ArrayList<>();
 
 		// ***INITIALIZE DRONEVIEW***
-		RawModel droneModel = OBJLoader.loadObjModel("tree", loader);
-		TexturedModel staticDroneModel = new TexturedModel(droneModel, new ModelTexture(loader.loadTexture("tree")));
+//		RawModel droneModel = OBJLoader.loadObjModel("tree", loader);
+//		TexturedModel staticDroneModel = new TexturedModel(droneModel, new ModelTexture(loader.loadTexture("tree")));
         System.out.println((int)PhysicsEngine.groundLevel -autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius());
 		for (int i = 0; i < DRONE_COUNT; i++) {
-			Drone drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, (int)PhysicsEngine.groundLevel -autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius() + 20, 0)), 1,
+			Drone drone = new Drone(null, new Matrix4f().translate(new Vector3f(0, (int)PhysicsEngine.groundLevel -autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius() + 20, 0)), 1,
 					autopilotConfig, new EulerPrediction(STEP_TIME));
 			Autopilot autopilot = AutopilotFactory.createAutopilot();
 			autopilot.simulationStarted(autopilotConfig, drone.getAutoPilotInputs());

@@ -101,6 +101,8 @@ public class MainGameLoop {
 	private static Button openFile;
 	private static Button randomCubes;
 
+	private static CubeRenderer cubeRenderer3D;
+
 	public static void main(String[] args) {
 		//Needed to load openCV
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -195,11 +197,11 @@ public class MainGameLoop {
 		Cube c = new Cube(1, 1, 0);
 		RawCubeModel cube = loader.loadToVAO(c.positions, c.colors);
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 25, -80)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -160)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 15, -240)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 10, -320)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 16, -400)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 14, -480)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 10, -160)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 30, -240)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 60, -320)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 30, -400)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -480)), 1));
 		
 		/* INITIALIZE AUTOPILOT */
 		autopilot = AutopilotFactory.createAutopilot();
@@ -226,7 +228,7 @@ public class MainGameLoop {
 			GL11.glScissor(0, 200, Display.getWidth(), Display.getHeight() - 200);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			//chaseCam.setPosition(chaseCam.getPosition().translate(0, -0.01f, -1));
-			renderEntities(chaseCam);
+			renderEntities(chaseCam, "3D");
 			chaseCam.setPosition(drone.getPosition().translate(0, 2, 10));
 			
 			//CAMERA VIEW
@@ -234,7 +236,7 @@ public class MainGameLoop {
 			GL11.glScissor(0,0,200,200);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			//camera.setPosition(camera.getPosition().translate(0, -0.01f, -1));
-			renderEntities(camera);
+			renderEntities(camera, "Drone");
 			camera.setPosition(drone.getPosition().translate(0, 0, -5));
 			//drone.rotate(0.01f, new Vector3f(1, 0, 0));
 			
@@ -318,7 +320,7 @@ public class MainGameLoop {
 		DisplayManager.closeDisplay();
 	}
 	
-	private static void renderEntities(Camera camera) {
+	private static void renderEntities(Camera camera, String type) {
 		for (Terrain t : terrains) {
 			renderer.processTerrain(t);
 		}
