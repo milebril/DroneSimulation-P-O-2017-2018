@@ -55,10 +55,12 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	
 	private FlyingAutopilot flyingAP;
 	private TakeOffAutopilot takeOffAP;
+	private TaxiAutopilot taxiAP;
 
 	public SimpleAutopilot() {
 		flyingAP = new FlyingAutopilot();
 		takeOffAP = new TakeOffAutopilot(this);
+		taxiAP = new TaxiAutopilot(this);
 		
 //		float[] pathX = { 0, 0, 0, 0, 0, 0 };
 //		float[] pathY = { 25, 10, 30, 60, 30, 20 };
@@ -161,6 +163,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 				return takeOffAP.timePassed(properties);
 			case FLYING:
 				return flyingAP.timePassed(properties);
+			case TAXI:
+				return taxiAP.timePassed(properties);
 			default:
 				break;
 			}
@@ -317,7 +321,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		return (float) Math.atan(overstaande / aanliggende);
 	}
 
-	private float getEuclidDist(Vector3f vec1, Vector3f vec2) {
+	public static float getEuclidDist(Vector3f vec1, Vector3f vec2) {
 		Vector3f temp = new Vector3f(0, 0, 0);
 		Vector3f.sub(vec2, vec1, temp);
 		return temp.length();

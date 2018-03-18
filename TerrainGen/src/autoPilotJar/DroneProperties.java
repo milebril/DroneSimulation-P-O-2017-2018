@@ -152,12 +152,12 @@ public class DroneProperties implements AutopilotOutputs{
 		return this.roll;
 	}
 	
-	// BRAKES
+//----- BRAKES --------
 	
 	private float frontBrakeForce;
 	private float leftBrakeForce;
 	private float rightBrakeForce;
-
+	//Getters
 	public float getFrontBrakeForce() {
 		return this.frontBrakeForce;
 	}
@@ -169,7 +169,18 @@ public class DroneProperties implements AutopilotOutputs{
 	public float getRightBrakeForce() {
 		return this.rightBrakeForce;
 	}
-	
+	//Setters
+	public void setFrontBrakeForce(float force) {
+		this.frontBrakeForce = force;
+	}
+
+	public void setLeftBrakeForce(float leftBrakeForce) {
+		this.leftBrakeForce = leftBrakeForce;
+	}
+
+	public void setRightBrakeForce(float rightBrakeForce) {
+		this.rightBrakeForce = rightBrakeForce;
+	}
 	// CALCULATED PROPERTIES
 	
 	// Delta time
