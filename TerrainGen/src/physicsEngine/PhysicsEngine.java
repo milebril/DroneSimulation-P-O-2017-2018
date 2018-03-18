@@ -10,7 +10,7 @@ public class PhysicsEngine {
 	/**
 	 * At which y-value the ground level is.
 	 */
-	public static double groundLevel = 1;
+	private static double groundLevel = 1;
 
 	// MAIN
 
@@ -172,6 +172,7 @@ public class PhysicsEngine {
 
 		// forces excersised by the front Tyre brake force
 		if (drone.getFrontTyre().isGrounded()) {
+			System.out.println("DRONE RAAKT DE GROND");
 
 			// richting van de remkracht (in wereldassenstelsel)
 			Vector3f brakeForce = drone.getVelocityOfPoint(drone.getFrontTyre().getGroundedPosition());

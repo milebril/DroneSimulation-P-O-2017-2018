@@ -16,6 +16,7 @@ public class LandingAutopilot {
 	}
 
 	public DroneProperties timePassed(DroneProperties properties) {
+		
 		// LET PLANE GO DOWN
 		if (properties.getPosition().getY() < 25 && properties.getPosition().getY() > 15
 				&& properties.getVelocity().length() >= 10) {
@@ -25,20 +26,21 @@ public class LandingAutopilot {
 			properties.setVerStabInclination(0);
 			properties.setLeftWingInclination((float) Math.toRadians(15));
 			properties.setRightWingInclination((float) Math.toRadians(15));
-		} else if (properties.getPosition().getY() < 15 && properties.getVelocity().length() >= 10) {
+		} else if (properties.getPosition().getY() < 15 && properties.getVelocity().length() >= 25) {
 			System.out.println("SLOW DOWN 2");
 			studCube = new Vector3f(0, 5, properties.getPosition().z);
 			studCube.z -= 20;
-			System.out.println(studCube);
 			properties.setHorStabInclination(properties.getHorStabInclination() + pidHorStab
 					.calculateChange(properties.getPitch() + getVerAngle(properties), properties.getDeltaTime()));
 			properties.setThrust(0);
 			properties.setLeftWingInclination((float) Math.toRadians(15));
 			properties.setRightWingInclination((float) Math.toRadians(15));
+			
 			properties.setFrontBrakeForce(getParent().getConfig().getRMax());
 			properties.setLeftBrakeForce(getParent().getConfig().getRMax());
 			properties.setRightBrakeForce(getParent().getConfig().getRMax());
-		} else if (properties.getPosition().getY() > 25 && properties.getVelocity().length() >= 10) {
+			
+		} else if (properties.getPosition().getY() > 25 && properties.getVelocity().length() >= 25) {
 			System.out.println("REDUCE HEIGHT");
 			properties.setThrust(0);
 			properties.setHorStabInclination((float) Math.toRadians(5));
@@ -46,7 +48,14 @@ public class LandingAutopilot {
 			properties.setLeftWingInclination((float) Math.toRadians(-5));
 			properties.setRightWingInclination((float) Math.toRadians(-5));
 		} else { // BRAKE
+			System.out.println("IS BRAKING");
 			properties.setThrust(0);
+			properties.setHorStabInclination(0);
+			properties.setVerStabInclination(0);
+			properties.setLeftWingInclination(0);
+			properties.setRightWingInclination(0);
+			
+			
 			properties.setFrontBrakeForce(getParent().getConfig().getRMax());
 			properties.setLeftBrakeForce(getParent().getConfig().getRMax());
 			properties.setRightBrakeForce(getParent().getConfig().getRMax());
