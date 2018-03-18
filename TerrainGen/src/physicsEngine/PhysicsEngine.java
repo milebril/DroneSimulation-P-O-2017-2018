@@ -10,7 +10,7 @@ public class PhysicsEngine {
 	/**
 	 * At which y-value the ground level is.
 	 */
-	private static double groundLevel = 1;
+	public static double groundLevel = 1;
 
 	// MAIN
 
