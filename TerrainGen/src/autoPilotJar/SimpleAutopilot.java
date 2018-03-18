@@ -49,18 +49,20 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	protected float newVerStabInclination = 0;	private float newLeftBrake = 0;
 	private float newRightBrake = 0;
 	private float newFrontBrake = 0;
-	private AutopilotStages stage = AutopilotStages.FLYING;
+	private AutopilotStages stage = AutopilotStages.LANDING;
 	
 	public float p, i, d;
 	
 	private FlyingAutopilot flyingAP;
 	private TakeOffAutopilot takeOffAP;
 	private TaxiAutopilot taxiAP;
+	private LandingAutopilot landingAP;
 
 	public SimpleAutopilot() {
 		flyingAP = new FlyingAutopilot();
 		takeOffAP = new TakeOffAutopilot(this);
 		taxiAP = new TaxiAutopilot(this);
+		landingAP = new LandingAutopilot(this);
 		
 //		float[] pathX = { 0, 0, 0, 0, 0, 0 };
 //		float[] pathY = { 25, 10, 30, 60, 30, 20 };
@@ -151,10 +153,10 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
 			setDroneProperties(inputs);
 
-			if (getProperties().getVelocity().length() > 80) // als de drone sneller vliegt dan 60m/s zet de thrust dan
-				this.newThrust = 0;
-			else
-				this.newThrust = configAP.getMaxThrust();
+//			if (getProperties().getVelocity().length() > 80) // als de drone sneller vliegt dan 60m/s zet de thrust dan
+//				this.newThrust = 0;
+//			else
+//				this.newThrust = configAP.getMaxThrust();
 
 			// newLeftWingInclination = 0;
 			// newRightWingInclination = 0;
@@ -165,6 +167,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 				return flyingAP.timePassed(properties);
 			case TAXI:
 				return taxiAP.timePassed(properties);
+			case LANDING:
+				return landingAP.timePassed(properties);
 			default:
 				break;
 			}
