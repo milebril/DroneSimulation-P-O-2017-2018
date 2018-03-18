@@ -56,7 +56,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	private FlyingAutopilot flyingAP;
 
 	public SimpleAutopilot() {
-		flyingAP = new FlyingAutopilot(this);
+		flyingAP = new FlyingAutopilot();
 		
 //		float[] pathX = { 0, 0, 0, 0, 0, 0 };
 //		float[] pathY = { 25, 10, 30, 60, 30, 20 };
