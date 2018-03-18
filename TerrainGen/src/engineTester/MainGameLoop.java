@@ -304,7 +304,6 @@ public class MainGameLoop {
 				//Autopilot stuff
 				AutopilotInputs inputs = drone.getAutoPilotInputs();
 				AutopilotOutputs outputs = autopilot.timePassed(inputs);
-				System.out.println(outputs.getThrust());
 				drone.setAutopilotOutouts(outputs);
 			}
 			
