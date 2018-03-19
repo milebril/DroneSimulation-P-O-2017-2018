@@ -49,7 +49,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	protected float newVerStabInclination = 0;	private float newLeftBrake = 0;
 	private float newRightBrake = 0;
 	private float newFrontBrake = 0;
-	private AutopilotStages stage = AutopilotStages.LANDING;
+	private AutopilotStages stage = AutopilotStages.TURNING;
 	
 	public float p, i, d;
 	
@@ -57,12 +57,14 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	private TakeOffAutopilot takeOffAP;
 	private TaxiAutopilot taxiAP;
 	private LandingAutopilot landingAP;
+	private TurningAutopilot turningAP;
 
 	public SimpleAutopilot() {
-		flyingAP = new FlyingAutopilot();
-		takeOffAP = new TakeOffAutopilot(this);
 		taxiAP = new TaxiAutopilot(this);
+		flyingAP = new FlyingAutopilot(this);
+		takeOffAP = new TakeOffAutopilot(this);
 		landingAP = new LandingAutopilot(this);
+		turningAP = new TurningAutopilot(this);
 		
 //		float[] pathX = { 0, 0, 0, 0, 0, 0 };
 //		float[] pathY = { 25, 10, 30, 60, 30, 20 };
@@ -169,6 +171,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 				return taxiAP.timePassed(properties);
 			case LANDING:
 				return landingAP.timePassed(properties);
+			case TURNING: 
+				return turningAP.timePassed(properties);
 			default:
 				break;
 			}

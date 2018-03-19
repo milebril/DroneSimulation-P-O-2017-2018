@@ -30,7 +30,9 @@ public class FlyingAutopilot {
 	private float checkpoint = -80;
 	public float p, i, d;
 
-	public FlyingAutopilot() {
+	public FlyingAutopilot(SimpleAutopilot parent) {
+		this.parent = parent;
+		
 		// Set the path
 		this.path = new MyPath(pathX, pathY, pathZ);
 		this.path.setIndex(0);
