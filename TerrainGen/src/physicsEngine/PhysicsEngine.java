@@ -18,10 +18,11 @@ public class PhysicsEngine {
 	 * Applies physics to the given drone for dt seconds, translating the drone
 	 * dt seconds into the future.
 	 * 
-	 * @throws DroneCrashException
-	 *             if the Drone crashes
+	 * @throws DroneCrashException if the Drone crashes
+	 * @throws MaxAoAException if the max angle of attack is exceeded while the lift force of
+	 * 						   the airfoil is greater than 50N
 	 */
-	public static void applyPhysics(Drone drone, float dt) throws DroneCrashException {
+	public static void applyPhysics(Drone drone, float dt) throws DroneCrashException, MaxAoAException {
 		// stepsize bepalen
 		float h;
 		if (dt - drone.getPredictionMethod().getStepSize() >= 0) {
@@ -94,7 +95,7 @@ public class PhysicsEngine {
 	 * @return array with force and torque on the drone (in drone frame) |
 	 *         Vector3f[]{total force, total torque} (in drone frame)
 	 */
-	private static Vector3f[] calculateForces(Drone drone, float stepsize) {
+	private static Vector3f[] calculateForces(Drone drone, float stepsize) throws MaxAoAException {
 
 		// The total force and torque that are exercised on the given Drone (in
 		// drone frame)
@@ -252,7 +253,7 @@ public class PhysicsEngine {
 	 * @return The linear and angular accelerations of the drone (in drone
 	 *         frame)
 	 */
-	private static Vector3f[] calculateAccelerations(Drone drone, float stepsize) {
+	private static Vector3f[] calculateAccelerations(Drone drone, float stepsize) throws MaxAoAException {
 		return calculateAccelerations(drone, calculateForces(drone, stepsize));
 	}
 

@@ -2,6 +2,8 @@ package entities;
 
 import org.lwjgl.util.vector.Vector3f;
 
+import physicsEngine.MaxAoAException;
+
 /**
  * all airfoils have a neutral attack vector oriented along (O,0,-1) expressed in the Drone Frame
  * @author Jakob
@@ -154,15 +156,19 @@ public class AirFoil {
 	
 	/**
 	 * Returns the lift force of the AirFoil assuming there is no wind.
+	 * @throws MaxAoAException if the max angle of attack is exceeded while the lift force of
+	 * 						   the airfoil is greater than 50N
 	 */
-	public Vector3f calculateAirFoilLiftForce(){
+	public Vector3f calculateAirFoilLiftForce() throws MaxAoAException {
 		return this.calculateAirfoilLiftForce(new Vector3f(0,0,0));
 	}
 	
 	/**
 	 * Returns the lift force of the AirFoil.
+	 * @throws MaxAoAException if the max angle of attack is exceeded while the lift force of
+	 * 						   the airfoil is greater than 50N
 	 */
-	public Vector3f calculateAirfoilLiftForce(Vector3f windW) {
+	public Vector3f calculateAirfoilLiftForce(Vector3f windW) throws MaxAoAException {
 		// calculate the airspeed the airfoil experiences
 		Vector3f airSpeedW = new Vector3f(0, 0, 0);
 		
@@ -205,10 +211,6 @@ public class AirFoil {
 		
 //		float aoa = this.calculateAOA(projectedAirspeedVectorD, normalD, attackVectorD);
 		float aoa = (float) - Math.atan2(a, b);
-		if (aoa > Math.toRadians(drone.getMaxAOA())) {
-			//System.err.println(aoa);
-			//System.exit(0); //TODO
-		}
 
 		// calculate the lift force N . liftSlope . AOA . s^2, where N is the
 		// normal, AOA is the angle of attack, and s is the projected airspeed
@@ -216,6 +218,11 @@ public class AirFoil {
 		Vector3f liftForceD = (Vector3f) normalD.scale(
 				this.getLiftSlope() * (float)(aoa % Math.PI) * airspeedSquared
 				);
+		
+		// if max AoA is exceeded and the liftForce is greater than 50N, throw exception
+		if (aoa > Math.toRadians(drone.getMaxAOA()) && liftForceD.length() > 50) {
+			throw new MaxAoAException("Error Max AoA exceeded!");
+		}
 		
 		return liftForceD;
 	}
