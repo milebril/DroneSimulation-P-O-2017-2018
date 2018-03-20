@@ -58,13 +58,15 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	private TaxiAutopilot taxiAP;
 	private LandingAutopilot landingAP;
 	private PhysicsTestAutopilot physicsAP;
+	public TurningAutopilot turningAP;
 
 	public SimpleAutopilot() {
+		taxiAP = new TaxiAutopilot(this);
 		flyingAP = new FlyingAutopilot(this);
 		takeOffAP = new TakeOffAutopilot(this);
-		taxiAP = new TaxiAutopilot(this);
 		landingAP = new LandingAutopilot(this);
 		physicsAP = new PhysicsTestAutopilot(this);
+		turningAP = new TurningAutopilot(this);
 		
 //		float[] pathX = { 0, 0, 0, 0, 0, 0 };
 //		float[] pathY = { 25, 10, 30, 60, 30, 20 };
@@ -154,6 +156,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
 			setDroneProperties(inputs);
+			if(turningAP.failed == true) this.failed = true;
+		//	if(inputs.getZ() < -200) this.isFinished = true;
 
 			if (getProperties().getVelocity().length() > 60) // als de drone sneller vliegt dan 60m/s zet de thrust dan
 				this.newThrust = 0;
@@ -171,8 +175,6 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 				return taxiAP.timePassed(properties);
 			case LANDING:
 				return landingAP.timePassed(properties);
-			case PHYSICS:
-				return physicsAP.timePassed(properties);
 			default:
 				break;
 			}
