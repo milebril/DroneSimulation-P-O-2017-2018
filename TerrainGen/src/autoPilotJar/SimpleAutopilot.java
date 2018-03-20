@@ -57,12 +57,14 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	private TakeOffAutopilot takeOffAP;
 	private TaxiAutopilot taxiAP;
 	private LandingAutopilot landingAP;
+	private PhysicsTestAutopilot physicsAP;
 
 	public SimpleAutopilot() {
 		flyingAP = new FlyingAutopilot();
 		takeOffAP = new TakeOffAutopilot(this);
 		taxiAP = new TaxiAutopilot(this);
 		landingAP = new LandingAutopilot(this);
+		physicsAP = new PhysicsTestAutopilot(this);
 		
 //		float[] pathX = { 0, 0, 0, 0, 0, 0 };
 //		float[] pathY = { 25, 10, 30, 60, 30, 20 };
@@ -169,6 +171,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 				return taxiAP.timePassed(properties);
 			case LANDING:
 				return landingAP.timePassed(properties);
+			case PHYSICS:
+				return physicsAP.timePassed(properties);
 			default:
 				break;
 			}
