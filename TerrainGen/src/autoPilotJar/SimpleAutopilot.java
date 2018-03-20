@@ -57,7 +57,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	private TakeOffAutopilot takeOffAP;
 	private TaxiAutopilot taxiAP;
 	private LandingAutopilot landingAP;
-	private TurningAutopilot turningAP;
+	public TurningAutopilot turningAP;
 
 	public SimpleAutopilot() {
 		taxiAP = new TaxiAutopilot(this);
@@ -154,6 +154,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
 			setDroneProperties(inputs);
+			if(turningAP.failed == true) this.failed = true;
+		//	if(inputs.getZ() < -200) this.isFinished = true;
 
 //			if (getProperties().getVelocity().length() > 80) // als de drone sneller vliegt dan 60m/s zet de thrust dan
 //				this.newThrust = 0;
