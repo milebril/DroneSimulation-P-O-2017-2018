@@ -55,6 +55,7 @@ public class DroneProperties implements AutopilotOutputs{
 		this.frontBrakeForce = 0;
 		this.leftBrakeForce = 0;
 		this.rightBrakeForce = 0;
+		this.rMax = 2486;
 		
 		//Initialize wings to 0
 		this.leftWingInclination = 0;
@@ -330,6 +331,7 @@ public class DroneProperties implements AutopilotOutputs{
 	
 	private float thrust;
 	private float maxThrust;
+	private float rMax;
 	
 	public void setThrust(float thrust) {
 		this.thrust = thrust;
@@ -384,5 +386,9 @@ public class DroneProperties implements AutopilotOutputs{
 	@Override
 	public float getVerStabInclination() {
 		return verStabInclination;
+	}
+
+	public float getRMax() {
+		return 2486;
 	}
 }
