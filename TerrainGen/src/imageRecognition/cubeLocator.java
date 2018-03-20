@@ -39,56 +39,36 @@ public class cubeLocator {
 			return;
 		}
 		
+		// calculate positions of cubes
 		
-		// bufferedImage --> byteArray
+		// bufferedImage to byteArray
 		byte[] byteArray = bufferedImageToByteArray(image);
-		List<float[]> colorHSVList = new ArrayList<float[]>();
-		for (int i=0; i < byteArray.length; i+=3) {
-			float[] hsv = new float[3];
-			Color.RGBtoHSB(byteArray[i],byteArray[i+1],byteArray[i+2],hsv);
-			hsv[0] = Math.round(hsv[0]*100.0);
-			hsv[1] = Math.round(hsv[1]*100.0);
-			hsv[2] = Math.round(hsv[2]*100.0);
-			colorHSVList.add(hsv);
-		}
 		
-		float [][][] HSVList = new float [200][200][3];
-		int l = 0;
-		for (int y=0; y < HSVList.length; y++) {
-			for (int x=0; x < HSVList.length; x++) {
-				
-				HSVList[x][y][0] = colorHSVList.get(l)[0];
-				HSVList[x][y][1] = colorHSVList.get(l)[1];
-				HSVList[x][y][2] = colorHSVList.get(l)[2];
-				l += 1;
-			}
-		}
+		// create a list with the HSV values
+		List<float[]> colorHSVList = byteArrayToHSVList(byteArray);
 		
+		// create a matrix
+		float [][][] HSVList = createMatrixOfHSVList(colorHSVList);
+		
+		// create a list with all the different HSV colors.
 		List<double[]> differentColorsHSVList = getAllDifferentHSVColors(colorHSVList);
 		for (int k=0; k < differentColorsHSVList.size(); k++) {
 			System.out.println(differentColorsHSVList.get(k)[0]+" "+differentColorsHSVList.get(k)[1]);
 		}
 		
+		// calculate the center of mass of each cube.
 		for (int k=0; k < differentColorsHSVList.size(); k++) {
 			double[] Center = getType0CenterOfMass(HSVList, differentColorsHSVList.get(k));
 			System.out.println(Center[0]+" "+Center[1]);
-		}
-		
-		
-
-		
-		
+		}	
 	}
-
-	
-
-
 
 
 
 	/**
 	 * Returns a byte[] array of the RGB values of the given BufferedImage.
 	 */
+	
 	public static byte[] bufferedImageToByteArray(BufferedImage image) {
 		
 		// get width and height of the image
@@ -112,6 +92,52 @@ public class cubeLocator {
 	}
 	
 	
+	
+	/**
+	 * Returns a list with the HSV values of the given byteArray.
+	 */
+	
+	public static List<float[]> byteArrayToHSVList(byte[] byteArray) {
+		List<float[]> colorHSVList = new ArrayList<float[]>();
+		for (int i=0; i < byteArray.length; i+=3) {
+			float[] hsv = new float[3];
+			Color.RGBtoHSB(byteArray[i],byteArray[i+1],byteArray[i+2],hsv);
+			hsv[0] = Math.round(hsv[0]*100.0);
+			hsv[1] = Math.round(hsv[1]*100.0);
+			hsv[2] = Math.round(hsv[2]*100.0);
+			colorHSVList.add(hsv);
+		}
+		return colorHSVList;
+	}
+	
+	
+	
+	
+	/**
+	 * Returns a matrix with the HSV values of every pixel.
+	 */
+	
+	public static float[][][] createMatrixOfHSVList(List<float[]> colorHSVList) {
+		float [][][] HSVList = new float [200][200][3];
+		int l = 0;
+		for (int y=0; y < HSVList.length; y++) {
+			for (int x=0; x < HSVList.length; x++) {
+				
+				HSVList[x][y][0] = colorHSVList.get(l)[0];
+				HSVList[x][y][1] = colorHSVList.get(l)[1];
+				HSVList[x][y][2] = colorHSVList.get(l)[2];
+				l += 1;
+			}
+		}
+		return HSVList;
+	}
+	
+	
+	
+	/**
+	 * Returns all the different HS colors, which represent a cube. Only a cube color if V-value is lower than 50.
+	 */
+	
 	public static List<double[]> getAllDifferentHSVColors(List<float[]> colorHSVList){
 		List<double[]> differentColorsHSVList = new ArrayList<double[]>();
 		for (int i = 0; i < colorHSVList.size(); i++) {
@@ -131,17 +157,9 @@ public class cubeLocator {
 	}
 						
 
-	
-	
-	
-
-	
-
  
 	/**
-	 * Returns the center of mass of the given type 0 Mat object
-	 * @throws IllegalArgumentException if the type of the mat is not 0
-	 * @throws IllegalArgumentException if the total sum of x or y coordinates overflows.
+	 * Returns the center of mass of the given cube
 	 */
 	static double[] getType0CenterOfMass(float[ ][ ][ ] HSVList, double[] color) {
 		
