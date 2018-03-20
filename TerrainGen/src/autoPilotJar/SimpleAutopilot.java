@@ -49,7 +49,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	protected float newVerStabInclination = 0;	private float newLeftBrake = 0;
 	private float newRightBrake = 0;
 	private float newFrontBrake = 0;
-	private AutopilotStages stage = AutopilotStages.LANDING;
+	private AutopilotStages stage = AutopilotStages.TAKE_OFF;
 	
 	public float p, i, d;
 	
