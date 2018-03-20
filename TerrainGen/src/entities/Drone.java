@@ -553,6 +553,10 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	public void setAutopilotOutouts(AutopilotOutputs outputs) {
 		setThrustForce(outputs.getThrust());
 		
+		this.getFrontTyre().setBrakingForce(outputs.getFrontBrakeForce());
+		this.getLeftTyre().setBrakingForce(outputs.getLeftBrakeForce());
+		this.getRightTyre().setBrakingForce(outputs.getRightBrakeForce());
+		
 		this.getLeftWing().setInclination(outputs.getLeftWingInclination());
 		this.getRightWing().setInclination(outputs.getRightWingInclination());		
 		this.getHorizStabilizer().setInclination(outputs.getHorStabInclination());

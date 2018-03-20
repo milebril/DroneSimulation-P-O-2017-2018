@@ -8,8 +8,10 @@ public class PhysicsTestAutopilot {
 	
 	public DroneProperties timePassed(DroneProperties properties) {
 		
-		// set thrust 50% of max thrust
-		properties.setThrust((float) (parent.getConfig().getMaxThrust()*0.5));
+		properties.setFrontBrakeForce(parent.getConfig().getRMax());
+		properties.setLeftBrakeForce(parent.getConfig().getRMax());
+		properties.setRightBrakeForce(parent.getConfig().getRMax());
+		
 		return properties;
 	}
 	

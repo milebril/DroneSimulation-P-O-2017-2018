@@ -64,13 +64,13 @@ public class PhysicsEngine {
 		Vector3f rightWingCenterOfMass = new Vector3f(0,0,0);
 		Vector3f.add(drone.transformToWorldFrame(drone.getRightWing().getCenterOfMass()),drone.getPosition(), rightWingCenterOfMass);
 		
-		if (drone.transformToWorldFrame(drone.getEnginePosition()).y <=	groundLevel) {
+		if (drone.transformToWorldFrame(drone.getEnginePosition()).y + drone.getPosition().y <=	groundLevel) {
 			throw new DroneCrashException("Drone Crashed: the engine hit the ground!");
-		} if (drone.transformToWorldFrame(drone.getTailMassPosition()).y <= groundLevel) {
+		} if (drone.transformToWorldFrame(drone.getTailMassPosition()).y  + drone.getPosition().y <= groundLevel) {
 			throw new DroneCrashException("Drone Crashed: the tail hit the ground!");
-		} if (leftWingCenterOfMass.y <= groundLevel) {
+		} if (leftWingCenterOfMass.y  + drone.getPosition().y <= groundLevel) {
 			throw new DroneCrashException("Drone Crashed: the left wing hit the	ground!");
-		} if (rightWingCenterOfMass.y <= groundLevel) {
+		} if (rightWingCenterOfMass.y  + drone.getPosition().y <= groundLevel) {
 			throw new DroneCrashException("Drone Crashed: the right wing hit the ground!");
 		}
 		for (Tyre tyre : drone.getTyres()) {
@@ -100,7 +100,7 @@ public class PhysicsEngine {
 		// drone frame)
 		Vector3f force = new Vector3f(0, 0, 0);
 		Vector3f torque = new Vector3f(0, 0, 0);
-
+		
 		// calculate the forces applied by the airFoils (liftForce + gravity)
 		for (int i = 0; i < drone.getAirFoils().length; i++) {
 
@@ -117,21 +117,21 @@ public class PhysicsEngine {
 			// add the calculated force and torque to the total force and torque
 			Vector3f.add(force, liftForceD, force);
 			Vector3f.add(torque, currentAirFoilTorqueD, torque);
-
 		}
-
+		
 		// force exercised by the engine
 		Vector3f thrustForceD = new Vector3f(0, 0, -drone.getThrustForce());
 		Vector3f.add(force, thrustForceD, force);
-
+		
 		// gravitational force exercised by the mass
 		Vector3f gravitationD = drone.transformToDroneFrame(new Vector3f(0, -drone.getMass() * drone.getGravity(), 0));
 		Vector3f.add(force, gravitationD, force);
+		
 
 		// forces excersised by the Tyre compression and deltacompression
 		double[] compressionForces = new double[] { 0, 0, 0 };
 		int i = 0;
-
+		
 		for (Tyre tyre : drone.getTyres()) {
 			// if the tyre is not grounded, there will be no compression forces
 			// -> start next iteration of for loop
@@ -152,8 +152,6 @@ public class PhysicsEngine {
 			Vector3f compressionTorque = new Vector3f();
 			Vector3f.cross(tyre.getGroundedPosition(), compressionForce, compressionTorque);
 			
-			Vector3f lever = tyre.getGroundedPosition();
-			
 			// optellen bij het totaal
 			Vector3f.add(force, compressionForce, force);
 			Vector3f.add(torque, compressionTorque, torque);
@@ -163,11 +161,10 @@ public class PhysicsEngine {
 
 		// forces excersised by the front Tyre brake force
 		if (drone.getFrontTyre().isGrounded()) {
-			System.out.println("DRONE RAAKT DE GROND");
 
 			// richting van de remkracht (in wereldassenstelsel)
 			Vector3f brakeForce = drone.getVelocityOfPoint(drone.getFrontTyre().getGroundedPosition());
-
+			
 			// tegengestelde richting, y-component weglaten en normaliseren
 			brakeForce.x = -brakeForce.x;
 			brakeForce.y = 0;
@@ -179,7 +176,7 @@ public class PhysicsEngine {
 
 				// orientatie schalen met de remkracht
 				brakeForce.scale((float) drone.getFrontTyre().getBrakingForce());
-
+				
 				// naar drone assenstelsel
 				brakeForce = drone.transformToDroneFrame(brakeForce);
 
