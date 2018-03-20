@@ -129,7 +129,7 @@ public class MainGameLoop {
 		//***INITIALIZE DRONEVIEW***
 		RawModel droneModel = OBJLoader.loadObjModel("tree", loader);
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,new ModelTexture(loader.loadTexture("tree")));
-		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, (int)PhysicsEngine.groundLevel -autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius() + 30, 0)), 1,
+		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, (int)PhysicsEngine.groundLevel -autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius(), 0)), 1,
 				autopilotConfig, new EulerPrediction(STEP_TIME));
 		entities.add(drone);
 		
@@ -196,12 +196,12 @@ public class MainGameLoop {
 		
 		Cube c = new Cube(1, 1, 0);
 		RawCubeModel cube = loader.loadToVAO(c.positions, c.colors);
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 25, -80)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 10, -160)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 30, -240)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 60, -320)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 30, -400)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -480)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -560)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -640)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -720)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -800)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -880)), 1));
 		
 		/* INITIALIZE AUTOPILOT */
 		autopilot = AutopilotFactory.createAutopilot();

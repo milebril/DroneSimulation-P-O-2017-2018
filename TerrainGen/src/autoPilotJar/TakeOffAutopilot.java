@@ -12,7 +12,7 @@ public class TakeOffAutopilot {
 		properties.setThrust(parent.getConfig().getMaxThrust());
 		
 		//Als de drone sneller gaat dan 60 m/s, begin met opstijgen.
-		if (properties.getVelocity().length() > 60) {
+		if (properties.getVelocity().length() > 40) {
 			properties.setLeftWingInclination((float) Math.toRadians(20));
 			properties.setRightWingInclination((float) Math.toRadians(20));
 		} else {
@@ -21,8 +21,8 @@ public class TakeOffAutopilot {
 		}
 
 		//Als de drone een hoogte van 10 meter bereikt heeft, mag de flyingAP overnemen
-		if (properties.getPosition().getY() > 20) {
-			getParent().setStage(AutopilotStages.LANDING);
+		if (properties.getPosition().getY() > 10) {
+			getParent().setStage(AutopilotStages.FLYING);
 		}
 		
 		return properties;

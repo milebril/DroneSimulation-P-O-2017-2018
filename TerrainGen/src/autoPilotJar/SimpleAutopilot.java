@@ -60,7 +60,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	private PhysicsTestAutopilot physicsAP;
 
 	public SimpleAutopilot() {
-		flyingAP = new FlyingAutopilot();
+		flyingAP = new FlyingAutopilot(this);
 		takeOffAP = new TakeOffAutopilot(this);
 		taxiAP = new TaxiAutopilot(this);
 		landingAP = new LandingAutopilot(this);
@@ -155,10 +155,10 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
 			setDroneProperties(inputs);
 
-//			if (getProperties().getVelocity().length() > 80) // als de drone sneller vliegt dan 60m/s zet de thrust dan
-//				this.newThrust = 0;
-//			else
-//				this.newThrust = configAP.getMaxThrust();
+			if (getProperties().getVelocity().length() > 60) // als de drone sneller vliegt dan 60m/s zet de thrust dan
+				this.newThrust = 0;
+			else
+				this.newThrust = configAP.getMaxThrust();
 
 			// newLeftWingInclination = 0;
 			// newRightWingInclination = 0;

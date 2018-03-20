@@ -14,8 +14,8 @@ public class FlyingAutopilot {
 
 	private float[] pathX = { 0, 0, 0, 0, 0, 0 };
 	private float[] pathY = { 20, 20, 20, 20, 20, 20 };
-	private float[] pathZ = { -80, -160, -240, -320, -400, -480 };
-	// private float[] pathZ = { -480, -560, -640, -720, -800, -880 };
+//	private float[] pathZ = { -80, -160, -240, -320, -400, -480 };
+	 private float[] pathZ = { -480, -560, -640, -720, -800, -880 };
 
 	private MyPath path;
 	public float minY = 20;
@@ -27,10 +27,11 @@ public class FlyingAutopilot {
 	public boolean failed = false;
 
 	private Vector3f cubePos;
-	private float checkpoint = -80;
+	private float checkpoint = -480;
 	public float p, i, d;
 
-	public FlyingAutopilot() {
+	public FlyingAutopilot(SimpleAutopilot parent) {
+		this.parent = parent;
 		// Set the path
 		this.path = new MyPath(pathX, pathY, pathZ);
 		this.path.setIndex(0);
@@ -62,7 +63,7 @@ public class FlyingAutopilot {
 		properties.setRightWingInclination(0);
 
 		// Check whether we reach a cube, or fly by one and fail the path
-		if (getEuclidDist(properties.getPosition(), cubePos) <= 3) {
+		if (getEuclidDist(properties.getPosition(), cubePos) <= 4) {
 			if (path.getIndex() <= 4) {
 				this.path.setIndex(this.path.getIndex() + 1);
 				this.cubePos = new Vector3f(path.getCurrentX(), path.getCurrentY(), path.getCurrentZ());
@@ -72,9 +73,10 @@ public class FlyingAutopilot {
 			} else {
 				System.out.println("Fininshed");
 				isFinished = true;
+				parent.setStage(AutopilotStages.LANDING);
 				System.out.println(maxY + " " + minY);
 			}
-			checkpoint = -80 * (path.getIndex() + 1);
+			checkpoint = -480 - (80 * (path.getIndex() + 1));
 		}
 
 		if (properties.getPosition().z < (checkpoint)) {

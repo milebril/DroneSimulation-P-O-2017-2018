@@ -26,7 +26,7 @@ public class LandingAutopilot {
 			properties.setVerStabInclination(0);
 			properties.setLeftWingInclination((float) Math.toRadians(15));
 			properties.setRightWingInclination((float) Math.toRadians(15));
-		} else if (properties.getPosition().getY() < 15 && properties.getVelocity().length() >= 15) {
+		} else if (properties.getPosition().getY() < 15 && properties.getVelocity().length() >= 50) {
 			System.out.println("SLOW DOWN 2");
 			
 			studCube = new Vector3f(0, 5, properties.getPosition().z);
@@ -44,13 +44,26 @@ public class LandingAutopilot {
 			properties.setLeftBrakeForce(getParent().getConfig().getRMax());
 			properties.setRightBrakeForce(getParent().getConfig().getRMax());
 			
-		} else if (properties.getPosition().getY() > 25 && properties.getVelocity().length() >= 10) {
+		} else if (properties.getPosition().getY() > 20 && properties.getVelocity().length() >= 10) {
 			System.out.println("REDUCE HEIGHT");
 			properties.setThrust(0);
 			properties.setHorStabInclination((float) Math.toRadians(5));
 			properties.setVerStabInclination(0);
 			properties.setLeftWingInclination((float) Math.toRadians(-5));
 			properties.setRightWingInclination((float) Math.toRadians(-5));
+		}else if (properties.getPosition().getY() < 10 && properties.getVelocity().length() <= 40) {
+			System.out.println("REDUCE HEIGHT");
+			properties.setThrust(0);
+			
+			properties.setHorStabInclination((float) Math.toRadians(1));
+			properties.setVerStabInclination(0);
+			properties.setLeftWingInclination((float) Math.toRadians(-15));
+			properties.setRightWingInclination((float) Math.toRadians(-15));
+			
+			properties.setFrontBrakeForce(getParent().getConfig().getRMax());
+			properties.setLeftBrakeForce(getParent().getConfig().getRMax());
+			properties.setRightBrakeForce(getParent().getConfig().getRMax());
+
 		} else if (properties.getPosition().getY() < 15 && properties.getVelocity().length() <= 15){ // BRAKE
 			System.out.println("IS BRAKING");
 			properties.setThrust(0);
@@ -64,7 +77,6 @@ public class LandingAutopilot {
 			properties.setLeftBrakeForce(getParent().getConfig().getRMax());
 			properties.setRightBrakeForce(getParent().getConfig().getRMax());
 		}
-
 		return properties;
 	}
 
