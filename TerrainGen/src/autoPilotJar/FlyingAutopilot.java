@@ -23,7 +23,7 @@ public class FlyingAutopilot {
 
 	private PIDController pidHorStab;
 
-	private boolean isFinished = false;
+	public boolean isFinished = false;
 	public boolean failed = false;
 
 	private Vector3f cubePos;
@@ -42,10 +42,10 @@ public class FlyingAutopilot {
 		p = 1 + r.nextFloat();
 		i = Math.abs(r.nextFloat() - 0.5f);
 		d = 1 + r.nextFloat();
-		// this.pidHorStab = new PIDController(p, i, d, (float) (Math.PI / 180), 0);
+		 this.pidHorStab = new PIDController(p, i, d, (float) (Math.PI / 180), 0);
 
 		// Best Finetuning until now
-		this.pidHorStab = new PIDController(1.1233587f, 0.30645216f, 1.1156111f, (float) (Math.PI / 180), 0);
+//		this.pidHorStab = new PIDController(1.1233587f, 0.30645216f, 1.1156111f, (float) (Math.PI / 180), 0);
 	}
 
 	public DroneProperties timePassed(DroneProperties properties) {
@@ -73,8 +73,8 @@ public class FlyingAutopilot {
 			} else {
 				System.out.println("Fininshed");
 				isFinished = true;
-				parent.setStage(AutopilotStages.LANDING);
-				System.out.println(maxY + " " + minY);
+//				System.out.println("New Best: PID: " + p + " " + i + " " + d);
+//				parent.setStage(AutopilotStages.LANDING);
 			}
 			checkpoint = -480 - (80 * (path.getIndex() + 1));
 		}

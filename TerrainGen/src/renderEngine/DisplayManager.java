@@ -14,7 +14,7 @@ public class DisplayManager {
 	
 	private static final int WIDTH = 1280;
 	private static final int HEIGHT = 700;
-	private static final int FPS_CAP = 120;
+	private static final int FPS_CAP = 40;
 	
 	public static float elapsedTime;
 	private static long lastFrameTime;
@@ -46,8 +46,8 @@ public class DisplayManager {
 		long currentFrameTime = getCurrentTime();
 		delta = (currentFrameTime - lastFrameTime) / 1000f; // In seconds
 		lastFrameTime = currentFrameTime;
-		if (delta > 0.006) {
-			delta = 0.006f;
+		if (delta > 0.01) {
+			delta = 0.015f;
 		}
 		elapsedTime += delta;
 	}

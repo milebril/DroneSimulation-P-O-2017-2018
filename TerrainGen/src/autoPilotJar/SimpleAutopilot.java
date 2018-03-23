@@ -46,14 +46,15 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	protected float newLeftWingInclination = 0;
 	protected float newRightWingInclination = 0;
 	protected float newHorStabInclination = 0;
-	protected float newVerStabInclination = 0;	private float newLeftBrake = 0;
+	protected float newVerStabInclination = 0;	
+	private float newLeftBrake = 0;
 	private float newRightBrake = 0;
 	private float newFrontBrake = 0;
 	private AutopilotStages stage = AutopilotStages.TAKE_OFF;
 	
 	public float p, i, d;
 	
-	private FlyingAutopilot flyingAP;
+	public FlyingAutopilot flyingAP;
 	private TakeOffAutopilot takeOffAP;
 	private TaxiAutopilot taxiAP;
 	private LandingAutopilot landingAP;
@@ -157,13 +158,15 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
 			setDroneProperties(inputs);
 			if(turningAP.failed == true) this.failed = true;
+			if(flyingAP.failed == true) this.failed = true;
+			if(flyingAP.isFinished) this.isFinished = true;
 		//	if(inputs.getZ() < -200) this.isFinished = true;
 
 			if (getProperties().getVelocity().length() > 60) // als de drone sneller vliegt dan 60m/s zet de thrust dan
 				this.newThrust = 0;
 			else
 				this.newThrust = configAP.getMaxThrust();
-
+			
 			// newLeftWingInclination = 0;
 			// newRightWingInclination = 0;
 			switch (stage) {
@@ -175,6 +178,8 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 				return taxiAP.timePassed(properties);
 			case LANDING:
 				return landingAP.timePassed(properties);
+			case TURNING:
+				return turningAP.timePassed(properties);
 			default:
 				break;
 			}

@@ -27,6 +27,7 @@ import interfaces.AutopilotOutputs;
 import models.RawModel;
 import models.TexturedModel;
 import physicsEngine.DroneCrashException;
+import physicsEngine.MaxAoAException;
 import physicsEngine.PhysicsEngine;
 import physicsEngine.approximationMethods.EulerPrediction;
 import renderEngine.DisplayManager;
@@ -38,7 +39,7 @@ import textures.ModelTexture;
 public class PIDFineTuner {
 
 	private static final float STEP_TIME = 0.001f;
-	private static final int DRONE_COUNT = 30;
+	private static final int DRONE_COUNT = 10;
 
 	private static AutopilotConfig autopilotConfig;
 	private static List<Entity> entities;
@@ -64,7 +65,6 @@ public class PIDFineTuner {
 
 		// ***INITIALIZE LOADERS & SCREEN***
 		DisplayManager.createDisplay();
-		Loader loader = new Loader();
 		entities = new ArrayList<>();
 		autopilots = new ArrayList<>();
 
@@ -73,7 +73,7 @@ public class PIDFineTuner {
 //		TexturedModel staticDroneModel = new TexturedModel(droneModel, new ModelTexture(loader.loadTexture("tree")));
         System.out.println((int)PhysicsEngine.groundLevel -autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius());
 		for (int i = 0; i < DRONE_COUNT; i++) {
-			Drone drone = new Drone(null, new Matrix4f().translate(new Vector3f(0, (int)PhysicsEngine.groundLevel -autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius() + 30, 0)), 1,
+			Drone drone = new Drone(null, new Matrix4f().translate(new Vector3f(0, (int)PhysicsEngine.groundLevel -autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius(), 0)), 1,
 					autopilotConfig, new EulerPrediction(STEP_TIME));
 			Autopilot autopilot = AutopilotFactory.createAutopilot();
 			autopilot.simulationStarted(autopilotConfig, drone.getAutoPilotInputs());
@@ -87,7 +87,9 @@ public class PIDFineTuner {
 		MasterRenderer m = new MasterRenderer();
 		
 		while (!Display.isCloseRequested()) {
-			for (int i = 0; i < DRONE_COUNT; i++) {
+			List<Drone> toRemove = new ArrayList<>();
+			List<SimpleAutopilot> toRemoves = new ArrayList<>();
+			for (int i = 0; i < entities.size(); i++) {
 				float dt = DisplayManager.getFrameTimeSeconds();
 				Drone drone = (Drone) entities.get(i);
 				SimpleAutopilot autopilot = autopilots.get(i);
@@ -95,31 +97,40 @@ public class PIDFineTuner {
 					try {
 						PhysicsEngine.applyPhysics(drone, dt);
 					} catch (DroneCrashException e) {
+						toRemove.add(drone);
+						toRemoves.add(autopilot);
 						System.out.println(e);
+					} catch (MaxAoAException e) {
+						toRemove.add(drone);
+						toRemoves.add(autopilot);
+						e.printStackTrace();
 					}
 					AutopilotInputs inputs = drone.getAutoPilotInputs();
 					AutopilotOutputs outputs = autopilot.timePassed(inputs);
 					drone.setAutopilotOutouts(outputs);
 				}
 			}
-
-			for (int j = 0; j < DRONE_COUNT; j++) {
+			
+			for (int j = 0; j < entities.size(); j++) {
 				SimpleAutopilot autopilot = autopilots.get(j);
 				if (autopilot.isFinished()) {
-//					if (autopilot.maxY < maxY && autopilot.minY > minY) {
-//						maxY = autopilot.maxY;
-//						minY = autopilot.minY;
-//						p = autopilot.p;
-//						i = autopilot.i;
-//						d = autopilot.d;
-//						
-//						System.out.println("New Best: Y:" + minY + " " + maxY + " PID: " + p + " " + i + " " + d);
-//					}
-					System.out.println("New Best: Y:" + autopilot.minY + " " + autopilot.maxY + " PID: " + autopilot.turningAP.p + " " + autopilot.turningAP.i + " " + autopilot.turningAP.d);
+					if (autopilot.maxY < maxY && autopilot.minY > minY) {
+						maxY = autopilot.maxY;
+						minY = autopilot.minY;
+						p = autopilot.p;
+						i = autopilot.i;
+						d = autopilot.d;
+						
+						System.out.println("New Best: Y:" + minY + " " + maxY + " PID: " + p + " " + i + " " + d);
+					}
+//					System.out.println("New Best: Y:" + autopilot.minY + " " + autopilot.maxY + " PID: " + autopilot.flyingAP.p + " " + autopilot.flyingAP.i + " " + autopilot.flyingAP.d);
 					
 //					System.out.println(autopilot.minY);
 				}
 			}
+			
+			autopilots.removeAll(toRemoves);
+			entities.removeAll(toRemove);
 			
 			if (allFinished()) {
 				System.exit(0);

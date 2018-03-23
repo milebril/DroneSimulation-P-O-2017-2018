@@ -21,6 +21,9 @@ public class TakeOffAutopilot {
 		}
 
 		//Als de drone een hoogte van 10 meter bereikt heeft, mag de flyingAP overnemen
+//		if (properties.getPosition().getY() > 32) {
+//			getParent().setStage(AutopilotStages.TURNING);
+//		}
 		if (properties.getPosition().getY() > 10) {
 			getParent().setStage(AutopilotStages.FLYING);
 		}

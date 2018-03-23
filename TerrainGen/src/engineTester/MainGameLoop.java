@@ -17,6 +17,7 @@ import models.RawCubeModel;
 import models.RawModel;
 import models.TexturedModel;
 import physicsEngine.DroneCrashException;
+import physicsEngine.MaxAoAException;
 import physicsEngine.PhysicsEngine;
 import physicsEngine.approximationMethods.EulerPrediction;
 
@@ -293,13 +294,17 @@ public class MainGameLoop {
 			//***UPDATES***
 			float dt = DisplayManager.getFrameTimeSeconds();
 			if(!entities.isEmpty() && dt > 0.00001 && !((SimpleAutopilot) autopilot).isFinished()) {
+				System.out.println(dt);
 				//applyphysics rekent de krachten uit en gaat dan de kinematische waarden van de drone
 				// aanpassen op basis daarvan 
 				try {
 					PhysicsEngine.applyPhysics(drone, dt);
 				} catch (DroneCrashException e) {
 					System.err.println(e);
-				} // TODO: stop simulation (drone crashed)
+				} catch (MaxAoAException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				
 				//Autopilot stuff
 				AutopilotInputs inputs = drone.getAutoPilotInputs();

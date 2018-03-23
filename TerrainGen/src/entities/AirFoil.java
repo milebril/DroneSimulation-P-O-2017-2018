@@ -220,9 +220,9 @@ public class AirFoil {
 				);
 		
 		// if max AoA is exceeded and the liftForce is greater than 50N, throw exception
-		if (aoa > Math.toRadians(drone.getMaxAOA()) && liftForceD.length() > 50) {
-			throw new MaxAoAException("Error Max AoA exceeded!");
-		}
+//		if (aoa > Math.toRadians(drone.getMaxAOA()) && liftForceD.length() > 50) {
+//			throw new MaxAoAException("Error Max AoA exceeded!");
+//		} TODO
 		
 		return liftForceD;
 	}
