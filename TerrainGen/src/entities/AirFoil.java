@@ -187,7 +187,6 @@ public class AirFoil {
 		// transform the airSpeed vector to the drone frame
 		Vector3f airSpeedD = this.getDrone().transformToDroneFrame(airSpeedW);
 		
-		
 		// project airSpeedD on the surface, perpendicular to the rotationAxis of the AirFoil
 		Vector3f rotationAxisD = this.getRotAxis();
 		
@@ -209,7 +208,7 @@ public class AirFoil {
 		float a = Vector3f.dot(projectedAirspeedVectorD, normalD);
 		float b = Vector3f.dot(projectedAirspeedVectorD, attackVectorD);
 		
-//		float aoa = this.calculateAOA(projectedAirspeedVectorD, normalD, attackVectorD);
+		// TODO: is aoa juist ?
 		float aoa = (float) - Math.atan2(a, b);
 
 		// calculate the lift force N . liftSlope . AOA . s^2, where N is the
@@ -226,27 +225,4 @@ public class AirFoil {
 		
 		return liftForceD;
 	}
-	
-	// TODO : Angle of Attack Calculation:
-	/**
-	 * Returns the angle of attack of this AirFoil
-	 */
-	public float getAOA(Vector3f projectedAirspeedVectorD, Vector3f normalD, Vector3f attackVectorD) {
-		float currentAoa = (float) - Math.atan2(Vector3f.dot(projectedAirspeedVectorD, normalD), 
-				Vector3f.dot(projectedAirspeedVectorD, attackVectorD));	
-		
-		if(currentAoa > this.getDrone().getMaxAOA()){
-			while (currentAoa > this.getDrone().getMaxAOA()){
-				currentAoa -= Math.PI;
-			}
-		}
-		
-		if(currentAoa < (- this.getDrone().getMaxAOA())){
-			while (currentAoa < (- this.getDrone().getMaxAOA())){
-				currentAoa += Math.PI;
-			}
-		}
-		return currentAoa;
-	}
-	
 }
