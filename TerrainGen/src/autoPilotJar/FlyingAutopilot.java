@@ -42,10 +42,10 @@ public class FlyingAutopilot {
 		p = 1 + r.nextFloat();
 		i = Math.abs(r.nextFloat() - 0.5f);
 		d = 1 + r.nextFloat();
-		 this.pidHorStab = new PIDController(p, i, d, (float) (Math.PI / 180), 0);
+//		 this.pidHorStab = new PIDController(p, i, d, (float) (Math.PI / 180), 0);
 
 		// Best Finetuning until now
-//		this.pidHorStab = new PIDController(1.1233587f, 0.30645216f, 1.1156111f, (float) (Math.PI / 180), 0);
+		this.pidHorStab = new PIDController(1.7185234f, 0.13441908f, 1.1590725f, (float) (Math.PI / 180), 0);
 	}
 
 	public DroneProperties timePassed(DroneProperties properties) {
