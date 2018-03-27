@@ -294,13 +294,13 @@ public class MainGameLoop {
 			//***UPDATES***
 			float dt = DisplayManager.getFrameTimeSeconds();
 			if(!entities.isEmpty() && dt > 0.00001 && !((SimpleAutopilot) autopilot).isFinished()) {
-				System.out.println(dt);
 				//applyphysics rekent de krachten uit en gaat dan de kinematische waarden van de drone
 				// aanpassen op basis daarvan 
 				try {
 					PhysicsEngine.applyPhysics(drone, dt);
 				} catch (DroneCrashException e) {
 					System.err.println(e);
+					System.exit(-1);
 				} catch (MaxAoAException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

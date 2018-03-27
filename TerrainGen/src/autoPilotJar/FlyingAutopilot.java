@@ -72,9 +72,9 @@ public class FlyingAutopilot {
 				System.out.println("Reached cube at: " + properties.getPosition());
 			} else {
 				System.out.println("Fininshed");
-				isFinished = true;
+//				isFinished = true;
 //				System.out.println("New Best: PID: " + p + " " + i + " " + d);
-//				parent.setStage(AutopilotStages.LANDING);
+				parent.setStage(AutopilotStages.LANDING);
 			}
 			checkpoint = -480 - (80 * (path.getIndex() + 1));
 		}

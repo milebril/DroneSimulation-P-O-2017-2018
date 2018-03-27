@@ -26,10 +26,10 @@ public class LandingAutopilot {
 			properties.setVerStabInclination(0);
 			properties.setLeftWingInclination((float) Math.toRadians(15));
 			properties.setRightWingInclination((float) Math.toRadians(15));
-		} else if (properties.getPosition().getY() < 15 && properties.getVelocity().length() >= 50) {
+		} else if (properties.getPosition().getY() < 15 && properties.getVelocity().length() >= 20) {
 			System.out.println("SLOW DOWN 2");
 			
-			studCube = new Vector3f(0, 5, properties.getPosition().z);
+			studCube = new Vector3f(0, 8, properties.getPosition().z);
 			studCube.z -= 20;
 
 			properties.setHorStabInclination(properties.getHorStabInclination() + pidHorStab
@@ -55,10 +55,10 @@ public class LandingAutopilot {
 			System.out.println("REDUCE HEIGHT");
 			properties.setThrust(0);
 			
-			properties.setHorStabInclination((float) Math.toRadians(1));
+			//properties.setHorStabInclination((float) Math.toRadians(1));
 			properties.setVerStabInclination(0);
-			properties.setLeftWingInclination((float) Math.toRadians(-15));
-			properties.setRightWingInclination((float) Math.toRadians(-15));
+			properties.setLeftWingInclination((float) Math.toRadians(-5));
+			properties.setRightWingInclination((float) Math.toRadians(-5));
 			
 			properties.setFrontBrakeForce(getParent().getConfig().getRMax());
 			properties.setLeftBrakeForce(getParent().getConfig().getRMax());

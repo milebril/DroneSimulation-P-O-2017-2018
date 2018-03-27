@@ -47,8 +47,11 @@ public class DisplayManager {
 		delta = (currentFrameTime - lastFrameTime) / 1000f; // In seconds
 		lastFrameTime = currentFrameTime;
 		if (delta > 0.01) {
-			delta = 0.015f;
+			delta = 0.01f;
 		}
+//		if (delta > 0.006) {
+//			delta = 0.006f;
+//		}
 		elapsedTime += delta;
 	}
 	
