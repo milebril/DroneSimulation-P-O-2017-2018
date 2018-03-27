@@ -33,35 +33,15 @@ public class PhysicsEngine {
 			return;
 		}
 		
-		
-		Vector3f testVector = new Vector3f(0, 0, -80);
-		
-		if (drone.getLinearVelocity().length() > 51) {
-			while (testVector.z > -190) {
-				System.out.println("testVector voor transformaties: " + vectorToIntString(testVector));
-				testVector = drone.transformToDroneFrame(drone.transformToWorldFrame(testVector));
-				System.out.println("testVector na transformaties: " + vectorToIntString(testVector));
-				System.out.println("-----------------------------------------------------");
-			}
-		}
-		
-		
-		
-		
-		
 
 		// huidige versnellingen bepalen
 		Vector3f[] currentAccelerationsD = calculateAccelerations(drone, h);
-		
-		System.out.println("vel. input: " + drone.transformToDroneFrame(drone.getLinearVelocity()).length());
 		
 		// snelheid voorspellen in functie van de huidige vernsellingen en posities
 		Vector3f[] newVelocities = drone.getPredictionMethod().predictVelocity(
 				drone.transformToDroneFrame(drone.getLinearVelocity()),
 				drone.transformToDroneFrame(drone.getAngularVelocity()), currentAccelerationsD[0],
 				currentAccelerationsD[1], h);
-		
-		System.out.println("physics new v.: " + drone.transformToWorldFrame(newVelocities[0]).length());
 		
 		
 		// nieuwe positie berekenen aan de hand van de nieuwe snelheid
