@@ -569,14 +569,19 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	 * Transforms the given vector from the drone frame to the world frame.
 	 */
 	public Vector3f transformToWorldFrame(Vector3f originalD){
-//		Matrix4f transformationMatrix = this.getPose();
-//		Vector4f vectorToTransform = new Vector4f(0, originalD.x, originalD.y, originalD.z);
+		float len = originalD.length();
+		
 		Matrix3f transformationMatrix = (Matrix3f) calculateDtoWTransformationMatrix();
 		Vector3f resultW = new Vector3f(0,0,0);
-//		Matrix4f.transform(transformationMatrix, vectorToTransform, resultW);
 
 		Matrix3f.transform(transformationMatrix, originalD, resultW);
-//		return new Vector3f(resultW.x, resultW.y, resultW.z);
+		
+		// to reduce the rekenfouten:
+		if (len != 0) {
+			resultW.normalise();
+			resultW.scale(len);
+		}
+		
 		return resultW;
 	}
 	
@@ -584,12 +589,20 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	 * Transforms the given vector from the world frame to the drone frame.
 	 */
 	public Vector3f transformToDroneFrame(Vector3f originalW){
+		float len = originalW.length();
+		
 		Matrix3f transformationMatrix = new Matrix3f();
 		calculateDtoWTransformationMatrix().transpose(transformationMatrix);
 		
 		Vector3f resultD = new Vector3f();
 		
 		Matrix3f.transform(transformationMatrix, originalW, resultD);
+		System.out.println(resultD);
+		// to reduce the rekenfouten:
+		if (len != 0) {
+			resultD.normalise();
+			resultD.scale(len);
+		}
 		return resultD;
 	}
 	

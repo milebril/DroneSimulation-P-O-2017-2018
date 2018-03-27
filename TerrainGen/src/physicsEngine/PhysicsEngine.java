@@ -32,17 +32,38 @@ public class PhysicsEngine {
 		} else {
 			return;
 		}
+		
+		
+		Vector3f testVector = new Vector3f(0, 0, -80);
+		
+		if (drone.getLinearVelocity().length() > 51) {
+			while (testVector.z > -190) {
+				System.out.println("testVector voor transformaties: " + vectorToIntString(testVector));
+				testVector = drone.transformToDroneFrame(drone.transformToWorldFrame(testVector));
+				System.out.println("testVector na transformaties: " + vectorToIntString(testVector));
+				System.out.println("-----------------------------------------------------");
+			}
+		}
+		
+		
+		
+		
+		
 
 		// huidige versnellingen bepalen
 		Vector3f[] currentAccelerationsD = calculateAccelerations(drone, h);
-
-		// snelheid voorspellen in functie van de huidige vernsellingen en
-		// posities
+		
+		System.out.println("vel. input: " + drone.transformToDroneFrame(drone.getLinearVelocity()).length());
+		
+		// snelheid voorspellen in functie van de huidige vernsellingen en posities
 		Vector3f[] newVelocities = drone.getPredictionMethod().predictVelocity(
 				drone.transformToDroneFrame(drone.getLinearVelocity()),
 				drone.transformToDroneFrame(drone.getAngularVelocity()), currentAccelerationsD[0],
 				currentAccelerationsD[1], h);
-
+		
+		System.out.println("physics new v.: " + drone.transformToWorldFrame(newVelocities[0]).length());
+		
+		
 		// nieuwe positie berekenen aan de hand van de nieuwe snelheid
 		Vector3f[] deltaPositions = calculatePositionDifferences(drone, newVelocities, h);
 
@@ -148,7 +169,7 @@ public class PhysicsEngine {
 			double comporessionForceSize = tyre.getTyreSlope() * compression + tyre.getDampSlope() * deltaCompression;
 			Vector3f compressionForce = new Vector3f(0, 0, 0);
 			compressionForce.y = (float) Math.abs(comporessionForceSize);
-			drone.transformToDroneFrame(compressionForce);
+			compressionForce = drone.transformToDroneFrame(compressionForce);
 
 			Vector3f compressionTorque = new Vector3f();
 			Vector3f.cross(tyre.getGroundedPosition(), compressionForce, compressionTorque);
@@ -227,6 +248,8 @@ public class PhysicsEngine {
 			rollingOrientation = drone.transformToWorldFrame(rollingOrientation);
 			rollingOrientation.y = 0;
 			rollingOrientation.normalise();
+			rollingOrientation = drone.transformToDroneFrame(rollingOrientation);
+			
 
 			rollingOrientation.scale((float) tyre.getBrakingForce());
 
@@ -325,5 +348,10 @@ public class PhysicsEngine {
 	 */
 	private static Vector3f average(Vector3f a, Vector3f b) {
 		return new Vector3f(a.x + (b.x - a.x) / 2, a.y + (b.y - a.y) / 2, a.z + (b.z - a.z) / 2);
+	}
+	
+	
+	public static String vectorToIntString(Vector3f vector) {
+		return "(" + (vector.x) + ", " + (vector.y) + ", "+ (vector.z) + ")"; 
 	}
 }
