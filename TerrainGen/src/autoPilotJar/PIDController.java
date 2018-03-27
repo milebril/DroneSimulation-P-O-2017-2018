@@ -20,7 +20,7 @@ public class PIDController {
 		this.goal = goal;
 	}
 	
-	public float calculateChange(float current, float dt){
+	public float calculateChange(float current, float dt) {
 		float currentError = current - this.goal;
 		this.totalError += currentError*dt;
 	
@@ -28,16 +28,16 @@ public class PIDController {
 		float I = Ki * totalError;
 		float D = 0;
 
-	if(dt > 0.00001){
-		D = Kd * (currentError - this.prevError)/dt;
-		this.prevError = currentError;
-	}
+		if(dt > 0.00001){
+			D = Kd * (currentError - this.prevError)/dt;
+			this.prevError = currentError;
+		}
 	
 		float factor = P + I + D;
 		return factor * this.changeFactor;
 	}
 
-	public void reset(){
+	public void reset() {
 		this.totalError = 0;
 		this.prevError = 0;
 	}

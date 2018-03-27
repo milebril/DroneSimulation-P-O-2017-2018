@@ -597,7 +597,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		Vector3f resultD = new Vector3f();
 		
 		Matrix3f.transform(transformationMatrix, originalW, resultD);
-		System.out.println(resultD);
+		
 		// to reduce the rekenfouten:
 		if (len != 0) {
 			resultD.normalise();

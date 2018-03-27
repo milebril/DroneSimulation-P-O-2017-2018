@@ -38,8 +38,6 @@ public class EulerPrediction extends PredictionMethod {
 		// angular prediction
 		Vector3f angPrediction = new Vector3f();
 		Vector3f.add(angVelocity, (Vector3f) angAcceleration.scale(stepSize), angPrediction);
-
-		System.out.println("heufd");
 		
 		return new Vector3f[]{linPrediction, angPrediction};
 	}
