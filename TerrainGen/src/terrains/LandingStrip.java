@@ -6,7 +6,7 @@ import textures.ModelTexture;
 
 public class LandingStrip extends Terrain{
 	
-	private static final float SIZE = 800;
+	private static final float SIZE = 2000;
 	private static final float SIZE_X = 50;
 	private static final int VERTEX_COUNT = 128;
 	
