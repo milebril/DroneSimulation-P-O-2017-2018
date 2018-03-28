@@ -1,30 +1,34 @@
 package autopilot.algorithms;
 
-
 import autopilot.Algorithm;
 import autopilot.AlgorithmHandler;
 import autopilot.Properties;
 
 public class Takeoff implements Algorithm {
 
+	public static float takeoffVelocity = 40;
+	
 	@Override
 	public void cycle(AlgorithmHandler handler) {
-		Properties properties = handler.getProperties();
-		System.out.println("- - - takeoff algorithm cycle - - -");
-		
-		if (properties.getVelocity().length() > 10) {
-			handler.setFrontBrakeForce(properties.getRMax());
-			handler.setLeftBrakeForce(properties.getRMax());
-			handler.setRightBrakeForce(properties.getRMax());
+
+		handler.setThrust(handler.getProperties().getMaxThrust());
+		// pull up nose if pitch is less than 30%
+		if (handler.getProperties().getY() < 4) {
+			handler.setLeftWingInclination((float) (15 * Math.PI / 180));
+			handler.setRightWingInclination((float) (15 * Math.PI / 180));
+			handler.setHorStabInclination((float) (-1 * Math.PI / 180));
+		} else if (handler.getProperties().getPitch() < 25 * Math.PI / 180) {
+			handler.setLeftWingInclination(0);
+			handler.setRightWingInclination(0);
+			handler.setHorStabInclination((float) (-8 * Math.PI / 180));
 		} else {
-			handler.setFrontBrakeForce(0);
-			handler.setLeftBrakeForce(0);
-			handler.setRightBrakeForce(0);
+			handler.setHorStabInclination((float) 0);
 		}
 		
-		
-		// IF (situatie waarin bepaalt algoritme moet activeren)
-		//		handler.setAlgorithm(new nextAlgorithm())
 	}
-
+	
+	@Override
+	public String getName() {
+		return "Takeoff";
+	}
 }

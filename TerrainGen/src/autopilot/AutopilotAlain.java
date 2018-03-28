@@ -1,5 +1,6 @@
 package autopilot;
 
+import autopilot.algorithms.SpeedUp;
 import autopilot.algorithms.Takeoff;
 import autopilotIO.Autopilot;
 import autopilotIO.config.AutopilotConfig;
@@ -16,7 +17,7 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	
 	public AutopilotAlain() {
 		// default algoritme
-		this.algorithm = new Takeoff();
+		this.algorithm = new SpeedUp();
 	}
 	
 	// AlgorithmHandler interface
@@ -27,6 +28,9 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	}
 	public Algorithm getAlgorithm() {
 		return this.algorithm;
+	}
+	public String getAlgorithmName() {
+		return getAlgorithm().getName();
 	}
 	
 	private float thrust = 0;
@@ -102,6 +106,7 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 		this.properties = new Properties(config, inputs);
 		
 		// run 1 cycle of the current algorithm
+		System.out.println("autopilot: " + getAlgorithm().getName());
 		getAlgorithm().cycle(this);
 		
 		return this;

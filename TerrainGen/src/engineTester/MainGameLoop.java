@@ -150,20 +150,20 @@ public class MainGameLoop {
 		textPosition.setColour(0, 0, 0);
 		
 		//Wing inclinations text
-		String leftWingInc = String.valueOf(drone.getLeftWing().getInclination());
-		GUIText textLeftWing = new GUIText("Left wing inclination = " + leftWingInc + "rad", 3, font, new Vector2f(0,0.3f),1,false);
+		String leftWingInc = String.valueOf(Math.round(drone.getLeftWing().getInclination() / Math.PI * 180));
+		GUIText textLeftWing = new GUIText("Left wing inclination = " + leftWingInc + "deg", 3, font, new Vector2f(0,0.3f),1,false);
 		textLeftWing.setColour(1, 0, 0);
 		
-		String rightWingInc = String.valueOf(drone.getRightWing().getInclination());
-		GUIText textRightWing = new GUIText("Right wing inclination = " + rightWingInc + "rad", 3, font, new Vector2f(0,0.45f),1,false);
+		String rightWingInc = String.valueOf(Math.round(drone.getRightWing().getInclination() / Math.PI * 180));
+		GUIText textRightWing = new GUIText("Right wing inclination = " + rightWingInc + "deg", 3, font, new Vector2f(0,0.45f),1,false);
 		textRightWing.setColour(1, 0, 0);
 		
-		String horzStab = String.valueOf(drone.getHorizStabilizer().getInclination());
-		GUIText textHorzStab = new GUIText("Horizontal stabilizer inclination = " + horzStab + "rad", 3, font, new Vector2f(0,0.60f), 1, false);
+		String horzStab = String.valueOf(Math.round(drone.getHorStabilizer().getInclination() / Math.PI * 180));
+		GUIText textHorzStab = new GUIText("Horizontal stabilizer inclination = " + horzStab + "deg", 3, font, new Vector2f(0,0.60f), 1, false);
 		textHorzStab.setColour(1, 0, 0);
 		
-		String vertStab = String.valueOf(drone.getVertStabilizer().getInclination());
-		GUIText textVertStab = new GUIText("Vertical stabilizer inclination = " + vertStab + "rad", 3, font, new Vector2f(0,0.75f), 1, false);
+		String vertStab = String.valueOf(Math.round(drone.getVertStabilizer().getInclination() / Math.PI * 180));
+		GUIText textVertStab = new GUIText("Vertical stabilizer inclination = " + vertStab + "deg", 3, font, new Vector2f(0,0.75f), 1, false);
 		textVertStab.setColour(1, 0, 0);
 		
 		
@@ -253,20 +253,20 @@ public class MainGameLoop {
 			textPosition.setString("Position = ("+xpos+" , "+ypos+" , "+zpos +")");
 			TextMaster.loadText(textPosition);
 			
-			leftWingInc = String.valueOf(Math.round(drone.getLeftWing().getInclination()*100.0)/100.0);
-			textLeftWing.setString("Left wing inclination = " + leftWingInc + "rad");
+			leftWingInc = String.valueOf(Math.round(drone.getLeftWing().getInclination() / Math.PI * 180));
+			textLeftWing.setString("Left wing inclination = " + leftWingInc + "deg");
 			TextMaster.loadText(textLeftWing);
 			
-			rightWingInc = String.valueOf(Math.round(drone.getRightWing().getInclination()*100.0)/100.0);
-			textRightWing.setString("Right wing inclination = " + rightWingInc + "rad");
+			rightWingInc = String.valueOf(Math.round(drone.getRightWing().getInclination() / Math.PI * 180));
+			textRightWing.setString("Right wing inclination = " + rightWingInc + "deg");
 			TextMaster.loadText(textRightWing);
 			
-			horzStab = String.valueOf(Math.round(drone.getHorizStabilizer().getInclination()*100.0)/100.0);
-			textHorzStab.setString("Horizontal stabilizer inclination = " + horzStab + "rad");
+			horzStab = String.valueOf(Math.round(drone.getHorStabilizer().getInclination() / Math.PI * 180));
+			textHorzStab.setString("Horizontal stabilizer inclination = " + horzStab + "deg");
 			TextMaster.loadText(textHorzStab);
 			
-			vertStab = String.valueOf(Math.round(drone.getVertStabilizer().getInclination()*100.0)/100.0);
-			textVertStab.setString("Vertical stabilizer inclination = " + vertStab + "rad");
+			vertStab = String.valueOf(Math.round(drone.getVertStabilizer().getInclination() / Math.PI * 180));
+			textVertStab.setString("Vertical stabilizer inclination = " + vertStab + "deg");
 			TextMaster.loadText(textVertStab);
 			
 			TextMaster.render();

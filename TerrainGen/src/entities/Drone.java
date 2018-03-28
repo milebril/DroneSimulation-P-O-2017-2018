@@ -32,7 +32,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 				AutopilotConfig cfg, PredictionMethod predictionMethod) {
 		super(model, pose, scale);
 		
-		this.linearVelocityW = new Vector3f(0.0f,0.0f, -49.0f);
+		this.linearVelocityW = new Vector3f(0.0f,0.0f, -35.0f);
 
 		this.angularVelocityW = new Vector3f(0f, 0f, 0f);
 		
@@ -131,7 +131,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	/**
 	 * Returns the horizontal stabilizer of the Drone.
 	 */
-	public AirFoil getHorizStabilizer(){
+	public AirFoil getHorStabilizer(){
 		return this.airFoils[2];
 	}
 
@@ -559,7 +559,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		
 		this.getLeftWing().setInclination(outputs.getLeftWingInclination());
 		this.getRightWing().setInclination(outputs.getRightWingInclination());		
-		this.getHorizStabilizer().setInclination(outputs.getHorStabInclination());
+		this.getHorStabilizer().setInclination(outputs.getHorStabInclination());
 		this.getVertStabilizer().setInclination(outputs.getVerStabInclination());
 	}	
 	

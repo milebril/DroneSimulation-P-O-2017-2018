@@ -6,6 +6,8 @@ public interface AlgorithmHandler extends AutopilotOutputs {
 	
 	public void setAlgorithm(Algorithm algorithm);
 	
+	public String getAlgorithmName();
+	
 	public void setThrust(float thrust);
 	
 	public void setLeftWingInclination(float leftWingInclination);
