@@ -187,7 +187,7 @@ public class MainGameLoop {
 		terrains.add(new Terrain(-1,-2,loader,new ModelTexture(loader.loadTexture("greenScreen"))));
 		terrains.add(new LandingStrip(-0.5f,-1,loader,new ModelTexture(loader.loadTexture("landing"))));
 		
-		Camera camera = new Camera(200, 200);	
+		camera = new Camera(200, 200);	
 		camera.setPosition(drone.getPosition().translate(0, 0, -5));
 		renderer = new MasterRenderer();
 		
@@ -219,9 +219,6 @@ public class MainGameLoop {
 		randomCubes.show(guis);
 		
 		while(!Display.isCloseRequested()){
-			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
-				camera.takeSnapshot();
-			}
 				
 			//***BIG SCREEN***
 			renderer.prepare();
@@ -313,6 +310,13 @@ public class MainGameLoop {
 			}
 			
 			keyInputs();
+			
+			while (paused) // if M is pressed, the simulation is paused untill M is pressed again
+			{
+				try {Thread.sleep(20);} catch (InterruptedException e) {}
+				keyInputs();
+			}
+			
 			removeCubes();
 			DisplayManager.updateDisplay();
 			
@@ -360,13 +364,75 @@ public class MainGameLoop {
 		return temp.length();
 	}
 	
+	private static boolean paused = false;
+	
+	private static Camera camera;
+	
 	public static void keyInputs() {
-		if(Keyboard.isKeyDown(Keyboard.KEY_L)) {
-			/* Lock/Unlock on Third Person Camera */
-			if (!lLock) {
-				chaseCameraLocked = !chaseCameraLocked;
+		
+		// update Keyboard events
+		Display.processMessages();
+		
+		while (Keyboard.next()) 
+		{
+			if (Keyboard.getEventKeyState()) // only react to pressed event, not to released event
+			{
+				switch (Keyboard.getEventKey()) 
+				{
+					case Keyboard.KEY_L:
+						/* Lock/Unlock on Third Person Camera */
+						if (!lLock) {
+							chaseCameraLocked = !chaseCameraLocked;
+						}
+						lLock = true;
+						break;
+						
+					case Keyboard.KEY_O:
+						//TODO
+						oLock = true;
+						break;
+						
+					case Keyboard.KEY_S:
+						if (!sLock) {
+							DisplayManager.start();
+						}
+						sLock = true;
+						break;
+						
+					case Keyboard.KEY_R:
+						reset();
+						break;
+						
+					case Keyboard.KEY_P:
+						camera.takeSnapshot();
+						break;
+						
+					case Keyboard.KEY_M:
+						System.out.println(" M button pressed");
+						paused = !paused;
+						break;
+						
+					default:
+						if (chaseCameraLocked) {
+							Vector3f.add(drone.getPosition(), new Vector3f(0, 2, 10), chaseCam.getPosition());
+						} else {
+							chaseCam.roam();
+						}
+						lLock = false;
+						oLock = false;
+						sLock = false;
+				}
 			}
-			lLock = true;
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		if(Keyboard.isKeyDown(Keyboard.KEY_L)) {
 		} else if (Keyboard.isKeyDown(Keyboard.KEY_O)) {
 			//TODO
 			oLock = true;
