@@ -7,9 +7,9 @@ import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
-import interfaces.AutopilotConfig;
-import interfaces.AutopilotInputs;
-import interfaces.AutopilotOutputs;
+import autopilotIO.config.AutopilotConfig;
+import autopilotIO.input.AutopilotInputs;
+import autopilotIO.output.AutopilotOutputs;
 import models.RawModel;
 import models.TexturedModel;
 import physicsEngine.approximationMethods.EulerPrediction;
@@ -32,7 +32,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 				AutopilotConfig cfg, PredictionMethod predictionMethod) {
 		super(model, pose, scale);
 		
-		this.linearVelocityW = new Vector3f(0.0f,0.0f, -0.0f);
+		this.linearVelocityW = new Vector3f(0.0f,0.0f, -49.0f);
 
 		this.angularVelocityW = new Vector3f(0f, 0f, 0f);
 		
@@ -550,7 +550,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	/**
 	 * Receives the input controls from the Autopilot
 	 */
-	public void setAutopilotOutouts(AutopilotOutputs outputs) {
+	public void setAutopilotOutputs(AutopilotOutputs outputs) {
 		setThrustForce(outputs.getThrust());
 		
 		this.getFrontTyre().setBrakingForce(outputs.getFrontBrakeForce());

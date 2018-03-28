@@ -13,23 +13,23 @@ import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 import org.opencv.core.Core;
 
-import autoPilotJar.SimpleAutopilot;
-import autoPilotJar.TurningAutopilot;
-import autopilot.AutopilotConfigReader;
+import autopilotIO.Autopilot;
+import autopilotIO.AutopilotFactory;
+import autopilotIO.config.AutopilotConfig;
+import autopilotIO.config.AutopilotConfigReader;
+import autopilotIO.input.AutopilotInputs;
+import autopilotIO.output.AutopilotOutputs;
 import entities.Drone;
 import entities.Entity;
 import fontRendering.TextMaster;
-import interfaces.Autopilot;
-import interfaces.AutopilotConfig;
-import interfaces.AutopilotFactory;
-import interfaces.AutopilotInputs;
-import interfaces.AutopilotOutputs;
 import models.RawModel;
 import models.TexturedModel;
 import physicsEngine.DroneCrashException;
 import physicsEngine.MaxAoAException;
 import physicsEngine.PhysicsEngine;
 import physicsEngine.approximationMethods.EulerPrediction;
+import prevAutopilot.SimpleAutopilot;
+import prevAutopilot.TurningAutopilot;
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
@@ -107,7 +107,7 @@ public class PIDFineTuner {
 					}
 					AutopilotInputs inputs = drone.getAutoPilotInputs();
 					AutopilotOutputs outputs = autopilot.timePassed(inputs);
-					drone.setAutopilotOutouts(outputs);
+					drone.setAutopilotOutputs(outputs);
 				}
 			}
 			

@@ -20,6 +20,7 @@ import physicsEngine.DroneCrashException;
 import physicsEngine.MaxAoAException;
 import physicsEngine.PhysicsEngine;
 import physicsEngine.approximationMethods.EulerPrediction;
+import prevAutopilot.SimpleAutopilot;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
@@ -29,8 +30,12 @@ import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.opencv.core.Core;
 
-import autoPilotJar.SimpleAutopilot;
-import autopilot.AutopilotConfigReader;
+import autopilotIO.Autopilot;
+import autopilotIO.AutopilotFactory;
+import autopilotIO.config.AutopilotConfig;
+import autopilotIO.config.AutopilotConfigReader;
+import autopilotIO.input.AutopilotInputs;
+import autopilotIO.output.AutopilotOutputs;
 import renderEngine.CubeRenderer;
 import renderEngine.DisplayManager;
 import renderEngine.EntityRenderer;
@@ -54,11 +59,6 @@ import fontRendering.TextMaster;
 import guis.Button;
 import guis.GuiRenderer;
 import guis.GuiTexture;
-import interfaces.Autopilot;
-import interfaces.AutopilotConfig;
-import interfaces.AutopilotFactory;
-import interfaces.AutopilotInputs;
-import interfaces.AutopilotOutputs;
 
 public class MainGameLoop {
 	
@@ -101,8 +101,6 @@ public class MainGameLoop {
 	//Buttons
 	private static Button openFile;
 	private static Button randomCubes;
-
-	private static CubeRenderer cubeRenderer3D;
 
 	public static void main(String[] args) {
 		//Needed to load openCV
@@ -288,29 +286,30 @@ public class MainGameLoop {
 			openFile.checkHover();
 			randomCubes.checkHover();
 			
+			
 			//***UPDATES***
 			float dt = DisplayManager.getFrameTimeSeconds();
-			if(!entities.isEmpty() && dt > 0.00001 && !((SimpleAutopilot) autopilot).isFinished()) {
-				//applyphysics rekent de krachten uit en gaat dan de kinematische waarden van de drone
-				// aanpassen op basis daarvan 
+			if(!entities.isEmpty() && dt > 0.00001) {
+				
+				// fysica toepassen
 				try {
 					PhysicsEngine.applyPhysics(drone, dt);
 				} catch (DroneCrashException e) {
 					System.err.println(e);
 					System.exit(-1);
 				} catch (MaxAoAException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					System.err.println(e);
+					System.exit(-1);
 				}
 				
-				//Autopilot stuff
+				// Autopilot
 				AutopilotInputs inputs = drone.getAutoPilotInputs();
 				AutopilotOutputs outputs = autopilot.timePassed(inputs);
-				drone.setAutopilotOutouts(outputs);
+				drone.setAutopilotOutputs(outputs);
 			}
 			
+			// check for keyboard input
 			keyInputs();
-			
 			while (paused) // if M is pressed, the simulation is paused untill M is pressed again
 			{
 				try {Thread.sleep(20);} catch (InterruptedException e) {}
@@ -319,7 +318,6 @@ public class MainGameLoop {
 			
 			removeCubes();
 			DisplayManager.updateDisplay();
-			
 		}
 
 		renderer.cleanUp();
@@ -388,7 +386,6 @@ public class MainGameLoop {
 						break;
 						
 					case Keyboard.KEY_O:
-						//TODO
 						oLock = true;
 						break;
 						
@@ -408,7 +405,6 @@ public class MainGameLoop {
 						break;
 						
 					case Keyboard.KEY_M:
-						System.out.println(" M button pressed");
 						paused = !paused;
 						break;
 						
@@ -423,36 +419,6 @@ public class MainGameLoop {
 						sLock = false;
 				}
 			}
-		}
-		
-		
-		
-		
-		
-		
-		
-		
-		if(Keyboard.isKeyDown(Keyboard.KEY_L)) {
-		} else if (Keyboard.isKeyDown(Keyboard.KEY_O)) {
-			//TODO
-			oLock = true;
-		} else if(Keyboard.isKeyDown(Keyboard.KEY_S)) {
-			if (!sLock) {
-				DisplayManager.start();
-			}
-			sLock = true;
-		} else if(Keyboard.isKeyDown(Keyboard.KEY_R)) {
-			reset();
-		}else {
-			if (chaseCameraLocked) {
-				Vector3f.add(drone.getPosition(), new Vector3f(0, 2, 10), chaseCam.getPosition());
-			} else {
-				chaseCam.roam();
-			}
-			
-			lLock = false;
-			oLock = false;
-			sLock = false;
 		}
 	}
 	
@@ -583,7 +549,6 @@ public class MainGameLoop {
 	
 
 	public static void loadCubes(File file) {
-		Random r = new Random();
 		
 		//reset entities first
 		cubes = new ArrayList<>();
