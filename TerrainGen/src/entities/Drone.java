@@ -532,7 +532,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	public AutopilotInputs getAutoPilotInputs() {
 
 		return new AutopilotInputs() {
-			public byte[] getImage() { return ImageConverter.bufferedImageToByteArray(camera.takeSnapshot());}
+			public byte[] getImage() { return camera.takeByteArraySnapshot();}
 			
 			public float getX() { return getPosition().x; }
 			public float getY() { return getPosition().y; }

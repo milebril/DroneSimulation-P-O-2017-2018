@@ -121,6 +121,27 @@ public class Camera {
 		
 		return image;
 	}
+	
+	/**
+	 * a method like takeSnapshot() that takes a snapshot but returns it as a byte array
+	 */
+	public byte[] takeByteArraySnapshot() {
+		GL11.glReadBuffer(GL11.GL_FRONT);
+		int bpp = 4; // Assuming a 32-bit display with a byte each for red, green, blue, and alpha.
+		ByteBuffer buffer = BufferUtils.createByteBuffer(snapshotWidth * snapshotHeight * bpp);
+		GL11.glReadPixels(0, 0, snapshotWidth, snapshotHeight, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer ); //Only take camera view
+		
+		byte[] rgbArray = new byte[3 * snapshotWidth * snapshotHeight]; // 3 color values per pixel
+		
+		for (int i = 0; i < 3 * snapshotWidth * snapshotHeight; i += 3)
+		{
+	        rgbArray[i]     = (byte) (buffer.get(i) & 0xFF);
+	        rgbArray[i + 1] = (byte) (buffer.get(i + 1) & 0xFF);
+	        rgbArray[i + 2] = (byte) (buffer.get(i + 2) & 0xFF);
+		}
+		
+		return rgbArray;
+	}
 
 	/**
 	 * Rotate around the x-axis
