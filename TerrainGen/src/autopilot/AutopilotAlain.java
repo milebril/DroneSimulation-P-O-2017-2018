@@ -12,18 +12,19 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	// Constructor
 	
 	public AutopilotAlain(Algorithm startingAlgorithm) {
-		this.algorithm = startingAlgorithm;
+		setAlgorithm(startingAlgorithm);
 	}
 	
 	public AutopilotAlain() {
 		// default algoritme
-		this.algorithm = new SpeedUp();
+		setAlgorithm(new SpeedUp());
 	}
 	
 	// AlgorithmHandler interface
 	
 	private Algorithm algorithm;
 	public void setAlgorithm(Algorithm algorithm) {
+		System.out.println("autopilot: " + algorithm.getName());
 		this.algorithm = algorithm;
 	}
 	public Algorithm getAlgorithm() {
@@ -106,7 +107,6 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 		this.properties = new Properties(config, inputs);
 		
 		// run 1 cycle of the current algorithm
-		System.out.println("autopilot: " + getAlgorithm().getName());
 		getAlgorithm().cycle(this);
 		
 		return this;

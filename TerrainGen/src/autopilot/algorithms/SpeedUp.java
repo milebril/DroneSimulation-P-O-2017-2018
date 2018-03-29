@@ -3,19 +3,17 @@ package autopilot.algorithms;
 import autopilot.Algorithm;
 import autopilot.AlgorithmHandler;
 
-public class SpeedUp  implements Algorithm {
+public class SpeedUp implements Algorithm {
 
 	@Override
 	public void cycle(AlgorithmHandler handler) {
-		
-		handler.setThrust(handler.getProperties().getMaxThrust());
-		handler.setFrontBrakeForce(0);
-		handler.setLeftBrakeForce(0);
-		handler.setRightBrakeForce(0);
-		
-		// if takeoff velocity is reached, switch to takeoff algorithm
-		if (Takeoff.takeoffVelocity <= handler.getProperties().getVelocity().length()) {
+		if (Takeoff.condition(handler)) {
 			handler.setAlgorithm(new Takeoff());
+		} else {
+			handler.setThrust(handler.getProperties().getMaxThrust());
+			handler.setFrontBrakeForce(0);
+			handler.setLeftBrakeForce(0);
+			handler.setRightBrakeForce(0);
 		}
 	}
 
