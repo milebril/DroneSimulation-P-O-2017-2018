@@ -1,4 +1,6 @@
-package autopilotIO.config;
+package autopilot.interfaces.config;
+
+import autopilot.interfaces.AutopilotConfig;
 
 public class AutopilotConfigReader {
     private static byte[] readByteArray(java.io.DataInputStream stream) throws java.io.IOException {

@@ -1,4 +1,4 @@
-package autopilotIO.output;
+package autopilot.interfaces;
 
 public interface AutopilotOutputs {
     float getThrust();

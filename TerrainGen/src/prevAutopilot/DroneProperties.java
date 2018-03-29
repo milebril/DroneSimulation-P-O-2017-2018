@@ -6,8 +6,8 @@ import javax.vecmath.Matrix4f;
 import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Vector3f;
 
-import autopilotIO.input.AutopilotInputs;
-import autopilotIO.output.AutopilotOutputs;
+import autopilot.interfaces.AutopilotInputs;
+import autopilot.interfaces.AutopilotOutputs;
 public class DroneProperties implements AutopilotOutputs{
 	
 	/**

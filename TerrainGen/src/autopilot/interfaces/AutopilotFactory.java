@@ -1,6 +1,6 @@
-package autopilotIO;
+package autopilot.interfaces;
 
-import autopilot.AutopilotAlain;
+import autopilot.algorithmHandler.AutopilotAlain;
 import prevAutopilot.SimpleAutopilot;
 import prevAutopilot.TaxiAutopilot;
 

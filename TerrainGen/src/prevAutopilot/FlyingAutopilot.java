@@ -6,7 +6,7 @@ import java.util.Random;
 
 import org.lwjgl.util.vector.Vector3f;
 
-import autopilotIO.path.MyPath;
+import autopilot.interfaces.path.MyPath;
 
 public class FlyingAutopilot {
 

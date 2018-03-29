@@ -1,7 +1,6 @@
 package autopilot.algorithms;
 
-import autopilot.Algorithm;
-import autopilot.AlgorithmHandler;
+import autopilot.algorithmHandler.AlgorithmHandler;
 
 public class PathFinder implements Algorithm {
 	

@@ -1,4 +1,6 @@
-package autopilotIO.output;
+package autopilot.interfaces.outputs;
+
+import autopilot.interfaces.AutopilotOutputs;
 
 public class AutopilotOutputsWriter {
     private static void writeByteArray(java.io.DataOutputStream stream, byte[] array) throws java.io.IOException {

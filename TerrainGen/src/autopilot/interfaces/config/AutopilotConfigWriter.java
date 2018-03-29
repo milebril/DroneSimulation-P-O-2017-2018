@@ -1,4 +1,6 @@
-package autopilotIO.config;
+package autopilot.interfaces.config;
+
+import autopilot.interfaces.AutopilotConfig;
 
 public class AutopilotConfigWriter {
     private static void writeByteArray(java.io.DataOutputStream stream, byte[] array) throws java.io.IOException {

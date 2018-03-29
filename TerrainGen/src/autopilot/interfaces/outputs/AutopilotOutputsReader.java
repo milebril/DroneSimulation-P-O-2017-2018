@@ -1,4 +1,6 @@
-package autopilotIO.output;
+package autopilot.interfaces.outputs;
+
+import autopilot.interfaces.AutopilotOutputs;
 
 public class AutopilotOutputsReader {
     private static byte[] readByteArray(java.io.DataInputStream stream) throws java.io.IOException {

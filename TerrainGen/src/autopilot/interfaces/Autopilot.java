@@ -1,8 +1,4 @@
-package autopilotIO;
-
-import autopilotIO.config.AutopilotConfig;
-import autopilotIO.input.AutopilotInputs;
-import autopilotIO.output.AutopilotOutputs;
+package autopilot.interfaces;
 
 public interface Autopilot {
     AutopilotOutputs simulationStarted(AutopilotConfig config, AutopilotInputs inputs);

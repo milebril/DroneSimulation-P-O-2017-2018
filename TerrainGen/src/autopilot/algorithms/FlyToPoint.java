@@ -1,13 +1,28 @@
 package autopilot.algorithms;
 
-import autopilot.Algorithm;
-import autopilot.AlgorithmHandler;
-import autopilot.Properties;
+import org.lwjgl.util.vector.Vector3f;
 
+import autopilot.algorithmHandler.AlgorithmHandler;
+import autopilot.algorithmHandler.Properties;
+
+/**
+ * An algorithm for flying to a given point.
+ */
 public class FlyToPoint implements Algorithm {
 	
-	public FlyToPoint(Algorithm nextAlgorithm) {
-		
+	public FlyToPoint(Algorithm nextAlgorithm, Vector3f point) {
+		this.point = point;
+		this.nextAlgorithm = nextAlgorithm;
+	}
+	
+	private final Vector3f point;
+	private Vector3f getPoint() {
+		return this.point;
+	}
+	
+	private final Algorithm nextAlgorithm;
+	private Algorithm getNextAlgorithm() {
+		return this.nextAlgorithm;
 	}
 
 	@Override

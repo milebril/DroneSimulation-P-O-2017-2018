@@ -1,8 +1,7 @@
 package autopilot.algorithms;
 
-import autopilot.Algorithm;
-import autopilot.AlgorithmHandler;
-import autopilot.Properties;
+import autopilot.algorithmHandler.AlgorithmHandler;
+import autopilot.algorithmHandler.Properties;
 
 public class Takeoff implements Algorithm {
 	

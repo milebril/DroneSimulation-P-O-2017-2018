@@ -1,4 +1,4 @@
-package autopilotIO.config;
+package autopilot.interfaces;
 
 public interface AutopilotConfig {
     String getDroneID();

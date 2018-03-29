@@ -1,4 +1,4 @@
-package autopilotIO.path;
+package autopilot.interfaces;
 
 public interface Path {
     float[] getX();

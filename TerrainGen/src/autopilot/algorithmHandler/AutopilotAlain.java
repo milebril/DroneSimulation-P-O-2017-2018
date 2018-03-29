@@ -1,11 +1,12 @@
-package autopilot;
+package autopilot.algorithmHandler;
 
+import autopilot.algorithms.Algorithm;
 import autopilot.algorithms.SpeedUp;
 import autopilot.algorithms.Takeoff;
-import autopilotIO.Autopilot;
-import autopilotIO.config.AutopilotConfig;
-import autopilotIO.input.AutopilotInputs;
-import autopilotIO.output.AutopilotOutputs;
+import autopilot.interfaces.Autopilot;
+import autopilot.interfaces.AutopilotConfig;
+import autopilot.interfaces.AutopilotInputs;
+import autopilot.interfaces.AutopilotOutputs;
 
 public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	

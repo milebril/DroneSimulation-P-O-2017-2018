@@ -7,12 +7,12 @@ import java.util.Random;
 import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Vector3f;
 
-import autopilotIO.Autopilot;
-import autopilotIO.config.AutopilotConfig;
-import autopilotIO.input.AutopilotInputs;
-import autopilotIO.output.AutopilotOutputs;
+import autopilot.interfaces.Autopilot;
+import autopilot.interfaces.AutopilotConfig;
+import autopilot.interfaces.AutopilotInputs;
+import autopilot.interfaces.AutopilotOutputs;
+import autopilot.interfaces.path.MyPath;
 import imageRecognition.openCV.ImageProcessor;
-import autopilotIO.path.MyPath;
 
 public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 

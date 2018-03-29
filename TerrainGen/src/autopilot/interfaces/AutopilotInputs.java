@@ -1,4 +1,4 @@
-package autopilotIO.input;
+package autopilot.interfaces;
 
 public interface AutopilotInputs {
     byte[] getImage();

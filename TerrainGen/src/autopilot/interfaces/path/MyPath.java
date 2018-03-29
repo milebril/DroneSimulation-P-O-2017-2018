@@ -1,4 +1,6 @@
-package autopilotIO.path;
+package autopilot.interfaces.path;
+
+import autopilot.interfaces.Path;
 
 public class MyPath implements Path {
 	

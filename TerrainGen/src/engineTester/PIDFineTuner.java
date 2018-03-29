@@ -13,12 +13,12 @@ import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 import org.opencv.core.Core;
 
-import autopilotIO.Autopilot;
-import autopilotIO.AutopilotFactory;
-import autopilotIO.config.AutopilotConfig;
-import autopilotIO.config.AutopilotConfigReader;
-import autopilotIO.input.AutopilotInputs;
-import autopilotIO.output.AutopilotOutputs;
+import autopilot.interfaces.Autopilot;
+import autopilot.interfaces.AutopilotConfig;
+import autopilot.interfaces.AutopilotFactory;
+import autopilot.interfaces.AutopilotInputs;
+import autopilot.interfaces.AutopilotOutputs;
+import autopilot.interfaces.config.AutopilotConfigReader;
 import entities.Drone;
 import entities.Entity;
 import fontRendering.TextMaster;
