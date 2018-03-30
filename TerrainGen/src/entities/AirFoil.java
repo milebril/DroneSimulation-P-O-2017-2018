@@ -186,6 +186,10 @@ public class AirFoil {
 
 		// transform the airSpeed vector to the drone frame
 		Vector3f airSpeedD = this.getDrone().transformToDroneFrame(airSpeedW);
+		System.out.println("rotationalVelocityW: " + rotationalVelocityW);
+		System.out.println("linearVelocityW: " + linearVelocityW);
+		System.out.println("airSpeedW: " + airSpeedW);
+		System.out.println("airSpeedD: " + airSpeedD);
 		
 		// project airSpeedD on the surface, perpendicular to the rotationAxis of the AirFoil
 		Vector3f rotationAxisD = this.getRotAxis();
@@ -202,6 +206,8 @@ public class AirFoil {
 		// normal of the airfoil (N)
 		Vector3f normalD = new Vector3f();
 		Vector3f.cross(this.getRotAxis(), attackVectorD,  normalD);
+		
+		System.out.println("S: " + projectedAirspeedVectorD + " A: " + attackVectorD + " N: " + normalD);
 		
 		// calculate the angle of attack, defined as -atan2(S . N, S . A), where S
 		// is the projected airspeed vector, N is the normal, and A is the attack vector

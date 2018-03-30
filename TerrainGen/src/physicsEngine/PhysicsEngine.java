@@ -38,10 +38,14 @@ public class PhysicsEngine {
 		Vector3f[] currentAccelerationsD = calculateAccelerations(drone, h);
 		
 		// snelheid voorspellen in functie van de huidige vernsellingen en posities
+		System.out.println("drone lin vel: " + drone.getLinearVelocity());
 		Vector3f[] newVelocities = drone.getPredictionMethod().predictVelocity(
 				drone.transformToDroneFrame(drone.getLinearVelocity()),
 				drone.transformToDroneFrame(drone.getAngularVelocity()), currentAccelerationsD[0],
 				currentAccelerationsD[1], h);
+		System.out.println("drone new lin vel: " +newVelocities[0]);
+		System.out.println("drone new lin vel: " +drone.transformToWorldFrame(newVelocities[0]));
+		
 		
 		
 		// nieuwe positie berekenen aan de hand van de nieuwe snelheid
@@ -52,6 +56,9 @@ public class PhysicsEngine {
 		drone.setAngularVelocity(drone.transformToWorldFrame(newVelocities[1]));
 
 		// translatie en rotatie uitvoeren
+		System.out.println("drone pos: " + drone.getPosition());
+		System.out.println("deltaPositions: " + deltaPositions[0]);
+		System.out.println("drone pos: " + drone.getPosition());
 		drone.translate(deltaPositions[0]);
 
 		if (!deltaPositions[1].equals(new Vector3f(0, 0, 0))) {
@@ -104,6 +111,8 @@ public class PhysicsEngine {
 		Vector3f force = new Vector3f(0, 0, 0);
 		Vector3f torque = new Vector3f(0, 0, 0);
 		
+		System.out.println("physics looooooooooooooooooooooooooooooooooooooooop");
+		
 		// calculate the forces applied by the airFoils (liftForce + gravity)
 		for (int i = 0; i < drone.getAirFoils().length; i++) {
 
@@ -112,7 +121,9 @@ public class PhysicsEngine {
 
 			// get the liftforce
 			Vector3f liftForceD = currentAirFoil.calculateAirFoilLiftForce();
-
+			
+			System.out.println("airfoil force: " + liftForceD);
+			
 			// calculate torque
 			Vector3f currentAirFoilTorqueD = new Vector3f(0, 0, 0);
 			Vector3f.cross(currentAirFoil.getCenterOfMass(), liftForceD, currentAirFoilTorqueD);
@@ -122,6 +133,8 @@ public class PhysicsEngine {
 			Vector3f.add(torque, currentAirFoilTorqueD, torque);
 		}
 		
+		System.out.println("airfoil forces: " + force);
+		
 		// force exercised by the engine
 		Vector3f thrustForceD = new Vector3f(0, 0, -drone.getThrustForce());
 		Vector3f.add(force, thrustForceD, force);
@@ -130,7 +143,7 @@ public class PhysicsEngine {
 		Vector3f gravitationD = drone.transformToDroneFrame(new Vector3f(0, -drone.getMass() * drone.getGravity(), 0));
 		Vector3f.add(force, gravitationD, force);
 
-		System.out.println("forces: " + force);
+		System.out.println("post grav and thrust forces: " + force);
 
 		// forces excersised by the Tyre compression and deltacompression
 		double[] compressionForces = new double[] { 0, 0, 0 };
@@ -246,7 +259,9 @@ public class PhysicsEngine {
 			Vector3f.add(force, totalTyreForce, force);
 			Vector3f.add(torque, brakeTorque, torque);
 		}
-
+		
+		System.out.println("post tyres -> final force: " + force);
+		
 		// return the results
 		return new Vector3f[] { force, torque };
 	}
