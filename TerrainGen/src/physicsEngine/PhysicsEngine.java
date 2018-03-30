@@ -23,6 +23,7 @@ public class PhysicsEngine {
 	 * 						   the airfoil is greater than 50N
 	 */
 	public static void applyPhysics(Drone drone, float dt) throws DroneCrashException, MaxAoAException {
+		System.out.println("--------------------PHYSICS LOOP--------------------");
 		// stepsize bepalen
 		float h;
 		if (dt - drone.getPredictionMethod().getStepSize() >= 0) {
@@ -43,8 +44,8 @@ public class PhysicsEngine {
 				drone.transformToDroneFrame(drone.getLinearVelocity()),
 				drone.transformToDroneFrame(drone.getAngularVelocity()), currentAccelerationsD[0],
 				currentAccelerationsD[1], h);
-		System.out.println("drone new lin vel: " +newVelocities[0]);
-		System.out.println("drone new lin vel: " +drone.transformToWorldFrame(newVelocities[0]));
+		System.out.println("drone new lin vel D: " +newVelocities[0]);
+		System.out.println("drone new lin vel W: " +drone.transformToWorldFrame(newVelocities[0]));
 		
 		
 		
@@ -56,10 +57,10 @@ public class PhysicsEngine {
 		drone.setAngularVelocity(drone.transformToWorldFrame(newVelocities[1]));
 
 		// translatie en rotatie uitvoeren
-		System.out.println("drone pos: " + drone.getPosition());
+		System.out.println("drone pos: " + drone.getPose());
 		System.out.println("deltaPositions: " + deltaPositions[0]);
-		System.out.println("drone pos: " + drone.getPosition());
 		drone.translate(deltaPositions[0]);
+		System.out.println("drone pos: " + drone.getPose());
 
 		if (!deltaPositions[1].equals(new Vector3f(0, 0, 0))) {
 			Vector3f rotationAxis = new Vector3f(0, 0, 0);
@@ -111,18 +112,17 @@ public class PhysicsEngine {
 		Vector3f force = new Vector3f(0, 0, 0);
 		Vector3f torque = new Vector3f(0, 0, 0);
 		
-		System.out.println("physics looooooooooooooooooooooooooooooooooooooooop");
-		
 		// calculate the forces applied by the airFoils (liftForce + gravity)
 		for (int i = 0; i < drone.getAirFoils().length; i++) {
 
 			// get the current AirFoil
 			AirFoil currentAirFoil = drone.getAirFoils()[i];
-
+			System.out.println("---- AIRFOIL");
 			// get the liftforce
 			Vector3f liftForceD = currentAirFoil.calculateAirFoilLiftForce();
 			
 			System.out.println("airfoil force: " + liftForceD);
+			System.out.println();
 			
 			// calculate torque
 			Vector3f currentAirFoilTorqueD = new Vector3f(0, 0, 0);
