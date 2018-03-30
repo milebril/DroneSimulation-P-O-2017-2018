@@ -36,31 +36,21 @@ public class PhysicsEngine {
 		
 
 		// huidige versnellingen bepalen
-		Vector3f[] currentAccelerationsD = calculateAccelerations(drone, h);
+		Vector3f[] currentAccelerationsW = calculateAccelerations(drone, h);
 		
 		// snelheid voorspellen in functie van de huidige vernsellingen en posities
-		System.out.println("drone lin vel: " + drone.getLinearVelocity());
-		Vector3f[] newVelocities = drone.getPredictionMethod().predictVelocity(
-				drone.transformToDroneFrame(drone.getLinearVelocity()),
-				drone.transformToDroneFrame(drone.getAngularVelocity()), currentAccelerationsD[0],
-				currentAccelerationsD[1], h);
-		System.out.println("drone new lin vel D: " +newVelocities[0]);
-		System.out.println("drone new lin vel W: " +drone.transformToWorldFrame(newVelocities[0]));
-		
-		
+		Vector3f[] newVelocities = drone.getPredictionMethod().predictVelocity(drone.getLinearVelocity(), drone.getAngularVelocity(), 
+																				currentAccelerationsW[0], currentAccelerationsW[1], h);
 		
 		// nieuwe positie berekenen aan de hand van de nieuwe snelheid
 		Vector3f[] deltaPositions = calculatePositionDifferences(drone, newVelocities, h);
 
 		// nieuwe snelheid opslaan
-		drone.setLinearVelocity(drone.transformToWorldFrame(newVelocities[0]));
-		drone.setAngularVelocity(drone.transformToWorldFrame(newVelocities[1]));
+		drone.setLinearVelocity(newVelocities[0]);
+		drone.setAngularVelocity(newVelocities[1]);
 
 		// translatie en rotatie uitvoeren
-		System.out.println("drone pos: " + drone.getPose());
-		System.out.println("deltaPositions: " + deltaPositions[0]);
 		drone.translate(deltaPositions[0]);
-		System.out.println("drone pos: " + drone.getPose());
 
 		if (!deltaPositions[1].equals(new Vector3f(0, 0, 0))) {
 			Vector3f rotationAxis = new Vector3f(0, 0, 0);
@@ -102,8 +92,8 @@ public class PhysicsEngine {
 	 * gravitational force, the engine thrust and gravitational force, the tail
 	 * mass gravitational force
 	 * 
-	 * @return array with force and torque on the drone (in drone frame) |
-	 *         Vector3f[]{total force, total torque} (in drone frame)
+	 * @return array with force and torque on the drone (in world frame) |
+	 *         Vector3f[]{total force, total torque} (in world frame)
 	 */
 	private static Vector3f[] calculateForces(Drone drone, float stepsize) throws MaxAoAException {
 
@@ -117,12 +107,9 @@ public class PhysicsEngine {
 
 			// get the current AirFoil
 			AirFoil currentAirFoil = drone.getAirFoils()[i];
-			System.out.println("---- AIRFOIL");
+			
 			// get the liftforce
 			Vector3f liftForceD = currentAirFoil.calculateAirFoilLiftForce();
-			
-			System.out.println("airfoil force: " + liftForceD);
-			System.out.println();
 			
 			// calculate torque
 			Vector3f currentAirFoilTorqueD = new Vector3f(0, 0, 0);
@@ -139,11 +126,13 @@ public class PhysicsEngine {
 		Vector3f thrustForceD = new Vector3f(0, 0, -drone.getThrustForce());
 		Vector3f.add(force, thrustForceD, force);
 		
+		System.out.println("thrust: " + thrustForceD);
+		
 		// gravitational force exercised by the mass
 		Vector3f gravitationD = drone.transformToDroneFrame(new Vector3f(0, -drone.getMass() * drone.getGravity(), 0));
 		Vector3f.add(force, gravitationD, force);
-
-		System.out.println("post grav and thrust forces: " + force);
+		
+		System.out.println("gravity: " + gravitationD);
 
 		// forces excersised by the Tyre compression and deltacompression
 		double[] compressionForces = new double[] { 0, 0, 0 };
@@ -260,7 +249,12 @@ public class PhysicsEngine {
 			Vector3f.add(torque, brakeTorque, torque);
 		}
 		
-		System.out.println("post tyres -> final force: " + force);
+		
+		// to world frame
+		force = drone.transformToWorldFrame(force);
+		torque = drone.transformToWorldFrame(torque);
+		
+		System.out.println("total force W: " + force);
 		
 		// return the results
 		return new Vector3f[] { force, torque };
@@ -268,9 +262,9 @@ public class PhysicsEngine {
 
 	/**
 	 * Calculates and returns the linear and angular accelerations of the drone
-	 * (in drone frame).
+	 * (in world frame).
 	 * 
-	 * @return The linear and angular accelerations of the drone (in drone
+	 * @return The linear and angular accelerations of the drone (in world
 	 *         frame)
 	 */
 	private static Vector3f[] calculateAccelerations(Drone drone, float stepsize) throws MaxAoAException {
@@ -279,15 +273,15 @@ public class PhysicsEngine {
 
 	/**
 	 * Calculates and returns the linear and angular accelerations of the drone
-	 * (in drone frame). The given forces Vector3f[] array is assumed to contain
+	 * (in world frame). The given forces Vector3f[] array is assumed to contain
 	 * the forces at index 0 and torque at index 1, both in drone frame.
 	 * 
-	 * @return The linear and angular accelerations of the drone (in drone
+	 * @return The linear and angular accelerations of the drone (in world
 	 *         frame)
 	 */
 	private static Vector3f[] calculateAccelerations(Drone drone, Vector3f[] forces) {
 		// linear acceleration
-		Vector3f linearAccelerationD = new Vector3f(forces[0].x / drone.getMass(), forces[0].y / drone.getMass(),
+		Vector3f linearAccelerationW = new Vector3f(forces[0].x / drone.getMass(), forces[0].y / drone.getMass(),
 				forces[0].z / drone.getMass());
 
 		// rotational inertia values
@@ -296,16 +290,16 @@ public class PhysicsEngine {
 		float iZz = drone.getInertiaMatrix().m22;
 
 		// angular velocity
-		Vector3f omega = drone.transformToDroneFrame(drone.getAngularVelocity());
+		Vector3f omega = drone.getAngularVelocity();
 
 		// angular acceleration
-		Vector3f angularAccelerationD = new Vector3f();
-		angularAccelerationD.x = (forces[1].x + (iYy - iZz) * omega.y * omega.z) / iXx;
-		angularAccelerationD.y = (forces[1].y + (iZz - iXx) * omega.x * omega.z) / iYy;
-		angularAccelerationD.z = (forces[1].z + (iXx - iYy) * omega.x * omega.y) / iZz;
+		Vector3f angularAccelerationW = new Vector3f();
+		angularAccelerationW.x = (forces[1].x + (iYy - iZz) * omega.y * omega.z) / iXx;
+		angularAccelerationW.y = (forces[1].y + (iZz - iXx) * omega.x * omega.z) / iYy;
+		angularAccelerationW.z = (forces[1].z + (iXx - iYy) * omega.x * omega.y) / iZz;
 
 		// return the results
-		return new Vector3f[] { linearAccelerationD, angularAccelerationD };
+		return new Vector3f[] { linearAccelerationW, angularAccelerationW };
 	}
 
 	// POSITION
@@ -323,6 +317,7 @@ public class PhysicsEngine {
 	 */
 	private static Vector3f[] calculatePositionDifferences(Drone drone, Vector3f[] newVelocities, float dt) {
 
+		
 		// calculate the average linear velocity
 		Vector3f avgLinearVelocityW = average(drone.getLinearVelocity(), newVelocities[0]);
 
