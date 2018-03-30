@@ -1,6 +1,7 @@
 package autopilot.algorithmHandler;
 
 import prevAutopilot.DroneProperties;
+import prevAutopilot.SimpleAutopilot.AirfoilOrientation;
 
 import javax.vecmath.AxisAngle4f;
 
@@ -332,51 +333,44 @@ public class Properties implements AutopilotConfig, AutopilotInputs {
 	}
 	private Matrix3f calculateOrientationMatrix(float heading, float pitch, float roll) {
 		
-		//lwjgl matrix
-		Matrix3f orientation = new Matrix3f();
-		
-		//pitch rotatie
 		Matrix3f xRot = new Matrix3f();
 		xRot.m11 = (float) Math.cos(pitch);
 		xRot.m22 = (float) Math.cos(pitch);
 		xRot.m21 = (float) - Math.sin(pitch);
 		xRot.m12 = (float) Math.sin(pitch);
-		//heading rotatie rond y-as
+		
 		Matrix3f yRot = new Matrix3f();
 		yRot.m00 = (float) Math.cos(heading);
 		yRot.m22 = (float) Math.cos(heading);
 		yRot.m20 = (float) Math.sin(heading);
 		yRot.m02 = (float) - Math.sin(heading);
-		//roll rond z-as
+		
 		Matrix3f zRot = new Matrix3f();
 		zRot.m00 = (float) Math.cos(roll);
 		zRot.m11 = (float) Math.cos(roll);
 		zRot.m10 = (float) - Math.sin(roll);
 		zRot.m01 = (float) Math.sin(roll);
 		
-		Matrix3f temp = new Matrix3f();
-		Matrix3f.mul(zRot, xRot, temp);
-		Matrix3f.mul(temp, yRot, orientation);
+		// rot = yRot . xRot . zRot -> 1st roll, dan pitch, dan heading
+		Matrix3f orientation = new Matrix3f();
+		Matrix3f.mul(xRot, zRot, orientation);
+		Matrix3f.mul(yRot, orientation, orientation);
 		
 		// de nieuwe setten
 		return orientation;
 	}
 	
-	/*
-	 * code geeft een error maar deze functies worden niet gebruikt (?) dus boeie
-	 * 
+	// Rotation speed
+	
 	private Vector3f rotationSpeed;
-	@Deprecated
 	public Vector3f getRotationSpeed() {
 		return new Vector3f(rotationSpeed.x, rotationSpeed.y, rotationSpeed.z);
 	}
-	@Deprecated
 	private void setRotationSpeed(Vector3f rotationSpeed) {
 		this.rotationSpeed = rotationSpeed;
 	}
-	@Deprecated
 	private Vector3f calculateRotationSpeed(Matrix3f orientation, Matrix3f previousOrientation, float deltaTime){
-
+		
 		//oppassen want 4x4 matrix is niet zomaar inverteerbaar om tegenstelde orientatie te krijgen
 		previousOrientation.transpose(); 
 		Matrix3f diff = new Matrix3f();
@@ -385,22 +379,11 @@ public class Properties implements AutopilotConfig, AutopilotInputs {
 		
 		//enkel hier de brakke library gebruiken:
 		AxisAngle4f rotation = new AxisAngle4f();
-		
 		// eerst omzetten naar andere Matrixtype, lwjgl is column major, javax row major
-		Matrix4f javaxCopy = new Matrix4f(	diff.m00, diff.m10, diff.m20, 0,
+		javax.vecmath.Matrix4f javaxCopy = new javax.vecmath.Matrix4f(	diff.m00, diff.m10, diff.m20, 0,
 											diff.m01, diff.m11, diff.m21, 0,
 											diff.m02, diff.m12, diff.m22, 0,
 											0, 		  0, 		0, 		  1);
-		
-		
-		//javaxCopy.m00 = diff.m00; javaxCopy.m10 = diff.m10; javaxCopy.m20 = diff.m20; javaxCopy.m30 = 0;
-		//javaxCopy.m01 = diff.m01; javaxCopy.m11 = diff.m11; javaxCopy.m21 = diff.m21; javaxCopy.m31 = 0;
-		//javaxCopy.m02 = diff.m02; javaxCopy.m12 = diff.m12; javaxCopy.m22 = diff.m22; javaxCopy.m32 = 0;
-		//javaxCopy.m03 = 0;        javaxCopy.m13 = 0;        javaxCopy.m23 = 0;        javaxCopy.m33 = 1;
-		
-		 
-		
-		
 		rotation.set(javaxCopy);
 		float[] result = new float[4];
 		rotation.get(result);
@@ -411,9 +394,118 @@ public class Properties implements AutopilotConfig, AutopilotInputs {
 		Vector3f speed = new Vector3f(result[0], result[1], result[2]);
 		speed.scale(result[3]);
 		
-		return null;
+		return speed;
 	}
-	*/
+	
+	/**
+	 * Returns the velocity (in the world frame) of a given point (in drone frame)
+	 * of the drone accounting for the velocity of drone and the rotation speed of
+	 * the drone.
+	 * 
+	 * @param a
+	 *            point attached to the drone (in drone frame)
+	 * @return the total velocity of the given point (in world frame)
+	 */
+	public Vector3f getVelocityOfPoint(Vector3f point) {
+
+		// de hefboomsafstand vh point tov de drone (world frame)
+		Vector3f hefboom = new Vector3f();
+		Matrix3f.transform(getOrientationMatrix(), point, hefboom);
+
+		// v_rot = omega x hefboomstafstand (world frame)
+		Vector3f rotation = new Vector3f();
+		Vector3f.cross(getRotationSpeed(), hefboom, rotation);
+
+		// totale snelheid is de som van de rotatie en de drone snelheid
+		Vector3f totalSpeed = new Vector3f();
+		Vector3f.add(getVelocity(), rotation, totalSpeed);
+
+		return totalSpeed;
+	}
+	
+	/**
+	 * An enum class used to specify the orientation of an airfoil.
+	 */
+	public enum AirfoilOrientation {
+		HORIZONTAL, VERTICAL
+	}
+
+	/**
+	 * Returns an array of the min and max inclination of the airfoil at position
+	 * centerOfMass (in drone frame) with an axis orientation either horizontal or
+	 * vertical. The min and max inclinations correspond respectively with the
+	 * negative and positive max angle of attack.
+	 * 
+	 * @return float[2] {min, max}
+	 */
+	public float[] getMaxInclination(Vector3f wingCentreOfMass, AirfoilOrientation orientation) {
+		float maxInclination[] = new float[2];
+
+		// tangens vd pos- en negative angle of attack
+		double posTangent = Math.tan(getMaxAOA());
+		double negTangent = - Math.tan(getMaxAOA());
+
+		// snelheid vd airfoil (world frame)
+		Vector3f S = getVelocityOfPoint(wingCentreOfMass);
+
+		// berekening vd min en max inclination
+		switch (orientation) {
+		case HORIZONTAL:
+			maxInclination[0] = (float) Math.atan((negTangent * S.z - S.y) / (S.z + negTangent * S.y));
+			maxInclination[1] = (float) Math.atan((posTangent * S.z - S.y) / (S.z + posTangent * S.y));
+			break;
+		case VERTICAL:
+			maxInclination[0] = (float) Math.atan((-S.x - negTangent * S.z) / (negTangent * S.x - S.z));
+			maxInclination[1] = (float) Math.atan((-S.x - posTangent * S.z) / (posTangent * S.x - S.z));
+			break;
+		}
+
+		return maxInclination;
+	}
+
+	/**
+	 * Returns the current min and max inclinations for the left wing. The min and
+	 * max inclinations correspont respectivly with the negative and positive max
+	 * angle of attack.
+	 * 
+	 * @return float[2] {min, max}
+	 */
+	public float[] getMaxInclinationLeftWing() {
+		return getMaxInclination(new Vector3f(-getWingX(), 0, 0), AirfoilOrientation.HORIZONTAL);
+	}
+
+	/**
+	 * Returns the current min and max inclinations for the right wing. The min and
+	 * max inclinations correspont respectivly with the negative and positive max
+	 * angle of attack.
+	 * 
+	 * @return float[2] {min, max}
+	 */
+	public float[] getMaxInclinationRightWing() {
+		return getMaxInclination(new Vector3f(getWingX(), 0, 0), AirfoilOrientation.HORIZONTAL);
+	}
+
+	/**
+	 * Returns the current min and max inclinations for the horizontal stabiliser.
+	 * The min and max inclinations correspont respectivly with the negative and
+	 * positive max angle of attack.
+	 * 
+	 * @return float[2] {min, max}
+	 */
+	public float[] getMaxInclinationHorStab() {
+		return getMaxInclination(new Vector3f(0, 0, getTailSize()), AirfoilOrientation.HORIZONTAL);
+	}
+
+	/**
+	 * Returns the current min and max inclinations for the vertical stabiliser. The
+	 * min and max inclinations correspont respectivly with the negative and
+	 * positive max angle of attack.
+	 * 
+	 * @return float[2] {min, max}
+	 */
+	public float[] getMaxInclinationVertStab() {
+		return getMaxInclination(new Vector3f(0, 0, getTailSize()), AirfoilOrientation.VERTICAL);
+	}
 	
 	// Update properties
 	
@@ -424,9 +516,12 @@ public class Properties implements AutopilotConfig, AutopilotInputs {
 		Vector3f newPosition = new Vector3f(inputs.getX(), inputs.getY(), inputs.getZ());
 		Vector3f newVelocity = calculateVelocity(newPosition, getPosition(), getDeltaTime());
 		Vector3f newAcceleration = calculateAcceleration(newVelocity, getVelocity(), getDeltaTime());
+		Matrix3f newOrientation = calculateOrientationMatrix(inputs.getHeading(), inputs.getPitch(), inputs.getRoll());
+		Vector3f newRotationSpeed = calculateRotationSpeed(newOrientation, getOrientationMatrix(), getDeltaTime());
 		setVelocity(newVelocity);
 		setAcceleration(newAcceleration);
-		setOrientationMatrix(calculateOrientationMatrix(inputs.getHeading(), inputs.getPitch(), inputs.getRoll()));
+		setOrientationMatrix(newOrientation);
+		setRotationSpeed(newRotationSpeed);
 		
 		// save inputs
 		setImage(inputs.getImage());

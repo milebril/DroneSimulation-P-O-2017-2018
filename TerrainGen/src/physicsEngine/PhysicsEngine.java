@@ -23,7 +23,7 @@ public class PhysicsEngine {
 	 * 						   the airfoil is greater than 50N
 	 */
 	public static void applyPhysics(Drone drone, float dt) throws DroneCrashException, MaxAoAException {
-		System.out.println("--------------------PHYSICS LOOP--------------------");
+		
 		// stepsize bepalen
 		float h;
 		if (dt - drone.getPredictionMethod().getStepSize() >= 0) {
@@ -120,19 +120,13 @@ public class PhysicsEngine {
 			Vector3f.add(torque, currentAirFoilTorqueD, torque);
 		}
 		
-		System.out.println("airfoil forces: " + force);
-		
 		// force exercised by the engine
 		Vector3f thrustForceD = new Vector3f(0, 0, -drone.getThrustForce());
 		Vector3f.add(force, thrustForceD, force);
 		
-		System.out.println("thrust: " + thrustForceD);
-		
 		// gravitational force exercised by the mass
 		Vector3f gravitationD = drone.transformToDroneFrame(new Vector3f(0, -drone.getMass() * drone.getGravity(), 0));
 		Vector3f.add(force, gravitationD, force);
-		
-		System.out.println("gravity: " + gravitationD);
 
 		// forces excersised by the Tyre compression and deltacompression
 		double[] compressionForces = new double[] { 0, 0, 0 };
@@ -253,8 +247,6 @@ public class PhysicsEngine {
 		// to world frame
 		force = drone.transformToWorldFrame(force);
 		torque = drone.transformToWorldFrame(torque);
-		
-		System.out.println("total force W: " + force);
 		
 		// return the results
 		return new Vector3f[] { force, torque };

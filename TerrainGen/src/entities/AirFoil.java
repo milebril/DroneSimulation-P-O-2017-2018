@@ -29,6 +29,8 @@ public class AirFoil {
 		this.airFoilLiftSlope = wingLiftSlope;
 	}
 	
+	public String name = "unnamed";
+	
 	// DRONE
 	
 	/**
@@ -219,7 +221,7 @@ public class AirFoil {
 		
 		// if max AoA is exceeded and the liftForce is greater than 50N, throw exception
 		if (aoa > Math.toRadians(drone.getMaxAOA()) && liftForceD.length() > 50) {
-			//throw new MaxAoAException("Error Max AoA exceeded!"); TODO
+			throw new MaxAoAException("Error Max AoA exceeded by " + name + "! Airfoil inclination: " + this.getInclination() + " AoA: " + aoa + " max AoA: " + Math.toRadians(drone.getMaxAOA()));
 		}
 		
 		return liftForceD;

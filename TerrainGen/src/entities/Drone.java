@@ -47,6 +47,12 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 														cfg.getHorStabLiftSlope());
 		this.airFoils[3] = new AirFoil(this, new Vector3f(0,1,0), new Vector3f(0, 0, cfg.getTailSize()), 0, 
 														cfg.getVerStabLiftSlope());
+		this.airFoils[0].name = "Left wing";
+		this.airFoils[1].name = "Right wing";
+		this.airFoils[2].name = "Horizontal stabilizer";
+		this.airFoils[3].name = "Vertical stabilizer";
+		
+		
 		
 		//set configs
 		this.maxThrust = cfg.getMaxThrust();
