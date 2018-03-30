@@ -610,8 +610,6 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	 * Returns the transformation matrix for transforming vectors from the drone to the world frame.
 	 */
 	public Matrix3f calculateDtoWTransformationMatrix(){
-		Matrix3f alt = getDroneToWorldRotationMatrix();
-		
 		Matrix4f matrix4 = this.getPose();
 		Matrix3f result = new Matrix3f();
 		result.m00 = matrix4.m00;
@@ -623,10 +621,6 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		result.m20 = matrix4.m20;
 		result.m21 = matrix4.m21;
 		result.m22 = matrix4.m22;
-		
-		//System.out.println("-------------------");
-		//System.out.println(result);
-		//System.out.println(alt);
 		return result;
 	}
 

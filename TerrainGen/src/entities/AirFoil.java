@@ -216,9 +216,7 @@ public class AirFoil {
 		
 		// TODO: is aoa juist ?
 		float aoa = (float) - Math.atan2(a, b);
-		System.out.println("y: " +a);
-		System.out.println("x: " +b);
-		System.out.println("aoa: " + aoa);
+
 		// calculate the lift force N . liftSlope . AOA . s^2, where N is the
 		// normal, AOA is the angle of attack, and s is the projected airspeed
 		float airspeedSquared = projectedAirspeedVectorD.lengthSquared();
