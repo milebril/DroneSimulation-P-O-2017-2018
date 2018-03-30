@@ -67,7 +67,7 @@ public class EntityRenderer {
 		Matrix4f transformationMatrix;
 		if (entity instanceof Drone) {
 			Matrix4f pose = new Matrix4f(entity.getPose());
-			pose.rotate((float) -(Math.PI/2), new Vector3f(1,0,0));
+			pose.rotate((float) -(Math.PI), new Vector3f(0,1,0));
 			transformationMatrix = pose;
 		} else {
 			transformationMatrix = entity.getPose();

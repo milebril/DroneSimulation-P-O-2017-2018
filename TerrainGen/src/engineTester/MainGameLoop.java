@@ -128,15 +128,18 @@ public class MainGameLoop {
 		cubes = new ArrayList<>();
 		
 		//***INITIALIZE DRONEVIEW***
-		RawModel droneModel = OBJLoader.loadObjModel("tree", loader);
-		TexturedModel staticDroneModel = new TexturedModel(droneModel,new ModelTexture(loader.loadTexture("tree")));
-		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, (int)PhysicsEngine.groundLevel -autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius(), 0)), 1,
+//		RawModel droneModel = OBJLoader.loadObjModel("tree", loader);
+//		TexturedModel staticDroneModel = new TexturedModel(droneModel,new ModelTexture(loader.loadTexture("tree")));
+		RawModel droneModel = OBJLoader.loadObjModel("untitled5", loader);
+		TexturedModel staticDroneModel = new TexturedModel(droneModel,new ModelTexture(loader.loadTexture("untitled")));
+		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, (int)PhysicsEngine.groundLevel -autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius(), 0)), 1f,
 				autopilotConfig, new EulerPrediction(STEP_TIME));
 		entities.add(drone);
 		
 		//***INITIALIZE CHASE-CAM***
 		chaseCam = new Camera();
-		chaseCam.setPosition(drone.getPosition().translate(0, 2, 10));
+		chaseCam.setPosition(drone.getPosition().translate(30, 0, 0));
+		//chaseCam.setRotation(0, -1.5f, 0);
 		
 		//***INITIALIZE GUI-TEXT***
 		FontType font = new FontType(loader.loadTexture("verdana"), new File("res/verdana.fnt"));
@@ -188,7 +191,7 @@ public class MainGameLoop {
 		terrains.add(new LandingStrip(-0.5f,-1,loader,new ModelTexture(loader.loadTexture("landing"))));
 		
 		Camera camera = new Camera(200, 200);	
-		camera.setPosition(drone.getPosition().translate(0, 0, -5));
+		camera.setPosition(drone.getPosition().translate(0, 0, 0));
 		renderer = new MasterRenderer();
 		
 		//Cube Render
@@ -230,7 +233,7 @@ public class MainGameLoop {
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			//chaseCam.setPosition(chaseCam.getPosition().translate(0, -0.01f, -1));
 			renderEntities(chaseCam, "3D");
-			chaseCam.setPosition(drone.getPosition().translate(0, 2, 10));
+			//chaseCam.setPosition(drone.getPosition().translate(0, 2, 10));
 			
 			//CAMERA VIEW
 			GL11.glViewport(0, 0, 200, 200);
@@ -379,7 +382,7 @@ public class MainGameLoop {
 			reset();
 		}else {
 			if (chaseCameraLocked) {
-				Vector3f.add(drone.getPosition(), new Vector3f(0, 2, 10), chaseCam.getPosition());
+				Vector3f.add(drone.getPosition(), new Vector3f(0, 0, 30), chaseCam.getPosition());
 			} else {
 				chaseCam.roam();
 			}
