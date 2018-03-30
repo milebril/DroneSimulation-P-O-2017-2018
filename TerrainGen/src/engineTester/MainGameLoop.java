@@ -130,8 +130,8 @@ public class MainGameLoop {
 		//***INITIALIZE DRONEVIEW***
 //		RawModel droneModel = OBJLoader.loadObjModel("tree", loader);
 //		TexturedModel staticDroneModel = new TexturedModel(droneModel,new ModelTexture(loader.loadTexture("tree")));
-		RawModel droneModel = OBJLoader.loadObjModel("untitled5", loader);
-		TexturedModel staticDroneModel = new TexturedModel(droneModel,new ModelTexture(loader.loadTexture("droneTex")));
+		RawModel droneModel = OBJLoader.loadObjModel("oeps", loader);
+		TexturedModel staticDroneModel = new TexturedModel(droneModel,new ModelTexture(loader.loadTexture("oeps")));
 		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, (int)PhysicsEngine.groundLevel -autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius(), 0)), 1f,
 				autopilotConfig, new EulerPrediction(STEP_TIME));
 		entities.add(drone);
