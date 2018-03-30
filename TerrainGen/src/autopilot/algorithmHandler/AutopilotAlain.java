@@ -1,12 +1,14 @@
 package autopilot.algorithmHandler;
 
 import autopilot.algorithms.Algorithm;
+import autopilot.algorithms.PathFinder;
 import autopilot.algorithms.SpeedUp;
 import autopilot.algorithms.Takeoff;
 import autopilot.interfaces.Autopilot;
 import autopilot.interfaces.AutopilotConfig;
 import autopilot.interfaces.AutopilotInputs;
 import autopilot.interfaces.AutopilotOutputs;
+import autopilot.interfaces.path.MyPath;
 
 public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	
@@ -18,7 +20,11 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	
 	public AutopilotAlain() {
 		// default algoritme
-		setAlgorithm(new SpeedUp());
+		float[] x = new float[]{  0,    0};
+		float[] y = new float[]{ 50,   55};
+		float[] z = new float[]{-50, -100};
+		MyPath path = new MyPath(x, y, z);
+		setAlgorithm(new PathFinder(path));
 	}
 	
 	// AlgorithmHandler interface
@@ -40,7 +46,11 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 		return thrust;
 	}
 	public void setThrust(float thrust) {
-		this.thrust = thrust;
+		if (thrust > getProperties().getMaxThrust()) {
+			this.thrust = getProperties().getMaxThrust();
+		} else {
+			this.thrust = thrust;
+		}
 	}
 
 	private float leftWingInclination = 0;

@@ -2,6 +2,7 @@ package autopilot.algorithms;
 
 import autopilot.algorithmHandler.AlgorithmHandler;
 import autopilot.algorithmHandler.Properties;
+import autopilot.interfaces.path.MyPath;
 
 public class Takeoff implements Algorithm {
 	
@@ -13,9 +14,12 @@ public class Takeoff implements Algorithm {
 	public void cycle(AlgorithmHandler handler) {
 
 		handler.setThrust(handler.getProperties().getMaxThrust());
-		System.out.println(PathFinder.condition(handler));
-		if (PathFinder.condition(handler)) {
-			handler.setAlgorithm(new PathFinder());
+		if (40 < handler.getProperties().getY()) {
+			float[] x = new float[]{  0,    0};
+			float[] y = new float[]{ 50,   55};
+			float[] z = new float[]{-50, -100};
+			MyPath path = new MyPath(x, y, z);
+			handler.setAlgorithm(new PathFinder(path));
 		} else if (handler.getProperties().getY() < 4) {
 			handler.setLeftWingInclination((float) (15 * Math.PI / 180));
 			handler.setRightWingInclination((float) (15 * Math.PI / 180));

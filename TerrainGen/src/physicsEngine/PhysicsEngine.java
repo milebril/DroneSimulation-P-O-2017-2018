@@ -81,6 +81,7 @@ public class PhysicsEngine {
 			}
 		}
 		
+		
 		// recursieve oproep
 		PhysicsEngine.applyPhysics(drone, (dt - h));
 	}
@@ -128,7 +129,8 @@ public class PhysicsEngine {
 		// gravitational force exercised by the mass
 		Vector3f gravitationD = drone.transformToDroneFrame(new Vector3f(0, -drone.getMass() * drone.getGravity(), 0));
 		Vector3f.add(force, gravitationD, force);
-		
+
+		System.out.println("forces: " + force);
 
 		// forces excersised by the Tyre compression and deltacompression
 		double[] compressionForces = new double[] { 0, 0, 0 };

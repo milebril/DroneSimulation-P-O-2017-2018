@@ -29,6 +29,11 @@ public class FlyToPoint implements Algorithm {
 	public void cycle(AlgorithmHandler handler) {
 		// TODO Auto-generated method stub
 		
+		// if the point is reached
+		boolean reached = true;
+		if (reached) {
+			handler.setAlgorithm(getNextAlgorithm());
+		}
 	}
 	
 	@Override
