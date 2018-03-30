@@ -17,7 +17,6 @@ import shaders.StaticShader;
 import shaders.cubes.CubeShader;
 
 public class CubeRenderer {
-
 	private static final float NEAR_PLANE = 0.1f;
 	private static final float FAR_PLANE = 1000;
 	
