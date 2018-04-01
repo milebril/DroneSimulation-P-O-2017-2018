@@ -20,9 +20,9 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	
 	public AutopilotAlain() {
 		// default algoritme
-		float[] x = new float[]{  0,    0};
-		float[] y = new float[]{ 50,   55};
-		float[] z = new float[]{-50, -100};
+		float[] x = new float[]{ -20,    0};
+		float[] y = new float[]{  50,   55};
+		float[] z = new float[]{-400, -800};
 		MyPath path = new MyPath(x, y, z);
 		setAlgorithm(new PathFinder(path));
 	}

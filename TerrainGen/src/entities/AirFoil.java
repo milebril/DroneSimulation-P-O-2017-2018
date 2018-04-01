@@ -211,6 +211,9 @@ public class AirFoil {
 		float b = Vector3f.dot(projectedAirspeedVectorD, attackVectorD);
 		
 		float aoa = (float) - Math.atan2(a, b);
+
+		if (aoa < -Math.PI) aoa += Math.PI;
+		if (Math.PI < aoa) aoa -= Math.PI;
 		
 		// calculate the lift force N . liftSlope . AOA . s^2, where N is the
 		// normal, AOA is the angle of attack, and s is the projected airspeed

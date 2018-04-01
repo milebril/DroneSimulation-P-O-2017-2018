@@ -291,6 +291,9 @@ public class Properties implements AutopilotConfig, AutopilotInputs {
 	private void setVelocity(Vector3f velocity) {
 		this.velocity = velocity;
 	}
+	/**
+	 * The velocity of the drone in world frame.
+	 */
 	private Vector3f calculateVelocity(Vector3f position, Vector3f previousPosition, float deltaTime) {
 		Vector3f diff = new Vector3f();
 		Vector3f.sub(position, previousPosition, diff);
@@ -356,19 +359,20 @@ public class Properties implements AutopilotConfig, AutopilotInputs {
 		Matrix3f.mul(xRot, zRot, orientation);
 		Matrix3f.mul(yRot, orientation, orientation);
 		
-		// de nieuwe setten
 		return orientation;
 	}
 	
 	// Rotation speed
 	
-	private Vector3f rotationSpeed;
+	private Vector3f rotationSpeed = new Vector3f(0, 0, 0);
 	public Vector3f getRotationSpeed() {
 		return new Vector3f(rotationSpeed.x, rotationSpeed.y, rotationSpeed.z);
 	}
 	private void setRotationSpeed(Vector3f rotationSpeed) {
 		this.rotationSpeed = rotationSpeed;
 	}
+	
+	// TODO: bevestigen/controleren dat deze functie juist is
 	private Vector3f calculateRotationSpeed(Matrix3f orientation, Matrix3f previousOrientation, float deltaTime){
 		
 		//oppassen want 4x4 matrix is niet zomaar inverteerbaar om tegenstelde orientatie te krijgen
@@ -395,6 +399,25 @@ public class Properties implements AutopilotConfig, AutopilotInputs {
 		speed.scale(result[3]);
 		
 		return speed;
+	}
+	
+	public Vector3f transformToWorldFrame(Vector3f vector) {
+		Matrix3f transformation = getOrientationMatrix();
+
+		Vector3f result = new Vector3f();
+		Matrix3f.transform(transformation, vector, result);
+		
+		return result;
+	}
+	
+	public Vector3f transformToDroneFrame(Vector3f vector) {
+		Matrix3f transformation = new Matrix3f();
+		getOrientationMatrix().transpose(transformation);
+		
+		Vector3f result = new Vector3f();
+		Matrix3f.transform(transformation, vector, result);
+		
+		return result;
 	}
 	
 	/**
@@ -439,28 +462,25 @@ public class Properties implements AutopilotConfig, AutopilotInputs {
 	 * @return float[2] {min, max}
 	 */
 	public float[] getMaxInclination(Vector3f wingCentreOfMass, AirfoilOrientation orientation) {
-		float maxInclination[] = new float[2];
 
-		// tangens vd pos- en negative angle of attack
-		double posTangent = Math.tan(getMaxAOA());
-		double negTangent = - Math.tan(getMaxAOA());
-
-		// snelheid vd airfoil (world frame)
-		Vector3f S = getVelocityOfPoint(wingCentreOfMass);
-
-		// berekening vd min en max inclination
+		// snelheid vd airfoil
+		Vector3f S = transformToDroneFrame(getVelocityOfPoint(wingCentreOfMass));
+		
+		float angle = 0;
+		float max = (float) Math.toRadians(getMaxAOA());
+		
 		switch (orientation) {
-		case HORIZONTAL:
-			maxInclination[0] = (float) Math.atan((negTangent * S.z - S.y) / (S.z + negTangent * S.y));
-			maxInclination[1] = (float) Math.atan((posTangent * S.z - S.y) / (S.z + posTangent * S.y));
-			break;
-		case VERTICAL:
-			maxInclination[0] = (float) Math.atan((-S.x - negTangent * S.z) / (negTangent * S.x - S.z));
-			maxInclination[1] = (float) Math.atan((-S.x - posTangent * S.z) / (posTangent * S.x - S.z));
-			break;
+			case HORIZONTAL:
+				angle = (float) Math.atan2(S.y, -S.z);
+				break;
+			case VERTICAL:
+				angle = (float) Math.atan2(-S.x, -S.z);
+				break;
 		}
-
-		return maxInclination;
+		if (angle < -Math.PI) angle += Math.PI;
+		if (Math.PI < angle) angle -= Math.PI;
+		
+		return new float[]{angle-max, angle+max};
 	}
 
 	/**
@@ -505,6 +525,65 @@ public class Properties implements AutopilotConfig, AutopilotInputs {
 	 */
 	public float[] getMaxInclinationVertStab() {
 		return getMaxInclination(new Vector3f(0, 0, getTailSize()), AirfoilOrientation.VERTICAL);
+	}
+	
+	// Airfoil Forces
+	
+	/**
+	 * Returns the linear force the left wing will apply (in drone frame)
+	 */
+	public Vector3f getAirfoilForce(Vector3f airfoilPosition, AirfoilOrientation orientation, float liftSlope, float inclination) {
+		
+		// snelheid vd airfoil
+		Vector3f S = transformToDroneFrame(getVelocityOfPoint(airfoilPosition));
+		float s2 = S.lengthSquared();
+		
+		// normal and aoa depend on airfoil orientation
+		float aoa;
+		float size;
+		Vector3f normal = new Vector3f();
+		switch (orientation) {
+			case HORIZONTAL:
+				aoa = (float) Math.atan2(S.y, -S.z);
+				size = liftSlope * aoa * s2;
+				normal = new Vector3f(0f, (float) Math.cos(inclination) * size, (float) Math.sin(inclination) * size);
+				break;
+			case VERTICAL:
+				aoa = (float) Math.atan2(-S.x, -S.z);
+				size = liftSlope * aoa * s2;
+				normal = new Vector3f((float) - Math.cos(inclination) * size, 0f, (float) Math.sin(inclination) * size);
+				break;
+		}
+		
+		return normal;
+	}
+	
+	/**
+	 * Returns the force the left wing would apply under the given inclination (in drone frame)
+	 */
+	public Vector3f getLeftWingForce(float inclination) {
+		return getAirfoilForce(new Vector3f(-getWingX(), 0, 0), AirfoilOrientation.HORIZONTAL, getWingLiftSlope(), inclination);
+	}
+	
+	/**
+	 * Returns the force the right wing would apply under the given inclination (in drone frame)
+	 */
+	public Vector3f getRightWingForce(float inclination) {
+		return getAirfoilForce(new Vector3f(getWingX(), 0, 0), AirfoilOrientation.HORIZONTAL, getWingLiftSlope(), inclination);
+	}
+	
+	/**
+	 * Returns the force the horizontal stabilizer would apply under the given inclination (in drone frame)
+	 */
+	public Vector3f getHorStabForce(float inclination) {
+		return getAirfoilForce(new Vector3f(0, 0, getTailSize()), AirfoilOrientation.HORIZONTAL, getHorStabLiftSlope(), inclination);
+	}
+	
+	/**
+	 * Returns the force the vertical stabilizer would apply under the given inclination (in drone frame)
+	 */
+	public Vector3f getVertStabForce(float inclination) {
+		return getAirfoilForce(new Vector3f(0, 0, getTailSize()), AirfoilOrientation.VERTICAL, getVerStabLiftSlope(), inclination);
 	}
 	
 	// Update properties
