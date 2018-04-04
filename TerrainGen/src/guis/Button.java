@@ -22,7 +22,6 @@ public abstract class Button implements IButton {
     private boolean isHidden = false;
     private boolean isHovering = false;
 
-    
     public Button(Loader loader, String texture, Vector2f position, Vector2f scale) {
         this.loader = loader;
         this.texture = texture;

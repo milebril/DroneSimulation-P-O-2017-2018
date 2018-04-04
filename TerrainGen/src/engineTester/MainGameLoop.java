@@ -22,8 +22,10 @@ import physicsEngine.PhysicsEngine;
 import physicsEngine.approximationMethods.EulerPrediction;
 
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
@@ -130,8 +132,8 @@ public class MainGameLoop {
 		//***INITIALIZE DRONEVIEW***
 //		RawModel droneModel = OBJLoader.loadObjModel("tree", loader);
 //		TexturedModel staticDroneModel = new TexturedModel(droneModel,new ModelTexture(loader.loadTexture("tree")));
-		RawModel droneModel = OBJLoader.loadObjModel("oeps", loader);
-		TexturedModel staticDroneModel = new TexturedModel(droneModel,new ModelTexture(loader.loadTexture("oeps")));
+		RawModel droneModel = OBJLoader.loadObjModel("untitled5", loader);
+		TexturedModel staticDroneModel = new TexturedModel(droneModel,new ModelTexture(loader.loadTexture("untitled")));
 		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, (int)PhysicsEngine.groundLevel -autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius(), 0)), 1f,
 				autopilotConfig, new EulerPrediction(STEP_TIME));
 		entities.add(drone);
@@ -467,7 +469,10 @@ public class MainGameLoop {
 	
 	private static void createOpenFileButton() {
 		JFileChooser fc = new JFileChooser();
-		openFile = new Button(loader, "openfile", new Vector2f(0.9f, 0.9f), new Vector2f(0.05f, 0.05f)) {
+		float normalizedX = -1.0f + 2.0f * (float) 1200 / (float) Display.getWidth();
+		float normalizedY = 1.0f - 2.0f * (float) 20 / (float) Display.getHeight(); //TODO
+		
+		openFile = new Button(loader, "openfile", new Vector2f(normalizedX, normalizedY), new Vector2f(0.05f, 0.05f)) {
 			@Override
 			public void whileHover() { }
 
