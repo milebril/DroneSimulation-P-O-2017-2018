@@ -258,7 +258,13 @@ public class MainGameLoop {
 
 			switch (currentView) {
 			case MINIMAP:
-				renderer.prepare();
+				//MiniMap
+				GL11.glViewport(580, 0, 700, Display.getHeight());
+				GL11.glScissor(580, 0, 700, Display.getHeight());
+				GL11.glEnable(GL11.GL_SCISSOR_TEST);
+				glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+				//renderer.prepare();
+				glClearColor(1, 1, 0, 1);
 				droneTextures.clear();
 				float normalizedX = 2.0f * (float) (drone.getPosition().x * Display.getWidth() / 4000) / (float) Display.getWidth();
 				float normalizedY = -2.0f * (float) (drone.getPosition().z * Display.getHeight() / 4000) / (float) Display.getHeight(); // TODO
@@ -267,6 +273,14 @@ public class MainGameLoop {
 						new Vector2f(s, s));
 				droneTextures.add(e);
 				guiRenderer.render(droneTextures);
+				
+				
+				//Drone List
+				GL11.glViewport(0, 0, 580, Display.getHeight());
+				GL11.glScissor(0, 0, 580, Display.getHeight());
+				GL11.glEnable(GL11.GL_SCISSOR_TEST);
+				glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+				glClearColor(1, 1, 1, 1);
 				break;
 			case MAIN:
 				// ***BIG SCREEN***
