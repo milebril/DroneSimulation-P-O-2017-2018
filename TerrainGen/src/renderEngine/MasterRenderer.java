@@ -21,7 +21,7 @@ import entities.Light;
 public class MasterRenderer {
 	
 	private static final float FOV = 60;
-	private static final float NEAR_PLANE = 0.1f;
+	private static final float NEAR_PLANE = 0.7f;
 	private static final float FAR_PLANE = 1000;
 	
 	private Matrix4f projectionMatrix;
@@ -86,6 +86,7 @@ public class MasterRenderer {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		//GL11.glClearColor(0.49f, 89f, 0.98f, 1);
 		GL11.glClearColor(255f, 255f, 255f, 1);
+		
 	}
 	
 	public void prepareBlack() {
