@@ -75,10 +75,11 @@ public class MainGameLoop {
 	private static boolean lLock;
 	private static boolean sLock;
 	private static boolean mLock;
+	private static boolean pLock;
 
 	public static AutopilotConfig autopilotConfig;
 
-	//Drone Stuff
+	// Drone Stuff
 	private static List<Drone> drones;
 	private static Drone activeDrone;
 
@@ -113,7 +114,7 @@ public class MainGameLoop {
 
 	// ViewEnum
 	private static ViewEnum currentView = ViewEnum.MAIN;
-	
+
 	//
 
 	private enum ViewEnum {
@@ -149,7 +150,7 @@ public class MainGameLoop {
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,
 				new ModelTexture(loader.loadTexture("untitled")));
 		Drone droneOne = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0,
-				(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius(), 0)),
+				(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius() + 20, 0)),
 				1f, autopilotConfig, new EulerPrediction(STEP_TIME));
 		activeDrone = droneOne;
 		entities.add(droneOne);
@@ -243,7 +244,7 @@ public class MainGameLoop {
 		}
 		float s = (60 / i.getHeight());
 		s = 0.01f;
-		
+
 		MiniMap minimap = new MiniMap();
 
 		while (!Display.isCloseRequested()) {
@@ -261,8 +262,8 @@ public class MainGameLoop {
 				GL11.glViewport(0, 0, 202, 202);
 				GL11.glScissor(0, 0, 202, 202);
 				GL11.glEnable(GL11.GL_SCISSOR_TEST);
-				glClearColor(0,0,0,1);
-				
+				glClearColor(0, 0, 0, 1);
+
 				renderer.prepare();
 				GL11.glViewport(0, 0, 200, 200);
 				GL11.glScissor(0, 0, 200, 200);
@@ -270,20 +271,19 @@ public class MainGameLoop {
 				renderEntities(camera, "Drone");
 				camera.setPosition(activeDrone.getPosition().translate(0, 0, -5));
 
-				
 				// ***BIG SCREEN***
-				//renderer.prepare();
+				// renderer.prepare();
 				GL11.glViewport(580, 0, 700, Display.getHeight());
 				GL11.glScissor(580, 0, 700, Display.getHeight());
 				GL11.glEnable(GL11.GL_SCISSOR_TEST);
-				GL11.glClearColor(135/255f, 206/255f, 235/255f, 0.6f);
+				GL11.glClearColor(135 / 255f, 206 / 255f, 235 / 255f, 0.6f);
 				renderEntities(chaseCam, "3D");
 
-				// GUI		
+				// GUI
 				GL11.glViewport(0, 0, 1280, 700);
 				GL11.glScissor(0, 0, 1280, 700);
 				GL11.glEnable(GL11.GL_SCISSOR_TEST);
-				
+
 				speed = String.valueOf(Math.round(activeDrone.getAbsVelocity()));
 				textSpeed.setString("Speed = " + speed + "m/s");
 				TextMaster.loadText(textSpeed);
@@ -346,12 +346,13 @@ public class MainGameLoop {
 			}
 
 			keyInputs();
-//			while (paused) // if M is pressed, the simulation is paused untill M is pressed again
-//			{
-//				try {Thread.sleep(20);} catch (InterruptedException e) {}
-//				keyInputs();
-//			}
-			
+			// while (paused) // if M is pressed, the simulation is paused untill M is
+			// pressed again
+			// {
+			// try {Thread.sleep(20);} catch (InterruptedException e) {}
+			// keyInputs();
+			// }
+
 			removeCubes();
 			DisplayManager.updateDisplay();
 
@@ -422,6 +423,11 @@ public class MainGameLoop {
 				}
 			}
 			mLock = true;
+		} else if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
+			if (!pLock) {
+				DisplayManager.pauze();
+			}
+			pLock = true;
 		} else {
 			if (chaseCameraLocked) {
 				Vector3f.add(activeDrone.getPosition(), new Vector3f(0, 0, 30), chaseCam.getPosition());
@@ -432,8 +438,9 @@ public class MainGameLoop {
 			lLock = false;
 			sLock = false;
 			mLock = false;
+			pLock = false;
 		}
-		
+
 		if (chaseCameraLocked) {
 			Vector3f.add(activeDrone.getPosition(), new Vector3f(0, 0, 30), chaseCam.getPosition());
 		} else {
@@ -522,7 +529,7 @@ public class MainGameLoop {
 		JFileChooser fc = new JFileChooser();
 		float normalizedX = -1.0f + 2.0f * (float) 1200 / (float) Display.getWidth();
 		float normalizedY = 1.0f - 2.0f * (float) 20 / (float) Display.getHeight();
-		
+
 		System.out.println(new Vector2f(normalizedX, normalizedY));
 
 		openFile = new Button(loader, "openfile", new Vector2f(normalizedX, normalizedY), new Vector2f(0.05f, 0.05f)) {
