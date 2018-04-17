@@ -6,8 +6,8 @@ import textures.ModelTexture;
 
 public class LandingStrip extends Terrain{
 	
-	private static final float SIZE = 2000;
-	private static final float SIZE_X = 50;
+	private static final float SIZE = 400;
+	private static final float SIZE_X = 100;
 	private static final int VERTEX_COUNT = 128;
 	
 	private float x;
@@ -18,8 +18,8 @@ public class LandingStrip extends Terrain{
 	public LandingStrip(float gridX, int gridZ, Loader loader, ModelTexture texture){
 		super((int) gridX, gridZ, loader, texture);
 		this.texture = texture;
-		this.x =  gridX * SIZE_X;
-		this.z = gridZ * SIZE;
+		this.x =  gridX;
+		this.z = gridZ;
 		this.model = generateTerrain(loader);
 	}
 	
