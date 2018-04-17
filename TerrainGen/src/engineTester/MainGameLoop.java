@@ -116,7 +116,7 @@ public class MainGameLoop {
 
 	public static void main(String[] args) {
 		// Needed to load openCV
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		//System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
 		// ***INITIALIZE CONFIG***
 		try {
@@ -148,6 +148,11 @@ public class MainGameLoop {
 				(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius(), 0)),
 				1f, autopilotConfig, new EulerPrediction(STEP_TIME));
 		entities.add(drone);
+		RawModel gateModel = OBJLoader.loadObjModel("gate10", loader);
+		TexturedModel staticGateModel = new TexturedModel(gateModel,
+				new ModelTexture(loader.loadTexture("gate.blauw")));
+		Entity gate = new Entity(staticGateModel, new Matrix4f().translate(new Vector3f(0, 1, -40)), 1);
+		entities.add(gate);
 
 		// ***INITIALIZE CHASE-CAM***
 		chaseCam = new Camera();
