@@ -7,9 +7,9 @@ import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
-import interfaces.AutopilotConfig;
-import interfaces.AutopilotInputs;
-import interfaces.AutopilotOutputs;
+import autopilot.interfaces.AutopilotConfig;
+import autopilot.interfaces.AutopilotInputs;
+import autopilot.interfaces.AutopilotOutputs;
 import models.RawModel;
 import models.TexturedModel;
 import physicsEngine.approximationMethods.EulerPrediction;
@@ -32,7 +32,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 				AutopilotConfig cfg, PredictionMethod predictionMethod) {
 		super(model, pose, scale);
 		
-		this.linearVelocityW = new Vector3f(0.0f,0.0f, -0.0f);
+		this.linearVelocityW = new Vector3f(0.0f,0.0f, -50.0f);
 
 		this.angularVelocityW = new Vector3f(0f, 0f, 0f);
 		
@@ -47,6 +47,12 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 														cfg.getHorStabLiftSlope());
 		this.airFoils[3] = new AirFoil(this, new Vector3f(0,1,0), new Vector3f(0, 0, cfg.getTailSize()), 0, 
 														cfg.getVerStabLiftSlope());
+		this.airFoils[0].name = "Left wing";
+		this.airFoils[1].name = "Right wing";
+		this.airFoils[2].name = "Horizontal stabilizer";
+		this.airFoils[3].name = "Vertical stabilizer";
+		
+		
 		
 		//set configs
 		this.maxThrust = cfg.getMaxThrust();
@@ -131,7 +137,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	/**
 	 * Returns the horizontal stabilizer of the Drone.
 	 */
-	public AirFoil getHorizStabilizer(){
+	public AirFoil getHorStabilizer(){
 		return this.airFoils[2];
 	}
 
@@ -550,7 +556,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	/**
 	 * Receives the input controls from the Autopilot
 	 */
-	public void setAutopilotOutouts(AutopilotOutputs outputs) {
+	public void setAutopilotOutputs(AutopilotOutputs outputs) {
 		setThrustForce(outputs.getThrust());
 		
 		this.getFrontTyre().setBrakingForce(outputs.getFrontBrakeForce());
@@ -559,7 +565,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		
 		this.getLeftWing().setInclination(outputs.getLeftWingInclination());
 		this.getRightWing().setInclination(outputs.getRightWingInclination());		
-		this.getHorizStabilizer().setInclination(outputs.getHorStabInclination());
+		this.getHorStabilizer().setInclination(outputs.getHorStabInclination());
 		this.getVertStabilizer().setInclination(outputs.getVerStabInclination());
 	}	
 	
@@ -660,5 +666,4 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		Vector3f headingVector = this.getHeadingVector(); 
 		return (float) Math.atan2(-headingVector.x, - headingVector.z);
 	}
-	
 }

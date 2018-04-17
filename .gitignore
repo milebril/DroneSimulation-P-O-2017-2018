@@ -15,4 +15,8 @@ LWJGL TEST PROJECT/
 
 LWJGL TEST PROJECT \(Betere Versie\)/res/image\.png
 
+*.png
+
 TerrainGen/\.classpath
+
+

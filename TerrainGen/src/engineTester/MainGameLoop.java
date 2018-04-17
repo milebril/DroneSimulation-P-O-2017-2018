@@ -1,5 +1,6 @@
 package engineTester;
 
+import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -22,6 +23,7 @@ import physicsEngine.DroneCrashException;
 import physicsEngine.MaxAoAException;
 import physicsEngine.PhysicsEngine;
 import physicsEngine.approximationMethods.EulerPrediction;
+import prevAutopilot.SimpleAutopilot;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -32,10 +34,15 @@ import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
+import org.newdawn.slick.TrueTypeFont;
 import org.opencv.core.Core;
 
-import autoPilotJar.SimpleAutopilot;
-import autopilot.AutopilotConfigReader;
+import autopilot.interfaces.Autopilot;
+import autopilot.interfaces.AutopilotConfig;
+import autopilot.interfaces.AutopilotFactory;
+import autopilot.interfaces.AutopilotInputs;
+import autopilot.interfaces.AutopilotOutputs;
+import autopilot.interfaces.config.AutopilotConfigReader;
 import renderEngine.CubeRenderer;
 import renderEngine.DisplayManager;
 import renderEngine.EntityRenderer;
@@ -59,11 +66,6 @@ import fontRendering.TextMaster;
 import guis.Button;
 import guis.GuiRenderer;
 import guis.GuiTexture;
-import interfaces.Autopilot;
-import interfaces.AutopilotConfig;
-import interfaces.AutopilotFactory;
-import interfaces.AutopilotInputs;
-import interfaces.AutopilotOutputs;
 
 public class MainGameLoop {
 
@@ -76,7 +78,9 @@ public class MainGameLoop {
 
 	public static AutopilotConfig autopilotConfig;
 
-	private static Drone drone;
+	//Drone Stuff
+	private static List<Drone> drones;
+	private static Drone activeDrone;
 
 	// Entities lists
 	private static List<Entity> entities;
@@ -109,6 +113,8 @@ public class MainGameLoop {
 
 	// ViewEnum
 	private static ViewEnum currentView = ViewEnum.MAIN;
+	
+	//
 
 	private enum ViewEnum {
 		MAIN, MINIMAP
@@ -136,18 +142,18 @@ public class MainGameLoop {
 		entities = new ArrayList<>();
 		terrains = new ArrayList<>();
 		cubes = new ArrayList<>();
+		drones = new ArrayList<>();
 
 		// ***INITIALIZE DRONEVIEW***
-		// RawModel droneModel = OBJLoader.loadObjModel("tree", loader);
-		// TexturedModel staticDroneModel = new TexturedModel(droneModel,new
-		// ModelTexture(loader.loadTexture("tree")));
 		RawModel droneModel = OBJLoader.loadObjModel("untitled5", loader);
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,
 				new ModelTexture(loader.loadTexture("untitled")));
-		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0,
+		Drone droneOne = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0,
 				(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius(), 0)),
 				1f, autopilotConfig, new EulerPrediction(STEP_TIME));
-		entities.add(drone);
+		activeDrone = droneOne;
+		entities.add(droneOne);
+		drones.add(droneOne);
 		RawModel gateModel = OBJLoader.loadObjModel("gate10", loader);
 		TexturedModel staticGateModel = new TexturedModel(gateModel,
 				new ModelTexture(loader.loadTexture("gate.blauw")));
@@ -156,14 +162,14 @@ public class MainGameLoop {
 
 		// ***INITIALIZE CHASE-CAM***
 		chaseCam = new Camera();
-		chaseCam.setPosition(drone.getPosition().translate(30, 0, 0));
+		chaseCam.setPosition(droneOne.getPosition().translate(30, 0, 0));
 		// chaseCam.setRotation(0, -1.5f, 0);
 
 		// ***INITIALIZE GUI-TEXT***
 		FontType font = new FontType(loader.loadTexture("verdana"), new File("res/verdana.fnt"));
 
 		// Speed text
-		String speed = String.valueOf(Math.round(drone.getAbsVelocity()));
+		String speed = String.valueOf(Math.round(activeDrone.getAbsVelocity()));
 		GUIText textSpeed = new GUIText("Speed = " + speed + "m/s", 1, font, new Vector2f(0, 0), 1, false);
 		textSpeed.setColour(0, 0, 0);
 
@@ -173,22 +179,22 @@ public class MainGameLoop {
 		textPosition.setColour(0, 0, 0);
 
 		// Wing inclinations text
-		String leftWingInc = String.valueOf(drone.getLeftWing().getInclination());
+		String leftWingInc = String.valueOf(activeDrone.getLeftWing().getInclination());
 		GUIText textLeftWing = new GUIText("Left wing inclination = " + leftWingInc + "rad", 1, font,
 				new Vector2f(0, 0.1f), 1, false);
 		textLeftWing.setColour(1, 0, 0);
 
-		String rightWingInc = String.valueOf(drone.getRightWing().getInclination());
+		String rightWingInc = String.valueOf(activeDrone.getRightWing().getInclination());
 		GUIText textRightWing = new GUIText("Right wing inclination = " + rightWingInc + "rad", 1, font,
 				new Vector2f(0, 0.15f), 1, false);
 		textRightWing.setColour(1, 0, 0);
 
-		String horzStab = String.valueOf(drone.getHorizStabilizer().getInclination());
+		String horzStab = String.valueOf(activeDrone.getHorStabilizer().getInclination());
 		GUIText textHorzStab = new GUIText("Horizontal stabilizer inclination = " + horzStab + "rad", 1, font,
 				new Vector2f(0, 0.20f), 1, false);
 		textHorzStab.setColour(1, 0, 0);
 
-		String vertStab = String.valueOf(drone.getVertStabilizer().getInclination());
+		String vertStab = String.valueOf(activeDrone.getVertStabilizer().getInclination());
 		GUIText textVertStab = new GUIText("Vertical stabilizer inclination = " + vertStab + "rad", 1, font,
 				new Vector2f(0, 0.25f), 1f, false);
 		textVertStab.setColour(1, 0, 0);
@@ -202,7 +208,7 @@ public class MainGameLoop {
 		terrains.add(new LandingStrip(-0.5f, -1, loader, new ModelTexture(loader.loadTexture("landing"))));
 
 		Camera camera = new Camera(200, 200);
-		camera.setPosition(drone.getPosition().translate(0, 0, 0));
+		camera.setPosition(activeDrone.getPosition().translate(0, 0, 0));
 		renderer = new MasterRenderer();
 
 		// Cube Render
@@ -220,7 +226,7 @@ public class MainGameLoop {
 
 		/* INITIALIZE AUTOPILOT */
 		autopilot = AutopilotFactory.createAutopilot();
-		autopilot.simulationStarted(autopilotConfig, drone.getAutoPilotInputs());
+		autopilot.simulationStarted(autopilotConfig, activeDrone.getAutoPilotInputs());
 
 		// ***INITIALIZE BUTTONS GUI***
 		List<GuiTexture> guis = new ArrayList<>();
@@ -241,8 +247,9 @@ public class MainGameLoop {
 			e1.printStackTrace();
 		}
 		float s = (60 / i.getHeight());
-		//System.out.println(s);
 		s = 0.01f;
+		
+		MiniMap minimap = new MiniMap();
 
 		while (!Display.isCloseRequested()) {
 			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
@@ -251,29 +258,7 @@ public class MainGameLoop {
 
 			switch (currentView) {
 			case MINIMAP:
-				//MiniMap
-				GL11.glViewport(580, 0, 700, Display.getHeight());
-				GL11.glScissor(580, 0, 700, Display.getHeight());
-				GL11.glEnable(GL11.GL_SCISSOR_TEST);
-				glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-				//renderer.prepare();
-				glClearColor(1, 1, 0, 1);
-				droneTextures.clear();
-				float normalizedX = 2.0f * (float) (drone.getPosition().x * Display.getWidth() / 4000) / (float) Display.getWidth();
-				float normalizedY = -2.0f * (float) (drone.getPosition().z * Display.getHeight() / 4000) / (float) Display.getHeight();
-				System.out.println(new Vector2f(normalizedX, normalizedY));
-				GuiTexture e = new GuiTexture(loader.loadTexture("grass"), new Vector2f(normalizedX, normalizedY),
-						new Vector2f(s, s));
-				droneTextures.add(e);
-				guiRenderer.render(droneTextures);
-				
-				
-				//Drone List
-				GL11.glViewport(0, 0, 580, Display.getHeight());
-				GL11.glScissor(0, 0, 580, Display.getHeight());
-				GL11.glEnable(GL11.GL_SCISSOR_TEST);
-				glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-				glClearColor(1, 1, 1, 1);
+				minimap.render(drones, guiRenderer, loader);
 				break;
 			case MAIN:
 				// CAMERA VIEW
@@ -287,10 +272,8 @@ public class MainGameLoop {
 				GL11.glViewport(0, 0, 200, 200);
 				GL11.glScissor(0, 0, 200, 200);
 				GL11.glEnable(GL11.GL_SCISSOR_TEST);
-				// camera.setPosition(camera.getPosition().translate(0, -0.01f, -1));
 				renderEntities(camera, "Drone");
-				camera.setPosition(drone.getPosition().translate(0, 0, -5));
-				// drone.rotate(0.01f, new Vector3f(1, 0, 0));
+				camera.setPosition(activeDrone.getPosition().translate(0, 0, -5));
 
 				
 				// ***BIG SCREEN***
@@ -299,48 +282,41 @@ public class MainGameLoop {
 				GL11.glScissor(580, 0, 700, Display.getHeight());
 				GL11.glEnable(GL11.GL_SCISSOR_TEST);
 				GL11.glClearColor(135/255f, 206/255f, 235/255f, 0.6f);
-				// chaseCam.setPosition(chaseCam.getPosition().translate(0, -0.01f, -1));
 				renderEntities(chaseCam, "3D");
-				// chaseCam.setPosition(drone.getPosition().translate(0, 2, 10));
 
 				// GUI		
 				GL11.glViewport(0, 0, 1280, 700);
 				GL11.glScissor(0, 0, 1280, 700);
 				GL11.glEnable(GL11.GL_SCISSOR_TEST);
-
-				speed = String.valueOf(Math.round(drone.getAbsVelocity()));
+				
+				speed = String.valueOf(Math.round(activeDrone.getAbsVelocity()));
 				textSpeed.setString("Speed = " + speed + "m/s");
 				TextMaster.loadText(textSpeed);
 
-				xpos = String.valueOf(Math.round(drone.getPosition().x));
-				ypos = String.valueOf(Math.round(drone.getPosition().y));
-				zpos = String.valueOf(Math.round(drone.getPosition().z));
+				xpos = String.valueOf(Math.round(activeDrone.getPosition().x));
+				ypos = String.valueOf(Math.round(activeDrone.getPosition().y));
+				zpos = String.valueOf(Math.round(activeDrone.getPosition().z));
 				textPosition.setString("Position = (" + xpos + " , " + ypos + " , " + zpos + ")");
 				TextMaster.loadText(textPosition);
 
-				leftWingInc = String.valueOf(Math.round(drone.getLeftWing().getInclination() * 100.0) / 100.0);
+				leftWingInc = String.valueOf(Math.round(activeDrone.getLeftWing().getInclination() * 100.0) / 100.0);
 				textLeftWing.setString("Left wing inclination = " + leftWingInc + "rad");
 				TextMaster.loadText(textLeftWing);
 
-				rightWingInc = String.valueOf(Math.round(drone.getRightWing().getInclination() * 100.0) / 100.0);
+				rightWingInc = String.valueOf(Math.round(activeDrone.getRightWing().getInclination() * 100.0) / 100.0);
 				textRightWing.setString("Right wing inclination = " + rightWingInc + "rad");
 				TextMaster.loadText(textRightWing);
 
-				horzStab = String.valueOf(Math.round(drone.getHorizStabilizer().getInclination() * 100.0) / 100.0);
+				horzStab = String.valueOf(Math.round(activeDrone.getHorStabilizer().getInclination() * 100.0) / 100.0);
 				textHorzStab.setString("Horizontal stabilizer inclination = " + horzStab + "rad");
 				TextMaster.loadText(textHorzStab);
 
-				vertStab = String.valueOf(Math.round(drone.getVertStabilizer().getInclination() * 100.0) / 100.0);
+				vertStab = String.valueOf(Math.round(activeDrone.getVertStabilizer().getInclination() * 100.0) / 100.0);
 				textVertStab.setString("Vertical stabilizer inclination = " + vertStab + "rad");
 				TextMaster.loadText(textVertStab);
 
 				TextMaster.render();
-				TextMaster.removeText(textSpeed);
-				TextMaster.removeText(textPosition);
-				TextMaster.removeText(textLeftWing);
-				TextMaster.removeText(textRightWing);
-				TextMaster.removeText(textHorzStab);
-				TextMaster.removeText(textVertStab);
+				TextMaster.removeAll();
 
 				// ***BUTTON GUI***
 				GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
@@ -355,12 +331,12 @@ public class MainGameLoop {
 
 			// ***UPDATES***
 			float dt = DisplayManager.getFrameTimeSeconds();
-			if (!entities.isEmpty() && dt > 0.00001 && !((SimpleAutopilot) autopilot).isFinished()) {
+			if (!entities.isEmpty() && dt > 0.00001) {
 				// applyphysics rekent de krachten uit en gaat dan de kinematische waarden van
 				// de drone
 				// aanpassen op basis daarvan
 				try {
-					PhysicsEngine.applyPhysics(drone, dt);
+					PhysicsEngine.applyPhysics(activeDrone, dt);
 				} catch (DroneCrashException e) {
 					System.err.println(e);
 					System.exit(-1);
@@ -369,12 +345,18 @@ public class MainGameLoop {
 				}
 
 				// Autopilot stuff
-				AutopilotInputs inputs = drone.getAutoPilotInputs();
+				AutopilotInputs inputs = activeDrone.getAutoPilotInputs();
 				AutopilotOutputs outputs = autopilot.timePassed(inputs);
-				drone.setAutopilotOutouts(outputs);
+				activeDrone.setAutopilotOutputs(outputs);
 			}
 
 			keyInputs();
+//			while (paused) // if M is pressed, the simulation is paused untill M is pressed again
+//			{
+//				try {Thread.sleep(20);} catch (InterruptedException e) {}
+//				keyInputs();
+//			}
+			
 			removeCubes();
 			DisplayManager.updateDisplay();
 
@@ -408,7 +390,7 @@ public class MainGameLoop {
 	private static void removeCubes() {
 		List<Entity> toRemove = new ArrayList<>();
 		for (Entity e : cubes) {
-			if (getEuclidDist(drone.getPosition(), e.getPosition()) <= 3) {
+			if (getEuclidDist(activeDrone.getPosition(), e.getPosition()) <= 3) {
 				toRemove.add(e);
 			}
 		}
@@ -447,7 +429,7 @@ public class MainGameLoop {
 			mLock = true;
 		} else {
 			if (chaseCameraLocked) {
-				Vector3f.add(drone.getPosition(), new Vector3f(0, 0, 30), chaseCam.getPosition());
+				Vector3f.add(activeDrone.getPosition(), new Vector3f(0, 0, 30), chaseCam.getPosition());
 			} else {
 				chaseCam.roam();
 			}
@@ -456,6 +438,14 @@ public class MainGameLoop {
 			sLock = false;
 			mLock = false;
 		}
+		
+		if (chaseCameraLocked) {
+			Vector3f.add(activeDrone.getPosition(), new Vector3f(0, 0, 30), chaseCam.getPosition());
+		} else {
+			chaseCam.roam();
+		}
+		lLock = false;
+		sLock = false;
 	}
 
 	private static void reset() {
@@ -467,17 +457,19 @@ public class MainGameLoop {
 		chaseCameraLocked = true;
 		// viewState = ViewStates.CHASE;
 
-		entities.remove(drone);
-		RawModel droneModel = OBJLoader.loadObjModel("tree", loader);
-		TexturedModel staticDroneModel = new TexturedModel(droneModel, new ModelTexture(loader.loadTexture("tree")));
-		drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0, 20, 0)), 1, autopilotConfig,
-				new EulerPrediction(STEP_TIME));
+		entities.remove(activeDrone);
+		RawModel droneModel = OBJLoader.loadObjModel("untitled5", loader);
+		TexturedModel staticDroneModel = new TexturedModel(droneModel,
+				new ModelTexture(loader.loadTexture("untitled")));
+		activeDrone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0,
+				(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius(), 0)),
+				1f, autopilotConfig, new EulerPrediction(STEP_TIME));
 		// drone.getPose().rotate((float) -(Math.PI/2), new Vector3f(1,0,0));
-		entities.add(drone);
+		entities.add(activeDrone);
 
 		// Reset AP
 		autopilot = AutopilotFactory.createAutopilot();
-		autopilot.simulationStarted(autopilotConfig, drone.getAutoPilotInputs());
+		autopilot.simulationStarted(autopilotConfig, activeDrone.getAutoPilotInputs());
 	}
 
 	public static void generateRandomCubes() {
@@ -535,6 +527,7 @@ public class MainGameLoop {
 		JFileChooser fc = new JFileChooser();
 		float normalizedX = -1.0f + 2.0f * (float) 1200 / (float) Display.getWidth();
 		float normalizedY = 1.0f - 2.0f * (float) 20 / (float) Display.getHeight();
+		
 		System.out.println(new Vector2f(normalizedX, normalizedY));
 
 		openFile = new Button(loader, "openfile", new Vector2f(normalizedX, normalizedY), new Vector2f(0.05f, 0.05f)) {
