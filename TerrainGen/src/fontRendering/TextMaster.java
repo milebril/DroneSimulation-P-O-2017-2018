@@ -50,4 +50,8 @@ public class TextMaster {
 		renderer.cleanUp();
 	}
 
+	public static void removeAll() {
+		texts.clear();
+	}
+
 }
