@@ -220,7 +220,7 @@ public class MainGameLoop {
 
 		Cube c = new Cube(1, 1, 0);
 		RawCubeModel cube = loader.loadToVAO(c.positions, c.colors);
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -480)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 4, -20)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -560)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -640)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -720)), 1));
