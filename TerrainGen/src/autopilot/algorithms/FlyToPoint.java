@@ -38,12 +38,6 @@ public class FlyToPoint implements Algorithm {
 		float feedback;
 		float[] maxIncl;
 		
-		
-		
-		
-		
-		
-		
 		// position of the point, relative to the drone position
 		Vector3f relativePosition =  new Vector3f();
 		Vector3f.sub(getPoint(), handler.getProperties().getPosition(), relativePosition);
@@ -51,102 +45,30 @@ public class FlyToPoint implements Algorithm {
 		// calculate heading error
 		float headingTarget = 0.5f; //(float) Math.atan2(-relativePosition.x, -relativePosition.z);
 		float headingError = headingTarget - handler.getProperties().getHeading();
+		float headingFeedback = headingPID.getFeedback(headingError, dt);
+		
+		
+		
 		System.out.println();
+		System.out.println("heading error: " + headingError);
 		
-		// if heading error is small, use vert stab, else use rolll
-		if (Math.abs(headingError) < 0.0) {
-			System.out.println("- - vert stab - -");
-			feedback = vertrollPID.getFeedback(- handler.getProperties().getRoll(), dt);// limit inclination
-			float altitudeFeedback = altitudePID.getFeedback(-handler.getProperties().getVelocity().y, dt);
-
-			System.out.println("rollPID feedback: " + Math.round(feedback * 10000.0) / 10000.0);
-			System.out.println("altitude feedback: " + Math.round(altitudeFeedback * 10000.0) / 10000.0);
-			
-			maxIncl = handler.getProperties().getMaxInclinationLeftWing();
-			feedback = limitFeedback(altitudeFeedback-feedback, maxIncl[0],  maxIncl[1]);
-			handler.setLeftWingInclination(feedback);
-			maxIncl = handler.getProperties().getMaxInclinationRightWing();
-			feedback = limitFeedback(altitudeFeedback+feedback, maxIncl[0],  maxIncl[1]);
-			handler.setRightWingInclination(feedback);
-			
-			
-			feedback = vertStabPID.getFeedback(-headingError, dt);
-			maxIncl = handler.getProperties().getMaxInclinationVertStab();
-			feedback = limitFeedback(feedback, maxIncl[0],  maxIncl[1]);
-			handler.setVerStabInclination(feedback);
-			
-		} else {
-			System.out.println("- - roll - -");
-			System.out.println("heading error: " + Math.round(headingError * 10000.0) / 10000.0);
-			
-			// to get the desired heading vector, the plane has to roll
-			float rollTarget = headingPID.getFeedback(headingError, dt);
-			float rollError = rollTarget - handler.getProperties().getRoll();
-			
-			System.out.println("rollTarget: " + rollTarget + " (error: " + rollError + ")");
-			
-			// to get the required roll, use pid for left and right wing inclinations
-			feedback = rollPID.getFeedback(rollError, dt);
-			
-			System.out.println("rollPID feedback: " + Math.round(feedback * 10000.0) / 10000.0);
-			
-			// alt PID
-			float altError = handler.getProperties().getY() - 40;
-			float altPID = altitudePID.getFeedback(altError, dt);
-			
-			System.out.println("altFeedback: " + altPID);
-			System.out.println();
-						
-			
-			
-			// limit inclination
-			maxIncl = handler.getProperties().getMaxInclinationLeftWing();
-			float left = limitFeedback(-feedback + altPID, maxIncl[0],  maxIncl[1]);
-			left = smooth(left, handler.getLeftWingInclination(), dt);
-			maxIncl = handler.getProperties().getMaxInclinationRightWing();
-			float right = limitFeedback(feedback + altPID, maxIncl[0],  maxIncl[1]);
-			right = smooth(right, handler.getRightWingInclination(), dt);
-			
-			handler.setLeftWingInclination(left);
-			handler.setRightWingInclination(right);
-			
-			
-			// get resulting momentum inbalance (to counter adverse yaw)
-			float momentum = getMomentumInbalance(handler, left, right);
-			// force the vert stab has to excert in the negative x direction (of drone frame)
-			float requiredForce = momentum / handler.getProperties().getTailSize();
-			// calculate vert stab inclination required for this force
-			
-			
-			System.out.println("requiredForce: " + requiredForce);
-			maxIncl = handler.getProperties().getMaxInclinationVertStab();
-			feedback = limitFeedback(-0.003f * requiredForce, maxIncl[0],  maxIncl[1]);
-			handler.setVerStabInclination(feedback);
-			
-			
-			
-			// horstab
-			float pitchError = handler.getProperties().getPitch();
-			float pitchFeedback = pitchPID.getFeedback(pitchError, dt);
-			
-			maxIncl = handler.getProperties().getMaxInclinationRightWing();
-			pitchFeedback = limitFeedback(-10*pitchFeedback, maxIncl[0],  maxIncl[1]);
-			
-			System.out.println("\npitchError:" + pitchError);
-			System.out.println("pitchFeedback:" + pitchFeedback);
-			handler.setHorStabInclination(0.75f*pitchFeedback);
-			
-			
-			
-		}
-		
-		// HORIZONTAL STABILIZER -> pitch op 0 deg houden
-		float pitch = 0.0f;
+		// pitch
+		float pitchTarget = 0;
+		float pitchError = pitchTarget - handler.getProperties().getPitch();
+		feedback = pitchPID.getFeedback(pitchError, dt);
 		maxIncl = handler.getProperties().getMaxInclinationHorStab();
-		feedback = horStabPID.getFeedback(handler.getProperties().getPitch() - pitch, dt);
-		feedback = limitFeedback(feedback, maxIncl[0],  maxIncl[1]);
-		handler.setHorStabInclination(feedback);
+		feedback = limitFeedback(feedback, maxIncl[0], maxIncl[1]);
+		handler.setHorStabInclination(-feedback);
 		
+		// altitude
+		float altitudeTarget = 22;
+		float altitudeError = altitudeTarget - handler.getProperties().getY();
+		float altitudeFeedback = altitudePID.getFeedback(altitudeError, dt);
+		
+		maxIncl = handler.getProperties().getMaxInclinationLeftWing();
+		altitudeFeedback = limitFeedback(altitudeFeedback, maxIncl[0], maxIncl[1]);
+		handler.setLeftWingInclination(altitudeFeedback);
+		handler.setRightWingInclination(altitudeFeedback);
 		
 		
 		
@@ -157,7 +79,7 @@ public class FlyToPoint implements Algorithm {
 		System.out.println();
 		System.out.println("thrust: " + Math.min(Math.max(0, cruiseForce + feedback), handler.getProperties().getMaxThrust()));
 		
-		boolean reached = false;
+		boolean reached = true;
 		// if the point is reached activate next algorithm
 		if (reached) {
 			handler.setAlgorithm(getNextAlgorithm());
@@ -165,14 +87,10 @@ public class FlyToPoint implements Algorithm {
 	}
 	
 	private PID thrustPID = new PID(1000, 400, 50, 2000);
-	private PID rollPID = new PID(1f, 0.05f, 0.0f, (float) (30 * Math.PI / 180));
-	private PID headingPID = new PID(2f, 0.1f, 0.1f, maxRoll);
-	private PID horStabPID = new PID(4, 1, 1, 2);
 	private PID altitudePID = new PID(0.1f, 1f, 0.0f, (float) (10 * Math.PI / 180));
-	private PID vertStabPID = new PID(1.5f, 0.7f, 0.2f,(float) (15 * Math.PI / 180));
-	private PID vertrollPID = new PID(1.5f, 0.2f, 0.1f, (float) (30 * Math.PI / 180));
-
-	private PID pitchPID = new PID(1f, 0.1f, 0.01f, (float) (10 * Math.PI / 180));
+	private PID pitchPID = new PID(1f, 0.5f, 0.01f, (float) (10 * Math.PI / 180));
+	private PID rollPID = new PID(1f, 0.2f, 0.05f,  (float) (45 * Math.PI / 180));
+	private PID headingPID = new PID(1f, 0.2f, 0.05f,  (float) (45 * Math.PI / 180));
 	
 	
 	@Override
