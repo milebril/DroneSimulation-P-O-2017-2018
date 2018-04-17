@@ -538,7 +538,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	public AutopilotInputs getAutoPilotInputs() {
 
 		return new AutopilotInputs() {
-			public byte[] getImage() { return camera.takeByteArraySnapshot();}
+			public byte[] getImage() { return null;} //TODO: is null zetten hier voldoende?
 			
 			public float getX() { return getPosition().x; }
 			public float getY() { return getPosition().y; }
