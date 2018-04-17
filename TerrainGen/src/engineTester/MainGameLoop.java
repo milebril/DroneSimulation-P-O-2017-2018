@@ -23,6 +23,7 @@ import physicsEngine.DroneCrashException;
 import physicsEngine.MaxAoAException;
 import physicsEngine.PhysicsEngine;
 import physicsEngine.approximationMethods.EulerPrediction;
+import prevAutopilot.SimpleAutopilot;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -36,8 +37,12 @@ import org.lwjgl.util.vector.Vector3f;
 import org.newdawn.slick.TrueTypeFont;
 import org.opencv.core.Core;
 
-import autoPilotJar.SimpleAutopilot;
-import autopilot.AutopilotConfigReader;
+import autopilot.interfaces.Autopilot;
+import autopilot.interfaces.AutopilotConfig;
+import autopilot.interfaces.AutopilotFactory;
+import autopilot.interfaces.AutopilotInputs;
+import autopilot.interfaces.AutopilotOutputs;
+import autopilot.interfaces.config.AutopilotConfigReader;
 import renderEngine.CubeRenderer;
 import renderEngine.DisplayManager;
 import renderEngine.EntityRenderer;
@@ -61,11 +66,6 @@ import fontRendering.TextMaster;
 import guis.Button;
 import guis.GuiRenderer;
 import guis.GuiTexture;
-import interfaces.Autopilot;
-import interfaces.AutopilotConfig;
-import interfaces.AutopilotFactory;
-import interfaces.AutopilotInputs;
-import interfaces.AutopilotOutputs;
 
 public class MainGameLoop {
 
@@ -346,6 +346,12 @@ public class MainGameLoop {
 			}
 
 			keyInputs();
+			while (paused) // if M is pressed, the simulation is paused untill M is pressed again
+			{
+				try {Thread.sleep(20);} catch (InterruptedException e) {}
+				keyInputs();
+			}
+			
 			removeCubes();
 			DisplayManager.updateDisplay();
 
@@ -427,6 +433,15 @@ public class MainGameLoop {
 			sLock = false;
 			mLock = false;
 		}
+		
+		if (chaseCameraLocked) {
+			Vector3f.add(drone.getPosition(), new Vector3f(0, 0, 30), chaseCam.getPosition());
+		} else {
+			chaseCam.roam();
+		}
+		lLock = false;
+		oLock = false;
+		sLock = false;
 	}
 
 	private static void reset() {

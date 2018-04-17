@@ -20,10 +20,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import autopilot.AutopilotConfigReader;
-import autopilot.AutopilotConfigValues;
-import autopilot.AutopilotConfigWriter;
-import interfaces.AutopilotConfig;
+import autopilot.interfaces.AutopilotConfig;
+import autopilot.interfaces.config.AutopilotConfigReader;
+import autopilot.interfaces.config.AutopilotConfigValues;
+import autopilot.interfaces.config.AutopilotConfigWriter;
 
 public class generateConfigFile extends JFrame{
 

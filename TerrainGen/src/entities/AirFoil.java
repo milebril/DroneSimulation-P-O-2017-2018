@@ -29,6 +29,8 @@ public class AirFoil {
 		this.airFoilLiftSlope = wingLiftSlope;
 	}
 	
+	public String name = "unnamed";
+	
 	// DRONE
 	
 	/**
@@ -208,9 +210,11 @@ public class AirFoil {
 		float a = Vector3f.dot(projectedAirspeedVectorD, normalD);
 		float b = Vector3f.dot(projectedAirspeedVectorD, attackVectorD);
 		
-		// TODO: is aoa juist ?
 		float aoa = (float) - Math.atan2(a, b);
 
+		if (aoa < -Math.PI) aoa += Math.PI;
+		if (Math.PI < aoa) aoa -= Math.PI;
+		
 		// calculate the lift force N . liftSlope . AOA . s^2, where N is the
 		// normal, AOA is the angle of attack, and s is the projected airspeed
 		float airspeedSquared = projectedAirspeedVectorD.lengthSquared();
@@ -219,9 +223,9 @@ public class AirFoil {
 				);
 		
 		// if max AoA is exceeded and the liftForce is greater than 50N, throw exception
-//		if (aoa > Math.toRadians(drone.getMaxAOA()) && liftForceD.length() > 50) {
-//			throw new MaxAoAException("Error Max AoA exceeded!");
-//		} TODO
+		if (aoa > Math.toRadians(drone.getMaxAOA()) && liftForceD.length() > 50) {
+			throw new MaxAoAException("Error Max AoA exceeded by " + name + "! Airfoil inclination: " + this.getInclination() + " AoA: " + aoa + " max AoA: " + Math.toRadians(drone.getMaxAOA()));
+		}
 		
 		return liftForceD;
 	}
