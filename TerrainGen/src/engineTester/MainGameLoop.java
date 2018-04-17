@@ -184,7 +184,7 @@ public class MainGameLoop {
 				new Vector2f(0, 0.15f), 1, false);
 		textRightWing.setColour(1, 0, 0);
 
-		String horzStab = String.valueOf(activeDrone.getHorizStabilizer().getInclination());
+		String horzStab = String.valueOf(activeDrone.getHorStabilizer().getInclination());
 		GUIText textHorzStab = new GUIText("Horizontal stabilizer inclination = " + horzStab + "rad", 1, font,
 				new Vector2f(0, 0.20f), 1, false);
 		textHorzStab.setColour(1, 0, 0);
@@ -302,7 +302,7 @@ public class MainGameLoop {
 				textRightWing.setString("Right wing inclination = " + rightWingInc + "rad");
 				TextMaster.loadText(textRightWing);
 
-				horzStab = String.valueOf(Math.round(activeDrone.getHorizStabilizer().getInclination() * 100.0) / 100.0);
+				horzStab = String.valueOf(Math.round(activeDrone.getHorStabilizer().getInclination() * 100.0) / 100.0);
 				textHorzStab.setString("Horizontal stabilizer inclination = " + horzStab + "rad");
 				TextMaster.loadText(textHorzStab);
 
@@ -326,7 +326,7 @@ public class MainGameLoop {
 
 			// ***UPDATES***
 			float dt = DisplayManager.getFrameTimeSeconds();
-			if (!entities.isEmpty() && dt > 0.00001 && !((SimpleAutopilot) autopilot).isFinished()) {
+			if (!entities.isEmpty() && dt > 0.00001) {
 				// applyphysics rekent de krachten uit en gaat dan de kinematische waarden van
 				// de drone
 				// aanpassen op basis daarvan
@@ -342,15 +342,15 @@ public class MainGameLoop {
 				// Autopilot stuff
 				AutopilotInputs inputs = activeDrone.getAutoPilotInputs();
 				AutopilotOutputs outputs = autopilot.timePassed(inputs);
-				activeDrone.setAutopilotOutouts(outputs);
+				activeDrone.setAutopilotOutputs(outputs);
 			}
 
 			keyInputs();
-			while (paused) // if M is pressed, the simulation is paused untill M is pressed again
-			{
-				try {Thread.sleep(20);} catch (InterruptedException e) {}
-				keyInputs();
-			}
+//			while (paused) // if M is pressed, the simulation is paused untill M is pressed again
+//			{
+//				try {Thread.sleep(20);} catch (InterruptedException e) {}
+//				keyInputs();
+//			}
 			
 			removeCubes();
 			DisplayManager.updateDisplay();
@@ -435,12 +435,11 @@ public class MainGameLoop {
 		}
 		
 		if (chaseCameraLocked) {
-			Vector3f.add(drone.getPosition(), new Vector3f(0, 0, 30), chaseCam.getPosition());
+			Vector3f.add(activeDrone.getPosition(), new Vector3f(0, 0, 30), chaseCam.getPosition());
 		} else {
 			chaseCam.roam();
 		}
 		lLock = false;
-		oLock = false;
 		sLock = false;
 	}
 
