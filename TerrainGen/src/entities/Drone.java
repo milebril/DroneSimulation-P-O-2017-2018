@@ -100,7 +100,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	// AUTOPILOT
 	
 	// Autopilot
-	private static Autopilot autopilot;
+	private Autopilot autopilot;
 	
 	public Autopilot getAutopilot() {
 		return this.autopilot;
