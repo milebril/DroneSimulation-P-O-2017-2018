@@ -16,6 +16,7 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 
+import models.Airport;
 import models.RawCubeModel;
 import models.RawModel;
 import models.TexturedModel;
@@ -113,6 +114,8 @@ public class MainGameLoop {
 
 	// ViewEnum
 	private static ViewEnum currentView = ViewEnum.MAIN;
+
+	private static Airport a;
 	
 	//
 
@@ -154,11 +157,11 @@ public class MainGameLoop {
 		activeDrone = droneOne;
 		entities.add(droneOne);
 		drones.add(droneOne);
-		RawModel gateModel = OBJLoader.loadObjModel("gate10", loader);
-		TexturedModel staticGateModel = new TexturedModel(gateModel,
-				new ModelTexture(loader.loadTexture("gate.blauw")));
-		Entity gate = new Entity(staticGateModel, new Matrix4f().translate(new Vector3f(0, 1, -40)), 1);
-		entities.add(gate);
+//		RawModel gateModel = OBJLoader.loadObjModel("gate10", loader);
+//		TexturedModel staticGateModel = new TexturedModel(gateModel,
+//				new ModelTexture(loader.loadTexture("gate.blauw")));
+//		Entity gate = new Entity(staticGateModel, new Matrix4f().translate(new Vector3f(0, 1, -40)), 1);
+//		entities.add(gate);
 
 		// ***INITIALIZE CHASE-CAM***
 		chaseCam = new Camera();
@@ -205,7 +208,7 @@ public class MainGameLoop {
 		terrains.add(new Terrain(-1, -1, loader, new ModelTexture(loader.loadTexture("checker"))));
 		terrains.add(new Terrain(0, 0, loader, new ModelTexture(loader.loadTexture("checker"))));
 		terrains.add(new Terrain(-1, 0, loader, new ModelTexture(loader.loadTexture("checker"))));
-		terrains.add(new LandingStrip(-0.5f, -1, loader, new ModelTexture(loader.loadTexture("landing"))));
+//		terrains.add(new LandingStrip(-0.5f, -1, loader, new ModelTexture(loader.loadTexture("landing"))));
 
 		Camera camera = new Camera(200, 200);
 		camera.setPosition(activeDrone.getPosition().translate(0, 0, 0));
@@ -251,6 +254,8 @@ public class MainGameLoop {
 		
 		MiniMap minimap = new MiniMap();
 
+		a = new Airport(0, -100);
+		
 		while (!Display.isCloseRequested()) {
 			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
 				camera.takeSnapshot();
@@ -377,6 +382,9 @@ public class MainGameLoop {
 		for (Entity entity : entities) {
 			renderer.processEntity(entity);
 		}
+		
+		a.render(renderer, chaseCam, light);
+		
 		renderer.render(light, camera);
 
 		cubeShader.start();
