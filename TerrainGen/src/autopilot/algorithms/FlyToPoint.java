@@ -157,7 +157,7 @@ public class FlyToPoint implements Algorithm {
 		System.out.println();
 		System.out.println("thrust: " + Math.min(Math.max(0, cruiseForce + feedback), handler.getProperties().getMaxThrust()));
 		
-		boolean reached = false;
+		boolean reached = true;
 		// if the point is reached activate next algorithm
 		if (reached) {
 			handler.setAlgorithm(getNextAlgorithm());

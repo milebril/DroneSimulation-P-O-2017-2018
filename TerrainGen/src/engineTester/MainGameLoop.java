@@ -148,13 +148,20 @@ public class MainGameLoop {
 		// ***INITIALIZE DRONEVIEW***
 		RawModel droneModel = OBJLoader.loadObjModel("untitled5", loader);
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,
-				new ModelTexture(loader.loadTexture("untitled")));
+				new ModelTexture(loader.loadTexture("untitled")));	
+		
 		Drone droneOne = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0,
 				(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius() + 20, 0)),
 				1f, autopilotConfig, new EulerPrediction(STEP_TIME));
+		
+		Drone droneTwo = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0,
+				(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius() + 20, 0)),
+				1f, autopilotConfig, new EulerPrediction(STEP_TIME));
+		
 		activeDrone = droneOne;
 		entities.add(droneOne);
 		drones.add(droneOne);
+		drones.add(droneTwo);
 
 		// ***INITIALIZE CHASE-CAM***
 		chaseCam = new Camera();
@@ -220,9 +227,6 @@ public class MainGameLoop {
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -800)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -880)), 1));
 
-		/* INITIALIZE AUTOPILOT */
-		autopilot = AutopilotFactory.createAutopilot();
-		autopilot.simulationStarted(autopilotConfig, activeDrone.getAutoPilotInputs());
 
 		// ***INITIALIZE BUTTONS GUI***
 		List<GuiTexture> guis = new ArrayList<>();
@@ -339,8 +343,7 @@ public class MainGameLoop {
 
 						// fysica toepassen
 						// applyphysics rekent de krachten uit en gaat dan de kinematische waarden van
-						// de drone
-						// aanpassen op basis daarvan
+						// de drone aanpassen op basis daarvan
 						try {
 							PhysicsEngine.applyPhysics(d, dt);
 						} catch (DroneCrashException e) {
@@ -376,7 +379,7 @@ public class MainGameLoop {
 					public void run() {
 						// Autopilot stuff
 						AutopilotInputs inputs = d.getAutoPilotInputs();
-						AutopilotOutputs outputs = autopilot.timePassed(inputs);
+						AutopilotOutputs outputs = d.getAutopilot().timePassed(inputs);
 						d.setAutopilotOutputs(outputs);
 					}
 				});

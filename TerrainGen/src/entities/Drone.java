@@ -7,7 +7,9 @@ import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
+import autopilot.interfaces.Autopilot;
 import autopilot.interfaces.AutopilotConfig;
+import autopilot.interfaces.AutopilotFactory;
 import autopilot.interfaces.AutopilotInputs;
 import autopilot.interfaces.AutopilotOutputs;
 import models.RawModel;
@@ -31,6 +33,10 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	public Drone(TexturedModel model, Matrix4f pose, float scale,
 				AutopilotConfig cfg, PredictionMethod predictionMethod) {
 		super(model, pose, scale);
+		
+		/* INITIALIZE AUTOPILOT */
+		setAutopilot(AutopilotFactory.createAutopilot());
+		getAutopilot().simulationStarted(cfg, getAutoPilotInputs());
 		
 		this.linearVelocityW = new Vector3f(0.0f,0.0f, -50.0f);
 
@@ -89,6 +95,19 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		this(null, pose, 1f, autopilotConfig, new EulerPrediction(0.01f));
 		this.setLinearVelocity(velocity);
 		this.setAngularVelocity(rotVel);
+	}
+	
+	// AUTOPILOT
+	
+	// Autopilot
+	private static Autopilot autopilot;
+	
+	public Autopilot getAutopilot() {
+		return this.autopilot;
+	}
+	
+	private void setAutopilot(Autopilot ap) {
+		this.autopilot = ap;
 	}
 	
 	// PREDICTION METHOD
