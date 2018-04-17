@@ -327,15 +327,41 @@ public class MainGameLoop {
 			// ***UPDATES***
 			float dt = DisplayManager.getFrameTimeSeconds();
 			if (!entities.isEmpty() && dt > 0.00001) {
-				// applyphysics rekent de krachten uit en gaat dan de kinematische waarden van
-				// de drone
-				// aanpassen op basis daarvan
+				
+				//De lijst waarin alle threads gestoken worden om later te checken of ze klaar zijn.
+				ArrayList<Thread> threadList = new ArrayList<Thread>();
+				
+				//Maak een thread aan voor elke drone
+				for(Drone d : drones) {
+				Thread thread = new Thread(new Runnable() {
+					@Override
+					public void run() {
+
+						// fysica toepassen
+						// applyphysics rekent de krachten uit en gaat dan de kinematische waarden van
+						// de drone
+						// aanpassen op basis daarvan
+						try {
+							PhysicsEngine.applyPhysics(d, dt);
+						} catch (DroneCrashException e) {
+							System.err.println(e);
+							System.exit(-1);
+						} catch (MaxAoAException e) {
+							e.printStackTrace();
+						}
+					}
+				});
+				
+					thread.start();
+					threadList.add(thread);
+				}
+				
+				//De code gaat niet verder totdat alle voordien aangemaakt threads klaar zijn
 				try {
-					PhysicsEngine.applyPhysics(activeDrone, dt);
-				} catch (DroneCrashException e) {
-					System.err.println(e);
-					System.exit(-1);
-				} catch (MaxAoAException e) {
+					for(Thread t : threadList)
+						t.join();
+				} catch (InterruptedException e) {
+					
 					e.printStackTrace();
 				}
 
