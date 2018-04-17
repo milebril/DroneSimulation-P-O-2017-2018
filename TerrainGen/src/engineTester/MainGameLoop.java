@@ -351,15 +351,15 @@ public class MainGameLoop {
 						}
 					}
 				});
-				
 					thread.start();
 					threadList.add(thread);
 				}
-				
+
 				//De code gaat niet verder totdat alle voordien aangemaakt threads klaar zijn
 				try {
-					for(Thread t : threadList)
+					for(Thread t : threadList) {
 						t.join();
+					}
 				} catch (InterruptedException e) {
 					
 					e.printStackTrace();
