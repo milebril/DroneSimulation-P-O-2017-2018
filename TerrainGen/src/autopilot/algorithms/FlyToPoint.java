@@ -81,7 +81,6 @@ public class FlyToPoint implements Algorithm {
 			
 			// to get the desired heading vector, the plane has to roll
 			float rollTarget = headingPID.getFeedback(headingError, dt);
-			
 			float rollError = rollTarget - handler.getProperties().getRoll();
 			
 			System.out.println("rollTarget: " + rollTarget + " (error: " + rollError + ")");
@@ -91,12 +90,21 @@ public class FlyToPoint implements Algorithm {
 			
 			System.out.println("rollPID feedback: " + Math.round(feedback * 10000.0) / 10000.0);
 			
+			// alt PID
+			float altError = handler.getProperties().getY() - 40;
+			float altPID = altitudePID.getFeedback(altError, dt);
+			
+			System.out.println("altFeedback: " + altPID);
+			System.out.println();
+						
+			
+			
 			// limit inclination
 			maxIncl = handler.getProperties().getMaxInclinationLeftWing();
-			float left = limitFeedback(-feedback, maxIncl[0],  maxIncl[1]);
+			float left = limitFeedback(-feedback + altPID, maxIncl[0],  maxIncl[1]);
 			left = smooth(left, handler.getLeftWingInclination(), dt);
 			maxIncl = handler.getProperties().getMaxInclinationRightWing();
-			float right = limitFeedback(feedback, maxIncl[0],  maxIncl[1]);
+			float right = limitFeedback(feedback + altPID, maxIncl[0],  maxIncl[1]);
 			right = smooth(right, handler.getRightWingInclination(), dt);
 			
 			handler.setLeftWingInclination(left);
@@ -109,10 +117,27 @@ public class FlyToPoint implements Algorithm {
 			float requiredForce = momentum / handler.getProperties().getTailSize();
 			// calculate vert stab inclination required for this force
 			
+			
 			System.out.println("requiredForce: " + requiredForce);
 			maxIncl = handler.getProperties().getMaxInclinationVertStab();
 			feedback = limitFeedback(-0.003f * requiredForce, maxIncl[0],  maxIncl[1]);
 			handler.setVerStabInclination(feedback);
+			
+			
+			
+			// horstab
+			float pitchError = handler.getProperties().getPitch();
+			float pitchFeedback = pitchPID.getFeedback(pitchError, dt);
+			
+			maxIncl = handler.getProperties().getMaxInclinationRightWing();
+			pitchFeedback = limitFeedback(-10*pitchFeedback, maxIncl[0],  maxIncl[1]);
+			
+			System.out.println("\npitchError:" + pitchError);
+			System.out.println("pitchFeedback:" + pitchFeedback);
+			handler.setHorStabInclination(0.75f*pitchFeedback);
+			
+			
+			
 		}
 		
 		// HORIZONTAL STABILIZER -> pitch op 0 deg houden
@@ -146,6 +171,9 @@ public class FlyToPoint implements Algorithm {
 	private PID altitudePID = new PID(0.1f, 1f, 0.0f, (float) (10 * Math.PI / 180));
 	private PID vertStabPID = new PID(1.5f, 0.7f, 0.2f,(float) (15 * Math.PI / 180));
 	private PID vertrollPID = new PID(1.5f, 0.2f, 0.1f, (float) (30 * Math.PI / 180));
+
+	private PID pitchPID = new PID(1f, 0.1f, 0.01f, (float) (10 * Math.PI / 180));
+	
 	
 	@Override
 	public String getName() {
