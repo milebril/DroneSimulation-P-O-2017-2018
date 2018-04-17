@@ -155,11 +155,12 @@ public class MainGameLoop {
 				1f, autopilotConfig, new EulerPrediction(STEP_TIME));
 		
 		Drone droneTwo = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0,
-				(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius() + 20, 0)),
+				(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius() + 20, 20)),
 				1f, autopilotConfig, new EulerPrediction(STEP_TIME));
 		
 		activeDrone = droneOne;
 		entities.add(droneOne);
+		entities.add(droneTwo);
 		drones.add(droneOne);
 		drones.add(droneTwo);
 
@@ -399,12 +400,6 @@ public class MainGameLoop {
 			}
 
 			keyInputs();
-			// while (paused) // if M is pressed, the simulation is paused untill M is
-			// pressed again
-			// {
-			// try {Thread.sleep(20);} catch (InterruptedException e) {}
-			// keyInputs();
-			// }
 
 			removeCubes();
 			DisplayManager.updateDisplay();
