@@ -21,7 +21,7 @@ public class Camera {
 	public float yaw;
 	private float roll;
 	
-	private float distance = 0.2f;
+	private float distance = 1.0f;
 	private float mouseSensitivity = 0.001f;
 	
 	private int snapshotWidth;

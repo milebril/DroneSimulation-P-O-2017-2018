@@ -12,6 +12,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
@@ -115,13 +119,14 @@ public class MainGameLoop {
 	// ViewEnum
 	private static ViewEnum currentView = ViewEnum.MAIN;
 
-	//
+	// ThreadPool
+	private static ExecutorService pool = Executors.newFixedThreadPool(10); // creating a pool of 5 threads
 
 	private enum ViewEnum {
 		MAIN, MINIMAP
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException, ExecutionException {
 		// Needed to load openCV
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
@@ -148,16 +153,24 @@ public class MainGameLoop {
 		// ***INITIALIZE DRONEVIEW***
 		RawModel droneModel = OBJLoader.loadObjModel("untitled5", loader);
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,
-				new ModelTexture(loader.loadTexture("untitled")));	
-		
-		Drone droneOne = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0,
-				(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius() + 20, 0)),
+				new ModelTexture(loader.loadTexture("untitled")));
+
+		Drone droneOne = new Drone(staticDroneModel,
+				new Matrix4f()
+						.translate(new Vector3f(0,
+								(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
+										+ autopilotConfig.getTyreRadius() + 20,
+								0)),
 				1f, autopilotConfig, new EulerPrediction(STEP_TIME));
-		
-		Drone droneTwo = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0,
-				(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius() + 20, 20)),
+
+		Drone droneTwo = new Drone(staticDroneModel,
+				new Matrix4f()
+						.translate(new Vector3f(0,
+								(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
+										+ autopilotConfig.getTyreRadius() + 20,
+								20)),
 				1f, autopilotConfig, new EulerPrediction(STEP_TIME));
-		
+
 		activeDrone = droneOne;
 		entities.add(droneOne);
 		entities.add(droneTwo);
@@ -227,7 +240,6 @@ public class MainGameLoop {
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -720)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -800)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -880)), 1));
-
 
 		// ***INITIALIZE BUTTONS GUI***
 		List<GuiTexture> guis = new ArrayList<>();
@@ -332,70 +344,65 @@ public class MainGameLoop {
 			// ***UPDATES***
 			float dt = DisplayManager.getFrameTimeSeconds();
 			if (!entities.isEmpty() && dt > 0.00001) {
-				
-				//De lijst waarin alle threads gestoken worden om later te checken of ze klaar zijn.
-				ArrayList<Thread> threadList = new ArrayList<Thread>();
-				
-				//Maak een thread aan voor elke drone
-				for(Drone d : drones) {
-				Thread physicsThread = new Thread(new Runnable() {
-					@Override
-					public void run() {
 
-						// fysica toepassen
-						// applyphysics rekent de krachten uit en gaat dan de kinematische waarden van
-						// de drone aanpassen op basis daarvan
-						try {
-							PhysicsEngine.applyPhysics(d, dt);
-						} catch (DroneCrashException e) {
-							System.err.println(e);
-							System.exit(-1);
-						} catch (MaxAoAException e) {
-							e.printStackTrace();
+				// De lijst waarin alle threads gestoken worden om later te checken of ze klaar
+				// zijn.
+				ArrayList<Future<?>> futureList = new ArrayList<Future<?>>();
+
+				// Maak een thread aan voor elke drone
+				for (Drone d : drones) {
+					Runnable toRun = new Runnable() {
+						@Override
+						public void run() {
+
+							// fysica toepassen
+							// applyphysics rekent de krachten uit en gaat dan de kinematische waarden van
+							// de drone aanpassen op basis daarvan
+							try {
+								PhysicsEngine.applyPhysics(d, dt);
+							} catch (DroneCrashException e) {
+								System.err.println(e);
+								System.exit(-1);
+							} catch (MaxAoAException e) {
+								e.printStackTrace();
+							}
 						}
-					}
-				});
-					physicsThread.start();
-					threadList.add(physicsThread);
+					};
+					System.out.print(" before run ");
+					Future<?> fut = pool.submit(toRun);
+					futureList.add(fut);
+					System.out.print(" after run ");
+				}
+				
+				// De code gaat niet verder totdat alle voordien aangemaakt threads klaar zijn
+				// future.get() -> Waits if necessary for the computation to complete, and then retrieves its result.
+				for(Future<?> fut : futureList) {
+					fut.get();
 				}
 
-				//De code gaat niet verder totdat alle voordien aangemaakt threads klaar zijn
-				try {
-					for(Thread t : threadList) {
-						t.join();
-					}
-				} catch (InterruptedException e) {
-					
-					e.printStackTrace();
+				ArrayList<Future<?>> futureList2 = new ArrayList<Future<?>>();
+
+				// Maak een thread aan voor elke drone
+				for (Drone d : drones) {
+					Runnable toRun = new Runnable() {
+						@Override
+						public void run() {
+							// Autopilot stuff
+							AutopilotInputs inputs = d.getAutoPilotInputs();
+							AutopilotOutputs outputs = d.getAutopilot().timePassed(inputs);
+							d.setAutopilotOutputs(outputs);
+						}
+					};
+
+					Future<?> fut = pool.submit(toRun);
+					futureList2.add(fut);
+	
 				}
 
-				
-				
-				ArrayList<Thread> threadList2 = new ArrayList<Thread>();
-				
-				//Maak een thread aan voor elke drone
-				for(Drone d : drones) {
-				Thread autopilotThread = new Thread(new Runnable() {
-					@Override
-					public void run() {
-						// Autopilot stuff
-						AutopilotInputs inputs = d.getAutoPilotInputs();
-						AutopilotOutputs outputs = d.getAutopilot().timePassed(inputs);
-						d.setAutopilotOutputs(outputs);
-					}
-				});
-					autopilotThread.start();
-					threadList2.add(autopilotThread);
-				}
-
-				//De code gaat niet verder totdat alle voordien aangemaakt threads klaar zijn
-				try {
-					for(Thread t : threadList2) {
-						t.join();
-					}
-				} catch (InterruptedException e) {
-					
-					e.printStackTrace();
+				// De code gaat niet verder totdat alle voordien aangemaakt threads klaar zijn
+				// future.get() -> Waits if necessary for the computation to complete, and then retrieves its result.
+				for(Future<?> fut : futureList2) {
+					fut.get();
 				}
 			}
 
