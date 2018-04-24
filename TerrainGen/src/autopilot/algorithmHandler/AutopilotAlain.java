@@ -1,9 +1,6 @@
 package autopilot.algorithmHandler;
 
-import autopilot.algorithms.Algorithm;
-import autopilot.algorithms.PathFinder;
-import autopilot.algorithms.SpeedUp;
-import autopilot.algorithms.Takeoff;
+import autopilot.algorithms.*;
 import autopilot.interfaces.Autopilot;
 import autopilot.interfaces.AutopilotConfig;
 import autopilot.interfaces.AutopilotInputs;
@@ -24,7 +21,7 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 		float[] y = new float[]{  50,   55};
 		float[] z = new float[]{-400, -800};
 		MyPath path = new MyPath(x, y, z);
-		setAlgorithm(new PathFinder(path));
+		setAlgorithm(new FlyToHeight(50f));
 	}
 	
 	// AlgorithmHandler interface

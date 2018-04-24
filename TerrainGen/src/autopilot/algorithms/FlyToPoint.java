@@ -65,8 +65,8 @@ public class FlyToPoint implements Algorithm {
 		System.out.println("rollError: " + rollError);
 		
 		
-		float deltaRoll = limitFeedback(rollError, -0.05f, 0.05f);
-		deltaRoll = rollPID.getFeedback(rollError, dt);
+		float deltaRoll = rollPID.getFeedback(rollError, dt);
+		deltaRoll = limitFeedback(rollError, -0.05f, 0.05f);
 		System.out.println("deltaRoll: " + deltaRoll + " rad");
 		
 		
