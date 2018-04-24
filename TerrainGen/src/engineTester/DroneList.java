@@ -7,6 +7,7 @@ import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.border.EmptyBorder;
 
@@ -14,6 +15,9 @@ import entities.Drone;
 
 import javax.swing.JList;
 import javax.swing.JLabel;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class DroneList extends JFrame {
 
@@ -35,6 +39,11 @@ public class DroneList extends JFrame {
 //		});
 //	}
 
+	//Labels;
+	JLabel lblPosition;
+	JLabel lblSpeed;
+	JLabel lblAngularSpeed;
+	
 	/**
 	 * Create the frame.
 	 */
@@ -47,28 +56,43 @@ public class DroneList extends JFrame {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
-		
-		JList list = new JList();
+	
+		JList<String> list = new JList<String>();
 		list.setBounds(6, 6, 116, 192);
-		
-		ListModel listModel = new DefaultListModel<String>();
+		DefaultListModel<String> listModel = new DefaultListModel<String>();
 		for (Drone d : drones) {
 			listModel.addElement(d.getName());
 		}
 		list.setModel(listModel);
+		JScrollPane pane = new JScrollPane(list);
+		pane.setBounds(6, 6, 116, 192);
+		contentPane.add(pane);
 		
-		contentPane.add(list);
-		
-		JLabel lblPosition = new JLabel("Position");
+		lblPosition = new JLabel("Position");
 		lblPosition.setBounds(6, 210, 283, 16);
 		contentPane.add(lblPosition);
 		
-		JLabel lblSpeed = new JLabel("Speed");
-		lblSpeed.setBounds(6, 238, 61, 16);
+		lblSpeed = new JLabel("Speed");
+		lblSpeed.setBounds(6, 238, 252, 16);
 		contentPane.add(lblSpeed);
 		
-		JLabel lblAngularSpeed = new JLabel("Angular speed");
-		lblAngularSpeed.setBounds(6, 266, 116, 16);
+		lblAngularSpeed = new JLabel("Angular speed");
+		lblAngularSpeed.setBounds(6, 266, 493, 16);
 		contentPane.add(lblAngularSpeed);
+		
+		JButton btnChoose = new JButton("Choose");
+		btnChoose.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				MainGameLoop.setActiveDrone(drones.get(list.getSelectedIndex()));
+			}
+		});
+		btnChoose.setBounds(134, 6, 117, 29);
+		contentPane.add(btnChoose);
+	}
+	
+	public void updateLabels(Drone drone) {
+		lblPosition.setText("Position: (" + drone.getPosition().x + ", " + drone.getPosition().y + ", " + drone.getPosition().z + ")");
+		lblSpeed.setText("Speed: (" + drone.getLinearVelocity().x + ", " + drone.getLinearVelocity().y + ", " + drone.getLinearVelocity().z + ")");
+		lblAngularSpeed.setText("Speed: (" + drone.getAngularVelocity().x + ", " + drone.getAngularVelocity().y + ", " + drone.getAngularVelocity().z + ")");
 	}
 }

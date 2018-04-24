@@ -449,6 +449,9 @@ public class MainGameLoop {
 			}
 
 			keyInputs();
+			
+			//Updates the GUI
+			droneList.updateLabels(activeDrone);
 
 			removeCubes();
 			DisplayManager.updateDisplay();
@@ -728,5 +731,9 @@ public class MainGameLoop {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static void setActiveDrone(Drone drone) {
+		activeDrone = drone;
 	}
 }
