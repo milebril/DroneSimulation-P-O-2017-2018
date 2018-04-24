@@ -143,6 +143,15 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	public Properties getProperties() {
 		return this.properties;
 	}
+	
+	public void startTimeHasPassed(AutopilotInputs inputs) {
+		getProperties().update(inputs);
+	}
+	
+	public AutopilotOutputs completeTimeHasPassed() {
+		getAlgorithm().cycle(this);
+		return this;
+	}
 		
 	
 	

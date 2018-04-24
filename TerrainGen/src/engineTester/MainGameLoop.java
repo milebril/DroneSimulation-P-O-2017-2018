@@ -188,7 +188,7 @@ public class MainGameLoop {
 									+ autopilotConfig.getTyreRadius() + 20 + 20,
 							20 * i)),
 					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
-			drone.setName("Drone " + i);
+			drone.setName("Drone " + (i + 10));
 
 			activeDrone = drone;
 			entities.add(drone);
@@ -202,7 +202,7 @@ public class MainGameLoop {
 									+ autopilotConfig.getTyreRadius() + 20,
 							20 * i)),
 					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
-			drone.setName("Drone " + i);
+			drone.setName("Drone " + (i + 20));
 
 			activeDrone = drone;
 			entities.add(drone);
@@ -216,7 +216,7 @@ public class MainGameLoop {
 									+ autopilotConfig.getTyreRadius() + 20 + 20,
 							20 * i)),
 					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
-			drone.setName("Drone " + i);
+			drone.setName("Drone " + (i + 30));
 
 			activeDrone = drone;
 			entities.add(drone);
