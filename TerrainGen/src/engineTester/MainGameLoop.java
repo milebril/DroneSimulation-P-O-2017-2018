@@ -438,6 +438,7 @@ public class MainGameLoop {
 						public void run() {
 							// Autopilot stuff
 							AutopilotInputs inputs = d.getAutoPilotInputs();
+							//TODO: timePassed moet weg! foetsieee
 							AutopilotOutputs outputs = d.getAutopilot().timePassed(inputs);
 							d.setAutopilotOutputs(outputs);
 
