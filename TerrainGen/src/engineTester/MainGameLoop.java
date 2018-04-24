@@ -163,19 +163,9 @@ public class MainGameLoop {
 								0)),
 				1f, autopilotConfig, new EulerPrediction(STEP_TIME));
 
-		Drone droneTwo = new Drone(staticDroneModel,
-				new Matrix4f()
-						.translate(new Vector3f(0,
-								(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
-										+ autopilotConfig.getTyreRadius() + 20,
-								20)),
-				1f, autopilotConfig, new EulerPrediction(STEP_TIME));
-
 		activeDrone = droneOne;
 		entities.add(droneOne);
-		entities.add(droneTwo);
 		drones.add(droneOne);
-		drones.add(droneTwo);
 
 		// ***INITIALIZE CHASE-CAM***
 		chaseCam = new Camera();
@@ -365,13 +355,12 @@ public class MainGameLoop {
 								System.exit(-1);
 							} catch (MaxAoAException e) {
 								e.printStackTrace();
+								System.exit(-1);
 							}
 						}
 					};
-					System.out.print(" before run ");
 					Future<?> fut = pool.submit(toRun);
 					futureList.add(fut);
-					System.out.print(" after run ");
 				}
 				
 				// De code gaat niet verder totdat alle voordien aangemaakt threads klaar zijn
