@@ -20,6 +20,7 @@ import java.util.concurrent.Future;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 
+import models.Airport;
 import models.RawCubeModel;
 import models.RawModel;
 import models.TexturedModel;
@@ -119,6 +120,10 @@ public class MainGameLoop {
 	// ViewEnum
 	private static ViewEnum currentView = ViewEnum.MAIN;
 
+	private static Airport a;
+	
+	//
+
 	// ThreadPool
 	private static ExecutorService pool = Executors.newFixedThreadPool(20); // creating a pool of X threads
 
@@ -132,7 +137,7 @@ public class MainGameLoop {
 
 	public static void main(String[] args) throws InterruptedException, ExecutionException {
 		// Needed to load openCV
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		//System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
 		// ***INITIALIZE CONFIG***
 		try {
@@ -263,7 +268,7 @@ public class MainGameLoop {
 		terrains.add(new Terrain(-1, -1, loader, new ModelTexture(loader.loadTexture("checker"))));
 		terrains.add(new Terrain(0, 0, loader, new ModelTexture(loader.loadTexture("checker"))));
 		terrains.add(new Terrain(-1, 0, loader, new ModelTexture(loader.loadTexture("checker"))));
-		terrains.add(new LandingStrip(-0.5f, -1, loader, new ModelTexture(loader.loadTexture("landing"))));
+//		terrains.add(new LandingStrip(-0.5f, -1, loader, new ModelTexture(loader.loadTexture("landing"))));
 
 		Camera camera = new Camera(200, 200);
 		camera.setPosition(activeDrone.getPosition().translate(0, 0, 0));
@@ -275,7 +280,7 @@ public class MainGameLoop {
 
 		Cube c = new Cube(1, 1, 0);
 		RawCubeModel cube = loader.loadToVAO(c.positions, c.colors);
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -480)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 4, -20)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -560)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -640)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -720)), 1));
@@ -303,6 +308,8 @@ public class MainGameLoop {
 		float s = (60 / i.getHeight());
 		s = 0.01f;
 
+		a = new Airport(0, -100);
+		
 		miniMap = new MiniMap();
 		droneList = new DroneList(drones);
 
@@ -477,7 +484,9 @@ public class MainGameLoop {
 		for (Entity entity : entities) {
 					renderer.processEntity(entity);
 		}
-
+		
+		a.render(renderer, chaseCam, light);
+		
 		renderer.render(light, camera);
 
 		cubeShader.start();

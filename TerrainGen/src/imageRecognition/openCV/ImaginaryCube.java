@@ -6,11 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.Scalar;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
+
 
 import java.awt.Point;
 
@@ -25,7 +21,7 @@ public class ImaginaryCube {
 		alignCube();
 		
 		// place the cube in front of the camera
-		translate(0, 0, -5);
+		translate(28,55 , -55);
 	}
 	
 	
@@ -64,9 +60,9 @@ public class ImaginaryCube {
 		return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
 	}
 	
-	private List<double[]> corners = Arrays.asList(new double[]{-0.5,  0.5, -0.5}, new double[]{-0.5,  0.5,  0.5}, 
-			new double[]{ 0.5,  0.5,  0.5}, new double[]{ 0.5,  0.5, -0.5}, new double[]{-0.5, -0.5, -0.5}, 
-			new double[]{-0.5, -0.5,  0.5}, new double[]{ 0.5, -0.5,  0.5}, new double[]{ 0.5, -0.5, -0.5});
+	private List<double[]> corners = Arrays.asList(new double[]{-2.5,  2.5, -2.5}, new double[]{-2.5,  2.5,  2.5}, 
+			new double[]{ 2.5,  2.5,  2.5}, new double[]{ 2.5,  2.5, -2.5}, new double[]{-2.5, -2.5, -2.5}, 
+			new double[]{-2.5, -2.5,  2.5}, new double[]{ 2.5, -2.5,  2.5}, new double[]{ 2.5, -2.5, -2.5});
 	
 	//private List<double[]> corners = Arrays.asList(new double[]{1, 0, 0}, new double[]{0, 1,  0}, 
 	//		new double[]{-1, 0, 0}, new double[]{-1.5, 0, 0}, new double[]{-2.59, 2.59, 0}, new double[]{2.59, -2.59, 0});
@@ -250,29 +246,6 @@ public class ImaginaryCube {
 	
 	
 	
-	public void saveAsImage(String imageName, Mat surface) {
-		Mat image = surface.clone();
-		
-		List<double[]> convexHull = getConvextHull();
-		org.opencv.core.Point p0;
-		org.opencv.core.Point p1;
-		for (int i = 0; i < convexHull.size() - 1; i++) {
-			p0 = new org.opencv.core.Point((int) (convexHull.get(i)[0]+100), (int) (-convexHull.get(i)[1]+100));
-			p1 = new org.opencv.core.Point((int) (convexHull.get(i+1)[0]+100), (int) (-convexHull.get(i+1)[1]+100));
-			Imgproc.line(image, p0, p1, new Scalar(255, 255, 255));
-		}
-		
-		List<double[]> punten = getProjectedCorners();
-		for (int i = 0; i < punten.size(); i++) {
-			//Imgproc.circle(image, new org.opencv.core.Point((int) (punten.get(i)[0]+100), (int) (-punten.get(i)[1]+100)), 1, new Scalar(120, 120, 120));
-			//Imgproc.circle(image, new org.opencv.core.Point((int) (punten.get(i)[0]+100), (int) (-punten.get(i)[1]+100)), 0, new Scalar(0, 0, 0));
-		}
-		//Imgcodecs.imwrite("res/" + imageName + ".png", image);
-	}
-	
-	public void saveAsImage(String imageName) {
-		saveAsImage(imageName, new Mat(200, 200, CvType.CV_16SC3, new Scalar(255, 255, 255)));
-	}
 	
 }
 
