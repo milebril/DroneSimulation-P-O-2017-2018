@@ -1,5 +1,12 @@
 package terrains;
 
+import java.awt.Point;
+import java.awt.geom.Point2D;
+
+import javax.vecmath.Point2d;
+
+import org.lwjgl.util.vector.Vector2f;
+
 import models.RawModel;
 import renderEngine.Loader;
 import textures.ModelTexture;
@@ -10,19 +17,30 @@ public class LandingStrip extends Terrain{
 	private static final float SIZE_X = 100;
 	private static final int VERTEX_COUNT = 128;
 	
+	private final int airportID;
+	private final int landingStripID;
+
+
 	private float x;
 	private float z;
 	private RawModel model;
 	private ModelTexture texture;
 	
-	public LandingStrip(float gridX, int gridZ, Loader loader, ModelTexture texture){
+	public LandingStrip(float gridX, int gridZ, Loader loader, ModelTexture texture, int airportId, int landingStripId){
 		super((int) gridX, gridZ, loader, texture);
 		this.texture = texture;
 		this.x =  gridX;
 		this.z = gridZ;
 		this.model = generateTerrain(loader);
+		this.airportID = airportId;
+		this.landingStripID = landingStripId;
 	}
 	
+	
+	public Vector2f getCenterOfLandingStrip() {
+		
+		return new Vector2f(x, z);
+	}
 	
 	
 	public float getX() {
@@ -33,6 +51,17 @@ public class LandingStrip extends Terrain{
 
 	public float getZ() {
 		return z;
+	}
+	
+	
+	public int getAirportID() {
+		return airportID;
+	}
+
+
+
+	public int getLandingStripID() {
+		return landingStripID;
 	}
 
 

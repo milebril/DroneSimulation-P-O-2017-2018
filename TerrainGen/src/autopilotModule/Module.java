@@ -1,11 +1,25 @@
 package autopilotModule;
 
+import org.lwjgl.util.vector.Matrix4f;
+import org.lwjgl.util.vector.Vector3f;
+
 import autopilot.interfaces.AutopilotConfig;
 import autopilot.interfaces.AutopilotInputs;
 import autopilot.interfaces.AutopilotModule;
 import autopilot.interfaces.AutopilotOutputs;
+import entities.Drone;
+import models.RawModel;
+import models.TexturedModel;
+import physicsEngine.PhysicsEngine;
+import physicsEngine.approximationMethods.EulerPrediction;
+import renderEngine.Loader;
+import renderEngine.OBJLoader;
+import textures.ModelTexture;
 
 public class Module implements AutopilotModule{
+	
+	private static final float STEP_TIME = 0.001f;
+	private static Loader loader;
 
 	@Override
 	public void defineAirportParams(float length, float width) {
@@ -23,6 +37,14 @@ public class Module implements AutopilotModule{
 	public void defineDrone(int airport, int gate, int pointingToRunway, AutopilotConfig config) {
 		// airport and gate define the drone's initial location, pointingToRunway its initial orientation. The first drone that is defined is drone 0, etc.
 		
+		
+		loader = new Loader();
+		RawModel droneModel = OBJLoader.loadObjModel("untitled5", loader);
+		TexturedModel staticDroneModel = new TexturedModel(droneModel,
+				new ModelTexture(loader.loadTexture("untitled")));
+		Drone drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0,
+				(int) PhysicsEngine.groundLevel - config.getWheelY() + config.getTyreRadius(), 0)),
+				1f, config, new EulerPrediction(STEP_TIME));
 	}
 
 	@Override
@@ -45,7 +67,7 @@ public class Module implements AutopilotModule{
 
 	@Override
 	public void simulationEnded() {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
