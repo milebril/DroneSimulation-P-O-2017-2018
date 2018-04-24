@@ -77,7 +77,7 @@ public class Module implements AutopilotModule{
 		
 		AutopilotOutputs outputs = autopilots.get(drone).completeTimeHasPassed();
 		//drones.get(drone).setAutopilotOutputs(outputs); dees is voor de maingameloop
-		return outputs;
+		return airports.get(drone).getAutopilot();
 	}
 
 	@Override
