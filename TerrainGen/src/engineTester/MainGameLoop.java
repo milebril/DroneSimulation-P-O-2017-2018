@@ -120,7 +120,7 @@ public class MainGameLoop {
 	private static ViewEnum currentView = ViewEnum.MAIN;
 
 	// ThreadPool
-	private static ExecutorService pool = Executors.newFixedThreadPool(5); // creating a pool of X threads
+	private static ExecutorService pool = Executors.newFixedThreadPool(20); // creating a pool of X threads
 
 	private enum ViewEnum {
 		MAIN, MINIMAP
@@ -155,35 +155,35 @@ public class MainGameLoop {
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,
 				new ModelTexture(loader.loadTexture("untitled")));
 
-//		for (int i = 1; i <= 10; i++) {
-//			Drone drone = new Drone(staticDroneModel,
-//					new Matrix4f().translate(new Vector3f(-20 * i,
-//							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
-//									+ autopilotConfig.getTyreRadius() + 20,
-//							20 * i)),
-//					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
-//			drone.setName("Drone " + i);
-//
-//			activeDrone = drone;
-//			entities.add(drone);
-//			drones.add(drone);
-//		}
-//
-//		for (int i = 1; i <= 10; i++) {
-//			Drone drone = new Drone(staticDroneModel,
-//					new Matrix4f().translate(new Vector3f(-20 * i,
-//							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
-//									+ autopilotConfig.getTyreRadius() + 20 + 20,
-//							20 * i)),
-//					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
-//			drone.setName("Drone " + i);
-//
-//			activeDrone = drone;
-//			entities.add(drone);
-//			drones.add(drone);
-//		}
+		for (int i = 1; i <= 10; i++) {
+			Drone drone = new Drone(staticDroneModel,
+					new Matrix4f().translate(new Vector3f(-20 * i,
+							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
+									+ autopilotConfig.getTyreRadius() + 20,
+							20 * i)),
+					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
+			drone.setName("Drone " + i);
 
-		for (int i = 1; i <= 500; i++) {
+			activeDrone = drone;
+			entities.add(drone);
+			drones.add(drone);
+		}
+
+		for (int i = 1; i <= 10; i++) {
+			Drone drone = new Drone(staticDroneModel,
+					new Matrix4f().translate(new Vector3f(-20 * i,
+							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
+									+ autopilotConfig.getTyreRadius() + 20 + 20,
+							20 * i)),
+					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
+			drone.setName("Drone " + i);
+
+			activeDrone = drone;
+			entities.add(drone);
+			drones.add(drone);
+		}
+
+		for (int i = 1; i <= 10; i++) {
 			Drone drone = new Drone(staticDroneModel,
 					new Matrix4f().translate(new Vector3f(20 * i,
 							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
@@ -197,19 +197,19 @@ public class MainGameLoop {
 			drones.add(drone);
 		}
 
-//		for (int i = 1; i <= 10; i++) {
-//			Drone drone = new Drone(staticDroneModel,
-//					new Matrix4f().translate(new Vector3f(20 * i,
-//							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
-//									+ autopilotConfig.getTyreRadius() + 20 + 20,
-//							20 * i)),
-//					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
-//			drone.setName("Drone " + i);
-//
-//			activeDrone = drone;
-//			entities.add(drone);
-//			drones.add(drone);
-//		}
+		for (int i = 1; i <= 10; i++) {
+			Drone drone = new Drone(staticDroneModel,
+					new Matrix4f().translate(new Vector3f(20 * i,
+							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
+									+ autopilotConfig.getTyreRadius() + 20 + 20,
+							20 * i)),
+					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
+			drone.setName("Drone " + i);
+
+			activeDrone = drone;
+			entities.add(drone);
+			drones.add(drone);
+		}
 
 		// ***INITIALIZE CHASE-CAM***
 		chaseCam = new Camera();
