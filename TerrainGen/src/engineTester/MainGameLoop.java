@@ -125,6 +125,10 @@ public class MainGameLoop {
 	private enum ViewEnum {
 		MAIN, MINIMAP
 	}
+	
+	//Minimap
+	private static MiniMap miniMap;
+	private static DroneList droneList;
 
 	public static void main(String[] args) throws InterruptedException, ExecutionException {
 		// Needed to load openCV
@@ -262,7 +266,8 @@ public class MainGameLoop {
 		float s = (60 / i.getHeight());
 		s = 0.01f;
 
-		MiniMap minimap = new MiniMap();
+		miniMap = new MiniMap();
+		droneList = new DroneList(drones);
 
 		while (!Display.isCloseRequested()) {
 			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
@@ -271,7 +276,7 @@ public class MainGameLoop {
 
 			switch (currentView) {
 			case MINIMAP:
-				minimap.render(drones, guiRenderer, loader);
+				miniMap.render(drones, guiRenderer, loader);
 				break;
 			case MAIN:
 				// CAMERA VIEW
@@ -368,10 +373,10 @@ public class MainGameLoop {
 							}
 						}
 					};
-					System.out.print(" before run ");
+					//System.out.print(" before run ");
 					Future<?> fut = pool.submit(toRun);
 					futureList.add(fut);
-					System.out.print(" after run ");
+					//System.out.print(" after run ");
 				}
 				
 				// De code gaat niet verder totdat alle voordien aangemaakt threads klaar zijn
@@ -472,8 +477,11 @@ public class MainGameLoop {
 		} else if (Keyboard.isKeyDown(Keyboard.KEY_M)) {
 			if (!mLock) {
 				if (currentView == ViewEnum.MAIN) {
+					//miniMap.createDroneList(drones);
 					currentView = ViewEnum.MINIMAP;
 				} else {
+					miniMap.removeDroneList();
+					//System.out.println("HER");
 					currentView = ViewEnum.MAIN;
 				}
 			}
@@ -501,8 +509,8 @@ public class MainGameLoop {
 		} else {
 			chaseCam.roam();
 		}
-		lLock = false;
-		sLock = false;
+//		lLock = false;
+//		sLock = false;
 	}
 
 	private static void reset() {
