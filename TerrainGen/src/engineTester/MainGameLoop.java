@@ -71,6 +71,8 @@ import fontRendering.TextMaster;
 import guis.Button;
 import guis.GuiRenderer;
 import guis.GuiTexture;
+import autopilotModule.*;
+import autopilotModule.Module;
 
 public class MainGameLoop {
 
@@ -121,6 +123,8 @@ public class MainGameLoop {
 	private static ViewEnum currentView = ViewEnum.MAIN;
 
 	private static Airport a;
+	
+	private static Module module = new Module();
 	
 	//
 
@@ -175,7 +179,8 @@ public class MainGameLoop {
 							20 * i)),
 					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
 			drone.setName("Drone " + i);
-
+			drone.setId(drones.size());
+			
 			activeDrone = drone;
 			entities.add(drone);
 			drones.add(drone);
@@ -189,6 +194,7 @@ public class MainGameLoop {
 							20 * i)),
 					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
 			drone.setName("Drone " + (i + 10));
+			drone.setId(drones.size());
 
 			activeDrone = drone;
 			entities.add(drone);
@@ -203,6 +209,7 @@ public class MainGameLoop {
 							20 * i)),
 					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
 			drone.setName("Drone " + (i + 20));
+			drone.setId(drones.size());
 
 			activeDrone = drone;
 			entities.add(drone);
@@ -217,6 +224,7 @@ public class MainGameLoop {
 							20 * i)),
 					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
 			drone.setName("Drone " + (i + 30));
+			drone.setId(drones.size());
 
 			activeDrone = drone;
 			entities.add(drone);
@@ -437,10 +445,11 @@ public class MainGameLoop {
 						@Override
 						public void run() {
 							// Autopilot stuff
-							AutopilotInputs inputs = d.getAutoPilotInputs();
+							module.startTimeHasPassed(d.getId(), d.getAutoPilotInputs());
 							//TODO: timePassed moet weg! foetsieee
-							AutopilotOutputs outputs = d.getAutopilot().timePassed(inputs);
+							AutopilotOutputs outputs = module.completeTimeHasPassed(d.getId());
 							d.setAutopilotOutputs(outputs);
+							
 
 							//System.out.println(d.getName() + " is ready with AP.");
 						}

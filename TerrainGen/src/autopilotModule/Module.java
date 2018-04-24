@@ -6,7 +6,9 @@ import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
 import autopilot.algorithmHandler.AutopilotAlain;
+import autopilot.interfaces.Autopilot;
 import autopilot.interfaces.AutopilotConfig;
+import autopilot.interfaces.AutopilotFactory;
 import autopilot.interfaces.AutopilotInputs;
 import autopilot.interfaces.AutopilotModule;
 import autopilot.interfaces.AutopilotOutputs;
@@ -32,6 +34,7 @@ public class Module implements AutopilotModule{
 	private HashMap<Integer,Airport> airports = new HashMap<Integer, Airport>();
 	private HashMap<Integer,AutopilotAlain> autopilots = new HashMap<Integer, AutopilotAlain>();
 	
+	
 	public Module() {
 	};
 	
@@ -49,20 +52,17 @@ public class Module implements AutopilotModule{
 		
 	}
 
+	//TODO: moeten we drones bijhouden hier en dezelfde lijst int testbed? of wa moete we hier eigenlijk juist doen???
 	@Override
 	public void defineDrone(int airport, int gate, int pointingToRunway, AutopilotConfig config) {
 		// airport and gate define the drone's initial location, pointingToRunway its initial orientation. The first drone that is defined is drone 0, etc.
 		
+		/* INITIALIZE AUTOPILOT */
+		Autopilot autopilot = AutopilotFactory.createAutopilot();
+		autopilots.put(autopilots.size(), (AutopilotAlain) autopilot);
 		
+		//autopilot.simulationStarted(config, autopilot.getAutoPilotInputs()); //TODO gewoon fixen
 		
-		loader = new Loader();
-		RawModel droneModel = OBJLoader.loadObjModel("untitled5", loader);
-		TexturedModel staticDroneModel = new TexturedModel(droneModel,
-				new ModelTexture(loader.loadTexture("untitled")));
-		Drone drone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0,
-				(int) PhysicsEngine.groundLevel - config.getWheelY() + config.getTyreRadius(), 0)),
-				1f, config, new EulerPrediction(STEP_TIME));
-		drones.put(drones.size(), drone);
 	}
 
 	@Override

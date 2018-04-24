@@ -34,9 +34,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 				AutopilotConfig cfg, PredictionMethod predictionMethod) {
 		super(model, pose, scale);
 		
-		/* INITIALIZE AUTOPILOT */
-		setAutopilot(AutopilotFactory.createAutopilot());
-		getAutopilot().simulationStarted(cfg, getAutoPilotInputs());
+		
 		
 		this.linearVelocityW = new Vector3f(0.0f,0.0f, -50.0f);
 
@@ -99,15 +97,14 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	
 	// AUTOPILOT
 	
-	// Autopilot
-	private Autopilot autopilot;
+	private int id;
 	
-	public Autopilot getAutopilot() {
-		return this.autopilot;
+	public int getId() {
+		return id;
 	}
-	
-	private void setAutopilot(Autopilot ap) {
-		this.autopilot = ap;
+
+	public void setId(int id) {
+		this.id = id;
 	}
 	
 	// PREDICTION METHOD
