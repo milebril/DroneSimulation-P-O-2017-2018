@@ -30,7 +30,6 @@ public class PathFinder implements Algorithm {
 		if (nextPos != null) // if there is a position to reach
 		{
 			// fly to the next position
-			System.out.println("[PathFinder] next position: (" + nextPos.x + ", " + nextPos.y + ", " + nextPos.z + ")");
 			Algorithm flyToPoint = new FlyToPoint(this, nextPos);
 			handler.setAlgorithm(flyToPoint);
 			flyToPoint.cycle(handler);
