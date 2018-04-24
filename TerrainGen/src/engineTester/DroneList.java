@@ -11,6 +11,8 @@ import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.border.EmptyBorder;
 
+import autopilot.algorithmHandler.AlgorithmHandler;
+import autopilot.algorithmHandler.AutopilotAlain;
 import entities.Drone;
 
 import javax.swing.JList;
@@ -23,40 +25,26 @@ public class DroneList extends JFrame {
 
 	private JPanel contentPane;
 
-	/**
-	 * Launch the application.
-	 */
-//	public static void main(String[] args) {
-//		EventQueue.invokeLater(new Runnable() {
-//			public void run() {
-//				try {
-//					DroneList frame = new DroneList();
-//					frame.setVisible(true);
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		});
-//	}
+	// Labels;
+	private JLabel lblPosition;
+	private JLabel lblSpeed;
+	private JLabel lblAngularSpeed;
+	private JLabel lblApState;
+	private JLabel lblHoldingPackage;
 
-	//Labels;
-	JLabel lblPosition;
-	JLabel lblSpeed;
-	JLabel lblAngularSpeed;
-	
 	/**
 	 * Create the frame.
 	 */
 	public DroneList(List<Drone> drones) {
 		setVisible(true);
-		
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 505, 473);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
-	
+
 		JList<String> list = new JList<String>();
 		list.setBounds(6, 6, 116, 192);
 		DefaultListModel<String> listModel = new DefaultListModel<String>();
@@ -67,19 +55,19 @@ public class DroneList extends JFrame {
 		JScrollPane pane = new JScrollPane(list);
 		pane.setBounds(6, 6, 116, 192);
 		contentPane.add(pane);
-		
+
 		lblPosition = new JLabel("Position");
 		lblPosition.setBounds(6, 210, 283, 16);
 		contentPane.add(lblPosition);
-		
+
 		lblSpeed = new JLabel("Speed");
 		lblSpeed.setBounds(6, 238, 252, 16);
 		contentPane.add(lblSpeed);
-		
+
 		lblAngularSpeed = new JLabel("Angular speed");
 		lblAngularSpeed.setBounds(6, 266, 493, 16);
 		contentPane.add(lblAngularSpeed);
-		
+
 		JButton btnChoose = new JButton("Choose");
 		btnChoose.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -88,11 +76,28 @@ public class DroneList extends JFrame {
 		});
 		btnChoose.setBounds(134, 6, 117, 29);
 		contentPane.add(btnChoose);
+		
+		lblApState = new JLabel("AP State");
+		lblApState.setBounds(6, 294, 261, 16);
+		contentPane.add(lblApState);
+		
+		lblHoldingPackage = new JLabel("Holding Package");
+		lblHoldingPackage.setBounds(6, 322, 261, 16);
+		contentPane.add(lblHoldingPackage);
 	}
-	
+
 	public void updateLabels(Drone drone) {
-		lblPosition.setText("Position: (" + drone.getPosition().x + ", " + drone.getPosition().y + ", " + drone.getPosition().z + ")");
-		lblSpeed.setText("Speed: (" + drone.getLinearVelocity().x + ", " + drone.getLinearVelocity().y + ", " + drone.getLinearVelocity().z + ")");
-		lblAngularSpeed.setText("Speed: (" + drone.getAngularVelocity().x + ", " + drone.getAngularVelocity().y + ", " + drone.getAngularVelocity().z + ")");
+		lblPosition.setText("Position: (" + (float) Math.round(drone.getPosition().x * 100) / 100 + ", "
+				+ (float) Math.round(drone.getPosition().y * 100) / 100 + ", "
+				+ (float) Math.round(drone.getPosition().z * 100) / 100 + ")");
+		lblSpeed.setText("Speed: (" + (float) Math.round(drone.getLinearVelocity().x * 100) / 100 + ", "
+				+ (float) Math.round(drone.getLinearVelocity().y * 100) / 100 + ", "
+				+ (float) Math.round(drone.getLinearVelocity().z * 100) / 100 + ")");
+		lblAngularSpeed.setText("Angular Velocity: (" + (float) Math.round(drone.getAngularVelocity().x * 100) / 100 + ", "
+				+ (float) Math.round(drone.getAngularVelocity().y * 100) / 100 + ", "
+				+ (float) Math.round(drone.getAngularVelocity().z * 100) / 100 + ")");
+		
+		lblApState.setText("AP State : " + ((AlgorithmHandler) drone.getAutopilot()).getAlgorithmName()); 
+		lblHoldingPackage.setText("Holding Package: False");
 	}
 }

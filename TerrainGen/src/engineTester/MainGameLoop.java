@@ -158,9 +158,12 @@ public class MainGameLoop {
 		RawModel droneModel = OBJLoader.loadObjModel("untitled5", loader);
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,
 				new ModelTexture(loader.loadTexture("untitled")));
+		
+		TexturedModel staticDroneModel2 = new TexturedModel(droneModel,
+				new ModelTexture(loader.loadTexture("untitledGreen")));
 
 		for (int i = 1; i <= 10; i++) {
-			Drone drone = new Drone(staticDroneModel,
+			Drone drone = new Drone(staticDroneModel2,
 					new Matrix4f().translate(new Vector3f(-20*i,
 							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
 									+ autopilotConfig.getTyreRadius() + 20,
@@ -305,7 +308,7 @@ public class MainGameLoop {
 
 		while (!Display.isCloseRequested()) {
 			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
-				camera.takeSnapshot();
+				//camera.takeSnapshot();
 			}
 
 			switch (currentView) {
@@ -517,11 +520,8 @@ public class MainGameLoop {
 		} else if (Keyboard.isKeyDown(Keyboard.KEY_M)) {
 			if (!mLock) {
 				if (currentView == ViewEnum.MAIN) {
-					//miniMap.createDroneList(drones);
 					currentView = ViewEnum.MINIMAP;
 				} else {
-					miniMap.removeDroneList();
-					//System.out.println("HER");
 					currentView = ViewEnum.MAIN;
 				}
 			}

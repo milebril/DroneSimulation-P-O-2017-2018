@@ -25,18 +25,14 @@ public class MiniMap {
 		droneTextures = new ArrayList<>();
 	}
 
-	public void createDroneList(List<Drone> drones) {
-		
-	}
-
 	public void render(List<Drone> drones, GuiRenderer guiRenderer, Loader loader) {
 		// MiniMap
-		GL11.glViewport(580, 0, 700, Display.getHeight());
-		GL11.glScissor(580, 0, 700, Display.getHeight());
+		GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
+		GL11.glScissor(0, 0, Display.getWidth(), Display.getHeight());
 		GL11.glEnable(GL11.GL_SCISSOR_TEST);
 		glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-		// renderer.prepare();
-		glClearColor(1, 1, 0, 1);
+		//renderer.prepare();
+		//glClearColor(1, 1, 0, 1);
 		droneTextures.clear();
 		for (Drone drone : drones) {
 			float normalizedX = 2.0f * (float) (drone.getPosition().x * Display.getWidth() / 4000)
@@ -50,27 +46,5 @@ public class MiniMap {
 		}
 
 		guiRenderer.render(droneTextures);
-
-		// Drone List
-		GL11.glViewport(0, 0, 580, Display.getHeight());
-		GL11.glScissor(0, 0, 580, Display.getHeight());
-		GL11.glEnable(GL11.GL_SCISSOR_TEST);
-		glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-		glClearColor(1, 1, 1, 1);
-		
-		GL11.glViewport(0, 0, 200, 200);
-		GL11.glScissor(0, 0, 200, 200);
-		GL11.glEnable(GL11.GL_SCISSOR_TEST);
-		glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-		glClearColor(1, 1, 1, 1);
-	}
-
-	public void removeDroneList() {
-		// System.out.println("Hier");
-		// droneList.setVisible(false);
-		// droneList.setEnabled(false);
-		// droneList.setFocusable(false);
-		// droneList.dispatchEvent(new WindowEvent(droneList,
-		// WindowEvent.WINDOW_CLOSING));
 	}
 }
