@@ -4,15 +4,15 @@ import textures.ModelTexture;
 
 public class TexturedModel {
 	
-	private RawModel rawModel;
+	private RawOBJModel rawModel;
 	private ModelTexture texture;
 	
-	public TexturedModel(RawModel model, ModelTexture texture){
+	public TexturedModel(RawOBJModel model, ModelTexture texture){
 		this.rawModel = model;
 		this.texture = texture;
 	}
 
-	public RawModel getRawModel() {
+	public RawOBJModel getRawOBJModel() {
 		return rawModel;
 	}
 

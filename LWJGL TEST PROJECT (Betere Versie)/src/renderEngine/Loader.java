@@ -10,6 +10,7 @@ import java.util.List;
 
 import models.Model2D;
 import models.RawModel;
+import models.RawOBJModel;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -35,6 +36,17 @@ public class Loader {
 		storeDataInAttributeList(1,3,colours);
 		unbindVAO();
 		return new RawModel(vaoID, positions.length/3);
+	}
+	
+	public RawOBJModel loadOBJToVAO(float[] positions,float[] textures,int[] indices){
+		int vaoID = createVAO();
+		if (indices != null) {
+			bindIndicesBuffer(indices);
+		}
+		storeDataInAttributeList(0,3,positions);
+		storeDataInAttributeList(1,2, textures);
+		unbindVAO();
+		return new RawOBJModel(vaoID, positions.length/3);
 	}
 	
 	public RawModel loadToVAO(float[] positions) {
@@ -63,6 +75,10 @@ public class Loader {
 			System.exit(-1);
 		}
 		textures.add(texture.getTextureID());
+	
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
+		
 		return texture.getTextureID();
 	}
 	

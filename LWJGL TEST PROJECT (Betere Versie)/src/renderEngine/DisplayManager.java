@@ -23,36 +23,19 @@ public class DisplayManager {
 	private static boolean started = false;
 	
 	public static void createDisplay(){		
-//		ContextAttribs attribs = new ContextAttribs(3,2)
-//		.withForwardCompatible(true)
-//		.withProfileCore(true);
-//		
-//		try {
-//			Display.setDisplayMode(new DisplayMode(WIDTH,HEIGHT));
-//			Display.create(new PixelFormat(), attribs);
-//			Display.setTitle("Our First Display!");
-//		} catch (LWJGLException e) {
-//			e.printStackTrace();
-//		}
+		ContextAttribs attribs = new ContextAttribs(3,2)
+		.withForwardCompatible(true)
+		.withProfileCore(true);
 		
-		Display.setTitle("Basic Game");
 		try {
-			Display.setDisplayMode(new DisplayMode(WIDTH, HEIGHT));
-			Display.create();
+			Display.setDisplayMode(new DisplayMode(WIDTH,HEIGHT));
+			Display.create(new PixelFormat(), attribs);
+			Display.setTitle("Drone Simulation");
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 		}
 		
-//		GL11.glMatrixMode(GL11.GL_PROJECTION);
-//		GL11.glLoadIdentity();
-//		GL11.glOrtho(0, WIDTH, HEIGHT, 0, 1, -1);
-//		GL11.glMatrixMode(GL11.GL_MODELVIEW);
-//		GL11.glEnable(GL11.GL_TEXTURE_2D);
-//		GL11.glEnable(GL11.GL_BLEND);
-//		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-//		
-		
-		GL11.glViewport(0, 0, WIDTH, HEIGHT);
+		GL11.glViewport(0,0, WIDTH, HEIGHT);
 		lastFrameTime = getCurrentTime();
 	}
 	
@@ -62,6 +45,7 @@ public class DisplayManager {
 		
 		long currentFrameTime = getCurrentTime();
 		delta = (currentFrameTime - lastFrameTime) / 1000f; // In seconds
+		delta = delta/4; //Slow down the simulation TODO: ik denk dat dit hier moet want anders gaat de AP verkeerde tijden berekenen.
 		lastFrameTime = currentFrameTime;
 		
 		elapsedTime += delta;
@@ -69,7 +53,7 @@ public class DisplayManager {
 	
 	public static float getFrameTimeSeconds() {
 		if (started) {
-			return (float) (delta);
+			return (float) (delta) ; //Simulatie wordt trager afgespeeld zodat het duidelijker is.
 		} else {
 			return 0;
 		}
@@ -103,4 +87,8 @@ public class DisplayManager {
 		elapsedTime = 0;
 		lastFrameTime = 0;
 	}
+	
+	
+	
+	
 }

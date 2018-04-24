@@ -1,9 +1,6 @@
 package entities;
 
-import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
-
-import renderEngine.DisplayManager;
 
 /**
  * all airfoils have a neutral attack vector oriented along (O,0,-1) expressed in the Drone Frame
@@ -12,67 +9,117 @@ import renderEngine.DisplayManager;
  */
 public class AirFoil {
 	
-	public AirFoil(Drone drone, Vector3f centerOfMass, float wingMass, float wingLiftSlope, Vector3f rotAx) {
+	// CONSTRUCTOR
+	
+	/**
+	 * The wing of a drone.
+	 * @param drone: The drone to which this AirFoil is attached
+	 * @param rotAx: The rotation axis of this AirFoil (in drone frame)
+	 * @param centerOfMass: The center of mass of this AirFoil (in drone frame)
+	 * @param mass: The mass of this AirFoil
+	 * @param wingLiftSlope: The lift slope of this AirFoil
+	 */
+	public AirFoil(Drone drone, Vector3f rotAx, Vector3f centerOfMass, float mass, float wingLiftSlope) {
 		this.drone = drone;
-		this.centerOfMassD = centerOfMass;
-		this.airFoilMass = wingMass;
-		this.airFoilLiftSlope = wingLiftSlope;
 		this.rotAx = rotAx;		
+		this.centerOfMass = centerOfMass;
+		this.airFoilMass = mass;
+		this.airFoilLiftSlope = wingLiftSlope;
 	}
 	
+	// DRONE
 	
-	// The AirFoil mass
+	/**
+	 * The drone to which this AirFoil is attached
+	 */
+	private final Drone drone;
+
+	/**
+	 * Returns the drone to which this AirFoil is attached
+	 */
+	public Drone getDrone() {
+		return this.drone;
+	}
+	
+	// MASS
+	
+	/**
+	 * The mass of the AirFoil
+	 */
 	private final float airFoilMass;
 	
+	/**
+	 * Returns the mass of the AirFoil
+	 */
 	public float getMass(){
 		return this.airFoilMass;
 	}
 	
+	// CENTER OF MASS
 	
-	// The center of mass of the AirFoil (in drone coordinates)
-	private Vector3f centerOfMassD;
+	/**
+	 * The AirFoils center of mass (in drone coordinates)
+	 */
+	private final Vector3f centerOfMass;
 	
+	/**
+	 * Returns the AirFoils center of mass (in drone coordinates)
+	 */
 	public Vector3f getCenterOfMass() {
-		return new Vector3f(this.centerOfMassD.x, this.centerOfMassD.y, this.centerOfMassD.z);
-	}
-
-	public void setCenterOfMass(Vector3f vector) {
-		this.centerOfMassD.set(vector.x, vector.y, vector.z);
+		return new Vector3f(this.centerOfMass.x, this.centerOfMass.y, this.centerOfMass.z);
 	}
 	
+	// ROTATION AXIS
 	
-	// The rotation axis of the AirFoil (in drone coordinates)
-	private Vector3f rotAx;
+	/**
+	 * The rotation axis of the AirFoil (in drone coordinates)
+	 */
+	private final Vector3f rotAx;
 	
+	/**
+	 * Returns the rotation axis of the AirFoil (in drone coordinates)
+	 */
 	public Vector3f getRotAxis(){
 		return new Vector3f(this.rotAx.x, this.rotAx.y, this.rotAx.z);
 	}
 	
+	// LIFTSLOPE
 	
-	// The lift slope of the AirFoil
-	private float airFoilLiftSlope;
+	/**
+	 * The lift slope of the AirFoil.
+	 */
+	private final float airFoilLiftSlope;
 	
+	/**
+	 * Returns the AirFoils lift slope.
+	 */
 	public float getLiftSlope(){
 		return this.airFoilLiftSlope;
 	}
-
-	public void setLiftSlope(float slope){
-		this.airFoilLiftSlope = slope;
-	}
 	
+	// INCLINATION
 	
-	// The inclination of the AirFoil (in radians)
+	/**
+	 * The inclination of the AirFoil in radians.
+	 */
 	private float inclination = 0;
-
+	
+	/**
+	 * Returns the inclination of the AirFoil in radians.
+	 */
 	public float getInclination(){
 		return this.inclination;
 	}
-
-	public void setInclination(float radians){
-		this.inclination = radians;
+	
+	/**
+	 * Sets the inclination of the AirFoil in radians.
+	 * @param inclination (in radians)
+	 */
+	public void setInclination(float inclination){
+		this.inclination = inclination;
 	}
 	
-	
+	// LIFT FORCE
 	
 	/**
 	 * Returns the AttackVector of the AirFoil. The only two possible rotation axes are the x-axis 
@@ -97,7 +144,6 @@ public class AirFoil {
 		return result;		
 	}
 	
-	
 	/**
 	 * Returns the normal of the AirFoil. The normal is defined as the cross product of
 	 * the axis vector and the attack vector of the AirFoil.
@@ -108,10 +154,16 @@ public class AirFoil {
 		return result;	
 	}
 	
+	/**
+	 * Returns the lift force of the AirFoil assuming there is no wind.
+	 */
 	public Vector3f calculateAirFoilLiftForce(){
 		return this.calculateAirfoilLiftForce(new Vector3f(0,0,0));
 	}
 	
+	/**
+	 * Returns the lift force of the AirFoil.
+	 */
 	public Vector3f calculateAirfoilLiftForce(Vector3f windW) {
 		// calculate the airspeed the airfoil experiences
 		Vector3f airSpeedW = new Vector3f(0, 0, 0);
@@ -137,51 +189,50 @@ public class AirFoil {
 		
 		// projected airspeed vector (S)
 		Vector3f projectedAirspeedVectorD = new Vector3f(0, 0, 0);
-		Vector3f.sub(airSpeedD, (Vector3f) rotationAxisD.scale(Vector3f.dot(airSpeedD, rotationAxisD)), projectedAirspeedVectorD);
-		//System.out.println("S: " + projectedAirspeedVectorD);
+		Vector3f.sub(airSpeedD, (Vector3f) rotationAxisD.scale(
+				Vector3f.dot(airSpeedD, rotationAxisD)), projectedAirspeedVectorD
+				);
 		
 		// attack vector of the airfoil (A)
 		Vector3f attackVectorD = this.calculateAttackVector();
-		//System.out.println("A: " + attackVectorD);
 		
 		// normal of the airfoil (N)
 		Vector3f normalD = new Vector3f();
 		Vector3f.cross(this.getRotAxis(), attackVectorD,  normalD);
-		//System.out.println("N: " + normalD);
-
 		
 		// calculate the angle of attack, defined as -atan2(S . N, S . A), where S
 		// is the projected airspeed vector, N is the normal, and A is the attack vector
-		 // A
 		float a = Vector3f.dot(projectedAirspeedVectorD, normalD);
 		float b = Vector3f.dot(projectedAirspeedVectorD, attackVectorD);
-		//System.out.println("a: " + a); // y
-		//System.out.println("b: " + b); // x
 		
 //		float aoa = this.calculateAOA(projectedAirspeedVectorD, normalD, attackVectorD);
 		float aoa = (float) - Math.atan2(a, b);
-		
-		if (aoa > drone.getMaxAOA()) {
-			System.out.println(aoa);
-			System.exit(0);
+		//System.out.println(drone.getMaxAOA());
+		if (aoa > Math.toRadians(drone.getMaxAOA())) {
+			System.err.println(aoa);
+			//System.exit(0);
 		}
 
+<<<<<<< HEAD
+=======
 		System.out.println("Airfoil calculateAirfliff  EFFECTIEVE AOA GEZET DOOR AP(lw, rw, hs, vs): " + aoa);
 
+>>>>>>> master
 		// calculate the lift force N . liftSlope . AOA . s^2, where N is the
 		// normal, AOA is the angle of attack, and s is the projected airspeed
 		float airspeedSquared = projectedAirspeedVectorD.lengthSquared();
-		Vector3f liftForceD = (Vector3f) normalD.scale(this.getLiftSlope() * (float)(aoa%Math.PI) * airspeedSquared);
-		//System.out.println("Airfoil angle of attack: " + aoa);
-		//System.out.println("Airfoil liftforce: " + liftForceD);
-		//System.out.println();
-		
+		Vector3f liftForceD = (Vector3f) normalD.scale(
+				this.getLiftSlope() * (float)(aoa % Math.PI) * airspeedSquared
+				);
 		
 		return liftForceD;
 	}
 	
-
-	private float calculateAOA(Vector3f projectedAirspeedVectorD, Vector3f normalD, Vector3f attackVectorD) {
+	// TODO : Angle of Attack Calculation:
+	/**
+	 * Returns the angle of attack of this AirFoil
+	 */
+	public float getAOA(Vector3f projectedAirspeedVectorD, Vector3f normalD, Vector3f attackVectorD) {
 		float currentAoa = (float) - Math.atan2(Vector3f.dot(projectedAirspeedVectorD, normalD), 
 				Vector3f.dot(projectedAirspeedVectorD, attackVectorD));	
 		
@@ -198,14 +249,5 @@ public class AirFoil {
 		}
 		return currentAoa;
 	}
-
-
-	private final Drone drone;
-
-	public Drone getDrone() {
-		return this.drone;
-	}
 	
-	
-	//TODO Angle Calculation
 }

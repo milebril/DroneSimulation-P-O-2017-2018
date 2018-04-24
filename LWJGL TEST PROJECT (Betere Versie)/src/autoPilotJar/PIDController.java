@@ -11,12 +11,6 @@ public class PIDController {
 	private float changeFactor;
 	private float goal;
 	
-//	private float HorizontalStabinclinationChange = (float) -(Math.PI / 180);
-//	private float thrustChange = -10;
-	
-	//Horizontaal: Wing.y-force == Gravity; -> Dan vliegen we recht
-	//E(t) = yForce - Gravity;
-	
 	public PIDController(float Kp, float Ki, float Kd, float changeFactor, float goal) {
 		this.Kp = Kp;
 		this.Ki = Ki;
@@ -26,21 +20,37 @@ public class PIDController {
 		this.goal = goal;
 	}
 	
-public float calculateChange(float current, float dt){
-	float currentError = current - this.goal;
-	this.totalError += currentError*dt;
+	public float calculateChange(float current, float dt){
+		float currentError = current - this.goal;
+		this.totalError += currentError*dt;
 	
+<<<<<<< HEAD
+		float P = Kp * currentError;
+		float I = Ki * totalError;
+		float D = 0;
+=======
 	float P = Kp * currentError;
 	float I = Ki * totalError;
 	float D = 0;
 	
 
+>>>>>>> master
 
 	if(dt > 0.00001){
 		D = Kd * (currentError - this.prevError)/dt;
-	this.prevError = currentError;
+		this.prevError = currentError;
 	}
 	
+<<<<<<< HEAD
+		float factor = P + I + D;
+		return factor * this.changeFactor;
+	}
+
+	public void reset(){
+		this.totalError = 0;
+		this.prevError = 0;
+	}
+=======
 //	System.out.println("P :" + P);
 //	System.out.println("I :" + I);
 //	System.out.println("D :" + D);
@@ -147,4 +157,5 @@ public void reset(){
 //		
 //		return new float[] { newInclination, newInclination };
 //	}
+>>>>>>> master
 }
