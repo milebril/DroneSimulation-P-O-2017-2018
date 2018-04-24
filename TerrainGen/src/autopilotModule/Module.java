@@ -5,6 +5,7 @@ import java.util.HashMap;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
+import autopilot.algorithmHandler.AutopilotAlain;
 import autopilot.interfaces.AutopilotConfig;
 import autopilot.interfaces.AutopilotInputs;
 import autopilot.interfaces.AutopilotModule;
@@ -29,6 +30,7 @@ public class Module implements AutopilotModule{
 	
 	private HashMap<Integer,Drone> drones = new HashMap<Integer, Drone>();
 	private HashMap<Integer,Airport> airports = new HashMap<Integer, Airport>();
+	private HashMap<Integer,AutopilotAlain> autopilots = new HashMap<Integer, AutopilotAlain>();
 	
 	public Module() {
 	};
@@ -66,14 +68,14 @@ public class Module implements AutopilotModule{
 	@Override
 	public void startTimeHasPassed(int drone, AutopilotInputs inputs) {
 		// Allows the autopilots for all drones to run in parallel if desired. Called with drone = 0 through N - 1, in that order, if N drones have been defined.
-		
+		autopilots.get(drone).startTimeHasPassed(inputs);
 	}
 
 	@Override
 	public AutopilotOutputs completeTimeHasPassed(int drone) {
 		// Called with drone = 0 through N - 1, in that order, if N drones have been defined.
 		
-		AutopilotOutputs outputs = drones.get(drone).getAutopilot().timePassed(drones.get(drone).getAutoPilotInputs());
+		AutopilotOutputs outputs = autopilots.get(drone).completeTimeHasPassed();
 		//drones.get(drone).setAutopilotOutputs(outputs); dees is voor de maingameloop
 		return outputs;
 	}
