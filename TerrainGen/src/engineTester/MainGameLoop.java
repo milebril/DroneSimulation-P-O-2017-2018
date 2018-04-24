@@ -254,7 +254,7 @@ public class MainGameLoop {
 		
 		MiniMap minimap = new MiniMap();
 
-		a = new Airport(0, -100);
+		a = new Airport(0, -100, 0);
 		
 		while (!Display.isCloseRequested()) {
 			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
