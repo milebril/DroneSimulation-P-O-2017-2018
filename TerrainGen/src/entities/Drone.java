@@ -685,4 +685,14 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		Vector3f headingVector = this.getHeadingVector(); 
 		return (float) Math.atan2(-headingVector.x, - headingVector.z);
 	}
+	
+	private String name;
+	
+	public String getName() {
+		return this.name;
+	}
+	
+	public void setName(String s) {
+		this.name = s;
+	}
 }

@@ -31,7 +31,6 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	
 	private Algorithm algorithm;
 	public void setAlgorithm(Algorithm algorithm) {
-		System.out.println("autopilot: " + algorithm.getName());
 		this.algorithm = algorithm;
 	}
 	public Algorithm getAlgorithm() {

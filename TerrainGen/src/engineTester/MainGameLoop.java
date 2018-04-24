@@ -120,7 +120,7 @@ public class MainGameLoop {
 	private static ViewEnum currentView = ViewEnum.MAIN;
 
 	// ThreadPool
-	private static ExecutorService pool = Executors.newFixedThreadPool(10); // creating a pool of 5 threads
+	private static ExecutorService pool = Executors.newFixedThreadPool(5); // creating a pool of X threads
 
 	private enum ViewEnum {
 		MAIN, MINIMAP
@@ -159,31 +159,65 @@ public class MainGameLoop {
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,
 				new ModelTexture(loader.loadTexture("untitled")));
 
-		Drone droneOne = new Drone(staticDroneModel,
-				new Matrix4f()
-						.translate(new Vector3f(0,
-								(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
-										+ autopilotConfig.getTyreRadius() + 20,
-								0)),
-				1f, autopilotConfig, new EulerPrediction(STEP_TIME));
+		for (int i = 1; i <= 10; i++) {
+			Drone drone = new Drone(staticDroneModel,
+					new Matrix4f().translate(new Vector3f(-20*i,
+							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
+									+ autopilotConfig.getTyreRadius() + 20,
+							20*i)),
+					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
+			drone.setName("Drone " + i);
 
-		Drone droneTwo = new Drone(staticDroneModel,
-				new Matrix4f()
-						.translate(new Vector3f(0,
-								(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
-										+ autopilotConfig.getTyreRadius() + 20,
-								20)),
-				1f, autopilotConfig, new EulerPrediction(STEP_TIME));
+			activeDrone = drone;
+			entities.add(drone);
+			drones.add(drone);
+		}
+		
+		for (int i = 1; i <= 10; i++) {
+			Drone drone = new Drone(staticDroneModel,
+					new Matrix4f().translate(new Vector3f(-20*i,
+							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
+									+ autopilotConfig.getTyreRadius() + 20 + 20,
+							20*i)),
+					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
+			drone.setName("Drone " + i);
 
-		activeDrone = droneOne;
-		entities.add(droneOne);
-		entities.add(droneTwo);
-		drones.add(droneOne);
-		drones.add(droneTwo);
+			activeDrone = drone;
+			entities.add(drone);
+			drones.add(drone);
+		}
+		
+		for (int i = 1; i <= 100; i++) {
+			Drone drone = new Drone(staticDroneModel,
+					new Matrix4f().translate(new Vector3f(20*i,
+							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
+									+ autopilotConfig.getTyreRadius() + 20,
+							20*i)),
+					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
+			drone.setName("Drone " + i);
+
+			activeDrone = drone;
+			entities.add(drone);
+			drones.add(drone);
+		}
+		
+		for (int i = 1; i <= 10; i++) {
+			Drone drone = new Drone(staticDroneModel,
+					new Matrix4f().translate(new Vector3f(20*i,
+							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
+									+ autopilotConfig.getTyreRadius() + 20 + 20,
+							20*i)),
+					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
+			drone.setName("Drone " + i);
+
+			activeDrone = drone;
+			entities.add(drone);
+			drones.add(drone);
+		}
 
 		// ***INITIALIZE CHASE-CAM***
 		chaseCam = new Camera();
-		chaseCam.setPosition(droneOne.getPosition().translate(30, 0, 0));
+		chaseCam.setPosition(activeDrone.getPosition().translate(30, 0, 0));
 		// chaseCam.setRotation(0, -1.5f, 0);
 
 		// ***INITIALIZE GUI-TEXT***
@@ -371,17 +405,17 @@ public class MainGameLoop {
 							} catch (MaxAoAException e) {
 								e.printStackTrace();
 							}
+							System.out.println(d.getName() + " is ready with applyPhysics.");
 						}
 					};
-					//System.out.print(" before run ");
 					Future<?> fut = pool.submit(toRun);
 					futureList.add(fut);
-					//System.out.print(" after run ");
 				}
-				
+
 				// De code gaat niet verder totdat alle voordien aangemaakt threads klaar zijn
-				// future.get() -> Waits if necessary for the computation to complete, and then retrieves its result.
-				for(Future<?> fut : futureList) {
+				// future.get() -> Waits if necessary for the computation to complete, and then
+				// retrieves its result.
+				for (Future<?> fut : futureList) {
 					fut.get();
 				}
 
@@ -396,17 +430,20 @@ public class MainGameLoop {
 							AutopilotInputs inputs = d.getAutoPilotInputs();
 							AutopilotOutputs outputs = d.getAutopilot().timePassed(inputs);
 							d.setAutopilotOutputs(outputs);
+
+							System.out.println(d.getName() + " is ready with AP.");
 						}
 					};
 
 					Future<?> fut = pool.submit(toRun);
 					futureList2.add(fut);
-	
+
 				}
 
 				// De code gaat niet verder totdat alle voordien aangemaakt threads klaar zijn
-				// future.get() -> Waits if necessary for the computation to complete, and then retrieves its result.
-				for(Future<?> fut : futureList2) {
+				// future.get() -> Waits if necessary for the computation to complete, and then
+				// retrieves its result.
+				for (Future<?> fut : futureList2) {
 					fut.get();
 				}
 			}
@@ -592,8 +629,6 @@ public class MainGameLoop {
 		JFileChooser fc = new JFileChooser();
 		float normalizedX = -1.0f + 2.0f * (float) 1200 / (float) Display.getWidth();
 		float normalizedY = 1.0f - 2.0f * (float) 20 / (float) Display.getHeight();
-
-		System.out.println(new Vector2f(normalizedX, normalizedY));
 
 		openFile = new Button(loader, "openfile", new Vector2f(normalizedX, normalizedY), new Vector2f(0.05f, 0.05f)) {
 			@Override

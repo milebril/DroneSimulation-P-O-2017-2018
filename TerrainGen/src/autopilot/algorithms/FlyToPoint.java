@@ -48,10 +48,6 @@ public class FlyToPoint implements Algorithm {
 		float headingFeedback = headingPID.getFeedback(headingError, dt);
 		
 		
-		
-		System.out.println();
-		System.out.println("heading error: " + headingError);
-		
 		// pitch
 		float pitchTarget = 0;
 		float pitchError = pitchTarget - handler.getProperties().getPitch();
@@ -76,9 +72,7 @@ public class FlyToPoint implements Algorithm {
 		float cruiseForce = handler.getProperties().getGravity();
 		feedback = thrustPID.getFeedback(50 - handler.getProperties().getVelocity().length(), dt);
 		handler.setThrust(Math.max(0, cruiseForce + feedback));
-		System.out.println();
-		System.out.println("thrust: " + Math.min(Math.max(0, cruiseForce + feedback), handler.getProperties().getMaxThrust()));
-		
+	
 		boolean reached = true;
 		// if the point is reached activate next algorithm
 		if (reached) {
