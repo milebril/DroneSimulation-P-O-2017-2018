@@ -21,7 +21,7 @@ public class ImaginaryCube {
 		alignCube();
 		
 		// place the cube in front of the camera
-		translate(0, 0, -20);
+		translate(-30,50 , -50);
 	}
 	
 	

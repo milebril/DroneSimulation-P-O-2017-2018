@@ -121,8 +121,8 @@ public class OpenCVTest {
 			
 			while (deltaX > 0.005 || deltaY > 0.005 || ratio > 1.025 || ratio < 0.975) {
 				iterations++;
-				if (iterations > 400) {
-					//break;
+				if (iterations > 700) {
+					break;
 				}
 				// get difference between the centers of mass
 				imCenterOfMass = imaginaryCube.getProjectedAreaCenterOfMass((float) (120.0 / 180 * Math.PI), (float) (120.0 / 180 * Math.PI));
