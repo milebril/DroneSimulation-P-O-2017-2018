@@ -155,12 +155,40 @@ public class MainGameLoop {
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,
 				new ModelTexture(loader.loadTexture("untitled")));
 
-		for (int i = 1; i <= 10; i++) {
+//		for (int i = 1; i <= 10; i++) {
+//			Drone drone = new Drone(staticDroneModel,
+//					new Matrix4f().translate(new Vector3f(-20 * i,
+//							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
+//									+ autopilotConfig.getTyreRadius() + 20,
+//							20 * i)),
+//					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
+//			drone.setName("Drone " + i);
+//
+//			activeDrone = drone;
+//			entities.add(drone);
+//			drones.add(drone);
+//		}
+//
+//		for (int i = 1; i <= 10; i++) {
+//			Drone drone = new Drone(staticDroneModel,
+//					new Matrix4f().translate(new Vector3f(-20 * i,
+//							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
+//									+ autopilotConfig.getTyreRadius() + 20 + 20,
+//							20 * i)),
+//					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
+//			drone.setName("Drone " + i);
+//
+//			activeDrone = drone;
+//			entities.add(drone);
+//			drones.add(drone);
+//		}
+
+		for (int i = 1; i <= 500; i++) {
 			Drone drone = new Drone(staticDroneModel,
-					new Matrix4f().translate(new Vector3f(-20*i,
+					new Matrix4f().translate(new Vector3f(20 * i,
 							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
 									+ autopilotConfig.getTyreRadius() + 20,
-							20*i)),
+							20 * i)),
 					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
 			drone.setName("Drone " + i);
 
@@ -168,48 +196,20 @@ public class MainGameLoop {
 			entities.add(drone);
 			drones.add(drone);
 		}
-		
-		for (int i = 1; i <= 10; i++) {
-			Drone drone = new Drone(staticDroneModel,
-					new Matrix4f().translate(new Vector3f(-20*i,
-							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
-									+ autopilotConfig.getTyreRadius() + 20 + 20,
-							20*i)),
-					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
-			drone.setName("Drone " + i);
 
-			activeDrone = drone;
-			entities.add(drone);
-			drones.add(drone);
-		}
-		
-		for (int i = 1; i <= 100; i++) {
-			Drone drone = new Drone(staticDroneModel,
-					new Matrix4f().translate(new Vector3f(20*i,
-							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
-									+ autopilotConfig.getTyreRadius() + 20,
-							20*i)),
-					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
-			drone.setName("Drone " + i);
-
-			activeDrone = drone;
-			entities.add(drone);
-			drones.add(drone);
-		}
-		
-		for (int i = 1; i <= 10; i++) {
-			Drone drone = new Drone(staticDroneModel,
-					new Matrix4f().translate(new Vector3f(20*i,
-							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
-									+ autopilotConfig.getTyreRadius() + 20 + 20,
-							20*i)),
-					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
-			drone.setName("Drone " + i);
-
-			activeDrone = drone;
-			entities.add(drone);
-			drones.add(drone);
-		}
+//		for (int i = 1; i <= 10; i++) {
+//			Drone drone = new Drone(staticDroneModel,
+//					new Matrix4f().translate(new Vector3f(20 * i,
+//							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
+//									+ autopilotConfig.getTyreRadius() + 20 + 20,
+//							20 * i)),
+//					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
+//			drone.setName("Drone " + i);
+//
+//			activeDrone = drone;
+//			entities.add(drone);
+//			drones.add(drone);
+//		}
 
 		// ***INITIALIZE CHASE-CAM***
 		chaseCam = new Camera();
@@ -400,7 +400,7 @@ public class MainGameLoop {
 							} catch (MaxAoAException e) {
 								e.printStackTrace();
 							}
-							System.out.println(d.getName() + " is ready with applyPhysics.");
+							//System.out.println(d.getName() + " is ready with applyPhysics.");
 						}
 					};
 					Future<?> fut = pool.submit(toRun);
@@ -426,7 +426,7 @@ public class MainGameLoop {
 							AutopilotOutputs outputs = d.getAutopilot().timePassed(inputs);
 							d.setAutopilotOutputs(outputs);
 
-							System.out.println(d.getName() + " is ready with AP.");
+							//System.out.println(d.getName() + " is ready with AP.");
 						}
 					};
 
@@ -457,14 +457,16 @@ public class MainGameLoop {
 		DisplayManager.closeDisplay();
 	}
 
-	private static void renderEntities(Camera camera, String type) {
+	private static void renderEntities(Camera camera, String type) throws InterruptedException, ExecutionException {
 		for (Terrain t : terrains) {
 			renderer.processTerrain(t);
 		}
 
+		//No need for multithreading; Already optimized; models are just displaced.
 		for (Entity entity : entities) {
-			renderer.processEntity(entity);
+					renderer.processEntity(entity);
 		}
+
 		renderer.render(light, camera);
 
 		cubeShader.start();
