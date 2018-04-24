@@ -68,16 +68,13 @@ public class Module implements AutopilotModule{
 	@Override
 	public void startTimeHasPassed(int drone, AutopilotInputs inputs) {
 		// Allows the autopilots for all drones to run in parallel if desired. Called with drone = 0 through N - 1, in that order, if N drones have been defined.
-		autopilots.get(drone).startTimeHasPassed(inputs);
+		autopilots.get(drone).timePassed(inputs);
 	}
 
 	@Override
 	public AutopilotOutputs completeTimeHasPassed(int drone) {
 		// Called with drone = 0 through N - 1, in that order, if N drones have been defined.
-		
-		AutopilotOutputs outputs = autopilots.get(drone).completeTimeHasPassed();
-		//drones.get(drone).setAutopilotOutputs(outputs); dees is voor de maingameloop
-		return airports.get(drone).getAutopilot();
+		return autopilots.get(drone);
 	}
 
 	@Override
