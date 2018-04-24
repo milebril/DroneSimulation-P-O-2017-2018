@@ -156,9 +156,12 @@ public class ImageProcessor {
 						teller+=1;
 					}
 				}
-				if ( (teller == 0) && colorHSVList.get(i)[2] < 50 ) {
-					differentColorsHSVList.add(new double[]{colorHSVList.get(i)[0],colorHSVList.get(i)[1]});
+				if ( (teller == 0) && (colorHSVList.get(i)[2] == 45 || colorHSVList.get(i)[2] == 20 || colorHSVList.get(i)[2] == 40 || colorHSVList.get(i)[2] == 25 || colorHSVList.get(i)[2] == 35|| colorHSVList.get(i)[2] == 30)) {
+					if (! ((colorHSVList.get(i)[0]  == 63 || colorHSVList.get(i)[0] == 64)  && (colorHSVList.get(i)[1] == 99|| colorHSVList.get(i)[1] == 98))) {
+					differentColorsHSVList.add(new double[]{colorHSVList.get(i)[0],colorHSVList.get(i)[1],colorHSVList.get(i)[2]});
+					}
 				}
+					
 			}
 		}	
 		return differentColorsHSVList;
