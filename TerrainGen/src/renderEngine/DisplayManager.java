@@ -92,4 +92,13 @@ public class DisplayManager {
 		lastFrameTime = 0;
 	}
 
+	public static void pauze() {
+		if (started) {
+			started = false;
+		} else {
+			started = true;
+		}
+		
+	}
+
 }

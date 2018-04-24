@@ -21,7 +21,7 @@ public class Camera {
 	public float yaw;
 	private float roll;
 	
-	private float distance = 0.2f;
+	private float distance = 1.0f;
 	private float mouseSensitivity = 0.001f;
 	
 	private int snapshotWidth;
@@ -192,10 +192,22 @@ public class Camera {
 	    }
 	    
 	    if (Mouse.isButtonDown(0)) {
-	      int dx = Mouse.getDX();
-          int dy = Mouse.getDY();
-          pitch -= (dx * mouseSensitivity);
-          yaw -= (dy * mouseSensitivity);
+//	      int dx = Mouse.getDX();
+//          int dy = Mouse.getDY();
+//          pitch -= (dx * mouseSensitivity);
+          
+          float pitchChange = Mouse.getDY() * 0.2f;
+          pitch -= pitchChange;
+          if(pitch < 0){
+              pitch = 0;
+          }else if(pitch > 90){
+              pitch = 90;
+          }
+          
+          float angleChange = Mouse.getDX() * 0.3f;
+          yaw -= angleChange;
+          
+//          yaw -= (dy * mouseSensitivity);
 	    }  
 	}
 }

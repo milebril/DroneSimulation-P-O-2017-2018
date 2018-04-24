@@ -12,6 +12,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
@@ -76,10 +80,11 @@ public class MainGameLoop {
 	private static boolean lLock;
 	private static boolean sLock;
 	private static boolean mLock;
+	private static boolean pLock;
 
 	public static AutopilotConfig autopilotConfig;
 
-	//Drone Stuff
+	// Drone Stuff
 	private static List<Drone> drones;
 	private static Drone activeDrone;
 
@@ -119,11 +124,18 @@ public class MainGameLoop {
 	
 	//
 
+	// ThreadPool
+	private static ExecutorService pool = Executors.newFixedThreadPool(20); // creating a pool of X threads
+
 	private enum ViewEnum {
 		MAIN, MINIMAP
 	}
+	
+	//Minimap
+	private static MiniMap miniMap;
+	private static DroneList droneList;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException, ExecutionException {
 		// Needed to load openCV
 		//System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
@@ -151,21 +163,69 @@ public class MainGameLoop {
 		RawModel droneModel = OBJLoader.loadObjModel("untitled5", loader);
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,
 				new ModelTexture(loader.loadTexture("untitled")));
-		Drone droneOne = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0,
-				(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius(), 0)),
-				1f, autopilotConfig, new EulerPrediction(STEP_TIME));
-		activeDrone = droneOne;
-		entities.add(droneOne);
-		drones.add(droneOne);
-//		RawModel gateModel = OBJLoader.loadObjModel("gate10", loader);
-//		TexturedModel staticGateModel = new TexturedModel(gateModel,
-//				new ModelTexture(loader.loadTexture("gate.blauw")));
-//		Entity gate = new Entity(staticGateModel, new Matrix4f().translate(new Vector3f(0, 1, -40)), 1);
-//		entities.add(gate);
+		
+		TexturedModel staticDroneModel2 = new TexturedModel(droneModel,
+				new ModelTexture(loader.loadTexture("untitledGreen")));
+
+		for (int i = 1; i <= 10; i++) {
+			Drone drone = new Drone(staticDroneModel2,
+					new Matrix4f().translate(new Vector3f(-20*i,
+							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
+									+ autopilotConfig.getTyreRadius() + 20,
+							20 * i)),
+					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
+			drone.setName("Drone " + i);
+
+			activeDrone = drone;
+			entities.add(drone);
+			drones.add(drone);
+		}
+
+		for (int i = 1; i <= 10; i++) {
+			Drone drone = new Drone(staticDroneModel,
+					new Matrix4f().translate(new Vector3f(-20 * i,
+							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
+									+ autopilotConfig.getTyreRadius() + 20 + 20,
+							20 * i)),
+					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
+			drone.setName("Drone " + i);
+
+			activeDrone = drone;
+			entities.add(drone);
+			drones.add(drone);
+		}
+
+		for (int i = 1; i <= 10; i++) {
+			Drone drone = new Drone(staticDroneModel,
+					new Matrix4f().translate(new Vector3f(20 * i,
+							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
+									+ autopilotConfig.getTyreRadius() + 20,
+							20 * i)),
+					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
+			drone.setName("Drone " + i);
+
+			activeDrone = drone;
+			entities.add(drone);
+			drones.add(drone);
+		}
+
+		for (int i = 1; i <= 10; i++) {
+			Drone drone = new Drone(staticDroneModel,
+					new Matrix4f().translate(new Vector3f(20 * i,
+							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
+									+ autopilotConfig.getTyreRadius() + 20 + 20,
+							20 * i)),
+					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
+			drone.setName("Drone " + i);
+
+			activeDrone = drone;
+			entities.add(drone);
+			drones.add(drone);
+		}
 
 		// ***INITIALIZE CHASE-CAM***
 		chaseCam = new Camera();
-		chaseCam.setPosition(droneOne.getPosition().translate(30, 0, 0));
+		chaseCam.setPosition(activeDrone.getPosition().translate(30, 0, 0));
 		// chaseCam.setRotation(0, -1.5f, 0);
 
 		// ***INITIALIZE GUI-TEXT***
@@ -220,16 +280,12 @@ public class MainGameLoop {
 
 		Cube c = new Cube(1, 1, 0);
 		RawCubeModel cube = loader.loadToVAO(c.positions, c.colors);
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -480)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 4, -20)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -560)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -640)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -720)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -800)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -880)), 1));
-
-		/* INITIALIZE AUTOPILOT */
-		autopilot = AutopilotFactory.createAutopilot();
-		autopilot.simulationStarted(autopilotConfig, activeDrone.getAutoPilotInputs());
 
 		// ***INITIALIZE BUTTONS GUI***
 		List<GuiTexture> guis = new ArrayList<>();
@@ -251,19 +307,20 @@ public class MainGameLoop {
 		}
 		float s = (60 / i.getHeight());
 		s = 0.01f;
-		
-		MiniMap minimap = new MiniMap();
 
 		a = new Airport(0, -100, 0);
 		
+		miniMap = new MiniMap();
+		droneList = new DroneList(drones);
+
 		while (!Display.isCloseRequested()) {
 			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
-				camera.takeSnapshot();
+				//camera.takeSnapshot();
 			}
 
 			switch (currentView) {
 			case MINIMAP:
-				minimap.render(drones, guiRenderer, loader);
+				miniMap.render(drones, guiRenderer, loader);
 				break;
 			case MAIN:
 				// CAMERA VIEW
@@ -271,8 +328,8 @@ public class MainGameLoop {
 				GL11.glViewport(0, 0, 202, 202);
 				GL11.glScissor(0, 0, 202, 202);
 				GL11.glEnable(GL11.GL_SCISSOR_TEST);
-				glClearColor(0,0,0,1);
-				
+				glClearColor(0, 0, 0, 1);
+
 				renderer.prepare();
 				GL11.glViewport(0, 0, 200, 200);
 				GL11.glScissor(0, 0, 200, 200);
@@ -280,20 +337,19 @@ public class MainGameLoop {
 				renderEntities(camera, "Drone");
 				camera.setPosition(activeDrone.getPosition().translate(0, 0, -5));
 
-				
 				// ***BIG SCREEN***
-				//renderer.prepare();
+				// renderer.prepare();
 				GL11.glViewport(580, 0, 700, Display.getHeight());
 				GL11.glScissor(580, 0, 700, Display.getHeight());
 				GL11.glEnable(GL11.GL_SCISSOR_TEST);
-				GL11.glClearColor(135/255f, 206/255f, 235/255f, 0.6f);
+				GL11.glClearColor(135 / 255f, 206 / 255f, 235 / 255f, 0.6f);
 				renderEntities(chaseCam, "3D");
 
-				// GUI		
+				// GUI
 				GL11.glViewport(0, 0, 1280, 700);
 				GL11.glScissor(0, 0, 1280, 700);
 				GL11.glEnable(GL11.GL_SCISSOR_TEST);
-				
+
 				speed = String.valueOf(Math.round(activeDrone.getAbsVelocity()));
 				textSpeed.setString("Speed = " + speed + "m/s");
 				TextMaster.loadText(textSpeed);
@@ -337,31 +393,76 @@ public class MainGameLoop {
 			// ***UPDATES***
 			float dt = DisplayManager.getFrameTimeSeconds();
 			if (!entities.isEmpty() && dt > 0.00001) {
-				// applyphysics rekent de krachten uit en gaat dan de kinematische waarden van
-				// de drone
-				// aanpassen op basis daarvan
-				try {
-					PhysicsEngine.applyPhysics(activeDrone, dt);
-				} catch (DroneCrashException e) {
-					System.err.println(e);
-					System.exit(-1);
-				} catch (MaxAoAException e) {
-					e.printStackTrace();
+
+				// De lijst waarin alle threads gestoken worden om later te checken of ze klaar
+				// zijn.
+				ArrayList<Future<?>> futureList = new ArrayList<Future<?>>();
+
+				// Maak een thread aan voor elke drone
+				for (Drone d : drones) {
+					Runnable toRun = new Runnable() {
+						@Override
+						public void run() {
+
+							// fysica toepassen
+							// applyphysics rekent de krachten uit en gaat dan de kinematische waarden van
+							// de drone aanpassen op basis daarvan
+							try {
+								PhysicsEngine.applyPhysics(d, dt);
+							} catch (DroneCrashException e) {
+								System.err.println(e);
+								System.exit(-1);
+							} catch (MaxAoAException e) {
+								e.printStackTrace();
+							}
+							//System.out.println(d.getName() + " is ready with applyPhysics.");
+						}
+					};
+					Future<?> fut = pool.submit(toRun);
+					futureList.add(fut);
 				}
 
-				// Autopilot stuff
-				AutopilotInputs inputs = activeDrone.getAutoPilotInputs();
-				AutopilotOutputs outputs = autopilot.timePassed(inputs);
-				activeDrone.setAutopilotOutputs(outputs);
+				// De code gaat niet verder totdat alle voordien aangemaakt threads klaar zijn
+				// future.get() -> Waits if necessary for the computation to complete, and then
+				// retrieves its result.
+				for (Future<?> fut : futureList) {
+					fut.get();
+				}
+
+				ArrayList<Future<?>> futureList2 = new ArrayList<Future<?>>();
+
+				// Maak een thread aan voor elke drone
+				for (Drone d : drones) {
+					Runnable toRun = new Runnable() {
+						@Override
+						public void run() {
+							// Autopilot stuff
+							AutopilotInputs inputs = d.getAutoPilotInputs();
+							AutopilotOutputs outputs = d.getAutopilot().timePassed(inputs);
+							d.setAutopilotOutputs(outputs);
+
+							//System.out.println(d.getName() + " is ready with AP.");
+						}
+					};
+
+					Future<?> fut = pool.submit(toRun);
+					futureList2.add(fut);
+
+				}
+
+				// De code gaat niet verder totdat alle voordien aangemaakt threads klaar zijn
+				// future.get() -> Waits if necessary for the computation to complete, and then
+				// retrieves its result.
+				for (Future<?> fut : futureList2) {
+					fut.get();
+				}
 			}
 
 			keyInputs();
-//			while (paused) // if M is pressed, the simulation is paused untill M is pressed again
-//			{
-//				try {Thread.sleep(20);} catch (InterruptedException e) {}
-//				keyInputs();
-//			}
 			
+			//Updates the GUI
+			droneList.updateLabels(activeDrone);
+
 			removeCubes();
 			DisplayManager.updateDisplay();
 
@@ -374,13 +475,14 @@ public class MainGameLoop {
 		DisplayManager.closeDisplay();
 	}
 
-	private static void renderEntities(Camera camera, String type) {
+	private static void renderEntities(Camera camera, String type) throws InterruptedException, ExecutionException {
 		for (Terrain t : terrains) {
 			renderer.processTerrain(t);
 		}
 
+		//No need for multithreading; Already optimized; models are just displaced.
 		for (Entity entity : entities) {
-			renderer.processEntity(entity);
+					renderer.processEntity(entity);
 		}
 		
 		a.render(renderer, chaseCam, light);
@@ -435,6 +537,11 @@ public class MainGameLoop {
 				}
 			}
 			mLock = true;
+		} else if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
+			if (!pLock) {
+				DisplayManager.pauze();
+			}
+			pLock = true;
 		} else {
 			if (chaseCameraLocked) {
 				Vector3f.add(activeDrone.getPosition(), new Vector3f(0, 0, 30), chaseCam.getPosition());
@@ -445,15 +552,16 @@ public class MainGameLoop {
 			lLock = false;
 			sLock = false;
 			mLock = false;
+			pLock = false;
 		}
-		
+
 		if (chaseCameraLocked) {
 			Vector3f.add(activeDrone.getPosition(), new Vector3f(0, 0, 30), chaseCam.getPosition());
 		} else {
 			chaseCam.roam();
 		}
-		lLock = false;
-		sLock = false;
+//		lLock = false;
+//		sLock = false;
 	}
 
 	private static void reset() {
@@ -535,8 +643,6 @@ public class MainGameLoop {
 		JFileChooser fc = new JFileChooser();
 		float normalizedX = -1.0f + 2.0f * (float) 1200 / (float) Display.getWidth();
 		float normalizedY = 1.0f - 2.0f * (float) 20 / (float) Display.getHeight();
-		
-		System.out.println(new Vector2f(normalizedX, normalizedY));
 
 		openFile = new Button(loader, "openfile", new Vector2f(normalizedX, normalizedY), new Vector2f(0.05f, 0.05f)) {
 			@Override
@@ -636,5 +742,9 @@ public class MainGameLoop {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static void setActiveDrone(Drone drone) {
+		activeDrone = drone;
 	}
 }

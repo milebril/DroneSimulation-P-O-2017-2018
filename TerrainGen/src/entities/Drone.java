@@ -7,7 +7,9 @@ import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
+import autopilot.interfaces.Autopilot;
 import autopilot.interfaces.AutopilotConfig;
+import autopilot.interfaces.AutopilotFactory;
 import autopilot.interfaces.AutopilotInputs;
 import autopilot.interfaces.AutopilotOutputs;
 import models.RawModel;
@@ -31,6 +33,10 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	public Drone(TexturedModel model, Matrix4f pose, float scale,
 				AutopilotConfig cfg, PredictionMethod predictionMethod) {
 		super(model, pose, scale);
+		
+		/* INITIALIZE AUTOPILOT */
+		setAutopilot(AutopilotFactory.createAutopilot());
+		getAutopilot().simulationStarted(cfg, getAutoPilotInputs());
 		
 		this.linearVelocityW = new Vector3f(0.0f,0.0f, -50.0f);
 
@@ -89,6 +95,19 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		this(null, pose, 1f, autopilotConfig, new EulerPrediction(0.01f));
 		this.setLinearVelocity(velocity);
 		this.setAngularVelocity(rotVel);
+	}
+	
+	// AUTOPILOT
+	
+	// Autopilot
+	private Autopilot autopilot;
+	
+	public Autopilot getAutopilot() {
+		return this.autopilot;
+	}
+	
+	private void setAutopilot(Autopilot ap) {
+		this.autopilot = ap;
 	}
 	
 	// PREDICTION METHOD
@@ -538,7 +557,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	public AutopilotInputs getAutoPilotInputs() {
 
 		return new AutopilotInputs() {
-			public byte[] getImage() { return camera.takeByteArraySnapshot();}
+			public byte[] getImage() { return null;} //TODO: is null zetten hier voldoende?
 			
 			public float getX() { return getPosition().x; }
 			public float getY() { return getPosition().y; }
@@ -665,5 +684,15 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 
 		Vector3f headingVector = this.getHeadingVector(); 
 		return (float) Math.atan2(-headingVector.x, - headingVector.z);
+	}
+	
+	private String name;
+	
+	public String getName() {
+		return this.name;
+	}
+	
+	public void setName(String s) {
+		this.name = s;
 	}
 }

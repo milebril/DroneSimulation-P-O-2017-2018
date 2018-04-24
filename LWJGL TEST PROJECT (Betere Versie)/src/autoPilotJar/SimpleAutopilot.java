@@ -87,6 +87,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	/**
 	 * Getter for the Autopilot input
 	 */
+<<<<<<< HEAD
 	public AutopilotInputs getInput() {
 		return this.inputAP;
 	}
@@ -96,6 +97,57 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
 		this.inputAP = inputs;
 		System.out.println("Roll: " + inputs.getRoll());
+=======
+	private float getAOA(float inclination, Vector3f rotationAxisD, Vector3f wingCentreOfMassD, Vector3f attackVectorDroneFrame){
+		
+		//copy and transform to world frame
+		Vector3f rotationAxisW = new Vector3f();		
+		Matrix3f.transform(this.getCurrentOrientation(), rotationAxisD, rotationAxisW);
+
+		
+
+//		try {
+//			Thread.sleep(1000);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		
+		Vector3f wingRotationSpeed = new Vector3f();
+		//de hefboomsafstand in wereldassenstelsel
+		Vector3f leftWingLever = new Vector3f();
+		
+		Matrix3f.transform(this.getCurrentOrientation(), wingCentreOfMassD, leftWingLever);
+		// v_rot = omega x hefboomstafstand (in Wereldassenstelsel)
+		Vector3f.cross(this.getCurrentRotationSpeed(), leftWingLever , wingRotationSpeed);
+		//totale snelheid is de som van de rotatie en de drone snelheid (in was)
+		
+		System.out.println("getAOA inclination leftWingLever: " + leftWingLever);
+		System.out.println("getAOA inclination CurrentRotationSpeed: " + this.getCurrentRotationSpeed());
+		
+//		System.out.println("getAOA inclination wingRotationSpeed: " + wingRotationSpeed);
+//		System.out.println("getAOA inclination this.calculateSpeedVector(): " + this.calculateSpeedVector());
+
+		Vector3f totalSpeedW = new Vector3f();
+		
+		Vector3f.add(this.calculateSpeedVector(), wingRotationSpeed, totalSpeedW); 		
+		
+		//The left wing's attack vector is (0, sin(leftWingInclination), -cos(leftWingInclination)
+		Vector3f attackVectorW = new Vector3f();
+		Matrix3f.transform(this.getCurrentOrientation(), attackVectorDroneFrame, attackVectorW);
+		
+		//We define an airfoil's normal as the cross product of its axis vector and its attack vector.
+		Vector3f normalW = new Vector3f();
+		Vector3f.cross(rotationAxisW, attackVectorW, normalW);
+		
+		Vector3f projAirspeedVectorW = new Vector3f();
+		//We define an airfoil's projected airspeed vector as its airspeed vector (its
+//		velocity minus the wind velocity) projected onto the plane perpendicular to its
+//		axis vector.
+//		System.out.println("rotation axis VOOR SCALE: " + copyRotationAxis);
+
+		Vector3f.sub(totalSpeedW, (Vector3f) rotationAxisW.scale(Vector3f.dot(totalSpeedW, rotationAxisW)), projAirspeedVectorW);
+>>>>>>> master
 		
 		if (this.inputAP.getElapsedTime() > 0.0000001) {
 			setDroneProperties(inputs);
@@ -177,6 +229,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 			//this.newThrust = configAP.getMaxThrust();
 		}
 
+<<<<<<< HEAD
 		return this;
 	}
 	
@@ -186,6 +239,18 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		this.inputAP = inputs;
 		
 		cubeLocator = new ImageProcessor(this);
+=======
+//		System.out.println("getAOA inclination : " + inclination);
+//		System.out.println("getAOA rotationAxisW : " + rotationAxisW);
+//		System.out.println("getAOA attackVectorDroneFrame : " + attackVectorDroneFrame);		
+//		System.out.println("getAOA projAirspeedVector: " + projAirspeedVectorW);
+//		System.out.println("getAOA totalSpeed: " + totalSpeedW);
+//		System.out.println("getAOA normal: " + normalW);
+//		System.out.println("getAOA projAirspeedVector: " + projAirspeedVectorW);
+//		System.out.println("getAOA attackVector: " + attackVectorW);
+		
+		float aoa = - (float) Math.atan2(Vector3f.dot(projAirspeedVectorW, normalW), Vector3f.dot(projAirspeedVectorW, attackVectorW));
+>>>>>>> master
 		
 		return this;
 	}
@@ -195,9 +260,6 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 	private Vector3f stubCube = new Vector3f(0, 0, -40);
 	private Vector3f cubePos = stubCube;
 	
-	private float heightGoal = 1;
-	
-	private ImageProcessor cubeLocator;
 	private PIDController pidHorStab;
 	private PIDController pidHorWing;
 	private PIDController pidHorGoal;
@@ -471,6 +533,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		public byte[] getImage() {
 			return this.image;
 		}
+<<<<<<< HEAD
 		
 		// Time
 		
@@ -484,6 +547,27 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		 */
 		public float getElapsedTime() {
 			return this.elapsedTime;
+=======
+		else{
+			
+			Vector3f attackVectorDroneFrame = new Vector3f(0.0f, (float)Math.sin(inclination), - (float)Math.cos(inclination));		
+			aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
+			
+			while((aoa < 0.9 *maxAOA)|| (aoa > maxAOA)){
+//				System.out.println("getMaxInclinationHorStab maxaoa:  " + maxAOA);
+//				System.out.println("getMaxInclinationHorStab current inclination:  " + inclination);;
+				if (aoa > maxAOA){
+					inclination -= INCLINATIONINCREMENT;
+				}
+				else{
+					inclination += INCLINATIONINCREMENT;
+				}
+//				System.out.println("getMaxInclinationHorStab current rotationAxis:  " + rotationAxis);
+	
+				attackVectorDroneFrame = new Vector3f(0.0f, (float)Math.sin(inclination), - (float)Math.cos(inclination));		
+				aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
+			}
+>>>>>>> master
 		}
 		
 		// Position
@@ -499,6 +583,7 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		public Vector3f getPosition() {
 			return this.position;
 		}
+<<<<<<< HEAD
 		
 		// Heading, pitch and roll
 		
@@ -608,10 +693,299 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		 * Calculates the orientation matrix.
 		 */
 		private Matrix3f calculateOrientationMatrix(float heading, float pitch, float roll) {
+=======
+		else{
+			
+			Vector3f attackVectorDroneFrame = new Vector3f(0.0f, (float)Math.sin(inclination), - (float)Math.cos(inclination));	
+			aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
+			
+			while((aoa < 0.9 *maxAOA)|| (aoa > maxAOA)){
+//				System.out.println("getMaxInclinationHorStab maxaoa:  " + maxAOA);
+//				System.out.println("getMaxInclinationHorStab current inclination:  " + inclination);;
+				if (aoa > maxAOA){
+					inclination -= INCLINATIONINCREMENT;
+				}
+				else{
+					inclination += INCLINATIONINCREMENT;
+				}
+//				System.out.println("getMaxInclinationHorStab current rotationAxis:  " + rotationAxis);
+				attackVectorDroneFrame = new Vector3f(0.0f, (float)Math.sin(inclination), - (float)Math.cos(inclination));		
+				aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
+			}
+		}
+		
+		return inclination;
+
+	}
+	
+	private float[] getMaxInclinationVertStab(){	
+//		 - the horizontal and vertical stabilizers are at (0, 0, tailSize)
+//		 - The vertical stabilizer's attack vector is (-sin(verStabInclination), 0, -cos(verStabInclination)).
+//		The axis vector of the vertical stabilizer is (0, 1, 0).		
+
+//		Vector3f rotationAxis = new Vector3f(0, 1, 0);
+//		Vector3f wingCentreOfMass = new Vector3f(0, 0, this.configAP.getTailSize());
+//		float inclination = 0;
+//			
+//		float maxAOA = configAP.getMaxAOA();
+//		float aoa = Float.NaN;
+//		
+//		//checken of de aoa al in het gewenste interval ligt.
+//		// zo nee: vergroot de inclinatie of verklein de inclinatie, bereken opnieuw de angle of attack en voer lus opnieuw uit
+//		if(this.calculateSpeedVector().length() == 0){
+//			aoa = maxAOA;
+//		}
+//		else{
+//			
+//			Vector3f attackVectorDroneFrame = new Vector3f(- (float)Math.sin(inclination), 0f, - (float)Math.cos(inclination));	
+//			aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
+//			
+//			while((aoa < 0.9 *maxAOA)|| (aoa > maxAOA)){
+////				System.out.println("getMaxInclinationHorStab maxaoa:  " + maxAOA);
+////				System.out.println("getMaxInclinationHorStab current inclination:  " + inclination);;
+//				if (aoa > maxAOA){
+//					inclination -= INCLINATIONINCREMENT;
+//				}
+//				else{
+//					inclination += INCLINATIONINCREMENT;
+//				}
+////				System.out.println("getMaxInclinationHorStab current rotationAxis:  " + rotationAxis);
+//	
+//				attackVectorDroneFrame = new Vector3f(- (float)Math.sin(inclination), 0f, - (float)Math.cos(inclination));		
+//				aoa = this.getAOA(inclination, rotationAxis, wingCentreOfMass, attackVectorDroneFrame);
+//			}
+//		}
+//		return inclination;
+		
+		float[] inclinations = new float[2];
+		
+		Vector3f rotationAxisD = new Vector3f(0, 1, 0);
+		Vector3f wingCentreOfMassD = new Vector3f(0, 0, this.configAP.getTailSize());
+		float posinclination = 0;
+		float neginclination = 0;
+		
+		float maxAOA = configAP.getMaxAOA();
+		float aoa = Float.NaN;
+		
+		//checken of de aoa al in het gewenste interval ligt.
+		// zo nee: vergroot de inclinatie of verklein de inclinatie, bereken opnieuw de angle of attack en voer lus opnieuw uit
+		if(this.calculateSpeedVector().length() == 0){
+			posinclination = maxAOA;
+			neginclination = - maxAOA;
+		}
+		else{
+			
+			//eerst positieve inclinatie en daarna hetzelfde voor de negatieve inclinatie
+			
+			Vector3f attackVectorDroneFrame = new Vector3f(- (float)Math.sin(posinclination), 0f, - (float)Math.cos(posinclination));		
+			aoa = this.getAOA(posinclination, rotationAxisD, wingCentreOfMassD, attackVectorDroneFrame);
+			int count = 0;
+			boolean add = false;
+			boolean sub = false;
+			
+			while((aoa < 0.9 *maxAOA)|| (aoa > maxAOA)){
+				
+				System.out.println("getMaxInclinationHorStab aoa:  " + aoa);
+
+				if (aoa > maxAOA){
+					posinclination -= INCLINATIONINCREMENT;
+					sub = true;
+					if (sub == add){
+						System.out.println("getMaxInclinationHorStab  ___BREAK___");
+						break;}
+					System.out.println("getMaxInclinationHorStab inclin min increment");
+					System.out.println("getMaxInclinationHorStab inclin: " + posinclination);
+					
+
+				}
+				else{
+					posinclination += INCLINATIONINCREMENT;
+					add = true; 
+					System.out.println("getMaxInclinationHorStab inclin plus increment");
+					System.out.println("getMaxInclinationHorStab inclin: " + posinclination);
+				}
+	
+				System.out.println(count++);
+				
+				attackVectorDroneFrame = new Vector3f(- (float)Math.sin(posinclination), 0f, - (float)Math.cos(posinclination));	
+				aoa = this.getAOA(posinclination, rotationAxisD, wingCentreOfMassD, attackVectorDroneFrame);
+			}
+			
+			System.out.println("getMaxInclinationHorStab aoa na positieve loop:  " + aoa);
+
+			inclinations[0] = posinclination;
+			
+			//NEGATIEVE inclinatie
+			
+			attackVectorDroneFrame = new Vector3f(- (float)Math.sin(posinclination), 0f, - (float)Math.cos(posinclination));		
+			aoa = this.getAOA(neginclination, rotationAxisD, wingCentreOfMassD, attackVectorDroneFrame);
+			boolean addneg = false;
+			boolean subneg = false;
+			
+			while((aoa > - 0.9 *maxAOA)|| (aoa < - maxAOA)){
+				
+				System.out.println("getMaxInclinationHorStab neg aoa:  " + aoa);
+
+				if (aoa > - 0.9 *maxAOA){
+					neginclination -= INCLINATIONINCREMENT;
+					subneg = true;
+					if (subneg == addneg){break;}
+					System.out.println("getMaxInclinationHorStab neginclin min increment");
+					System.out.println("getMaxInclinationHorStab neginclin: " + neginclination);
+				}
+				else{
+					neginclination += INCLINATIONINCREMENT;
+					addneg = true; 
+					System.out.println("getMaxInclinationHorStab neginclin plus increment");
+					System.out.println("getMaxInclinationHorStab neginclin: " + neginclination);
+				}
+	
+				System.out.println(count++);
+				
+				attackVectorDroneFrame = new Vector3f(- (float)Math.sin(posinclination), 0f, - (float)Math.cos(posinclination));
+				aoa = this.getAOA(neginclination, rotationAxisD, wingCentreOfMassD, attackVectorDroneFrame);
+			}
+		}
+		
+		System.out.println("getMaxInclinationHorStab aoa na negatieve loop:  " + aoa);
+
+		inclinations[1] = neginclination;
+
+		
+		System.out.println("getMaxInclinationHorStab BEREKENDE MAX INCLINATIONS IN AP:  " + inclinations[0] + inclinations[1]);
+		
+		return inclinations;		
+		
+	}
+	
+	private float[] getMaxInclinationHorStab(){
+		//		 - the horizontal and vertical stabilizers are at (0, 0, tailSize)
+//		- The axis vector of both wings and of the horizontal stabilizer is (1, 0, 0).
+//		 - The horizontal stabilizer's attack vector is (0, sin(horStabInclination), -cos(horStabInclination))
+		
+		float[] inclinations = new float[2];
+		
+		Vector3f rotationAxisD = new Vector3f(1, 0, 0);
+		Vector3f wingCentreOfMassD = new Vector3f(0, 0, this.configAP.getTailSize());
+		float posinclination = 0;
+		float neginclination = 0;
+		
+		float maxAOA = configAP.getMaxAOA();
+		float aoa = Float.NaN;
+		
+		//checken of de aoa al in het gewenste interval ligt.
+		// zo nee: vergroot de inclinatie of verklein de inclinatie, bereken opnieuw de angle of attack en voer lus opnieuw uit
+		if(this.calculateSpeedVector().length() == 0){
+			posinclination = maxAOA;
+			neginclination = - maxAOA;
+		}
+		else{
+			
+			//eerst positieve inclinatie en daarna hetzelfde voor de negatieve inclinatie
+			
+			Vector3f attackVectorDroneFrame = new Vector3f(0f, (float)Math.sin(posinclination), - (float)Math.cos(posinclination));		
+			aoa = this.getAOA(posinclination, rotationAxisD, wingCentreOfMassD, attackVectorDroneFrame);
+			int count = 0;
+			boolean add = false;
+			boolean sub = false;
+			
+			while((aoa < 0.9 *maxAOA)|| (aoa > maxAOA)){
+				
+				System.out.println("getMaxInclinationHorStab aoa:  " + aoa);
+
+				if (aoa > maxAOA){
+					posinclination -= INCLINATIONINCREMENT;
+					sub = true;
+					if (sub == add){
+						System.out.println("getMaxInclinationHorStab  ___BREAK___");
+						break;}
+					System.out.println("getMaxInclinationHorStab inclin min increment");
+					System.out.println("getMaxInclinationHorStab inclin: " + posinclination);
+					
+
+				}
+				else{
+					posinclination += INCLINATIONINCREMENT;
+					add = true; 
+					System.out.println("getMaxInclinationHorStab inclin plus increment");
+					System.out.println("getMaxInclinationHorStab inclin: " + posinclination);
+				}
+	
+				System.out.println(count++);
+				
+				attackVectorDroneFrame = new Vector3f(0f, (float)Math.sin(posinclination), - (float)Math.cos(posinclination));		
+				aoa = this.getAOA(posinclination, rotationAxisD, wingCentreOfMassD, attackVectorDroneFrame);
+			}
+			
+			System.out.println("getMaxInclinationHorStab aoa na positieve loop:  " + aoa);
+
+			inclinations[0] = posinclination;
+			
+			//NEGATIEVE inclinatie
+			
+			attackVectorDroneFrame = new Vector3f(0f, (float)Math.sin(neginclination), - (float)Math.cos(neginclination));		
+			aoa = this.getAOA(neginclination, rotationAxisD, wingCentreOfMassD, attackVectorDroneFrame);
+			boolean addneg = false;
+			boolean subneg = false;
+			
+			while((aoa > - 0.9 *maxAOA)|| (aoa < - maxAOA)){
+				
+				System.out.println("getMaxInclinationHorStab neg aoa:  " + aoa);
+
+				if (aoa > - 0.9 *maxAOA){
+					neginclination -= INCLINATIONINCREMENT;
+					subneg = true;
+					if (subneg == addneg){break;}
+					System.out.println("getMaxInclinationHorStab neginclin min increment");
+					System.out.println("getMaxInclinationHorStab neginclin: " + neginclination);
+				}
+				else{
+					neginclination += INCLINATIONINCREMENT;
+					addneg = true; 
+					System.out.println("getMaxInclinationHorStab neginclin plus increment");
+					System.out.println("getMaxInclinationHorStab neginclin: " + neginclination);
+				}
+	
+				System.out.println(count++);
+				
+				attackVectorDroneFrame = new Vector3f(0f, (float)Math.sin(neginclination), - (float)Math.cos(neginclination));		
+				aoa = this.getAOA(neginclination, rotationAxisD, wingCentreOfMassD, attackVectorDroneFrame);
+			}
+		}
+		
+		System.out.println("getMaxInclinationHorStab aoa na negatieve loop:  " + aoa);
+
+		inclinations[1] = neginclination;
+
+		
+		System.out.println("getMaxInclinationHorStab BEREKENDE MAX INCLINATIONS IN AP:  " + inclinations[0] + inclinations[1]);
+		
+		return inclinations;		
+	}
+	
+	private float getEuclidDist(Vector3f vec1, Vector3f vec2){
+		Vector3f temp = new Vector3f(0,0,0);
+		Vector3f.sub(vec2, vec1, temp);
+		return temp.length();
+	}
+	
+	private int blockCount = 0;
+	private boolean lockedOnTarget = false;
+	
+	@Override
+	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
+		this.inputAP = inputs;
+		if (this.inputAP.getElapsedTime() > 0.0000001) {
+			currentPosition = new Vector3f(inputAP.getX(), inputAP.getY(), inputAP.getZ());
+			this.dt = inputs.getElapsedTime() - prevElapsedTime;
+			prevElapsedTime = inputs.getElapsedTime();
+			this.prevPosition = new Vector3f(currentPosition.x, currentPosition.y, currentPosition.z);
+>>>>>>> master
 			
 			//lwjgl matrix
 			Matrix3f orientation = new Matrix3f();
 			
+<<<<<<< HEAD
 			//pitch rotatie
 			Matrix3f xRot = new Matrix3f();
 			xRot.m11 = (float) Math.cos(pitch);
@@ -657,6 +1031,52 @@ public class SimpleAutopilot implements Autopilot, AutopilotOutputs {
 		 * Calculates the rotation speed property using the current orientation, previous orientation and delta time.
 		 */
 		private Vector3f calculateRotationSpeed(Matrix3f orientation, Matrix3f previousOrientation, float deltaTime){
+=======
+			newHorStabInclination += pidHorStab.calculateChange(inputAP.getPitch() + getVerAngle(), dt);
+			if(newHorStabInclination > Math.PI/6) newHorStabInclination = (float) (Math.PI/6);
+			else if(newHorStabInclination < - Math.PI/6) newHorStabInclination = (float) -(Math.PI/6);
+
+			float maxposHorStab = getMaxInclinationHorStab()[0];
+			float maxnegHorStab = getMaxInclinationHorStab()[1];
+
+//			Bij de stabilisers worden er zowel een positieve max als een negatief minimum teruggegeven omdat die niet
+//			noodzakelijk gelijk zijn aan elkaar. Bij de vleugels zal dat verschil erg klein zijn tenzij er snel gerolld wordt
+//			Daarom geven de vleugels slechts 1 inclination terug.
+			
+			if (newHorStabInclination > maxposHorStab) {
+				newHorStabInclination = maxposHorStab;
+			} else if (newHorStabInclination < maxnegHorStab) {
+				newHorStabInclination = maxnegHorStab;
+			}
+			
+			newVerStabInclination += pidVerStab.calculateChange(inputAP.getHeading() - getHorAngle(), dt);
+			if(newVerStabInclination > Math.PI/6) newVerStabInclination = (float) (Math.PI/6);
+			else if(newVerStabInclination < - Math.PI/6) newVerStabInclination = (float) -(Math.PI/6);
+
+//			//ROLL PID
+//			float changeWing = this.pidWings.calculateChange(inputAP.getHeading() - getHorAngle(), dt);
+//				
+//			this.newLeftWingInclination += changeWing;
+//			if(this.newLeftWingInclination > Math.toRadians(20)) this.newLeftWingInclination = (float) Math.toRadians(20);
+//			if(this.newLeftWingInclination < 0) this.newLeftWingInclination = 0;
+//				
+//			this.newRightWingInclination -= changeWing;
+//			if(this.newRightWingInclination > Math.toRadians(20)) this.newRightWingInclination = (float) Math.toRadians(20);
+//			if(this.newRightWingInclination < 0) this.newRightWingInclination = 0;
+//
+//			//Negatieve Roll (LeftWingInclination > RightWingInclination) -> NegatieveChangeWingRoll
+//			if(Math.abs(this.inputAP.getRoll()) > Math.toRadians(10)){
+//				float changeWingRoll = this.pidRoll.calculateChange(this.inputAP.getRoll(),dt);
+//				//System.out.println("Roll | ChangeWingRoll : " + this.inputAP.getRoll() + " | " + changeWingRoll);
+//				this.newLeftWingInclination += changeWingRoll;
+//				if(this.newLeftWingInclination > Math.toRadians(20)) this.newLeftWingInclination = (float) Math.toRadians(20);
+//				if(this.newLeftWingInclination < 0) this.newLeftWingInclination = 0;
+//				
+//				this.newRightWingInclination -= changeWingRoll;
+//				if(this.newRightWingInclination > Math.toRadians(20)) this.newRightWingInclination = (float) Math.toRadians(20);
+//				if(this.newRightWingInclination < 0) this.newRightWingInclination = 0;
+//			}
+>>>>>>> master
 			
 			//oppassen want 4x4 matrix is niet zomaar inverteerbaar om tegenstelde orientatie te krijgen
 			previousOrientation.transpose(); 

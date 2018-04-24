@@ -213,6 +213,11 @@ public class AirFoil {
 			//System.exit(0);
 		}
 
+<<<<<<< HEAD
+=======
+		System.out.println("Airfoil calculateAirfliff  EFFECTIEVE AOA GEZET DOOR AP(lw, rw, hs, vs): " + aoa);
+
+>>>>>>> master
 		// calculate the lift force N . liftSlope . AOA . s^2, where N is the
 		// normal, AOA is the angle of attack, and s is the projected airspeed
 		float airspeedSquared = projectedAirspeedVectorD.lengthSquared();
