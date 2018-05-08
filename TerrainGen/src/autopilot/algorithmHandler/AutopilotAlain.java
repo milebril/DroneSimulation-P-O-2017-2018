@@ -1,5 +1,8 @@
 package autopilot.algorithmHandler;
 
+import java.util.LinkedList;
+import java.util.NoSuchElementException;
+
 import autopilot.algorithms.*;
 import autopilot.interfaces.Autopilot;
 import autopilot.interfaces.AutopilotConfig;
@@ -16,12 +19,35 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	}
 	
 	public AutopilotAlain() {
-		// default algoritme
-		float[] x = new float[]{ -20,    0};
-		float[] y = new float[]{  50,   55};
-		float[] z = new float[]{-400, -800};
-		MyPath path = new MyPath(x, y, z);
-		setAlgorithm(new FlyToHeight(50f));
+		
+		// add algorithms in order
+		addAlgorithm(new Aanloop(50f));
+		addAlgorithm(new FlyToHeight(100f));
+		addAlgorithm(new FlyToHeight(10f));
+		addAlgorithm(new FlyToHeight(5f));
+		addAlgorithm(new Land());
+		
+		
+		// start 1st algorithm
+		nextAlgorithm();
+	}
+	
+	
+	private LinkedList<Algorithm> algorithmList = new LinkedList<Algorithm>();
+	
+	public void addAlgorithm(Algorithm a) {
+		algorithmList.add(a);
+	}
+	
+	public void nextAlgorithm() {
+		try {
+			setAlgorithm(algorithmList.pop());
+		} catch (NoSuchElementException e) {
+			setAlgorithm(new VliegRechtdoor());
+		}
+		
+		if (getAlgorithm() == null)
+			setAlgorithm(new VliegRechtdoor());
 	}
 	
 	// AlgorithmHandler interface

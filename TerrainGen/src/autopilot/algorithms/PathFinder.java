@@ -26,7 +26,6 @@ public class PathFinder implements Algorithm {
 		Vector3f nextPos = getPath().poll();
 		
 		
-		
 		if (nextPos != null) // if there is a position to reach
 		{
 			// fly to the next position

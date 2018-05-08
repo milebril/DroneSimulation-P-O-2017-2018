@@ -1,54 +1,41 @@
 package autopilot.interfaces.path;
 
+import java.util.LinkedList;
+import org.lwjgl.util.vector.Vector3f;
+
 import autopilot.interfaces.Path;
 
-public class MyPath implements Path {
+public class MyPath extends LinkedList<Vector3f> implements Path {
 	
-	private float[] x;
-	private float[] y;
-	private float[] z;
-	private int index;
-
-	public MyPath (float[] x, float[] y, float [] z) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
-		this.index = 0;
-	}
-	
-	public float getCurrentX() {
-		return getX()[getIndex()];
-	}
-	
-	public float getCurrentY() {
-		return getY()[getIndex()];
-	}
-	
-	public float getCurrentZ() {
-		return getZ()[getIndex()];
-	}
-	
-	public int getIndex() {
-		return this.index;
-	}
-	
-	public void setIndex(int i) {
-		this.index = i;
+	public void addInaccurate(Vector3f pos, float margin) {
+		add(new Vector3f(pos.x + (float) (2*Math.random()-1)*margin, pos.x + (float) (2*Math.random()-1)*margin,pos.x + (float) (2*Math.random()-1)*margin));
 	}
 	
 	@Override
 	public float[] getX() {
-		return this.x;
+		float[] x = new float[size()];
+		for (int i = 0; i<size();i++) {
+			x[i] = this.get(i).x;
+		}
+		return x;
 	}
 
 	@Override
 	public float[] getY() {
-		return this.y;
+		float[] y = new float[size()];
+		for (int i = 0; i<size();i++) {
+			y[i] = this.get(i).y;
+		}
+		return y;
 	}
 
 	@Override
 	public float[] getZ() {
-		return this.z;
+		float[] z = new float[size()];
+		for (int i = 0; i<size();i++) {
+			z[i] = this.get(i).z;
+		}
+		return z;
 	}
 
 }

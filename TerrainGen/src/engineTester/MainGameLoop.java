@@ -46,7 +46,9 @@ import autopilot.interfaces.AutopilotConfig;
 import autopilot.interfaces.AutopilotFactory;
 import autopilot.interfaces.AutopilotInputs;
 import autopilot.interfaces.AutopilotOutputs;
+import autopilot.interfaces.Path;
 import autopilot.interfaces.config.AutopilotConfigReader;
+import autopilot.interfaces.path.MyPath;
 import renderEngine.CubeRenderer;
 import renderEngine.DisplayManager;
 import renderEngine.EntityRenderer;
@@ -159,7 +161,7 @@ public class MainGameLoop {
 				new Matrix4f()
 						.translate(new Vector3f(0,
 								(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
-										+ autopilotConfig.getTyreRadius() + 20,
+										+ autopilotConfig.getTyreRadius(),
 								0)),
 				1f, autopilotConfig, new EulerPrediction(STEP_TIME));
 
@@ -205,6 +207,11 @@ public class MainGameLoop {
 		GUIText textVertStab = new GUIText("Vertical stabilizer inclination = " + vertStab + "rad", 1, font,
 				new Vector2f(0, 0.25f), 1f, false);
 		textVertStab.setColour(1, 0, 0);
+		
+		String thrust = String.valueOf(activeDrone.getThrustForce());
+		GUIText textThrust = new GUIText("Thrust = " + thrust + "rad", 1, font,
+				new Vector2f(0, 0.30f), 1f, false);
+		textThrust.setColour(1, 0, 0);
 
 		light = new Light(new Vector3f(20000, 20000, 2000), new Vector3f(1, 1, 1));
 
@@ -230,7 +237,14 @@ public class MainGameLoop {
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -720)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -800)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -880)), 1));
-
+		
+		
+		// ***INITIALIZE CUBE PATH***
+		MyPath cubePath = new MyPath();
+		for (int i = 0; i<cubes.size(); i++) {
+			cubePath.addInaccurate(cubes.get(i).getPosition(), 5f);
+		}
+		
 		// ***INITIALIZE BUTTONS GUI***
 		List<GuiTexture> guis = new ArrayList<>();
 		GuiRenderer guiRenderer = new GuiRenderer(loader);
@@ -316,6 +330,10 @@ public class MainGameLoop {
 				vertStab = String.valueOf(Math.round(activeDrone.getVertStabilizer().getInclination() * 100.0) / 100.0);
 				textVertStab.setString("Vertical stabilizer inclination = " + vertStab + "rad");
 				TextMaster.loadText(textVertStab);
+				
+				thrust = String.valueOf(Math.round(activeDrone.getThrustForce() * 100.0) / 100.0);
+				textThrust.setString("Thrust = " + thrust);
+				TextMaster.loadText(textThrust);
 
 				TextMaster.render();
 				TextMaster.removeAll();

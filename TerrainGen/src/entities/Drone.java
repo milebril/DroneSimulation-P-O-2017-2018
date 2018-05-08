@@ -38,7 +38,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		setAutopilot(AutopilotFactory.createAutopilot());
 		getAutopilot().simulationStarted(cfg, getAutoPilotInputs());
 		
-		this.linearVelocityW = new Vector3f(0.0f,0.0f, -50.0f);
+		this.linearVelocityW = new Vector3f(0.0f,0.0f, -43.0f);
 
 		this.angularVelocityW = new Vector3f(0f, 0f, 0f);
 		
