@@ -84,7 +84,10 @@ public class Entity {
 	 * Translates this entity over the given vector.
 	 */
 	public void translate(Vector3f vector) {
-		this.pose.translate(vector);
+		//this.pose.translate(vector);
+		this.pose.m30 += vector.x;
+		this.pose.m31 += vector.y;
+		this.pose.m32 += vector.z;
 	}
 	
 	/** 

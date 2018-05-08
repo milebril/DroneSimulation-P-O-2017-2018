@@ -7,6 +7,7 @@ import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
+import autopilot.algorithmHandler.AutopilotAlain;
 import autopilot.interfaces.Autopilot;
 import autopilot.interfaces.AutopilotConfig;
 import autopilot.interfaces.AutopilotFactory;
@@ -34,9 +35,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 				AutopilotConfig cfg, PredictionMethod predictionMethod) {
 		super(model, pose, scale);
 		
-		/* INITIALIZE AUTOPILOT */
-		setAutopilot(AutopilotFactory.createAutopilot());
-		getAutopilot().simulationStarted(cfg, getAutoPilotInputs());
+		
 		
 		this.linearVelocityW = new Vector3f(0.0f,0.0f, -43.0f);
 
@@ -58,6 +57,9 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		this.airFoils[2].name = "Horizontal stabilizer";
 		this.airFoils[3].name = "Vertical stabilizer";
 		
+		/* INITIALIZE AUTOPILOT */
+		Autopilot autopilot = AutopilotFactory.createAutopilot();
+		this.setAutopilot(autopilot);
 		
 		
 		//set configs
@@ -99,15 +101,14 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	
 	// AUTOPILOT
 	
-	// Autopilot
-	private Autopilot autopilot;
+	private int id;
 	
-	public Autopilot getAutopilot() {
-		return this.autopilot;
+	public int getId() {
+		return id;
 	}
-	
-	private void setAutopilot(Autopilot ap) {
-		this.autopilot = ap;
+
+	public void setId(int id) {
+		this.id = id;
 	}
 	
 	// PREDICTION METHOD
@@ -685,4 +686,25 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		Vector3f headingVector = this.getHeadingVector(); 
 		return (float) Math.atan2(-headingVector.x, - headingVector.z);
 	}
+	
+	private String name;
+	
+	public String getName() {
+		return this.name;
+	}
+	
+	public void setName(String s) {
+		this.name = s;
+	}
+	
+	public Autopilot getAutopilot() {
+		return autopilot;
+	}
+
+	public void setAutopilot(Autopilot autopilot) {
+		this.autopilot = autopilot;
+	}
+
+	private Autopilot autopilot;
+	
 }

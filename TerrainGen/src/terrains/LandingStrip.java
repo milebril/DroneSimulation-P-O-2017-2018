@@ -1,28 +1,55 @@
 package terrains;
 
+import java.awt.Point;
+import java.awt.geom.Point2D;
+
+import javax.vecmath.Point2d;
+
+import org.lwjgl.util.vector.Vector2f;
+
 import models.RawModel;
 import renderEngine.Loader;
 import textures.ModelTexture;
 
 public class LandingStrip extends Terrain{
 	
-	private static final float SIZE = 2000;
-	private static final float SIZE_X = 50;
+	private static float SIZE;
+	private static float SIZE_X;
 	private static final int VERTEX_COUNT = 128;
 	
+	private final int airportID;
+	private final int landingStripID;
+
+
 	private float x;
 	private float z;
 	private RawModel model;
 	private ModelTexture texture;
 	
-	public LandingStrip(float gridX, int gridZ, Loader loader, ModelTexture texture){
+	public LandingStrip(float gridX, int gridZ, Loader loader, ModelTexture texture, int airportId, int landingStripId, boolean rotated){
 		super((int) gridX, gridZ, loader, texture);
 		this.texture = texture;
-		this.x =  gridX * SIZE_X;
-		this.z = gridZ * SIZE;
+		this.x =  gridX;
+		this.z = gridZ;
 		this.model = generateTerrain(loader);
+		this.airportID = airportId;
+		this.landingStripID = landingStripId;
+		
+		if (rotated) {
+			System.out.println("Hier");
+			SIZE = 100;
+			SIZE_X = 830;
+		} else {
+			SIZE = 400;
+			SIZE_X = 100;
+		}
 	}
 	
+	
+	public Vector2f getCenterOfLandingStrip() {
+		
+		return new Vector2f(x, z);
+	}
 	
 	
 	public float getX() {
@@ -33,6 +60,17 @@ public class LandingStrip extends Terrain{
 
 	public float getZ() {
 		return z;
+	}
+	
+	
+	public int getAirportID() {
+		return airportID;
+	}
+
+
+
+	public int getLandingStripID() {
+		return landingStripID;
 	}
 
 

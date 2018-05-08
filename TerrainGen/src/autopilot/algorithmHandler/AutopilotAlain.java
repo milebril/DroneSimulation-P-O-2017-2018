@@ -53,7 +53,6 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	
 	private Algorithm algorithm;
 	public void setAlgorithm(Algorithm algorithm) {
-		System.out.println("autopilot: " + algorithm.getName());
 		this.algorithm = algorithm;
 	}
 	public Algorithm getAlgorithm() {
@@ -165,6 +164,15 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	private Properties properties;
 	public Properties getProperties() {
 		return this.properties;
+	}
+	
+	public void startTimeHasPassed(AutopilotInputs inputs) {
+		getProperties().update(inputs);
+	}
+	
+	public AutopilotOutputs completeTimeHasPassed() {
+		getAlgorithm().cycle(this);
+		return this;
 	}
 		
 	
