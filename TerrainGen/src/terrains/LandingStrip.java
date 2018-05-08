@@ -13,8 +13,8 @@ import textures.ModelTexture;
 
 public class LandingStrip extends Terrain{
 	
-	private static final float SIZE = 400;
-	private static final float SIZE_X = 100;
+	private static float SIZE;
+	private static float SIZE_X;
 	private static final int VERTEX_COUNT = 128;
 	
 	private final int airportID;
@@ -26,7 +26,7 @@ public class LandingStrip extends Terrain{
 	private RawModel model;
 	private ModelTexture texture;
 	
-	public LandingStrip(float gridX, int gridZ, Loader loader, ModelTexture texture, int airportId, int landingStripId){
+	public LandingStrip(float gridX, int gridZ, Loader loader, ModelTexture texture, int airportId, int landingStripId, boolean rotated){
 		super((int) gridX, gridZ, loader, texture);
 		this.texture = texture;
 		this.x =  gridX;
@@ -34,6 +34,15 @@ public class LandingStrip extends Terrain{
 		this.model = generateTerrain(loader);
 		this.airportID = airportId;
 		this.landingStripID = landingStripId;
+		
+		if (rotated) {
+			System.out.println("Hier");
+			SIZE = 100;
+			SIZE_X = 830;
+		} else {
+			SIZE = 400;
+			SIZE_X = 100;
+		}
 	}
 	
 	

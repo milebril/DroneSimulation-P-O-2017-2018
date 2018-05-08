@@ -39,7 +39,7 @@ public class DroneList extends JFrame {
 		setVisible(true);
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 505, 473);
+		setBounds(0, 0, 295, 473);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -84,6 +84,33 @@ public class DroneList extends JFrame {
 		lblHoldingPackage = new JLabel("Holding Package");
 		lblHoldingPackage.setBounds(6, 322, 261, 16);
 		contentPane.add(lblHoldingPackage);
+		
+		JButton btnTopDown = new JButton("TOP DOWN");
+		btnTopDown.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				MainGameLoop.extraView = ViewEnumExtra.TOP_DOWN;
+			}
+		});
+		btnTopDown.setBounds(134, 47, 117, 29);
+		contentPane.add(btnTopDown);
+		
+		JButton btnLeftSide = new JButton("LEFT SIDE");
+		btnLeftSide.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				MainGameLoop.extraView = ViewEnumExtra.LEFT_SIDE;
+			}
+		});
+		btnLeftSide.setBounds(134, 88, 117, 29);
+		contentPane.add(btnLeftSide);
+		
+		JButton btnRightSide = new JButton("RIGHT SIDE");
+		btnRightSide.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				MainGameLoop.extraView = ViewEnumExtra.RIGHT_SIDE;
+			}
+		});
+		btnRightSide.setBounds(134, 129, 117, 29);
+		contentPane.add(btnRightSide);
 	}
 
 	public void updateLabels(Drone drone) {
@@ -97,7 +124,7 @@ public class DroneList extends JFrame {
 				+ (float) Math.round(drone.getAngularVelocity().y * 100) / 100 + ", "
 				+ (float) Math.round(drone.getAngularVelocity().z * 100) / 100 + ")");
 		
-		lblApState.setText("AP State : " + ((AlgorithmHandler) drone.getAutopilot()).getAlgorithmName()); 
+		//lblApState.setText("AP State : " + ((AlgorithmHandler) drone.getAutopilot()).getAlgorithmName()); 
 		lblHoldingPackage.setText("Holding Package: False");
 	}
 }

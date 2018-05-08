@@ -14,6 +14,7 @@ import org.lwjgl.util.vector.Vector2f;
 import entities.Drone;
 import guis.GuiRenderer;
 import guis.GuiTexture;
+import models.Airport;
 import renderEngine.Loader;
 
 public class MiniMap {
@@ -25,7 +26,7 @@ public class MiniMap {
 		droneTextures = new ArrayList<>();
 	}
 
-	public void render(List<Drone> drones, GuiRenderer guiRenderer, Loader loader) {
+	public void render(List<Drone> drones, List<Airport> airports, GuiRenderer guiRenderer, Loader loader) {
 		// MiniMap
 		GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
 		GL11.glScissor(0, 0, Display.getWidth(), Display.getHeight());
@@ -34,17 +35,28 @@ public class MiniMap {
 		//renderer.prepare();
 		//glClearColor(1, 1, 0, 1);
 		droneTextures.clear();
+		
+		for (Airport a : airports) {
+			float normalizedX = 2.0f * (float) (a.getPosition().x * Display.getWidth() / 4000)
+					/ (float) Display.getWidth();
+			float normalizedY = -2.0f * (float) (a.getPosition().z * Display.getHeight() / 4000)
+					/ (float) Display.getHeight();
+			GuiTexture e = new GuiTexture(loader.loadTexture("airport"), new Vector2f(normalizedX, normalizedY),
+					new Vector2f(0.03f, 0.03f));
+			droneTextures.add(e);
+		}
+		
 		for (Drone drone : drones) {
 			float normalizedX = 2.0f * (float) (drone.getPosition().x * Display.getWidth() / 4000)
 					/ (float) Display.getWidth();
 			float normalizedY = -2.0f * (float) (drone.getPosition().z * Display.getHeight() / 4000)
 					/ (float) Display.getHeight();
-			// System.out.println(new Vector2f(normalizedX, normalizedY));
-			GuiTexture e = new GuiTexture(loader.loadTexture("grass"), new Vector2f(normalizedX, normalizedY),
-					new Vector2f(0.01f, 0.01f));
+			GuiTexture e = new GuiTexture(loader.loadTexture("plane"), new Vector2f(normalizedX, normalizedY),
+					new Vector2f(0.02f, 0.02f));
 			droneTextures.add(e);
 		}
-
+		
 		guiRenderer.render(droneTextures);
+		
 	}
 }

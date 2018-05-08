@@ -27,9 +27,16 @@ public class Airport {
 
 	private LandingStrip landingStrip;
 	private LandingStrip landingStrip2;
+	
+	private int x;
+	private int z;
 
-	public Airport(int x, int z, int airportId) {
+	private Vector3f position;
+
+	public Airport(int x, int z, int airportId, String rotation) {
 		
+		this.x = x;
+		this.z = z;
 		airportID = airportId;
 		Loader loader = new Loader();
 
@@ -37,11 +44,23 @@ public class Airport {
 		TexturedModel staticGateModel = new TexturedModel(gateModel,
 				new ModelTexture(loader.loadTexture("gate.blauw")));
 
-		leftGate = new Gate(staticGateModel, new Matrix4f().translate(new Vector3f(x, 1, z)), 1, airportId, 1);
-		rightGate = new Gate(staticGateModel, new Matrix4f().translate(new Vector3f(x + 40, 1, z)), 1, airportId, 0);
-
-		landingStrip = new LandingStrip(x - 30, z - 400, loader, new ModelTexture(loader.loadTexture("landing")), airportId, 0);
-		landingStrip2 = new LandingStrip(x - 30, z, loader, new ModelTexture(loader.loadTexture("landing")),airportId, 1);
+		if (rotation.equals("block")) {
+			leftGate = new Gate(staticGateModel, new Matrix4f().translate(new Vector3f(x, 1, z)), 1, airportId, 1);
+			rightGate = new Gate(staticGateModel, new Matrix4f().translate(new Vector3f(x, 1, z + 40)), 1, airportId, 0);
+			leftGate.rotate((float) (Math.PI/2), new Vector3f(0, 1, 0));
+			rightGate.rotate((float) (Math.PI/2), new Vector3f(0, 1, 0));
+			
+			landingStrip = new LandingStrip(x, z - 30, loader, new ModelTexture(loader.loadTexture("landing")), airportId, 0, true);
+			landingStrip2 = new LandingStrip(x - 400, z - 30, loader, new ModelTexture(loader.loadTexture("landing")),airportId, 1, true);
+		} else {
+			leftGate = new Gate(staticGateModel, new Matrix4f().translate(new Vector3f(x, 1, z)), 1, airportId, 1);
+			rightGate = new Gate(staticGateModel, new Matrix4f().translate(new Vector3f(x + 40, 1, z)), 1, airportId, 0);
+			
+			landingStrip = new LandingStrip(x - 30, z - 400, loader, new ModelTexture(loader.loadTexture("landing")), airportId, 0, false);
+			landingStrip2 = new LandingStrip(x - 30, z, loader, new ModelTexture(loader.loadTexture("landing")),airportId, 1, false);
+		}
+		
+		position = new Vector3f(x, 0, z);
 	}
 
 	public void render(MasterRenderer renderer, Camera camera, Light light) {
@@ -61,9 +80,19 @@ public class Airport {
 		return rightGate; // default gate is rightGate
 	}
 	
-	public Matrix4f getPosition(int gateID, AutopilotConfig config) {
-		return new Matrix4f().translate(new Vector3f(20,(int) PhysicsEngine.groundLevel - config.getWheelY()
-								+ config.getTyreRadius(),20)); //TODO: juiste positie voor x en z
+	public Matrix4f getDronePosition(int gateID, AutopilotConfig config) {
+		
+		return new Matrix4f().translate(new Vector3f(0 + 40*gateID + x,(int) PhysicsEngine.groundLevel - config.getWheelY()
+								+ config.getTyreRadius(),0 + 10 + z));
+	}
+
+	public Vector3f getPackagePosition(int gateID) {
+		
+		return new Vector3f(0 + 40 * gateID + x , 0 , 0 + 10 + z);
+	}
+
+	public Vector3f getPosition() {
+		return position;
 	}
 
 }

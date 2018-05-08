@@ -31,6 +31,7 @@ public class DisplayManager {
 			Display.setDisplayMode(new DisplayMode(WIDTH,HEIGHT));
 			Display.create(new PixelFormat(), attribs);
 			Display.setTitle("Drone Simulation");
+			Display.setLocation(350, 10);
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 		}
