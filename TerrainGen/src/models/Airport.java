@@ -3,10 +3,12 @@ package models;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
+import autopilot.interfaces.AutopilotConfig;
 import entities.Camera;
 import entities.Entity;
 import entities.Gate;
 import entities.Light;
+import physicsEngine.PhysicsEngine;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
 import renderEngine.OBJLoader;
@@ -51,6 +53,17 @@ public class Airport {
 
 	public int getAirportID() {
 		return airportID;
+	}
+	
+	public Gate getGate(int gate) {
+		if (this.leftGate.getGateID() == gate)
+			return leftGate;
+		return rightGate; // default gate is rightGate
+	}
+	
+	public Matrix4f getPosition(int gateID, AutopilotConfig config) {
+		return new Matrix4f().translate(new Vector3f(20,(int) PhysicsEngine.groundLevel - config.getWheelY()
+								+ config.getTyreRadius(),20)); //TODO: juiste positie voor x en z
 	}
 
 }

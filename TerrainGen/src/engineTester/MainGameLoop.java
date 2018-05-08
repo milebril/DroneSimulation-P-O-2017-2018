@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -87,8 +88,8 @@ public class MainGameLoop {
 	public static AutopilotConfig autopilotConfig;
 
 	// Drone Stuff
-	private static List<Drone> drones;
 	private static Drone activeDrone;
+	private static List<Drone> drones; 
 
 	// Entities lists
 	private static List<Entity> entities;
@@ -124,7 +125,25 @@ public class MainGameLoop {
 
 	private static Airport a;
 	
-	private static Module module = new Module();
+	// Module
+	private static HashMap<Integer,Drone> activeDrones = new HashMap<Integer, Drone>();
+	private static HashMap<Integer,Drone> inactiveDrones = new HashMap<Integer, Drone>();
+	private static HashMap<Integer,Airport> airports = new HashMap<Integer, Airport>();
+	
+	public HashMap<Integer,Airport> getAirports(){
+		return this.airports;
+	}
+	
+	public HashMap<Integer,Drone> getInactiveDrones(){
+		return this.activeDrones;
+	}
+	
+	public HashMap<Integer,Drone> getActiveDrones(){
+		return this.inactiveDrones;
+	}
+
+	private static Testbed testbed = new Testbed(activeDrones, inactiveDrones, airports);
+	private static Module module = new Module(testbed);
 	
 	//
 
@@ -161,75 +180,36 @@ public class MainGameLoop {
 		entities = new ArrayList<>();
 		terrains = new ArrayList<>();
 		cubes = new ArrayList<>();
-		drones = new ArrayList<>();
+		module = new Module(testbed);
 
 		// ***INITIALIZE DRONEVIEW***
-		RawModel droneModel = OBJLoader.loadObjModel("untitled5", loader);
-		TexturedModel staticDroneModel = new TexturedModel(droneModel,
-				new ModelTexture(loader.loadTexture("untitled")));
-		
-		TexturedModel staticDroneModel2 = new TexturedModel(droneModel,
-				new ModelTexture(loader.loadTexture("untitledGreen")));
+//		RawModel droneModel = OBJLoader.loadObjModel("untitled5", loader);
+//		TexturedModel staticDroneModel = new TexturedModel(droneModel,
+//				new ModelTexture(loader.loadTexture("untitled")));
 
-		for (int i = 1; i <= 10; i++) {
-			Drone drone = new Drone(staticDroneModel2,
-					new Matrix4f().translate(new Vector3f(-20*i,
-							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
-									+ autopilotConfig.getTyreRadius() + 20,
-							20 * i)),
-					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
-			drone.setName("Drone " + i);
-			drone.setId(drones.size());
+
+//		for (int i = 1; i <= 10; i++) {
 			
-			activeDrone = drone;
-			entities.add(drone);
-			drones.add(drone);
-		}
+//			Drone drone = new Drone(staticDroneModel,
+//					new Matrix4f().translate(new Vector3f(-20*i,
+//							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
+//									+ autopilotConfig.getTyreRadius() + 20,
+//							20 * i)),
+//					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
+//			drone.setName("Drone " + i);
+//			drone.setId(drones.size());
+//			
+//			activeDrone = drone;
+//			entities.add(drone);
+//			drones.add(drone);
+//		}
+		
+		module.defineAirport(0, 0, 20, 20);
+		module.defineDrone(1, 0, 0, autopilotConfig);
 
-		for (int i = 1; i <= 10; i++) {
-			Drone drone = new Drone(staticDroneModel,
-					new Matrix4f().translate(new Vector3f(-20 * i,
-							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
-									+ autopilotConfig.getTyreRadius() + 20 + 20,
-							20 * i)),
-					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
-			drone.setName("Drone " + (i + 10));
-			drone.setId(drones.size());
-
-			activeDrone = drone;
-			entities.add(drone);
-			drones.add(drone);
-		}
-
-		for (int i = 1; i <= 10; i++) {
-			Drone drone = new Drone(staticDroneModel,
-					new Matrix4f().translate(new Vector3f(20 * i,
-							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
-									+ autopilotConfig.getTyreRadius() + 20,
-							20 * i)),
-					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
-			drone.setName("Drone " + (i + 20));
-			drone.setId(drones.size());
-
-			activeDrone = drone;
-			entities.add(drone);
-			drones.add(drone);
-		}
-
-		for (int i = 1; i <= 10; i++) {
-			Drone drone = new Drone(staticDroneModel,
-					new Matrix4f().translate(new Vector3f(20 * i,
-							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
-									+ autopilotConfig.getTyreRadius() + 20 + 20,
-							20 * i)),
-					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
-			drone.setName("Drone " + (i + 30));
-			drone.setId(drones.size());
-
-			activeDrone = drone;
-			entities.add(drone);
-			drones.add(drone);
-		}
+		List<Drone> valuesList = new ArrayList<Drone>(testbed.getInactiveDrones().values());
+		Drone randomValue = valuesList.get(0);
+		activeDrone = randomValue;
 
 		// ***INITIALIZE CHASE-CAM***
 		chaseCam = new Camera();
@@ -325,6 +305,9 @@ public class MainGameLoop {
 			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
 				//camera.takeSnapshot();
 			}
+			
+			drones.addAll(new ArrayList<Drone>(activeDrones.values()));
+			drones.addAll(new ArrayList<Drone>(inactiveDrones.values()));
 
 			switch (currentView) {
 			case MINIMAP:
@@ -758,3 +741,5 @@ public class MainGameLoop {
 		activeDrone = drone;
 	}
 }
+	
+

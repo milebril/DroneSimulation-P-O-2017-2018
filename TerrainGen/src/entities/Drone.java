@@ -7,6 +7,7 @@ import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
+import autopilot.algorithmHandler.AutopilotAlain;
 import autopilot.interfaces.Autopilot;
 import autopilot.interfaces.AutopilotConfig;
 import autopilot.interfaces.AutopilotFactory;
@@ -56,6 +57,9 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		this.airFoils[2].name = "Horizontal stabilizer";
 		this.airFoils[3].name = "Vertical stabilizer";
 		
+		/* INITIALIZE AUTOPILOT */
+		Autopilot autopilot = AutopilotFactory.createAutopilot();
+		this.setAutopilot(autopilot);
 		
 		
 		//set configs
@@ -692,4 +696,15 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	public void setName(String s) {
 		this.name = s;
 	}
+	
+	public Autopilot getAutopilot() {
+		return autopilot;
+	}
+
+	public void setAutopilot(Autopilot autopilot) {
+		this.autopilot = autopilot;
+	}
+
+	private Autopilot autopilot;
+	
 }
