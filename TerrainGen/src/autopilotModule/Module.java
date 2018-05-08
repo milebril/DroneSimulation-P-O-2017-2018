@@ -44,7 +44,6 @@ public class Module implements AutopilotModule {
 	public void defineAirportParams(float length, float width) {
 		this.length = length;
 		this.width = width;
-
 	}
 
 	@Override
@@ -75,6 +74,20 @@ public class Module implements AutopilotModule {
 				new EulerPrediction(STEP_TIME));
 		int droneId = this.getTestbed()
 				.getDrones(this.getTestbed().getInactiveDrones(), this.getTestbed().getActiveDrones()).size();
+		drone.setName("Drone: " + droneId);
+
+		if (pointingToRunway == 1) {
+			if (luchthaven.isRotated()) {
+				drone.rotate((float) -Math.PI / 2, new Vector3f(0, 1, 0));
+			}
+		} else {
+			if (luchthaven.isRotated()) {
+				drone.rotate((float) Math.PI / 2, new Vector3f(0, 1, 0));
+			} else {
+				drone.rotate((float) Math.PI, new Vector3f(0, 1, 0));
+			}
+		}
+
 		this.getTestbed().getInactiveDrones().add(droneId, drone);
 
 	}

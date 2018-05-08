@@ -32,20 +32,10 @@ public class MiniMap {
 		GL11.glScissor(0, 0, Display.getWidth(), Display.getHeight());
 		GL11.glEnable(GL11.GL_SCISSOR_TEST);
 		glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-		//renderer.prepare();
-		//glClearColor(1, 1, 0, 1);
+		// renderer.prepare();
+		// glClearColor(1, 1, 0, 1);
 		droneTextures.clear();
-		
-		for (Airport a : airports) {
-			float normalizedX = 2.0f * (float) (a.getPosition().x * Display.getWidth() / 4000)
-					/ (float) Display.getWidth();
-			float normalizedY = -2.0f * (float) (a.getPosition().z * Display.getHeight() / 4000)
-					/ (float) Display.getHeight();
-			GuiTexture e = new GuiTexture(loader.loadTexture("airport"), new Vector2f(normalizedX, normalizedY),
-					new Vector2f(0.03f, 0.03f));
-			droneTextures.add(e);
-		}
-		
+
 		for (Drone drone : drones) {
 			float normalizedX = 2.0f * (float) (drone.getPosition().x * Display.getWidth() / 4000)
 					/ (float) Display.getWidth();
@@ -55,8 +45,17 @@ public class MiniMap {
 					new Vector2f(0.02f, 0.02f));
 			droneTextures.add(e);
 		}
-		
+		for (Airport a : airports) {
+			float normalizedX = 2.0f * (float) (a.getPosition().x * Display.getWidth() / 4000)
+					/ (float) Display.getWidth();
+			float normalizedY = -2.0f * (float) (a.getPosition().z * Display.getHeight() / 4000)
+					/ (float) Display.getHeight();
+			GuiTexture e = new GuiTexture(loader.loadTexture("airport"), new Vector2f(normalizedX, normalizedY),
+					new Vector2f(0.03f, 0.03f));
+			droneTextures.add(e);
+		}
+
 		guiRenderer.render(droneTextures);
-		
+
 	}
 }
