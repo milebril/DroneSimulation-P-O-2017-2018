@@ -208,7 +208,7 @@ public class MainGameLoop {
 		module.defineAirport(0, -300, 50, 50);
 		module.defineAirport(0, -100, 50, 50);
 		module.defineAirport(0, -200, 50, 50);
-		module.defineDrone(0, 0, 0, autopilotConfig);
+		module.defineDrone(2, 1, 0, autopilotConfig);
 
 		
 		Drone randomValue = testbed.getInactiveDrones().get(0);
