@@ -452,9 +452,6 @@ public class ImageProcessor {
 			
 			// create a list with all the different HSV colors.
 			List<double[]> differentColorsHSVList = getAllDifferentHSVColors(colorHSVList);
-			for (int k=0; k < differentColorsHSVList.size(); k++) {
-				System.out.println(differentColorsHSVList.get(k)[0]+" "+differentColorsHSVList.get(k)[1]);
-			}
 			
 			
 			for (int i = 0; i < differentColorsHSVList.size(); i++){
@@ -506,9 +503,8 @@ public class ImageProcessor {
 				}
 				
 			
-				System.out.println("estimated location: (" + String.valueOf(imaginaryCube.getPosition()[0]) + ", " + String.valueOf(imaginaryCube.getPosition()[1]+2.32) + ", " + String.valueOf(imaginaryCube.getPosition()[2]-5.0) + ")");
 				Vector3f Coordinates = new Vector3f(); 
-				Coordinates.set((float)imaginaryCube.getPosition()[0], (float) imaginaryCube.getPosition()[1], (float) imaginaryCube.getPosition()[2]);
+				Coordinates.set((float)imaginaryCube.getPosition()[0], (float) (imaginaryCube.getPosition()[1]+2.32), (float) (imaginaryCube.getPosition()[2]-(5.0)));
 				listWithCoordinatesOfCubes.add(Coordinates);
 			}
 				
