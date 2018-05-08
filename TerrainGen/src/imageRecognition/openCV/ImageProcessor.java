@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+import org.lwjgl.util.vector.Vector3f;
 
 import prevAutopilot.SimpleAutopilot;
 
@@ -17,6 +17,7 @@ public class ImageProcessor {
 	
 	/* ImageProcessor constructor */
 	
+
 	public ImageProcessor(SimpleAutopilot autopilot) {
 		this.autopilot = autopilot;
 		// rotate the cube to be in alignment with the world frame
@@ -439,7 +440,8 @@ public class ImageProcessor {
 
 		
 		
-		public void getCoordinatesOfCube() {
+		public List<Vector3f> getCoordinatesOfCube() {
+			List<Vector3f> listWithCoordinatesOfCubes = new ArrayList<Vector3f>();
 			// calculate positions of cubes
 			
 			// create a list with the HSV values
@@ -450,9 +452,6 @@ public class ImageProcessor {
 			
 			// create a list with all the different HSV colors.
 			List<double[]> differentColorsHSVList = getAllDifferentHSVColors(colorHSVList);
-			for (int k=0; k < differentColorsHSVList.size(); k++) {
-				System.out.println(differentColorsHSVList.get(k)[0]+" "+differentColorsHSVList.get(k)[1]);
-			}
 			
 			
 			for (int i = 0; i < differentColorsHSVList.size(); i++){
@@ -504,12 +503,12 @@ public class ImageProcessor {
 				}
 				
 			
-				System.out.println("estimated location: (" + String.valueOf(imaginaryCube.getPosition()[0]) + ", " + String.valueOf(imaginaryCube.getPosition()[1]+2.32) + ", " + String.valueOf(imaginaryCube.getPosition()[2]-5.0) + ")");
-
+				Vector3f Coordinates = new Vector3f(); 
+				Coordinates.set((float)imaginaryCube.getPosition()[0], (float) (imaginaryCube.getPosition()[1]+2.32), (float) (imaginaryCube.getPosition()[2]-(5.0)));
+				listWithCoordinatesOfCubes.add(Coordinates);
 			}
 				
-			//return ListWithCoordinatesOfCubes;
-		
+		return listWithCoordinatesOfCubes;
 		}
 		
 
