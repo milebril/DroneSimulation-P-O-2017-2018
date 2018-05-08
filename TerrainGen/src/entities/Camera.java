@@ -190,7 +190,12 @@ public class Camera {
 	    if(Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)){
 	      position.y-=0.2f;
 	    }
-	    
+	    if(Keyboard.isKeyDown(Keyboard.KEY_R)){
+		      pitch += Math.toRadians(1.0f);
+		}
+	    if(Keyboard.isKeyDown(Keyboard.KEY_E)){
+		      pitch -= Math.toRadians(1.0f);
+		}
 	    if (Mouse.isButtonDown(0)) {
 //	      int dx = Mouse.getDX();
 //          int dy = Mouse.getDY();
