@@ -3,10 +3,12 @@ package models;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
+import autopilot.interfaces.AutopilotConfig;
 import entities.Camera;
 import entities.Entity;
 import entities.Gate;
 import entities.Light;
+import physicsEngine.PhysicsEngine;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
 import renderEngine.OBJLoader;
@@ -25,11 +27,16 @@ public class Airport {
 
 	private LandingStrip landingStrip;
 	private LandingStrip landingStrip2;
+	
+	private int x;
+	private int z;
 
 	private Vector3f position;
 
 	public Airport(int x, int z, int airportId, String rotation) {
 		
+		this.x = x;
+		this.z = z;
 		airportID = airportId;
 		Loader loader = new Loader();
 
@@ -65,6 +72,23 @@ public class Airport {
 
 	public int getAirportID() {
 		return airportID;
+	}
+	
+	public Gate getGate(int gate) {
+		if (this.leftGate.getGateID() == gate)
+			return leftGate;
+		return rightGate; // default gate is rightGate
+	}
+	
+	public Matrix4f getDronePosition(int gateID, AutopilotConfig config) {
+		
+		return new Matrix4f().translate(new Vector3f(0 + 40*gateID + x,(int) PhysicsEngine.groundLevel - config.getWheelY()
+								+ config.getTyreRadius(),0 + 10 + z));
+	}
+
+	public Vector3f getPackagePosition(int gateID) {
+		
+		return new Vector3f(0 + 40 * gateID + x , 0 , 0 + 10 + z);
 	}
 
 	public Vector3f getPosition() {

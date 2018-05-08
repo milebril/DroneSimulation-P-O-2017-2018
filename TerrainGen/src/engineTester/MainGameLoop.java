@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -71,6 +72,8 @@ import fontRendering.TextMaster;
 import guis.Button;
 import guis.GuiRenderer;
 import guis.GuiTexture;
+import autopilotModule.*;
+import autopilotModule.Module;
 
 public class MainGameLoop {
 
@@ -85,7 +88,6 @@ public class MainGameLoop {
 	public static AutopilotConfig autopilotConfig;
 
 	// Drone Stuff
-	private static List<Drone> drones;
 	private static Drone activeDrone;
 
 	// Entities lists
@@ -124,6 +126,26 @@ public class MainGameLoop {
 
 	private static Airport a;
 	
+	// Module
+//	private static ArrayList<Drone> activeDrones = new ArrayList<Drone>();
+//	private static ArrayList<Drone> inactiveDrones = new ArrayList<Drone>();
+//	private static ArrayList<Airport> airports = new ArrayList<Airport>();
+//	
+//	public ArrayList<Airport> getAirports(){
+//		return this.airports;
+//	}
+//	
+//	public ArrayList<Drone> getInactiveDrones(){
+//		return this.activeDrones;
+//	}
+//	
+//	public ArrayList<Drone> getActiveDrones(){
+//		return this.inactiveDrones;
+//	}
+
+	private static Testbed testbed = new Testbed();
+	private static Module module = new Module(testbed);
+	
 	//
 	public static ViewEnumExtra extraView = ViewEnumExtra.TOP_DOWN;
 
@@ -160,37 +182,43 @@ public class MainGameLoop {
 		entities = new ArrayList<>();
 		terrains = new ArrayList<>();
 		cubes = new ArrayList<>();
-		drones = new ArrayList<>();
+		module = new Module(testbed);
 		airports = new ArrayList<>();
 
 		// ***INITIALIZE DRONEVIEW***
-		RawModel droneModel = OBJLoader.loadObjModel("untitled5", loader);
-		TexturedModel staticDroneModel = new TexturedModel(droneModel,
-				new ModelTexture(loader.loadTexture("untitled")));
-		
-		TexturedModel staticDroneModel2 = new TexturedModel(droneModel,
-				new ModelTexture(loader.loadTexture("untitledGreen")));
+//		RawModel droneModel = OBJLoader.loadObjModel("untitled5", loader);
+//		TexturedModel staticDroneModel = new TexturedModel(droneModel,
+//				new ModelTexture(loader.loadTexture("untitled")));
 
-		for (int i = 1; i <= 10; i++) {
-			Drone drone = new Drone(staticDroneModel2,
-					new Matrix4f().translate(new Vector3f(-100*i,
-							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
-									+ autopilotConfig.getTyreRadius() + 20,
-							0)),
-					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
-			drone.setName("Drone " + i);
 
-			entities.add(drone);
-			drones.add(drone);
-		}
+//		for (int i = 1; i <= 10; i++) {
+			
+//			Drone drone = new Drone(staticDroneModel,
+//					new Matrix4f().translate(new Vector3f(-20*i,
+//							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
+//									+ autopilotConfig.getTyreRadius() + 20,
+//							20 * i)),
+//					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
+//			drone.setName("Drone " + i);
+//			drone.setId(drones.size());
+//			
+//			activeDrone = drone;
+//			entities.add(drone);
+//			drones.add(drone);
+//		}
 		
-		activeDrone = drones.get(0);
+		module.defineAirport(0, 0, 20, 20);
+		module.defineAirport(0, -300, 50, 50);
+		module.defineAirport(0, -100, 50, 50);
+		module.defineAirport(0, -200, 50, 50);
+		module.defineDrone(2, 1, 0, autopilotConfig);
+		module.defineDrone(1, 0, 0, autopilotConfig);
 		
-		RawModel crateModel = OBJLoader.loadObjModel("tree", loader);
-		TexturedModel staticcrateModel = new TexturedModel(crateModel,
-				new ModelTexture(loader.loadTexture("tree")));
-		Entity e = new Entity(staticcrateModel, new Matrix4f().translate(new Vector3f(0,2,0)), 1);
-		entities.add(e);
+		ArrayList<Drone> drones = getDrones();
+
+		
+		Drone randomValue = testbed.getInactiveDrones().get(0);
+		activeDrone = randomValue;
 
 		// ***INITIALIZE CHASE-CAM***
 		chaseCam = new Camera();
@@ -229,14 +257,6 @@ public class MainGameLoop {
 		List<GuiTexture> guis = new ArrayList<>();
 		GuiRenderer guiRenderer = new GuiRenderer(loader);
 
-		List<GuiTexture> droneTextures = new ArrayList<>();
-
-		createOpenFileButton();
-		openFile.show(guis);
-
-		createRandomCubeButton();
-		randomCubes.show(guis);
-
 		BufferedImage i = null;
 		try {
 			i = ImageIO.read(new File("res/grass.png"));
@@ -253,11 +273,14 @@ public class MainGameLoop {
 		
 		miniMap = new MiniMap();
 		droneList = new DroneList(drones);
+		
 
 		while (!Display.isCloseRequested()) {
 			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
 				//camera.takeSnapshot();
 			}
+
+			drones = getDrones();
 
 			switch (currentView) {
 			case MINIMAP:
@@ -356,10 +379,11 @@ public class MainGameLoop {
 						@Override
 						public void run() {
 							// Autopilot stuff
-							AutopilotInputs inputs = d.getAutoPilotInputs();
+							module.startTimeHasPassed(d.getId(), d.getAutoPilotInputs());
 							//TODO: timePassed moet weg! foetsieee
-							AutopilotOutputs outputs = d.getAutopilot().timePassed(inputs);
+							AutopilotOutputs outputs = module.completeTimeHasPassed(d.getId());
 							d.setAutopilotOutputs(outputs);
+							
 
 							//System.out.println(d.getName() + " is ready with AP.");
 						}
@@ -401,12 +425,18 @@ public class MainGameLoop {
 		}
 
 		//No need for multithreading; Already optimized; models are just displaced.
-		for (Entity entity : entities) {
-					renderer.processEntity(entity);
+//		for (Entity entity : entities) {
+//					renderer.processEntity(entity);
+//		}
+		
+		for (Drone d : getDrones()) {
+			renderer.processEntity(d);
 		}
+			
 		
-		a.render(renderer, chaseCam, light);
-		
+		for(Airport a: testbed.getAirports()) {
+			a.render(renderer, chaseCam, light);
+		}
 		renderer.render(light, camera);
 
 		cubeShader.start();
@@ -446,8 +476,6 @@ public class MainGameLoop {
 				DisplayManager.start();
 			}
 			sLock = true;
-		} else if (Keyboard.isKeyDown(Keyboard.KEY_R)) {
-			reset();
 		} else if (Keyboard.isKeyDown(Keyboard.KEY_M)) {
 			if (!mLock) {
 				if (currentView == ViewEnum.MAIN) {
@@ -484,187 +512,16 @@ public class MainGameLoop {
 //		sLock = false;
 	}
 
-	private static void reset() {
-		// Reset Cubes & Display
-		generateRandomCubes();
-		// DisplayManager.reset();
-
-		// Reset Cameras
-		chaseCameraLocked = true;
-		// viewState = ViewStates.CHASE;
-
-		entities.remove(activeDrone);
-		RawModel droneModel = OBJLoader.loadObjModel("untitled5", loader);
-		TexturedModel staticDroneModel = new TexturedModel(droneModel,
-				new ModelTexture(loader.loadTexture("untitled")));
-		activeDrone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0,
-				(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius(), 0)),
-				1f, autopilotConfig, new EulerPrediction(STEP_TIME));
-		// drone.getPose().rotate((float) -(Math.PI/2), new Vector3f(1,0,0));
-		entities.add(activeDrone);
-
-		// Reset AP
-		autopilot = AutopilotFactory.createAutopilot();
-		autopilot.simulationStarted(autopilotConfig, activeDrone.getAutoPilotInputs());
-	}
-
-	public static void generateRandomCubes() {
-		Random r = new Random();
-		cubes = new ArrayList<>();
-
-		float prevX = 0.0f;
-		float prevY = 0.0f;
-
-		for (int i = 1; i <= 5; i++) {
-			Cube c = null;
-
-			switch (i) {
-			case 1:
-				c = new Cube(1, 0, 0);
-				break;
-			case 2:
-				c = new Cube(0, 1, 0);
-				break;
-			case 3:
-				c = new Cube(1, 0, 0);
-				break;
-			case 4:
-				c = new Cube(1, 1, 0);
-				break;
-			case 5:
-				c = new Cube(0, 1, 1);
-				break;
-			default:
-				break;
-			}
-
-			RawCubeModel model = loader.loadToVAO(c.positions, c.colors);
-			float x = r.nextFloat() * 20 - 10;
-			x = 0;
-			float y = ((float) r.nextInt(20));
-			float z = i * -40;
-			Vector3f position = new Vector3f(x, y, z);
-
-			while (Math.sqrt(Math.pow(x - prevX, 2) + Math.pow(y - prevY, 2)) > 10) {
-				x = r.nextFloat() * 20 - 10;
-				// x = 0;
-				y = ((float) r.nextInt(1000) / 500 - 1) * 10;
-			}
-
-			prevX = x;
-			prevY = y;
-
-			cubes.add(new Entity(model, new Matrix4f().translate(position), 1));
-		}
-
-	}
-
-	private static void createOpenFileButton() {
-		JFileChooser fc = new JFileChooser();
-		float normalizedX = -1.0f + 2.0f * (float) 1200 / (float) Display.getWidth();
-		float normalizedY = 1.0f - 2.0f * (float) 20 / (float) Display.getHeight();
-
-		openFile = new Button(loader, "openfile", new Vector2f(normalizedX, normalizedY), new Vector2f(0.05f, 0.05f)) {
-			@Override
-			public void whileHover() {
-			}
-
-			@Override
-			public void stopHover() {
-				this.setScale(new Vector2f(0.05f, 0.05f));
-			}
-
-			@Override
-			public void startHover() {
-				this.playHoverAnimation(0.01f);
-			}
-
-			@Override
-			public void onClick() {
-				this.playerClickAnimation(0.02f);
-
-				int returnVal = fc.showOpenDialog(null);
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					File file = fc.getSelectedFile();
-					// Read file and load cubes
-					loadCubes(file);
-				} else {
-					System.out.println("Open command cancelled by user.");
-				}
-			}
-		};
-	}
-
-	private static void createRandomCubeButton() {
-		randomCubes = new Button(loader, "random", new Vector2f(0.9f, 0.75f), new Vector2f(0.05f, 0.05f)) {
-			@Override
-			public void whileHover() {
-			}
-
-			@Override
-			public void stopHover() {
-			}
-
-			@Override
-			public void startHover() {
-			}
-
-			@Override
-			public void onClick() {
-				generateRandomCubes();
-			}
-		};
-	}
-
-	public static void loadCubes(File file) {
-		// reset entities first
-		cubes = new ArrayList<>();
-
-		int count = 0;
-
-		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-			for (String line; (line = br.readLine()) != null;) {
-				String[] s = line.split(" ");
-				float x = Float.parseFloat(s[0]);
-				float y = Float.parseFloat(s[1]);
-				float z = Float.parseFloat(s[2]);
-
-				Cube c = null;
-
-				switch (count) {
-				case 0:
-					c = new Cube(1, 0, 0);
-					break;
-				case 1:
-					c = new Cube(0, 1, 0);
-					break;
-				case 2:
-					c = new Cube(1, 0, 1);
-					break;
-				case 3:
-					c = new Cube(1, 1, 0);
-					break;
-				case 4:
-					c = new Cube(0, 1, 1);
-					break;
-				default:
-					break;
-				}
-				count++;
-
-				RawCubeModel model = loader.loadToVAO(c.positions, c.colors);
-
-				cubes.add(new Entity(model, new Matrix4f().translate(new Vector3f(x, y, z)), 1));
-			}
-			// line is not visible here.
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
 	public static void setActiveDrone(Drone drone) {
 		activeDrone = drone;
 	}
+	
+	public static ArrayList<Drone> getDrones(){
+		ArrayList<Drone> d = new ArrayList<Drone>();
+		d.addAll(testbed.getActiveDrones());
+		d.addAll(testbed.getInactiveDrones());
+		return d;
+	}
 }
+	
+
