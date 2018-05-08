@@ -1,9 +1,9 @@
 package autopilot.algorithmHandler;
 
-import autopilot.algorithms.Algorithm;
-import autopilot.algorithms.PathFinder;
-import autopilot.algorithms.SpeedUp;
-import autopilot.algorithms.Takeoff;
+import java.util.LinkedList;
+import java.util.NoSuchElementException;
+
+import autopilot.algorithms.*;
 import autopilot.interfaces.Autopilot;
 import autopilot.interfaces.AutopilotConfig;
 import autopilot.interfaces.AutopilotInputs;
@@ -19,12 +19,34 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	}
 	
 	public AutopilotAlain() {
-		// default algoritme
-		float[] x = new float[]{ -20,    0};
-		float[] y = new float[]{  50,   55};
-		float[] z = new float[]{-400, -800};
-		MyPath path = new MyPath(x, y, z);
-		setAlgorithm(new PathFinder(path));
+		
+		// add algorithms in order
+		addAlgorithm(new Aanloop(50f));
+		addAlgorithm(new FlyToHeight(20f));
+		addAlgorithm(new FlyToHeight(5f));
+		addAlgorithm(new Land());
+		
+		
+		// start 1st algorithm
+		nextAlgorithm();
+	}
+	
+	
+	private LinkedList<Algorithm> algorithmList = new LinkedList<Algorithm>();
+	
+	public void addAlgorithm(Algorithm a) {
+		algorithmList.add(a);
+	}
+	
+	public void nextAlgorithm() {
+		try {
+			setAlgorithm(algorithmList.pop());
+		} catch (NoSuchElementException e) {
+			setAlgorithm(new VliegRechtdoor());
+		}
+		
+		if (getAlgorithm() == null)
+			setAlgorithm(new VliegRechtdoor());
 	}
 	
 	// AlgorithmHandler interface
@@ -126,7 +148,7 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
 		// update Properties
 		getProperties().update(inputs);
-		
+		System.out.println("Hier");
 		// run 1 cycle of the current algorithm
 		getAlgorithm().cycle(this);
 		

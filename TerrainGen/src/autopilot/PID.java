@@ -27,7 +27,7 @@ public class PID {
 		float P = error;
 		float D = (error - prevError) / dt;
 		
-		if (Kp * P + Kd * D < maxFeedback) integrate(error * dt);
+		if (Math.abs(Kp * P + Kd * D) < maxFeedback) integrate(error * dt);
 		
 		float I = totalError;
 		

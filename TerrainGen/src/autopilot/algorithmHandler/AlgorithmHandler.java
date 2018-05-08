@@ -5,6 +5,8 @@ import autopilot.interfaces.AutopilotOutputs;
 
 public interface AlgorithmHandler extends AutopilotOutputs {
 	
+	public void nextAlgorithm();
+	
 	public void setAlgorithm(Algorithm algorithm);
 	
 	public String getAlgorithmName();

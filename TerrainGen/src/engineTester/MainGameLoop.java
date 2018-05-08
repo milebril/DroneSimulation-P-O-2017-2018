@@ -48,7 +48,9 @@ import autopilot.interfaces.AutopilotConfig;
 import autopilot.interfaces.AutopilotFactory;
 import autopilot.interfaces.AutopilotInputs;
 import autopilot.interfaces.AutopilotOutputs;
+import autopilot.interfaces.Path;
 import autopilot.interfaces.config.AutopilotConfigReader;
+import autopilot.interfaces.path.MyPath;
 import renderEngine.CubeRenderer;
 import renderEngine.DisplayManager;
 import renderEngine.EntityRenderer;
@@ -209,7 +211,7 @@ public class MainGameLoop {
 		module.defineAirport(0, -400, 1, 50);
 		module.defineAirport(0, -100, 50, 50);
 		module.defineAirport(0, -200, 50, 50);
-		module.defineDrone(2, 1, 0, autopilotConfig);
+		module.defineDrone(2, 1, 1, autopilotConfig);
 		module.defineDrone(1, 0, 0, autopilotConfig);
 		
 		ArrayList<Drone> drones = getDrones();
@@ -329,7 +331,7 @@ public class MainGameLoop {
 
 			// ***UPDATES***
 			float dt = DisplayManager.getFrameTimeSeconds();
-			if (!entities.isEmpty() && dt > 0.00001) {
+			if (dt > 0.00001) {
 
 				// De lijst waarin alle threads gestoken worden om later te checken of ze klaar
 				// zijn.
@@ -351,6 +353,7 @@ public class MainGameLoop {
 								System.exit(-1);
 							} catch (MaxAoAException e) {
 								e.printStackTrace();
+								System.exit(-1);
 							}
 							//System.out.println(d.getName() + " is ready with applyPhysics.");
 						}
@@ -367,7 +370,6 @@ public class MainGameLoop {
 				}
 
 				ArrayList<Future<?>> futureList2 = new ArrayList<Future<?>>();
-
 				// Maak een thread aan voor elke drone
 				for (Drone d : drones) {
 					Runnable toRun = new Runnable() {

@@ -438,7 +438,7 @@ public class Properties implements AutopilotConfig, AutopilotInputs {
 		// v_rot = omega x hefboomstafstand (world frame)
 		Vector3f rotation = new Vector3f();
 		Vector3f.cross(getRotationSpeed(), hefboom, rotation);
-
+		
 		// totale snelheid is de som van de rotatie en de drone snelheid
 		Vector3f totalSpeed = new Vector3f();
 		Vector3f.add(getVelocity(), rotation, totalSpeed);

@@ -26,14 +26,19 @@ public class FlyToPoint implements Algorithm {
 		return this.nextAlgorithm;
 	}
 
-	private float height = 40;
 	
 	private float maxRoll = (float) Math.toRadians(30);
-	
+	private float wingBaseIncl = (float) Math.toRadians(2);
 	private float smoothness = 9.4f; // max inclination change per dt
+	private float height = -1;
+	
 	
 	@Override
 	public void cycle(AlgorithmHandler handler) {
+		if (height == -1) {
+			height = handler.getProperties().getY();
+		}
+		
 		float dt = handler.getProperties().getDeltaTime();
 		float feedback;
 		float[] maxIncl;
@@ -42,29 +47,49 @@ public class FlyToPoint implements Algorithm {
 		Vector3f relativePosition =  new Vector3f();
 		Vector3f.sub(getPoint(), handler.getProperties().getPosition(), relativePosition);
 		
-		// calculate heading error
-		float headingTarget = 0.5f; //(float) Math.atan2(-relativePosition.x, -relativePosition.z);
+		// HEADING
+		float headingTarget = (float) Math.PI/2; //(float) Math.atan2(-relativePosition.x, -relativePosition.z);
 		float headingError = headingTarget - handler.getProperties().getHeading();
-		float headingFeedback = headingPID.getFeedback(headingError, dt);
+		
+		System.out.println("--------------------");
+		System.out.println("heading error: " + headingError + " rad");
+		
+		// ROLL
 		
 		
-		// pitch
+		
+		float roll = handler.getProperties().getRoll();
+		float rollTarget = maxRoll;
+		float rollError = (rollTarget - roll);
+		System.out.println("roll: " + roll);
+		System.out.println("rollError: " + rollError);
+		
+		
+		float deltaRoll = rollPID.getFeedback(rollError, dt);
+		deltaRoll = limitFeedback(rollError, -0.05f, 0.05f);
+		System.out.println("deltaRoll: " + deltaRoll + " rad");
+		
+		
+		
+		float rightWingInc = deltaRoll;
+		float lefttWingInc = -deltaRoll;
+		float vertStabInc = -0.6f * deltaRoll;
+		
+		
+		handler.setLeftWingInclination(wingBaseIncl+lefttWingInc);
+		handler.setRightWingInclination(wingBaseIncl+rightWingInc);
+		handler.setVerStabInclination(vertStabInc);
+		
+		
+		float pitch = handler.getProperties().getPitch();
 		float pitchTarget = 0;
-		float pitchError = pitchTarget - handler.getProperties().getPitch();
-		feedback = pitchPID.getFeedback(pitchError, dt);
-		maxIncl = handler.getProperties().getMaxInclinationHorStab();
-		feedback = limitFeedback(feedback, maxIncl[0], maxIncl[1]);
-		handler.setHorStabInclination(-feedback);
+		float pitchError = pitchTarget-pitch;
+		float heightError = height - handler.getProperties().getY();
+		float horIncl = horstabPID.getFeedback(-4f *pitchError - 0.2f*heightError, dt);
+		System.out.println("pitch: " + pitch);
+		handler.setHorStabInclination(horIncl);
 		
-		// altitude
-		float altitudeTarget = 22;
-		float altitudeError = altitudeTarget - handler.getProperties().getY();
-		float altitudeFeedback = altitudePID.getFeedback(altitudeError, dt);
 		
-		maxIncl = handler.getProperties().getMaxInclinationLeftWing();
-		altitudeFeedback = limitFeedback(altitudeFeedback, maxIncl[0], maxIncl[1]);
-		handler.setLeftWingInclination(altitudeFeedback);
-		handler.setRightWingInclination(altitudeFeedback);
 		
 		
 		
@@ -72,8 +97,14 @@ public class FlyToPoint implements Algorithm {
 		float cruiseForce = handler.getProperties().getGravity();
 		feedback = thrustPID.getFeedback(50 - handler.getProperties().getVelocity().length(), dt);
 		handler.setThrust(Math.max(0, cruiseForce + feedback));
-	
-		boolean reached = true;
+		System.out.println();
+		System.out.println("thrust: " + Math.min(Math.max(0, cruiseForce + feedback), handler.getProperties().getMaxThrust()));
+		
+		
+		boolean reached = false;
+		if (headingError < 0.2) {
+			reached = true;
+		}
 		// if the point is reached activate next algorithm
 		if (reached) {
 			handler.setAlgorithm(getNextAlgorithm());
@@ -81,11 +112,8 @@ public class FlyToPoint implements Algorithm {
 	}
 	
 	private PID thrustPID = new PID(1000, 400, 50, 2000);
-	private PID altitudePID = new PID(0.1f, 1f, 0.0f, (float) (10 * Math.PI / 180));
-	private PID pitchPID = new PID(1f, 0.5f, 0.01f, (float) (10 * Math.PI / 180));
-	private PID rollPID = new PID(1f, 0.2f, 0.05f,  (float) (45 * Math.PI / 180));
-	private PID headingPID = new PID(1f, 0.2f, 0.05f,  (float) (45 * Math.PI / 180));
-	
+	private PID horstabPID = new PID(1f, 0.5f, 0.3f, 0.2f);
+	private PID rollPID = new PID(1f, 0.2f, 0f, 0.5f);
 	
 	@Override
 	public String getName() {
@@ -93,8 +121,8 @@ public class FlyToPoint implements Algorithm {
 	}
 	
 	private float limitFeedback(float feedback, float min, float max) {
-		if (0.95f*max < feedback) return 0.95f*max;
-		else if (feedback < 0.95f*min) return 0.95f*min;
+		if (0.75f*max < feedback) return 0.75f*max;
+		else if (feedback < 0.75f*min) return 0.75f*min;
 		else return feedback;
 	}
 	
