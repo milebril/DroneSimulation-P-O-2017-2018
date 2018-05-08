@@ -89,7 +89,6 @@ public class MainGameLoop {
 
 	// Drone Stuff
 	private static Drone activeDrone;
-	private static List<Drone> drones = new ArrayList<Drone>(); 
 
 	// Entities lists
 	private static List<Entity> entities;
@@ -126,23 +125,23 @@ public class MainGameLoop {
 	private static Airport a;
 	
 	// Module
-	private static ArrayList<Drone> activeDrones = new ArrayList<Drone>();
-	private static ArrayList<Drone> inactiveDrones = new ArrayList<Drone>();
-	private static ArrayList<Airport> airports = new ArrayList<Airport>();
-	
-	public ArrayList<Airport> getAirports(){
-		return this.airports;
-	}
-	
-	public ArrayList<Drone> getInactiveDrones(){
-		return this.activeDrones;
-	}
-	
-	public ArrayList<Drone> getActiveDrones(){
-		return this.inactiveDrones;
-	}
+//	private static ArrayList<Drone> activeDrones = new ArrayList<Drone>();
+//	private static ArrayList<Drone> inactiveDrones = new ArrayList<Drone>();
+//	private static ArrayList<Airport> airports = new ArrayList<Airport>();
+//	
+//	public ArrayList<Airport> getAirports(){
+//		return this.airports;
+//	}
+//	
+//	public ArrayList<Drone> getInactiveDrones(){
+//		return this.activeDrones;
+//	}
+//	
+//	public ArrayList<Drone> getActiveDrones(){
+//		return this.inactiveDrones;
+//	}
 
-	private static Testbed testbed = new Testbed(activeDrones, inactiveDrones, airports);
+	private static Testbed testbed = new Testbed();
 	private static Module module = new Module(testbed);
 	
 	//
@@ -209,6 +208,9 @@ public class MainGameLoop {
 		module.defineAirport(0, -100, 50, 50);
 		module.defineAirport(0, -200, 50, 50);
 		module.defineDrone(2, 1, 0, autopilotConfig);
+		module.defineDrone(1, 0, 0, autopilotConfig);
+		
+		ArrayList<Drone> drones = getDrones();
 
 		
 		Drone randomValue = testbed.getInactiveDrones().get(0);
@@ -303,13 +305,14 @@ public class MainGameLoop {
 		
 		miniMap = new MiniMap();
 		droneList = new DroneList(drones);
+		
 
 		while (!Display.isCloseRequested()) {
 			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
 				//camera.takeSnapshot();
 			}
 
-			drones = getDrones(activeDrones,inactiveDrones);
+			drones = getDrones();
 
 			switch (currentView) {
 			case MINIMAP:
@@ -480,7 +483,7 @@ public class MainGameLoop {
 //					renderer.processEntity(entity);
 //		}
 		
-		for (Drone d : drones) {
+		for (Drone d : getDrones()) {
 			renderer.processEntity(d);
 		}
 			
@@ -749,10 +752,10 @@ public class MainGameLoop {
 		activeDrone = drone;
 	}
 	
-	public static List<Drone> getDrones(ArrayList<Drone> activeDrones, ArrayList<Drone> inactiveDrones){
+	public static ArrayList<Drone> getDrones(){
 		ArrayList<Drone> d = new ArrayList<Drone>();
-		d.addAll(activeDrones);
-		d.addAll(inactiveDrones);
+		d.addAll(testbed.getActiveDrones());
+		d.addAll(testbed.getInactiveDrones());
 		return d;
 	}
 }

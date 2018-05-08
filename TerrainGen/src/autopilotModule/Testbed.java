@@ -9,10 +9,7 @@ import models.Airport;
 
 public class Testbed {
 
-	public Testbed(ArrayList<Drone> activeDrones, ArrayList<Drone> inactiveDrones, ArrayList<Airport> airports){
-		this.activeDrones = activeDrones;
-		this.inactiveDrones = inactiveDrones;
-		this.airports = airports;
+	public Testbed(){
 	}
 	
 	private static ArrayList<Drone> activeDrones = new ArrayList<Drone>();
