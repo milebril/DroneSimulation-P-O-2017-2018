@@ -26,7 +26,9 @@ public class Airport {
 	private LandingStrip landingStrip;
 	private LandingStrip landingStrip2;
 
-	public Airport(int x, int z, int airportId) {
+	private Vector3f position;
+
+	public Airport(int x, int z, int airportId, String rotation) {
 		
 		airportID = airportId;
 		Loader loader = new Loader();
@@ -35,11 +37,23 @@ public class Airport {
 		TexturedModel staticGateModel = new TexturedModel(gateModel,
 				new ModelTexture(loader.loadTexture("gate.blauw")));
 
-		leftGate = new Gate(staticGateModel, new Matrix4f().translate(new Vector3f(x, 1, z)), 1, airportId, 1);
-		rightGate = new Gate(staticGateModel, new Matrix4f().translate(new Vector3f(x + 40, 1, z)), 1, airportId, 0);
-
-		landingStrip = new LandingStrip(x - 30, z - 400, loader, new ModelTexture(loader.loadTexture("landing")), airportId, 0);
-		landingStrip2 = new LandingStrip(x - 30, z, loader, new ModelTexture(loader.loadTexture("landing")),airportId, 1);
+		if (rotation.equals("block")) {
+			leftGate = new Gate(staticGateModel, new Matrix4f().translate(new Vector3f(x, 1, z)), 1, airportId, 1);
+			rightGate = new Gate(staticGateModel, new Matrix4f().translate(new Vector3f(x, 1, z + 40)), 1, airportId, 0);
+			leftGate.rotate((float) (Math.PI/2), new Vector3f(0, 1, 0));
+			rightGate.rotate((float) (Math.PI/2), new Vector3f(0, 1, 0));
+			
+			landingStrip = new LandingStrip(x, z - 30, loader, new ModelTexture(loader.loadTexture("landing")), airportId, 0, true);
+			landingStrip2 = new LandingStrip(x - 400, z - 30, loader, new ModelTexture(loader.loadTexture("landing")),airportId, 1, true);
+		} else {
+			leftGate = new Gate(staticGateModel, new Matrix4f().translate(new Vector3f(x, 1, z)), 1, airportId, 1);
+			rightGate = new Gate(staticGateModel, new Matrix4f().translate(new Vector3f(x + 40, 1, z)), 1, airportId, 0);
+			
+			landingStrip = new LandingStrip(x - 30, z - 400, loader, new ModelTexture(loader.loadTexture("landing")), airportId, 0, false);
+			landingStrip2 = new LandingStrip(x - 30, z, loader, new ModelTexture(loader.loadTexture("landing")),airportId, 1, false);
+		}
+		
+		position = new Vector3f(x, 0, z);
 	}
 
 	public void render(MasterRenderer renderer, Camera camera, Light light) {
@@ -51,6 +65,10 @@ public class Airport {
 
 	public int getAirportID() {
 		return airportID;
+	}
+
+	public Vector3f getPosition() {
+		return position;
 	}
 
 }
