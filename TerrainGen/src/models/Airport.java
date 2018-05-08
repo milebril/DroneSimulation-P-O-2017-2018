@@ -32,6 +32,8 @@ public class Airport {
 	private int z;
 
 	private Vector3f position;
+	
+	private boolean rotated;
 
 	public Airport(int x, int z, int airportId, String rotation) {
 		
@@ -60,6 +62,7 @@ public class Airport {
 			landingStrip2 = new LandingStrip(x - 30, z, loader, new ModelTexture(loader.loadTexture("landing")),airportId, 1, false);
 		}
 		
+		rotated = (rotation.equals("block")) ? true : false;
 		position = new Vector3f(x, 0, z);
 	}
 
@@ -93,6 +96,10 @@ public class Airport {
 
 	public Vector3f getPosition() {
 		return position;
+	}
+	
+	public boolean isRotated() {
+		return rotated;
 	}
 
 }
