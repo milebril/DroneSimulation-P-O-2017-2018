@@ -148,7 +148,7 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
 		// update Properties
 		getProperties().update(inputs);
-		
+		System.out.println("Hier");
 		// run 1 cycle of the current algorithm
 		getAlgorithm().cycle(this);
 		
