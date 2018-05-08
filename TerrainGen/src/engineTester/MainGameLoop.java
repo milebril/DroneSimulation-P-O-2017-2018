@@ -94,7 +94,6 @@ public class MainGameLoop {
 	private static List<Entity> entities;
 	private static List<Terrain> terrains;
 	private static List<Entity> cubes;
-	private static List<Airport> airports;
 
 	// Loader
 	private static Loader loader;
@@ -183,7 +182,6 @@ public class MainGameLoop {
 		terrains = new ArrayList<>();
 		cubes = new ArrayList<>();
 		module = new Module(testbed);
-		airports = new ArrayList<>();
 
 		// ***INITIALIZE DRONEVIEW***
 //		RawModel droneModel = OBJLoader.loadObjModel("untitled5", loader);
@@ -208,7 +206,7 @@ public class MainGameLoop {
 //		}
 		
 		module.defineAirport(0, 0, 20, 20);
-		module.defineAirport(0, -300, 50, 50);
+		module.defineAirport(0, -400, 1, 50);
 		module.defineAirport(0, -100, 50, 50);
 		module.defineAirport(0, -200, 50, 50);
 		module.defineDrone(2, 1, 0, autopilotConfig);
@@ -266,10 +264,10 @@ public class MainGameLoop {
 		float s = (60 / i.getHeight());
 		s = 0.01f;
 
-		a = new Airport(0, 0, 0, "block");
-		Airport a2 = new Airport(1500, 1500, 2, "");
-		airports.add(a);
-		airports.add(a2);
+//		a = new Airport(0, 0, 0, "block");
+//		Airport a2 = new Airport(1500, 1500, 2, "");
+//		airports.add(a);
+//		airports.add(a2);
 		
 		miniMap = new MiniMap();
 		droneList = new DroneList(drones);
@@ -284,7 +282,7 @@ public class MainGameLoop {
 
 			switch (currentView) {
 			case MINIMAP:
-				miniMap.render(drones, airports, guiRenderer, loader);
+				miniMap.render(drones, getAirports(), guiRenderer, loader);
 				break;
 			case MAIN:
 				// CAMERA VIEW
@@ -518,6 +516,13 @@ public class MainGameLoop {
 		d.addAll(testbed.getActiveDrones());
 		d.addAll(testbed.getInactiveDrones());
 		return d;
+	}
+	
+	public static ArrayList<Airport> getAirports(){
+		ArrayList<Airport> a = new ArrayList<Airport>();
+		a.addAll(testbed.getAirports());
+		return a;
+		
 	}
 }
 	

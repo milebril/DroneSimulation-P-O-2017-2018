@@ -75,6 +75,7 @@ public class Module implements AutopilotModule {
 				new EulerPrediction(STEP_TIME));
 		int droneId = this.getTestbed()
 				.getDrones(this.getTestbed().getInactiveDrones(), this.getTestbed().getActiveDrones()).size();
+		drone.setName("Drone: " + droneId);
 		this.getTestbed().getInactiveDrones().add(droneId, drone);
 
 	}
