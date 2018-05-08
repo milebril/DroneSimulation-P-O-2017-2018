@@ -89,7 +89,7 @@ public class MainGameLoop {
 
 	// Drone Stuff
 	private static Drone activeDrone;
-	private static List<Drone> drones; 
+	private static List<Drone> drones = new ArrayList<Drone>(); 
 
 	// Entities lists
 	private static List<Entity> entities;
@@ -126,19 +126,19 @@ public class MainGameLoop {
 	private static Airport a;
 	
 	// Module
-	private static HashMap<Integer,Drone> activeDrones = new HashMap<Integer, Drone>();
-	private static HashMap<Integer,Drone> inactiveDrones = new HashMap<Integer, Drone>();
-	private static HashMap<Integer,Airport> airports = new HashMap<Integer, Airport>();
+	private static ArrayList<Drone> activeDrones = new ArrayList<Drone>();
+	private static ArrayList<Drone> inactiveDrones = new ArrayList<Drone>();
+	private static ArrayList<Airport> airports = new ArrayList<Airport>();
 	
-	public HashMap<Integer,Airport> getAirports(){
+	public ArrayList<Airport> getAirports(){
 		return this.airports;
 	}
 	
-	public HashMap<Integer,Drone> getInactiveDrones(){
+	public ArrayList<Drone> getInactiveDrones(){
 		return this.activeDrones;
 	}
 	
-	public HashMap<Integer,Drone> getActiveDrones(){
+	public ArrayList<Drone> getActiveDrones(){
 		return this.inactiveDrones;
 	}
 
@@ -205,10 +205,13 @@ public class MainGameLoop {
 //		}
 		
 		module.defineAirport(0, 0, 20, 20);
-		module.defineDrone(1, 0, 0, autopilotConfig);
+		module.defineAirport(0, -300, 50, 50);
+		module.defineAirport(0, -100, 50, 50);
+		module.defineAirport(0, -200, 50, 50);
+		module.defineDrone(0, 0, 0, autopilotConfig);
 
-		List<Drone> valuesList = new ArrayList<Drone>(testbed.getInactiveDrones().values());
-		Drone randomValue = valuesList.get(0);
+		
+		Drone randomValue = testbed.getInactiveDrones().get(0);
 		activeDrone = randomValue;
 
 		// ***INITIALIZE CHASE-CAM***
@@ -268,7 +271,7 @@ public class MainGameLoop {
 
 		Cube c = new Cube(1, 1, 0);
 		RawCubeModel cube = loader.loadToVAO(c.positions, c.colors);
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 4, -20)), 1));
+		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, -5, -100)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -560)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -640)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -720)), 1));
@@ -305,9 +308,8 @@ public class MainGameLoop {
 			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
 				//camera.takeSnapshot();
 			}
-			
-			drones.addAll(new ArrayList<Drone>(activeDrones.values()));
-			drones.addAll(new ArrayList<Drone>(inactiveDrones.values()));
+
+			drones = getDrones(activeDrones,inactiveDrones);
 
 			switch (currentView) {
 			case MINIMAP:
@@ -474,12 +476,18 @@ public class MainGameLoop {
 		}
 
 		//No need for multithreading; Already optimized; models are just displaced.
-		for (Entity entity : entities) {
-					renderer.processEntity(entity);
+//		for (Entity entity : entities) {
+//					renderer.processEntity(entity);
+//		}
+		
+		for (Drone d : drones) {
+			renderer.processEntity(d);
 		}
+			
 		
-		a.render(renderer, chaseCam, light);
-		
+		for(Airport a: testbed.getAirports()) {
+			a.render(renderer, chaseCam, light);
+		}
 		renderer.render(light, camera);
 
 		cubeShader.start();
@@ -739,6 +747,13 @@ public class MainGameLoop {
 
 	public static void setActiveDrone(Drone drone) {
 		activeDrone = drone;
+	}
+	
+	public static List<Drone> getDrones(ArrayList<Drone> activeDrones, ArrayList<Drone> inactiveDrones){
+		ArrayList<Drone> d = new ArrayList<Drone>();
+		d.addAll(activeDrones);
+		d.addAll(inactiveDrones);
+		return d;
 	}
 }
 	
