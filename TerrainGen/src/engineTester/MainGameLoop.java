@@ -326,9 +326,6 @@ public class MainGameLoop {
 				GL11.glScissor(0, 0, Display.getWidth(), Display.getHeight());
 				GL11.glEnable(GL11.GL_SCISSOR_TEST);
 
-				guiRenderer.render(guis);
-				openFile.checkHover();
-				randomCubes.checkHover();
 				break;
 			}
 
