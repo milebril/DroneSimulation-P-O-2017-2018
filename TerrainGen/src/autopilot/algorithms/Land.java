@@ -25,8 +25,14 @@ public class Land implements Algorithm {
 			handler.setRightWingInclination(0);
 			
 			// remmen
+			handler.setFrontBrakeForce(handler.getProperties().getRMax());
 			handler.setLeftBrakeForce(handler.getProperties().getRMax());
 			handler.setRightBrakeForce(handler.getProperties().getRMax());
+		}
+		
+		// wanneer het vliegtuig stilstaat is het geland
+		if (handler.getProperties().getVelocity().length() <= 0.0005) {
+			handler.nextAlgorithm();
 		}
 	}
 	
