@@ -2,6 +2,9 @@ package autopilotModule;
 
 import java.util.ArrayList;
 
+import org.lwjgl.util.vector.Matrix4f;
+import org.lwjgl.util.vector.Vector3f;
+
 import autopilot.algorithmHandler.AutopilotAlain;
 import autopilot.interfaces.Autopilot;
 import autopilot.interfaces.AutopilotConfig;
@@ -94,17 +97,18 @@ public class Module implements AutopilotModule{
 		Integer distance = Integer.MAX_VALUE;
 		Drone dBest = this.testbed.getInactiveDrones().get(0);
 		
+		Vector3f airport = this.getTestbed().getAirports().get(fromAirport).getPackagePosition(fromGate);
 		for (Drone d : this.testbed.getInactiveDrones()) {
-			
-			if (true) {
-				//als d korter is overschrijven, anders next
-				//TODO: fix distance
+			Vector3f dpos = d.getPosition();
+			Vector3f newDistance = new Vector3f(airport.getX()-dpos.getX(), airport.getY() - dpos.getY(), airport.getZ() - dpos.getZ());
+			if (newDistance.length() < distance) {
+				distance = (int) newDistance.length();
+				dBest = d;
 			}
-			//kortste afstand berekenen
 		}
 		
-		this.getTestbed().getInactiveDrones().remove(dBest.hashCode());
-		this.getTestbed().getActiveDrones().add(dBest.hashCode(), dBest);
+		this.getTestbed().getInactiveDrones().remove(dBest);
+		this.getTestbed().getActiveDrones().add(dBest);
 		
 	}
 

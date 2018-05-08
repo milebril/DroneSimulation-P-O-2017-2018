@@ -69,7 +69,12 @@ public class Airport {
 	public Matrix4f getDronePosition(int gateID, AutopilotConfig config) {
 		
 		return new Matrix4f().translate(new Vector3f(0 + 40*gateID + x,(int) PhysicsEngine.groundLevel - config.getWheelY()
-								+ config.getTyreRadius(),0 + 10 + z)); //TODO: juiste positie voor x en z
+								+ config.getTyreRadius(),0 + 10 + z));
+	}
+
+	public Vector3f getPackagePosition(int gateID) {
+		
+		return new Vector3f(0 + 40 * gateID + x , 0 , 0 + 10 + z);
 	}
 
 }
