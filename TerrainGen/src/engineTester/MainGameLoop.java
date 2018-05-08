@@ -331,7 +331,7 @@ public class MainGameLoop {
 
 			// ***UPDATES***
 			float dt = DisplayManager.getFrameTimeSeconds();
-			if (!entities.isEmpty() && dt > 0.00001) {
+			if (dt > 0.00001) {
 
 				// De lijst waarin alle threads gestoken worden om later te checken of ze klaar
 				// zijn.
@@ -370,7 +370,6 @@ public class MainGameLoop {
 				}
 
 				ArrayList<Future<?>> futureList2 = new ArrayList<Future<?>>();
-
 				// Maak een thread aan voor elke drone
 				for (Drone d : drones) {
 					Runnable toRun = new Runnable() {
