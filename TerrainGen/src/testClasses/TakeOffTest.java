@@ -96,10 +96,10 @@ public class TakeOffTest {
 
 			// Set the takeOffSpeed to a random value between 30-60
 			Random r = new Random();
-			int speed = 40;//r.nextInt(20) + 30;
-			int angle = i + 23;//r.nextInt(30);
-			//speed = 35;
-//			angle = 12;
+			int speed = 40;// r.nextInt(20) + 30;
+			int angle = i + 23;// r.nextInt(30);
+			speed = 35;
+			angle = 12;
 			speeds.add(speed);
 			angles[i] = (float) angle;
 			System.out.println("Angle: " + angle);
@@ -116,39 +116,54 @@ public class TakeOffTest {
 
 			ArrayList<Future<?>> futureList = new ArrayList<Future<?>>();
 			float dt = DisplayManager.getFrameTimeSeconds();
-			for (Drone drone : testbed.getActiveDrones()) {
-				Runnable toRun = new Runnable() {
-					@Override
-					public void run() {
-						if (dt > 0.00001 && !((AutopilotAlain) drone.getAutopilot()).isFinished()
-								&& !((AutopilotAlain) drone.getAutopilot()).crashed) {
-							try {
-								PhysicsEngine.applyPhysics(drone, dt);
-							} catch (DroneCrashException e) {
-								crashCount++;
-								System.out.println(crashCount);
-								((AutopilotAlain) drone.getAutopilot()).crashed = true;
-								int index = testbed.getActiveDrones().indexOf(drone);
-								System.out.println("Startspeed crash at an angle of: " + angles[index]);
-								System.out.println(e);
-							} catch (MaxAoAException e) {
-								e.printStackTrace();
+			if (dt > 0.00001) {
+				for (Drone drone : testbed.getActiveDrones()) {
+					Runnable toRun = new Runnable() {
+						@Override
+						public void run() {
+							if (!((AutopilotAlain) drone.getAutopilot()).isFinished()
+									&& !((AutopilotAlain) drone.getAutopilot()).crashed) {
+								try {
+									PhysicsEngine.applyPhysics(drone, dt);
+								} catch (DroneCrashException e) {
+									crashCount++;
+									System.out.println(crashCount);
+									((AutopilotAlain) drone.getAutopilot()).crashed = true;
+									int index = testbed.getActiveDrones().indexOf(drone);
+									System.out.println("Startspeed crash at an angle of: " + angles[index]);
+									System.out.println(e);
+								} catch (MaxAoAException e) {
+									e.printStackTrace();
+								}
 							}
 						}
-					}
-					
-					
-				};
-				Future<?> fut = pool.submit(toRun);
-				futureList.add(fut);
-				
-				module.startTimeHasPassed(drone.getId(), drone.getAutoPilotInputs());
-				AutopilotOutputs outputs = module.completeTimeHasPassed(drone.getId());
-				drone.setAutopilotOutputs(outputs);
-			}
 
-			for (Future<?> fut : futureList) {
-				fut.get();
+					};
+					Future<?> fut = pool.submit(toRun);
+					futureList.add(fut);
+
+				}
+
+				for (Future<?> fut : futureList) {
+					fut.get();
+				}
+				
+				ArrayList<Future<?>> futureList2 = new ArrayList<Future<?>>();
+				// Maak een thread aan voor elke drone
+				for (Drone d : testbed.getActiveDrones()) {
+					Runnable toRun = new Runnable() {
+						@Override
+						public void run() {
+							module.startTimeHasPassed(d.getId(), d.getAutoPilotInputs());
+							AutopilotOutputs outputs = module.completeTimeHasPassed(d.getId());
+							d.setAutopilotOutputs(outputs);
+						}
+					};
+
+					Future<?> fut = pool.submit(toRun);
+					futureList2.add(fut);
+
+				}
 			}
 
 			m.prepare();

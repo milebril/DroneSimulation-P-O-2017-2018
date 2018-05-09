@@ -27,7 +27,7 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 		time = System.currentTimeMillis();
 		
 		// add algorithms in order
-//		addAlgorithm(new Aanloop(40f, 12f));
+//		addAlgorithm(new Aanloop(35f, 12f));
 //		addAlgorithm(new FlyToHeight(20f));
 //		addAlgorithm(new FlyToHeight(5f));
 //		addAlgorithm(new Land());
@@ -156,7 +156,7 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 		// run 1 cycle of the current algorithm
 		getAlgorithm().cycle(this);
 		
-		if (getProperties().getPosition().y > 3 && timeOnGround == 0) {
+		if (getProperties().getPosition().y > 2.4f && timeOnGround == 0) {
 			timeOnGround = System.currentTimeMillis() - time;
 			lenghtOnGround = getProperties().getPosition().z;
 		}
