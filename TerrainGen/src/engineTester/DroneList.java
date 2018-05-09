@@ -124,7 +124,7 @@ public class DroneList extends JFrame {
 				+ (float) Math.round(drone.getAngularVelocity().y * 100) / 100 + ", "
 				+ (float) Math.round(drone.getAngularVelocity().z * 100) / 100 + ")");
 		
-		//lblApState.setText("AP State : " + ((AlgorithmHandler) drone.getAutopilot()).getAlgorithmName()); 
+		lblApState.setText("AP State : " + ((AlgorithmHandler) drone.getAutopilot()).getAlgorithmName()); 
 		lblHoldingPackage.setText("Holding Package: False");
 	}
 }

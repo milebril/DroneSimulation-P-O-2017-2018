@@ -72,17 +72,18 @@ public class Module implements AutopilotModule {
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,
 				new ModelTexture(loader.loadTexture("untitled")));
 		Random r = new Random();
-		int x = r.nextInt(2000);
-		int z = r.nextInt(2000);
-//		int x = 0;
-//		int z = 0;
+//		int x = r.nextInt(2000);
+//		int z = r.nextInt(2000);
+		int x = 0;
+		int z = 0;
 		Drone drone = new Drone(staticDroneModel,
 				luchthaven.getDronePosition(gate, config).translate(new Vector3f(x, 0, z)), 1f, config,
 				new EulerPrediction(STEP_TIME));
 		int droneId = getTestbed()
-				.getDrones(getTestbed().getInactiveDrones(), getTestbed().getActiveDrones()).size();
+				.getDrones(testbed.getInactiveDrones(), testbed.getActiveDrones()).size();
 		drone.setName("Drone: " + droneId);
-		System.out.println(drone.getId());
+		drone.setId(droneId);
+		System.out.println("Drone: " + drone.getId());
 
 		if (pointingToRunway == 1) {
 			if (luchthaven.isRotated()) {

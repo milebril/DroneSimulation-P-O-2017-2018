@@ -16,6 +16,7 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	
 	public boolean crashed = false;
 	private long time;
+	public long timeOnGround;
 
 	public AutopilotAlain(Algorithm startingAlgorithm) {
 		setAlgorithm(startingAlgorithm);
@@ -26,7 +27,7 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 		time = System.currentTimeMillis();
 		
 		// add algorithms in order
-		addAlgorithm(new Aanloop(36f));
+//		addAlgorithm(new Aanloop(40f, 12f));
 //		addAlgorithm(new FlyToHeight(20f));
 //		addAlgorithm(new FlyToHeight(5f));
 //		addAlgorithm(new Land());
@@ -43,7 +44,6 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	
 	public void nextAlgorithm() {
 		try {
-			System.out.println("Hier");
 			setAlgorithm(algorithmList.pop());
 		} catch (NoSuchElementException e) {
 			setAlgorithm(new VliegRechtdoor());
@@ -127,6 +127,7 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	}
 
 	private float rightBrakeForce = 0;
+	public float lenghtOnGround;
 	public float getRightBrakeForce() {
 		return rightBrakeForce;
 	}
@@ -154,6 +155,11 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 		getProperties().update(inputs);
 		// run 1 cycle of the current algorithm
 		getAlgorithm().cycle(this);
+		
+		if (getProperties().getPosition().y > 3 && timeOnGround == 0) {
+			timeOnGround = System.currentTimeMillis() - time;
+			lenghtOnGround = getProperties().getPosition().z;
+		}
 		
 		return this;
 	}

@@ -8,6 +8,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Matrix4f;
@@ -45,13 +49,17 @@ public class TakeOffTest {
 	private static float p, i, d;
 	private static float minY = 0, maxY = 100;
 
-	private static List<Integer> speeds = new ArrayList<>();
-	
+	static List<Integer> speeds = new ArrayList<>();
+	static float[] angles = new float[DRONE_COUNT];
+
 	private static Testbed testbed = new Testbed();
 	private static Module module = new Module(testbed);
 	private static int crashCount;
+	private static List<Drone> finished = new ArrayList<>();
 
-	public static void main(String[] args) {
+	private static ExecutorService pool = Executors.newFixedThreadPool(20);
+
+	public static void main(String[] args) throws InterruptedException, ExecutionException {
 		// Needed to load openCV
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
@@ -83,18 +91,22 @@ public class TakeOffTest {
 		module.defineAirport(0, -200, 50, 50);
 		for (int i = 0; i < DRONE_COUNT; i++) {
 			module.defineDrone(2, 1, 1, autopilotConfig);
-			
+
 			AutopilotAlain autopilot = (AutopilotAlain) testbed.getActiveDrones().get(i).getAutopilot();
 
 			// Set the takeOffSpeed to a random value between 30-60
 			Random r = new Random();
-			int speed = r.nextInt(30) + 30;
+			int speed = r.nextInt(40) + 30;
+			int angle = r.nextInt(5) + 8;
+			//speed = 35;
+//			angle = 12;
 			speeds.add(speed);
-			System.out.println(speed);
-			autopilot.setAlgorithm(new Aanloop(speed));
+			angles[i] = (float) angle;
+			System.out.println(angle);
+			autopilot.setAlgorithm(new Aanloop(speed, angle));
 
-			// try to reach a goal height of 100
-			autopilot.addAlgorithm(new FlyToHeight(100f));
+			// try to reach a goal height of 20
+			autopilot.addAlgorithm(new FlyToHeight(20f));
 		}
 
 		DisplayManager.start();
@@ -102,39 +114,56 @@ public class TakeOffTest {
 
 		while (!Display.isCloseRequested()) {
 
+			ArrayList<Future<?>> futureList = new ArrayList<Future<?>>();
+			float dt = DisplayManager.getFrameTimeSeconds();
 			for (Drone drone : testbed.getActiveDrones()) {
-				float dt = DisplayManager.getFrameTimeSeconds();
-				if (dt > 0.00001 && !((AutopilotAlain) drone.getAutopilot()).isFinished() && !((AutopilotAlain) drone.getAutopilot()).crashed) {
-					try {
-						PhysicsEngine.applyPhysics(drone, dt);
-					} catch (DroneCrashException e) {
-						crashCount++;
-						System.out.println(crashCount);
-						((AutopilotAlain) drone.getAutopilot()).crashed = true;
-						int index = testbed.getActiveDrones().indexOf(drone);
-						System.out.println("Startspeed crash: " + speeds.get(index));
-						System.out.println(e);
-					} catch (MaxAoAException e) {
-						e.printStackTrace();
+				Runnable toRun = new Runnable() {
+					@Override
+					public void run() {
+						if (dt > 0.00001 && !((AutopilotAlain) drone.getAutopilot()).isFinished()
+								&& !((AutopilotAlain) drone.getAutopilot()).crashed) {
+							try {
+								PhysicsEngine.applyPhysics(drone, dt);
+							} catch (DroneCrashException e) {
+								crashCount++;
+								System.out.println(crashCount);
+								((AutopilotAlain) drone.getAutopilot()).crashed = true;
+								int index = testbed.getActiveDrones().indexOf(drone);
+								System.out.println("Startspeed crash: " + angles[index]);
+								System.out.println(e);
+							} catch (MaxAoAException e) {
+								e.printStackTrace();
+							}
+						}
 					}
 					
-					module.startTimeHasPassed(drone.getId(), drone.getAutoPilotInputs());
-					AutopilotOutputs outputs = module.completeTimeHasPassed(drone.getId());
-					drone.setAutopilotOutputs(outputs);
 					
-					System.out.println(drone.getId());
-				}
+				};
+				Future<?> fut = pool.submit(toRun);
+				futureList.add(fut);
+				
+				module.startTimeHasPassed(drone.getId(), drone.getAutoPilotInputs());
+				AutopilotOutputs outputs = module.completeTimeHasPassed(drone.getId());
+				drone.setAutopilotOutputs(outputs);
+			}
+
+			for (Future<?> fut : futureList) {
+				fut.get();
 			}
 
 			m.prepare();
 			DisplayManager.updateDisplay();
 
 			for (Drone d : testbed.getActiveDrones()) {
-				if (((AutopilotAlain) d.getAutopilot()).isFinished()) {
+				if (((AutopilotAlain) d.getAutopilot()).isFinished() && !finished.contains(d)) {
+					finished.add(d);
 					System.out.println("finished");
 					System.out.println(((AutopilotAlain) d.getAutopilot()).complete);
+					System.out.println(((AutopilotAlain) d.getAutopilot()).timeOnGround);
+					System.out.println(((AutopilotAlain) d.getAutopilot()).lenghtOnGround);
 					int index = testbed.getActiveDrones().indexOf(d);
-					System.out.println("Startspeed: " + speeds.get(index));
+					System.out.println("startAngle: " + angles[index]);
+					System.out.println("startSpeed: " + speeds.get(index));
 				}
 			}
 
