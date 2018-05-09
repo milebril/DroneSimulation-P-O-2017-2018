@@ -32,7 +32,7 @@ public class Testbed {
 		return this.inactiveDrones;
 	}
 	
-	public List<Drone> getDrones(){
+	public ArrayList<Drone> getDrones(){
 		ArrayList<Drone> d = new ArrayList<Drone>();
 		d.addAll(activeDrones);
 		d.addAll(inactiveDrones);
