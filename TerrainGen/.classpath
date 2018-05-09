@@ -5,12 +5,12 @@
 	<classpathentry kind="lib" path="lib/jars/lwjgl_util.jar"/>
 	<classpathentry kind="lib" path="lib/jars/lwjgl.jar">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="TerrainGen/lib/natives/macosx"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="TerrainGen/lib/natives/windows"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/jars/opencv-330.jar">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/usr/local/Cellar/opencv3/HEAD-25f740e_4/share/OpenCV/java"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="C:/Unif/P&amp;O/OpenCV/opencv/build/java/x64"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/jars/slick-util.jar"/>

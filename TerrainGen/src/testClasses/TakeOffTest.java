@@ -42,7 +42,7 @@ import renderEngine.MasterRenderer;
 public class TakeOffTest {
 
 	private static final float STEP_TIME = 0.001f;
-	private static final int DRONE_COUNT = 20;
+	private static final int DRONE_COUNT = 25;
 
 	private static AutopilotConfig autopilotConfig;
 
@@ -96,13 +96,13 @@ public class TakeOffTest {
 
 			// Set the takeOffSpeed to a random value between 30-60
 			Random r = new Random();
-			int speed = r.nextInt(20) + 30;
-			int angle = r.nextInt(5) + 8;
+			int speed = 40;//r.nextInt(20) + 30;
+			int angle = i + 23;//r.nextInt(30);
 			//speed = 35;
 //			angle = 12;
 			speeds.add(speed);
 			angles[i] = (float) angle;
-			System.out.println(angle);
+			System.out.println("Angle: " + angle);
 			autopilot.setAlgorithm(new Aanloop(speed, angle));
 
 			// try to reach a goal height of 20
@@ -129,7 +129,7 @@ public class TakeOffTest {
 								System.out.println(crashCount);
 								((AutopilotAlain) drone.getAutopilot()).crashed = true;
 								int index = testbed.getActiveDrones().indexOf(drone);
-								System.out.println("Startspeed crash: " + angles[index]);
+								System.out.println("Startspeed crash at an angle of: " + angles[index]);
 								System.out.println(e);
 							} catch (MaxAoAException e) {
 								e.printStackTrace();
@@ -158,12 +158,12 @@ public class TakeOffTest {
 				if (((AutopilotAlain) d.getAutopilot()).isFinished() && !finished.contains(d)) {
 					finished.add(d);
 					System.out.println("finished");
-					System.out.println(((AutopilotAlain) d.getAutopilot()).complete);
-					System.out.println(((AutopilotAlain) d.getAutopilot()).timeOnGround);
-					System.out.println(((AutopilotAlain) d.getAutopilot()).lenghtOnGround);
+					System.out.println("Time to complete: " + ((AutopilotAlain) d.getAutopilot()).complete);
+					System.out.println("Time on ground: " + ((AutopilotAlain) d.getAutopilot()).timeOnGround);
+					System.out.println("Length on ground: " + ((AutopilotAlain) d.getAutopilot()).lenghtOnGround);
 					int index = testbed.getActiveDrones().indexOf(d);
-					System.out.println("startAngle: " + angles[index]);
-					System.out.println("startSpeed: " + speeds.get(index));
+					System.out.println("Take off angle: " + angles[index]);
+					System.out.println("Take off speed: " + speeds.get(index));
 				}
 			}
 
