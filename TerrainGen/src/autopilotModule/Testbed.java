@@ -20,6 +20,10 @@ public class Testbed {
 		return this.airports;
 	}
 	
+	public int getNextAirportID() {
+		return this.airports.size();
+	}
+	
 	public ArrayList<Drone> getInactiveDrones(){
 		return this.activeDrones;
 	}
@@ -28,10 +32,14 @@ public class Testbed {
 		return this.inactiveDrones;
 	}
 	
-	public List<Drone> getDrones(ArrayList<Drone> activeDrones, ArrayList<Drone> inactiveDrones){
+	public ArrayList<Drone> getDrones(){
 		ArrayList<Drone> d = new ArrayList<Drone>();
 		d.addAll(activeDrones);
 		d.addAll(inactiveDrones);
 		return d;
+	}
+	
+	public int getNextDroneID() {
+		return getDrones().size();
 	}
 }
