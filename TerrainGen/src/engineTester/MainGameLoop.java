@@ -212,13 +212,15 @@ public class MainGameLoop {
 		module.defineAirport(0, -100, 50, 50);
 		module.defineAirport(0, -200, 50, 50);
 		module.defineDrone(2, 1, 1, autopilotConfig);
-		module.defineDrone(1, 0, 0, autopilotConfig);
+		//module.defineDrone(1, 0, 0, autopilotConfig);
 		
 		ArrayList<Drone> drones = getDrones();
 
 		
-		Drone randomValue = testbed.getInactiveDrones().get(0);
-		activeDrone = randomValue;
+		//Drone randomValue = testbed.getInactiveDrones().get(0);
+//		activeDrone = randomValue;
+		
+		activeDrone = testbed.getActiveDrones().get(0);
 
 		// ***INITIALIZE CHASE-CAM***
 		chaseCam = new Camera();
@@ -338,7 +340,7 @@ public class MainGameLoop {
 				ArrayList<Future<?>> futureList = new ArrayList<Future<?>>();
 
 				// Maak een thread aan voor elke drone
-				for (Drone d : drones) {
+				for (Drone d : testbed.getActiveDrones()) {
 					Runnable toRun = new Runnable() {
 						@Override
 						public void run() {
@@ -371,7 +373,7 @@ public class MainGameLoop {
 
 				ArrayList<Future<?>> futureList2 = new ArrayList<Future<?>>();
 				// Maak een thread aan voor elke drone
-				for (Drone d : drones) {
+				for (Drone d : testbed.getActiveDrones()) {
 					Runnable toRun = new Runnable() {
 						@Override
 						public void run() {

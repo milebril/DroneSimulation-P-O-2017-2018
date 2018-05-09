@@ -33,7 +33,7 @@ public class Module implements AutopilotModule {
 
 	private Testbed testbed;
 
-	private ArrayList<AutopilotOutputs> apOutputs;
+	private ArrayList<AutopilotOutputs> apOutputs = new ArrayList<>();
 
 	public Module(Testbed testbed) {
 		setTestbed(testbed);
@@ -87,8 +87,10 @@ public class Module implements AutopilotModule {
 				drone.rotate((float) Math.PI, new Vector3f(0, 1, 0));
 			}
 		}
-
-		this.getTestbed().getInactiveDrones().add(droneId, drone);
+		
+		drone.getAutopilot().simulationStarted(config, drone.getAutoPilotInputs());
+		
+		this.getTestbed().getActiveDrones().add(droneId, drone);
 
 	}
 
@@ -96,7 +98,7 @@ public class Module implements AutopilotModule {
 	public void startTimeHasPassed(int drone, AutopilotInputs inputs) {
 		// Allows the autopilots for all drones to run in parallel if desired. Called
 		// with drone = 0 through N - 1, in that order, if N drones have been defined.
-
+		System.out.println("Hier");
 		this.apOutputs.add(drone, this.getTestbed().getActiveDrones().get(drone).getAutopilot().timePassed(inputs));
 	}
 
@@ -104,6 +106,7 @@ public class Module implements AutopilotModule {
 	public AutopilotOutputs completeTimeHasPassed(int drone) {
 		// Called with drone = 0 through N - 1, in that order, if N drones have been
 		// defined.
+		System.out.println("Hiersss");
 		return apOutputs.get(drone);
 	}
 
