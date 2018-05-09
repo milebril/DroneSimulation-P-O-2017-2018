@@ -32,10 +32,11 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	// CONSTRUCTORS
 	
 	public Drone(TexturedModel model, Matrix4f pose, float scale,
-				AutopilotConfig cfg, PredictionMethod predictionMethod) {
+				AutopilotConfig cfg, PredictionMethod predictionMethod, int id, String name) {
 		super(model, pose, scale);
 		
-		
+		setName(name);
+		setId(id);
 		
 		this.linearVelocityW = new Vector3f(0.0f,0.0f, -30.0f);
 
@@ -93,8 +94,8 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		tyres[2] = new Tyre(this, new Vector3f(cfg.getRearWheelX(), cfg.getWheelY(), cfg.getRearWheelZ()), cfg.getTyreRadius(), cfg.getRMax(), cfg.getFcMax(), cfg.getTyreSlope(), cfg.getDampSlope());
 	}
 	
-	public Drone(Matrix4f pose, AutopilotConfig autopilotConfig, Vector3f velocity, Vector3f rotVel) {
-		this(null, pose, 1f, autopilotConfig, new EulerPrediction(0.01f));
+	public Drone(Matrix4f pose, AutopilotConfig autopilotConfig, Vector3f velocity, Vector3f rotVel, int id, String name) {
+		this(null, pose, 1f, autopilotConfig, new EulerPrediction(0.01f), id, name);
 		this.setLinearVelocity(velocity);
 		this.setAngularVelocity(rotVel);
 	}

@@ -93,15 +93,11 @@ public class MainGameLoop {
 	private static Drone activeDrone;
 
 	// Entities lists
-	private static List<Entity> entities;
 	private static List<Terrain> terrains;
 	private static List<Entity> cubes;
 
 	// Loader
 	private static Loader loader;
-
-	// Autopilot
-	private static Autopilot autopilot;
 
 	// Camera Stuff
 	private static Camera chaseCam;
@@ -118,32 +114,10 @@ public class MainGameLoop {
 	// Lights
 	private static Light light;
 
-	// Buttons
-	private static Button openFile;
-	private static Button randomCubes;
-
 	// ViewEnum
 	private static ViewEnum currentView = ViewEnum.MAIN;
 
-	private static Airport a;
-	
-	// Module
-//	private static ArrayList<Drone> activeDrones = new ArrayList<Drone>();
-//	private static ArrayList<Drone> inactiveDrones = new ArrayList<Drone>();
-//	private static ArrayList<Airport> airports = new ArrayList<Airport>();
-//	
-//	public ArrayList<Airport> getAirports(){
-//		return this.airports;
-//	}
-//	
-//	public ArrayList<Drone> getInactiveDrones(){
-//		return this.activeDrones;
-//	}
-//	
-//	public ArrayList<Drone> getActiveDrones(){
-//		return this.inactiveDrones;
-//	}
-
+	//Module
 	private static Testbed testbed = new Testbed();
 	private static Module module = new Module(testbed);
 	
@@ -180,7 +154,6 @@ public class MainGameLoop {
 		DisplayManager.createDisplay();
 		loader = new Loader();
 		TextMaster.init(loader);
-		entities = new ArrayList<>();
 		terrains = new ArrayList<>();
 		cubes = new ArrayList<>();
 		module = new Module(testbed);
@@ -258,7 +231,7 @@ public class MainGameLoop {
 //		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -880)), 1));
 
 		// ***INITIALIZE BUTTONS GUI***
-		List<GuiTexture> guis = new ArrayList<>();
+		//List<GuiTexture> guis = new ArrayList<>();
 		GuiRenderer guiRenderer = new GuiRenderer(loader);
 
 		BufferedImage i = null;
