@@ -77,6 +77,7 @@ public class DisplayManager {
 	}
 
 	public static void start() {
+		System.out.println("Hier");
 		started = true;
 	}
 

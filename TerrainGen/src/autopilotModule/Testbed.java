@@ -28,7 +28,7 @@ public class Testbed {
 		return this.inactiveDrones;
 	}
 	
-	public static List<Drone> getDrones(ArrayList<Drone> activeDrones, ArrayList<Drone> inactiveDrones){
+	public List<Drone> getDrones(ArrayList<Drone> activeDrones, ArrayList<Drone> inactiveDrones){
 		ArrayList<Drone> d = new ArrayList<Drone>();
 		d.addAll(activeDrones);
 		d.addAll(inactiveDrones);

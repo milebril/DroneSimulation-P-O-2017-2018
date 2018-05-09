@@ -1,6 +1,7 @@
 package autopilotModule;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
@@ -70,11 +71,18 @@ public class Module implements AutopilotModule {
 		RawModel droneModel = OBJLoader.loadObjModel("untitled5", loader);
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,
 				new ModelTexture(loader.loadTexture("untitled")));
-		Drone drone = new Drone(staticDroneModel, luchthaven.getDronePosition(gate, config), 1f, config,
+		Random r = new Random();
+		int x = r.nextInt(2000);
+		int z = r.nextInt(2000);
+//		int x = 0;
+//		int z = 0;
+		Drone drone = new Drone(staticDroneModel,
+				luchthaven.getDronePosition(gate, config).translate(new Vector3f(x, 0, z)), 1f, config,
 				new EulerPrediction(STEP_TIME));
-		int droneId = this.getTestbed()
-				.getDrones(this.getTestbed().getInactiveDrones(), this.getTestbed().getActiveDrones()).size();
+		int droneId = getTestbed()
+				.getDrones(getTestbed().getInactiveDrones(), getTestbed().getActiveDrones()).size();
 		drone.setName("Drone: " + droneId);
+		System.out.println(drone.getId());
 
 		if (pointingToRunway == 1) {
 			if (luchthaven.isRotated()) {
@@ -87,9 +95,9 @@ public class Module implements AutopilotModule {
 				drone.rotate((float) Math.PI, new Vector3f(0, 1, 0));
 			}
 		}
-		
+
 		drone.getAutopilot().simulationStarted(config, drone.getAutoPilotInputs());
-		
+
 		this.getTestbed().getActiveDrones().add(droneId, drone);
 
 	}
@@ -98,7 +106,6 @@ public class Module implements AutopilotModule {
 	public void startTimeHasPassed(int drone, AutopilotInputs inputs) {
 		// Allows the autopilots for all drones to run in parallel if desired. Called
 		// with drone = 0 through N - 1, in that order, if N drones have been defined.
-		System.out.println("Hier");
 		this.apOutputs.add(drone, this.getTestbed().getActiveDrones().get(drone).getAutopilot().timePassed(inputs));
 	}
 
@@ -106,7 +113,6 @@ public class Module implements AutopilotModule {
 	public AutopilotOutputs completeTimeHasPassed(int drone) {
 		// Called with drone = 0 through N - 1, in that order, if N drones have been
 		// defined.
-		System.out.println("Hiersss");
 		return apOutputs.get(drone);
 	}
 

@@ -14,23 +14,26 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	
 	// Constructor
 	
+	public boolean crashed = false;
+	private long time;
+
 	public AutopilotAlain(Algorithm startingAlgorithm) {
 		setAlgorithm(startingAlgorithm);
 	}
 	
 	public AutopilotAlain() {
 		
-		// add algorithms in order
-		addAlgorithm(new Aanloop(50f));
-		addAlgorithm(new FlyToHeight(20f));
-		addAlgorithm(new FlyToHeight(5f));
-		addAlgorithm(new Land());
+		time = System.currentTimeMillis();
 		
+		// add algorithms in order
+		addAlgorithm(new Aanloop(36f));
+//		addAlgorithm(new FlyToHeight(20f));
+//		addAlgorithm(new FlyToHeight(5f));
+//		addAlgorithm(new Land());
 		
 		// start 1st algorithm
 		nextAlgorithm();
 	}
-	
 	
 	private LinkedList<Algorithm> algorithmList = new LinkedList<Algorithm>();
 	
@@ -40,6 +43,7 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	
 	public void nextAlgorithm() {
 		try {
+			System.out.println("Hier");
 			setAlgorithm(algorithmList.pop());
 		} catch (NoSuchElementException e) {
 			setAlgorithm(new VliegRechtdoor());
@@ -148,7 +152,6 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
 		// update Properties
 		getProperties().update(inputs);
-		System.out.println("Hierss");
 		// run 1 cycle of the current algorithm
 		getAlgorithm().cycle(this);
 		
@@ -162,6 +165,8 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	// Properties
 	
 	private Properties properties;
+	public long complete;
+	
 	public Properties getProperties() {
 		return this.properties;
 	}
@@ -173,6 +178,15 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	public AutopilotOutputs completeTimeHasPassed() {
 		getAlgorithm().cycle(this);
 		return this;
+	}
+
+	public boolean isFinished() {
+		if (algorithm instanceof VliegRechtdoor) {
+			complete = System.currentTimeMillis() - time;
+			return true;
+		} else {
+			return false;
+		}
 	}
 		
 	
