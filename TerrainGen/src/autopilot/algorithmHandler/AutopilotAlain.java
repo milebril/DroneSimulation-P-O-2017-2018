@@ -27,8 +27,8 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 		time = System.currentTimeMillis();
 		
 		// add algorithms in order
-		addAlgorithm(new Aanloop(40f, 18f));
-		addAlgorithm(new FlyToHeight(20f));
+//		addAlgorithm(new Aanloop(40f, 18f));
+//		addAlgorithm(new FlyToHeight(20f));
 //		addAlgorithm(new FlyToHeight(5f));
 //		addAlgorithm(new Land());
 		
