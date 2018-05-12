@@ -97,7 +97,7 @@ public class TakeOffTest {
 			// Set the takeOffSpeed to a random value between 30-60
 			Random r = new Random();
 			int speed = 40;// r.nextInt(20) + 30;
-			int angle = i;// r.nextInt(30);
+			int angle = i + 1;// r.nextInt(30);
 			//speed = 35;
 			//angle = 12;
 			speeds.add(speed);
