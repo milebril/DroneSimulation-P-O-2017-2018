@@ -184,7 +184,7 @@ public class MainGameLoop {
 		module.defineAirport(0, -400, 1, 50);
 		module.defineAirport(0, -100, 50, 50);
 		module.defineAirport(0, -200, 50, 50);
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 10; i++) {
 			module.defineDrone(2, 1, 1, autopilotConfig);
 		}
 		//module.defineDrone(2, 1, 1, autopilotConfig);
@@ -225,15 +225,8 @@ public class MainGameLoop {
 
 		Cube c = new Cube(1, 0, 0);
 		RawCubeModel cube = loader.loadToVAO(c.positions, c.colors);
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 2, 0)), 1));
-//		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -560)), 1));
-//		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -640)), 1));
-//		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -720)), 1));
-//		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -800)), 1));
-//		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -880)), 1));
-
+		
 		// ***INITIALIZE BUTTONS GUI***
-		//List<GuiTexture> guis = new ArrayList<>();
 		GuiRenderer guiRenderer = new GuiRenderer(loader);
 
 		BufferedImage i = null;
@@ -242,17 +235,9 @@ public class MainGameLoop {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-		float s = (60 / i.getHeight());
-		s = 0.01f;
-
-//		a = new Airport(0, 0, 0, "block");
-//		Airport a2 = new Airport(1500, 1500, 2, "");
-//		airports.add(a);
-//		airports.add(a2);
 		
 		miniMap = new MiniMap();
 		droneList = new DroneList(drones);
-		
 
 		while (!Display.isCloseRequested()) {
 			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {

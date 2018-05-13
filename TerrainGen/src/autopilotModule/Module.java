@@ -30,7 +30,7 @@ public class Module implements AutopilotModule {
 
 	private Testbed testbed;
 
-	private AutopilotOutputs[] apOutputs = new AutopilotOutputs[500];
+	private AutopilotOutputs[] apOutputs = new AutopilotOutputs[2000];
 
 	public Module(Testbed testbed) {
 		setTestbed(testbed);
