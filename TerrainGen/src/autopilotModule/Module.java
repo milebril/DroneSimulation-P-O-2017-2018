@@ -71,7 +71,7 @@ public class Module implements AutopilotModule {
 		int x = 0;
 		int z = 0;
 		Drone drone = new Drone(staticDroneModel,
-				luchthaven.getDronePosition(gate, config).translate(new Vector3f(x, 0, z)), 1f, config,
+				luchthaven.getDronePosition(gate, config).translate(new Vector3f(x, 10, z)), 1f, config,
 				new EulerPrediction(STEP_TIME),droneId,"Drone: " + droneId);
 		
 		System.out.println(drone.getId());

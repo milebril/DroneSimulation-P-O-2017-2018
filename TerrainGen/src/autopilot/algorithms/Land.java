@@ -19,10 +19,10 @@ public class Land implements Algorithm {
 			// pitch op 0 houden
 			float feedback = pitchPID.getFeedback(handler.getProperties().getPitch(), dt);
 			handler.setHorStabInclination(feedback);
-			
+
 			// rusting dalen
-			handler.setLeftWingInclination(0);
-			handler.setRightWingInclination(0);
+			handler.setLeftWingInclination(-feedback);
+			handler.setRightWingInclination(-feedback);
 			
 			// remmen
 			handler.setFrontBrakeForce(handler.getProperties().getRMax());

@@ -15,21 +15,23 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	// Constructor
 	
 	public boolean crashed = false;
+	
 	private long time;
-	public long timeOnGround;
+	private float startZ;
+	public long timeToLand;
+	public float lengthToLand;
+	private float groundTouchStart;
+	public float groundLength; 
 
 	public AutopilotAlain(Algorithm startingAlgorithm) {
 		setAlgorithm(startingAlgorithm);
 	}
 	
 	public AutopilotAlain() {
-		
-		time = System.currentTimeMillis();
-		
 		// add algorithms in order
 //		addAlgorithm(new Aanloop(40f, 18f));
 //		addAlgorithm(new FlyToHeight(20f));
-//		addAlgorithm(new FlyToHeight(5f));
+//		addAlgorithm(new FlyToHeight(10f));
 //		addAlgorithm(new Land());
 		
 		// start 1st algorithm
@@ -49,8 +51,14 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 			setAlgorithm(new VliegRechtdoor());
 		}
 		
-		if (getAlgorithm() == null)
+		if (algorithm instanceof Land) {
+			startZ = getProperties().getPosition().z;
+			time = System.currentTimeMillis();
+		}
+		
+		if (getAlgorithm() == null) {
 			setAlgorithm(new VliegRechtdoor());
+		}
 	}
 	
 	// AlgorithmHandler interface
@@ -156,9 +164,8 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 		// run 1 cycle of the current algorithm
 		getAlgorithm().cycle(this);
 		
-		if (getProperties().getPosition().y > 2.4f && timeOnGround == 0) {
-			timeOnGround = System.currentTimeMillis() - time;
-			lenghtOnGround = getProperties().getPosition().z;
+		if (getProperties().getPosition().getY() < 2.5f) {
+			groundTouchStart = getProperties().getPosition().getZ();
 		}
 		
 		return this;
@@ -171,7 +178,6 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	// Properties
 	
 	private Properties properties;
-	public long complete;
 	
 	public Properties getProperties() {
 		return this.properties;
@@ -188,14 +194,12 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 
 	public boolean isFinished() {
 		if (algorithm instanceof VliegRechtdoor) {
-			complete = System.currentTimeMillis() - time;
+			timeToLand = System.currentTimeMillis() - time;
+			lengthToLand = Math.abs(getProperties().getPosition().z - startZ);
+			groundLength = Math.abs(getProperties().getPosition().z -groundTouchStart);
 			return true;
 		} else {
 			return false;
 		}
 	}
-		
-	
-	
-	
 }
