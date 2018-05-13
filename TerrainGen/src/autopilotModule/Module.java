@@ -1,6 +1,7 @@
 package autopilotModule;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.lwjgl.util.vector.Vector3f;
@@ -29,7 +30,7 @@ public class Module implements AutopilotModule {
 
 	private Testbed testbed;
 
-	private ArrayList<AutopilotOutputs> apOutputs = new ArrayList<>();
+	private AutopilotOutputs[] apOutputs = new AutopilotOutputs[500];
 
 	public Module(Testbed testbed) {
 		setTestbed(testbed);
@@ -66,16 +67,14 @@ public class Module implements AutopilotModule {
 				new ModelTexture(loader.loadTexture("untitled")));
 		Random r = new Random();
 		int droneId = getTestbed().getNextDroneID();
-//		int x = r.nextInt(2000);
-//		int z = r.nextInt(2000);
-		int x = 0;
-		int z = 0;
+		int x = r.nextInt(2000);
+		int z = r.nextInt(2000);
+//		int x = 0;
+//		int z = 0;
 		Drone drone = new Drone(staticDroneModel,
-				luchthaven.getDronePosition(gate, config).translate(new Vector3f(x, 10, z)), 1f, config,
+				luchthaven.getDronePosition(gate, config).translate(new Vector3f(x, 0, z)), 1f, config,
 				new EulerPrediction(STEP_TIME),droneId,"Drone: " + droneId);
 		
-		System.out.println(drone.getId());
-
 		if (pointingToRunway == 1) {
 			if (luchthaven.isRotated()) {
 				drone.rotate((float) -Math.PI / 2, new Vector3f(0, 1, 0));
@@ -92,21 +91,20 @@ public class Module implements AutopilotModule {
 
 		//TODO: Drones mogen pas actief worden als er een pakketje op valt
 		this.getTestbed().getActiveDrones().add(droneId, drone);
-
 	}
 
 	@Override
 	public void startTimeHasPassed(int drone, AutopilotInputs inputs) {
 		// Allows the autopilots for all drones to run in parallel if desired. Called
 		// with drone = 0 through N - 1, in that order, if N drones have been defined.
-		this.apOutputs.add(drone, this.getTestbed().getActiveDrones().get(drone).getAutopilot().timePassed(inputs));
+		apOutputs[drone] = this.getTestbed().getActiveDrones().get(drone).getAutopilot().timePassed(inputs);
 	}
 
 	@Override
 	public AutopilotOutputs completeTimeHasPassed(int drone) {
 		// Called with drone = 0 through N - 1, in that order, if N drones have been
 		// defined.
-		return apOutputs.get(drone);
+		return apOutputs[drone];
 	}
 
 	@Override

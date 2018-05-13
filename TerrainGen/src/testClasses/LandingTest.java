@@ -43,7 +43,7 @@ import renderEngine.MasterRenderer;
 public class LandingTest {
 
 	private static final float STEP_TIME = 0.001f;
-	private static final int DRONE_COUNT = 4;
+	private static final int DRONE_COUNT = 20;
 
 	private static AutopilotConfig autopilotConfig;
 
@@ -90,10 +90,10 @@ public class LandingTest {
 
 			AutopilotAlain autopilot = (AutopilotAlain) testbed.getActiveDrones().get(i).getAutopilot();
 
-			float height = i * 10 + 10;
+			float height = i * 5 + 10;
 			heights[i] = height;
 
-			autopilot.setAlgorithm(new FlyToHeight(i * 10 + 10));
+			autopilot.setAlgorithm(new FlyToHeight(i * 5 + 10));
 			autopilot.addAlgorithm(new Land());
 		}
 

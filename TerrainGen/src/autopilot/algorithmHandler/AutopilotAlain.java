@@ -29,8 +29,8 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	
 	public AutopilotAlain() {
 		// add algorithms in order
-//		addAlgorithm(new Aanloop(40f, 18f));
-//		addAlgorithm(new FlyToHeight(20f));
+		addAlgorithm(new Aanloop(34f, 15f));
+		addAlgorithm(new FlyToHeight(20f));
 //		addAlgorithm(new FlyToHeight(10f));
 //		addAlgorithm(new Land());
 		
@@ -164,7 +164,7 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 		// run 1 cycle of the current algorithm
 		getAlgorithm().cycle(this);
 		
-		if (getProperties().getPosition().getY() < 2.5f) {
+		if (getProperties().getPosition().getY() < 2.5f && groundTouchStart == 0) {
 			groundTouchStart = getProperties().getPosition().getZ();
 		}
 		
@@ -196,7 +196,7 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 		if (algorithm instanceof VliegRechtdoor) {
 			timeToLand = System.currentTimeMillis() - time;
 			lengthToLand = Math.abs(getProperties().getPosition().z - startZ);
-			groundLength = Math.abs(getProperties().getPosition().z -groundTouchStart);
+			groundLength = Math.abs(getProperties().getPosition().z - groundTouchStart);
 			return true;
 		} else {
 			return false;
