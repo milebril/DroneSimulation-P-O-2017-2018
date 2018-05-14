@@ -12,6 +12,8 @@ import autopilot.interfaces.path.MyPath;
 
 public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	
+	public static float CRUISESPEED = 40f;
+	
 	// Constructor
 	
 	public AutopilotAlain(Algorithm startingAlgorithm) {
@@ -21,16 +23,14 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	public AutopilotAlain() {
 		
 		// add algorithms in order
-		addAlgorithm(new Aanloop(50f));
+		addAlgorithm(new Aanloop(34f));
 		addAlgorithm(new FlyToHeight(20f));
-		addAlgorithm(new FlyToHeight(5f));
+		addAlgorithm(new Turn(1.1f));
 		addAlgorithm(new Land());
-		
 		
 		// start 1st algorithm
 		nextAlgorithm();
 	}
-	
 	
 	private LinkedList<Algorithm> algorithmList = new LinkedList<Algorithm>();
 	

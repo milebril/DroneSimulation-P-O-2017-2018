@@ -167,7 +167,7 @@ public class OpenCVTest {
 				imPercentage = imaginaryCube.getProjectedAreaPercentage((float) (120.0 / 180 * Math.PI), (float) (120.0 / 180 * Math.PI));
 				ratio = imPercentage / percentage;
 				imaginaryCube.translate(0, 0, (1 - ratio)*0.1);
-				imaginaryCube.saveAsImage("result " + String.valueOf(iterations * 2 - 1), rgbMat);
+				//imaginaryCube.saveAsImage("result " + String.valueOf(iterations * 2 - 1), rgbMat);
 				
 			}
 			

@@ -2,6 +2,7 @@ package autopilot.algorithms;
 
 import autopilot.PID;
 import autopilot.algorithmHandler.AlgorithmHandler;
+import autopilot.algorithmHandler.AutopilotAlain;
 
 public class FlyToHeight implements Algorithm {
 
@@ -14,48 +15,40 @@ public class FlyToHeight implements Algorithm {
 	private float prevP = -100f;
 	private float prevH = -100f;
 	
+	private float cruiseSpeed = AutopilotAlain.CRUISESPEED;
+	
 	@Override
 	public void cycle(AlgorithmHandler handler) {
 		
 		float dt = handler.getProperties().getDeltaTime();
 		
-		// snelheid behouden
-		float cruiseForce = handler.getProperties().getGravity();
-		float feedback = thrustPID.getFeedback(50 - handler.getProperties().getVelocity().length(), dt);
-		handler.setThrust(Math.max(0, cruiseForce + feedback));
+		// SNELHEID ~ THRUST
+		float feedback = thrustPID.getFeedback(cruiseSpeed - handler.getProperties().getVelocity().length(), dt);
+		handler.setThrust(Math.max(0, feedback));
 		
-		// STIJGENnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+		// STIJGEN/DALEN ~ ZIJVLEUGELS
 		float heightError = this.height - handler.getProperties().getY();
 		feedback = heightPID.getFeedback(heightError, dt);
-
-		// stijgen met zijvleugels
+		
 		handler.setLeftWingInclination(0.1f+feedback);
 		handler.setRightWingInclination(0.1f+feedback);
 		
-		// pitch op 0 houden
+		// PITCH ~ HOR STAB
 		feedback = pitchPID.getFeedback(handler.getProperties().getPitch(), dt);
 		handler.setHorStabInclination(feedback);
 		
 		
-		if (prevP == -100f)
-			prevP = handler.getProperties().getPitch();
-		if (prevH == -100f)
-			prevH = handler.getProperties().getY();
-		
+		// CONTROLEREN OF DOEL (stabiliteit op gevraagde hoogte) BEREIKT IS
+		if (prevP == -100f)	prevP = handler.getProperties().getPitch();
+		if (prevH == -100f)	prevH = handler.getProperties().getY();
 		float deltaP = (handler.getProperties().getPitch() - prevP)/dt;
 		prevP = handler.getProperties().getPitch();
-		
 		float deltaH = (handler.getProperties().getY() - prevH)/dt;
 		prevH = handler.getProperties().getY();
-
-		//System.out.println("deltaP:"+deltaP);
-		//System.out.println("deltaH:"+deltaH);
-		//System.out.println("picht:"+handler.getProperties().getPitch());
-		
 		
 		// als hoogte behaalt is en drone gestabiliseert is, volgend algoritme
 		if (Math.abs(height-handler.getProperties().getY()) < 1 && Math.abs(handler.getProperties().getPitch()) < 0.03 
-				&& Math.abs(deltaP) < 0.4 && Math.abs(deltaP) < 0.2) {
+				&& Math.abs(deltaP) < 0.4 && Math.abs(deltaH) < 0.2) {
 			handler.nextAlgorithm();
 		}
 		

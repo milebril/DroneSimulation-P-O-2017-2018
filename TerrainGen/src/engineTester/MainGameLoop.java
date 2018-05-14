@@ -239,12 +239,6 @@ public class MainGameLoop {
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -880)), 1));
 		
 		
-		// ***INITIALIZE CUBE PATH***
-		MyPath cubePath = new MyPath();
-		for (int i = 0; i<cubes.size(); i++) {
-			cubePath.addInaccurate(cubes.get(i).getPosition(), 5f);
-		}
-		
 		// ***INITIALIZE BUTTONS GUI***
 		List<GuiTexture> guis = new ArrayList<>();
 		GuiRenderer guiRenderer = new GuiRenderer(loader);

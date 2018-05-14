@@ -20,9 +20,9 @@ public class Aanloop implements Algorithm {
 		handler.setRightBrakeForce(0);
 		if (handler.getProperties().getVelocity().length() < this.snelheid) { // versnellen
 			handler.setThrust(handler.getProperties().getMaxThrust());
-		} else if (handler.getProperties().getY() < 5) {
-			handler.setLeftWingInclination((float) Math.toRadians(10)); 
-			handler.setRightWingInclination((float) Math.toRadians(10)); 
+		} else if (handler.getProperties().getY() < 8) {
+			handler.setLeftWingInclination((float) Math.toRadians(15)); 
+			handler.setRightWingInclination((float) Math.toRadians(15)); 
 		} else {
 			handler.nextAlgorithm();
 		}
