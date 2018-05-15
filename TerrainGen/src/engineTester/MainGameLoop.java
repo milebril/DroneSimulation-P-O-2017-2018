@@ -181,12 +181,12 @@ public class MainGameLoop {
 //		}
 		
 		module.defineAirport(0, 0, 20, 20);
-		module.defineAirport(0, -400, 1, 50);
-		module.defineAirport(0, -100, 50, 50);
-		module.defineAirport(0, -200, 50, 50);
-		for (int i = 0; i < 10; i++) {
-			module.defineDrone(2, 1, 1, autopilotConfig);
-		}
+//		module.defineAirport(0, -400, 1, 50);
+//		module.defineAirport(0, -100, 50, 50);
+//		module.defineAirport(0, -200, 50, 50);
+//		for (int i = 0; i < 10; i++) {
+			module.defineDrone(0, 1, 1, autopilotConfig);
+		//}
 		//module.defineDrone(2, 1, 1, autopilotConfig);
 		
 		//module.defineDrone(1, 0, 0, autopilotConfig);

@@ -67,10 +67,10 @@ public class Module implements AutopilotModule {
 				new ModelTexture(loader.loadTexture("untitled")));
 		Random r = new Random();
 		int droneId = getTestbed().getNextDroneID();
-		int x = r.nextInt(2000);
-		int z = r.nextInt(2000);
-//		int x = 0;
-//		int z = 0;
+//		int x = r.nextInt(2000);
+//		int z = r.nextInt(2000);
+		int x = 0;
+		int z = 0;
 		Drone drone = new Drone(staticDroneModel,
 				luchthaven.getDronePosition(gate, config).translate(new Vector3f(x, 0, z)), 1f, config,
 				new EulerPrediction(STEP_TIME),droneId,"Drone: " + droneId);
