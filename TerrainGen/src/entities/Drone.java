@@ -34,10 +34,6 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 				AutopilotConfig cfg, PredictionMethod predictionMethod) {
 		super(model, pose, scale);
 		
-		/* INITIALIZE AUTOPILOT */
-		setAutopilot(AutopilotFactory.createAutopilot());
-		getAutopilot().simulationStarted(cfg, getAutoPilotInputs());
-		
 		this.linearVelocityW = new Vector3f(0.0f,0.0f, -30.0f);
 
 		this.angularVelocityW = new Vector3f(0f, 0f, 0f);
@@ -89,6 +85,10 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		tyres[0] = new Tyre(this, new Vector3f(0, cfg.getWheelY(), cfg.getFrontWheelZ()), cfg.getTyreRadius(), cfg.getRMax(), cfg.getFcMax(), cfg.getTyreSlope(), cfg.getDampSlope());
 		tyres[1] = new Tyre(this, new Vector3f(-cfg.getRearWheelX(), cfg.getWheelY(), cfg.getRearWheelZ()), cfg.getTyreRadius(), cfg.getRMax(), cfg.getFcMax(), cfg.getTyreSlope(), cfg.getDampSlope());
 		tyres[2] = new Tyre(this, new Vector3f(cfg.getRearWheelX(), cfg.getWheelY(), cfg.getRearWheelZ()), cfg.getTyreRadius(), cfg.getRMax(), cfg.getFcMax(), cfg.getTyreSlope(), cfg.getDampSlope());
+		
+		/* INITIALIZE AUTOPILOT */
+		setAutopilot(AutopilotFactory.createAutopilot());
+		getAutopilot().simulationStarted(cfg, getAutoPilotInputs());
 	}
 	
 	public Drone(Matrix4f pose, AutopilotConfig autopilotConfig, Vector3f velocity, Vector3f rotVel) {
@@ -534,6 +534,10 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 		return this.camera;
 	}
 	
+	public void setCamera(Camera camera) {
+		this.camera = camera;
+	}
+	
 	/**
 	 * Set the roll of the Drones camera.
 	 */
@@ -557,7 +561,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	public AutopilotInputs getAutoPilotInputs() {
 		// TODO: nullpointer fixen:
 		// byte[] image = camera.takeByteArraySnapshot();
-		byte[] image = null;
+		System.out.println(camera);
 		
 		return new AutopilotInputs() {
 			public byte[] getImage() { return camera.takeByteArraySnapshot();} //TODO: is null zetten hier voldoende?
@@ -687,9 +691,5 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 
 		Vector3f headingVector = this.getHeadingVector(); 
 		return (float) Math.atan2(-headingVector.x, - headingVector.z);
-	}
-
-	public void setCamera(Camera camera) {
-		this.camera = camera;
 	}
 }

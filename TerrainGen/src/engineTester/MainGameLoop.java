@@ -156,14 +156,22 @@ public class MainGameLoop {
 		RawModel droneModel = OBJLoader.loadObjModel("untitled5", loader);
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,
 				new ModelTexture(loader.loadTexture("untitled")));
-		
-		Drone droneOne = new Drone(staticDroneModel,
-				new Matrix4f().translate(new Vector3f(0, (int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius(), 0)),
+
+		Drone droneOne = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0,
+				(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius(), 0)),
 				1f, autopilotConfig, new EulerPrediction(STEP_TIME));
 
 		activeDrone = droneOne;
 		entities.add(droneOne);
 		drones.add(droneOne);
+
+		Camera camera = new Camera(200, 200);
+		camera.setPosition(activeDrone.getPosition().translate(0, 0, 0));
+		renderer = new MasterRenderer();
+
+		drones.get(0).setCamera(camera);
+		System.out.println("HIERRRR");
+		System.out.println(activeDrone.getCamera());
 
 		// ***INITIALIZE CHASE-CAM***
 		chaseCam = new Camera();
@@ -203,10 +211,9 @@ public class MainGameLoop {
 		GUIText textVertStab = new GUIText("Vertical stabilizer inclination = " + vertStab + "rad", 1, font,
 				new Vector2f(0, 0.25f), 1f, false);
 		textVertStab.setColour(1, 0, 0);
-		
+
 		String thrust = String.valueOf(activeDrone.getThrustForce());
-		GUIText textThrust = new GUIText("Thrust = " + thrust + "rad", 1, font,
-				new Vector2f(0, 0.30f), 1f, false);
+		GUIText textThrust = new GUIText("Thrust = " + thrust + "rad", 1, font, new Vector2f(0, 0.30f), 1f, false);
 		textThrust.setColour(1, 0, 0);
 
 		light = new Light(new Vector3f(20000, 20000, 2000), new Vector3f(1, 1, 1));
@@ -216,12 +223,6 @@ public class MainGameLoop {
 		terrains.add(new Terrain(0, 0, loader, new ModelTexture(loader.loadTexture("checker"))));
 		terrains.add(new Terrain(-1, 0, loader, new ModelTexture(loader.loadTexture("checker"))));
 		terrains.add(new LandingStrip(-0.5f, -1, loader, new ModelTexture(loader.loadTexture("landing"))));
-
-		Camera camera = new Camera(200, 200);
-		camera.setPosition(activeDrone.getPosition().translate(0, 0, 0));
-		renderer = new MasterRenderer();
-		
-		activeDrone.setCamera(camera);
 
 		// Cube Render
 		cubeShader = new CubeShader();
@@ -240,12 +241,17 @@ public class MainGameLoop {
 		RawCubeModel cube5 = loader.loadToVAO(c5.positions, c5.colors);
 		RawCubeModel cube6 = loader.loadToVAO(c6.positions, c6.colors);
 		cubes.add(new Entity(cube1, new Matrix4f().translate(new Vector3f(0, 30, -400)), 1));
-		//cubes.add(new Entity(cube2, new Matrix4f().translate(new Vector3f(0, 30, -400)), 1));
-		//cubes.add(new Entity(cube3, new Matrix4f().translate(new Vector3f(0, 30, -400)), 1));
-		//cubes.add(new Entity(cube4, new Matrix4f().translate(new Vector3f(0, 30, -400)), 1));
-		//cubes.add(new Entity(cube5, new Matrix4f().translate(new Vector3f(0, 30, -400)), 1));
-		//cubes.add(new Entity(cube6, new Matrix4f().translate(new Vector3f(0, 30, -400)), 1));
-		
+		// cubes.add(new Entity(cube2, new Matrix4f().translate(new Vector3f(0, 30,
+		// -400)), 1));
+		// cubes.add(new Entity(cube3, new Matrix4f().translate(new Vector3f(0, 30,
+		// -400)), 1));
+		// cubes.add(new Entity(cube4, new Matrix4f().translate(new Vector3f(0, 30,
+		// -400)), 1));
+		// cubes.add(new Entity(cube5, new Matrix4f().translate(new Vector3f(0, 30,
+		// -400)), 1));
+		// cubes.add(new Entity(cube6, new Matrix4f().translate(new Vector3f(0, 30,
+		// -400)), 1));
+
 		// ***INITIALIZE BUTTONS GUI***
 		List<GuiTexture> guis = new ArrayList<>();
 		GuiRenderer guiRenderer = new GuiRenderer(loader);
@@ -310,22 +316,26 @@ public class MainGameLoop {
 				textPosition.setString("Position = (" + xpos + " , " + ypos + " , " + zpos + ")");
 				TextMaster.loadText(textPosition);
 
-				leftWingInc = String.valueOf(Math.round(activeDrone.getLeftWing().getInclination() * 10000.0) / 10000.0);
+				leftWingInc = String
+						.valueOf(Math.round(activeDrone.getLeftWing().getInclination() * 10000.0) / 10000.0);
 				textLeftWing.setString("Left wing inclination = " + leftWingInc + "rad");
 				TextMaster.loadText(textLeftWing);
 
-				rightWingInc = String.valueOf(Math.round(activeDrone.getRightWing().getInclination() * 10000.0) / 10000.0);
+				rightWingInc = String
+						.valueOf(Math.round(activeDrone.getRightWing().getInclination() * 10000.0) / 10000.0);
 				textRightWing.setString("Right wing inclination = " + rightWingInc + "rad");
 				TextMaster.loadText(textRightWing);
 
-				horzStab = String.valueOf(Math.round(activeDrone.getHorStabilizer().getInclination() * 10000.0) / 10000.0);
+				horzStab = String
+						.valueOf(Math.round(activeDrone.getHorStabilizer().getInclination() * 10000.0) / 10000.0);
 				textHorzStab.setString("Horizontal stabilizer inclination = " + horzStab + "rad");
 				TextMaster.loadText(textHorzStab);
 
-				vertStab = String.valueOf(Math.round(activeDrone.getVertStabilizer().getInclination() * 10000.0) / 10000.0);
+				vertStab = String
+						.valueOf(Math.round(activeDrone.getVertStabilizer().getInclination() * 10000.0) / 10000.0);
 				textVertStab.setString("Vertical stabilizer inclination = " + vertStab + "rad");
 				TextMaster.loadText(textVertStab);
-				
+
 				thrust = String.valueOf(Math.round(activeDrone.getThrustForce() * 10.0) / 10.0);
 				textThrust.setString("Thrust = " + thrust);
 				TextMaster.loadText(textThrust);
@@ -345,65 +355,28 @@ public class MainGameLoop {
 			// ***UPDATES***
 			float dt = DisplayManager.getFrameTimeSeconds();
 			if (!entities.isEmpty() && dt > 0.00001) {
-
-				// De lijst waarin alle threads gestoken worden om later te checken of ze klaar
-				// zijn.
-				ArrayList<Future<?>> futureList = new ArrayList<Future<?>>();
-
 				// Maak een thread aan voor elke drone
 				for (Drone d : drones) {
-					Runnable toRun = new Runnable() {
-						@Override
-						public void run() {
+					// fysica toepassen
+					// applyphysics rekent de krachten uit en gaat dan de kinematische waarden van
+					// de drone aanpassen op basis daarvan
+					try {
+						PhysicsEngine.applyPhysics(d, dt);
+					} catch (DroneCrashException e) {
+						System.err.println(e);
+						System.exit(-1);
+					} catch (MaxAoAException e) {
+						e.printStackTrace();
+						System.exit(-1);
 
-							// fysica toepassen
-							// applyphysics rekent de krachten uit en gaat dan de kinematische waarden van
-							// de drone aanpassen op basis daarvan
-							try {
-								PhysicsEngine.applyPhysics(d, dt);
-							} catch (DroneCrashException e) {
-								System.err.println(e);
-								System.exit(-1);
-							} catch (MaxAoAException e) {
-								e.printStackTrace();
-								System.exit(-1);
-							}
-						}
-					};
-					Future<?> fut = pool.submit(toRun);
-					futureList.add(fut);
-				}
-				
-				// De code gaat niet verder totdat alle voordien aangemaakt threads klaar zijn
-				// future.get() -> Waits if necessary for the computation to complete, and then retrieves its result.
-				for(Future<?> fut : futureList) {
-					fut.get();
+					}
+					System.out.println("DIT");
+					System.out.println(d.getCamera());
+					AutopilotInputs inputs = d.getAutoPilotInputs();
+					AutopilotOutputs outputs = d.getAutopilot().timePassed(inputs);
+					d.setAutopilotOutputs(outputs);
 				}
 
-				ArrayList<Future<?>> futureList2 = new ArrayList<Future<?>>();
-
-				// Maak een thread aan voor elke drone
-				for (Drone d : drones) {
-					Runnable toRun = new Runnable() {
-						@Override
-						public void run() {
-							// Autopilot stuff
-							AutopilotInputs inputs = d.getAutoPilotInputs();
-							AutopilotOutputs outputs = d.getAutopilot().timePassed(inputs);
-							d.setAutopilotOutputs(outputs);
-						}
-					};
-
-					Future<?> fut = pool.submit(toRun);
-					futureList2.add(fut);
-	
-				}
-
-				// De code gaat niet verder totdat alle voordien aangemaakt threads klaar zijn
-				// future.get() -> Waits if necessary for the computation to complete, and then retrieves its result.
-				for(Future<?> fut : futureList2) {
-					fut.get();
-				}
 			}
 
 			keyInputs();
@@ -468,7 +441,7 @@ public class MainGameLoop {
 			}
 			sLock = true;
 		} else if (Keyboard.isKeyDown(Keyboard.KEY_R)) {
-			
+
 		} else if (Keyboard.isKeyDown(Keyboard.KEY_M)) {
 			if (!mLock) {
 				if (currentView == ViewEnum.MAIN) {
