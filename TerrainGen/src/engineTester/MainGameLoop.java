@@ -93,15 +93,11 @@ public class MainGameLoop {
 	private static Drone activeDrone;
 
 	// Entities lists
-	private static List<Entity> entities;
 	private static List<Terrain> terrains;
 	private static List<Entity> cubes;
 
 	// Loader
 	private static Loader loader;
-
-	// Autopilot
-	private static Autopilot autopilot;
 
 	// Camera Stuff
 	private static Camera chaseCam;
@@ -118,32 +114,10 @@ public class MainGameLoop {
 	// Lights
 	private static Light light;
 
-	// Buttons
-	private static Button openFile;
-	private static Button randomCubes;
-
 	// ViewEnum
 	private static ViewEnum currentView = ViewEnum.MAIN;
 
-	private static Airport a;
-	
-	// Module
-//	private static ArrayList<Drone> activeDrones = new ArrayList<Drone>();
-//	private static ArrayList<Drone> inactiveDrones = new ArrayList<Drone>();
-//	private static ArrayList<Airport> airports = new ArrayList<Airport>();
-//	
-//	public ArrayList<Airport> getAirports(){
-//		return this.airports;
-//	}
-//	
-//	public ArrayList<Drone> getInactiveDrones(){
-//		return this.activeDrones;
-//	}
-//	
-//	public ArrayList<Drone> getActiveDrones(){
-//		return this.inactiveDrones;
-//	}
-
+	//Module
 	private static Testbed testbed = new Testbed();
 	private static Module module = new Module(testbed);
 	
@@ -180,7 +154,6 @@ public class MainGameLoop {
 		DisplayManager.createDisplay();
 		loader = new Loader();
 		TextMaster.init(loader);
-		entities = new ArrayList<>();
 		terrains = new ArrayList<>();
 		cubes = new ArrayList<>();
 		module = new Module(testbed);
@@ -211,16 +184,20 @@ public class MainGameLoop {
 		module.defineAirport(0, -400, 1, 50);
 		module.defineAirport(0, -100, 50, 50);
 		module.defineAirport(0, -200, 50, 50);
-		module.defineDrone(2, 1, 1, autopilotConfig);
+		for (int i = 0; i < 10; i++) {
+			module.defineDrone(2, 1, 1, autopilotConfig);
+		}
+		//module.defineDrone(2, 1, 1, autopilotConfig);
+		
 		//module.defineDrone(1, 0, 0, autopilotConfig);
 		
-		ArrayList<Drone> drones = getDrones();
+		ArrayList<Drone> drones = getTestbed().getDrones();
 
 		
 		//Drone randomValue = testbed.getInactiveDrones().get(0);
 //		activeDrone = randomValue;
 		
-		activeDrone = testbed.getActiveDrones().get(0);
+		activeDrone = getTestbed().getActiveDrones().get(0);
 
 		// ***INITIALIZE CHASE-CAM***
 		chaseCam = new Camera();
@@ -248,15 +225,8 @@ public class MainGameLoop {
 
 		Cube c = new Cube(1, 0, 0);
 		RawCubeModel cube = loader.loadToVAO(c.positions, c.colors);
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 2, 0)), 1));
-//		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -560)), 1));
-//		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -640)), 1));
-//		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -720)), 1));
-//		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -800)), 1));
-//		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -880)), 1));
-
+		
 		// ***INITIALIZE BUTTONS GUI***
-		List<GuiTexture> guis = new ArrayList<>();
 		GuiRenderer guiRenderer = new GuiRenderer(loader);
 
 		BufferedImage i = null;
@@ -265,28 +235,20 @@ public class MainGameLoop {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-		float s = (60 / i.getHeight());
-		s = 0.01f;
-
-//		a = new Airport(0, 0, 0, "block");
-//		Airport a2 = new Airport(1500, 1500, 2, "");
-//		airports.add(a);
-//		airports.add(a2);
 		
 		miniMap = new MiniMap();
 		droneList = new DroneList(drones);
-		
 
 		while (!Display.isCloseRequested()) {
 			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
 				//camera.takeSnapshot();
 			}
 
-			drones = getDrones();
+			drones = getTestbed().getDrones();
 
 			switch (currentView) {
 			case MINIMAP:
-				miniMap.render(drones, getAirports(), guiRenderer, loader);
+				miniMap.render(drones, getTestbed().getAirports(), guiRenderer, loader);
 				break;
 			case MAIN:
 				// CAMERA VIEW
@@ -340,7 +302,7 @@ public class MainGameLoop {
 				ArrayList<Future<?>> futureList = new ArrayList<Future<?>>();
 
 				// Maak een thread aan voor elke drone
-				for (Drone d : testbed.getActiveDrones()) {
+				for (Drone d : getTestbed().getActiveDrones()) {
 					Runnable toRun = new Runnable() {
 						@Override
 						public void run() {
@@ -373,7 +335,7 @@ public class MainGameLoop {
 
 				ArrayList<Future<?>> futureList2 = new ArrayList<Future<?>>();
 				// Maak een thread aan voor elke drone
-				for (Drone d : testbed.getActiveDrones()) {
+				for (Drone d : getTestbed().getActiveDrones()) {
 					Runnable toRun = new Runnable() {
 						@Override
 						public void run() {
@@ -428,12 +390,12 @@ public class MainGameLoop {
 //					renderer.processEntity(entity);
 //		}
 		
-		for (Drone d : getDrones()) {
+		for (Drone d : getTestbed().getDrones()) {
 			renderer.processEntity(d);
 		}
 			
 		
-		for(Airport a: testbed.getAirports()) {
+		for(Airport a: getTestbed().getAirports()) {
 			a.render(renderer, chaseCam, light);
 		}
 		renderer.render(light, camera);
@@ -503,7 +465,22 @@ public class MainGameLoop {
 		}
 
 		if (chaseCameraLocked) {
-			Vector3f.add(activeDrone.getPosition(), new Vector3f(0, 0, 30), chaseCam.getPosition());
+			float one = Math.abs((float) (Math.cos(activeDrone.getHeadingFloat()) * 30));
+			float two = Math.abs((float) (Math.sin(activeDrone.getHeadingFloat()) * 30));
+			
+			if (activeDrone.getHeadingFloat() > 0) {
+				if (activeDrone.getHeadingFloat() > Math.PI/2) {
+					one = -one;
+				}
+				Vector3f.add(activeDrone.getPosition(), new Vector3f(two, 0, one), chaseCam.getPosition());
+			} else {
+				if (activeDrone.getHeadingFloat() < -Math.PI/2) {
+					one = -one;
+				}
+				Vector3f.add(activeDrone.getPosition(), new Vector3f(-two, 0, one), chaseCam.getPosition());
+			}
+			
+			chaseCam.setPitch(-activeDrone.getHeadingFloat());
 		} else {
 			chaseCam.roam();
 		}
@@ -514,19 +491,9 @@ public class MainGameLoop {
 	public static void setActiveDrone(Drone drone) {
 		activeDrone = drone;
 	}
-	
-	public static ArrayList<Drone> getDrones(){
-		ArrayList<Drone> d = new ArrayList<Drone>();
-		d.addAll(testbed.getActiveDrones());
-		d.addAll(testbed.getInactiveDrones());
-		return d;
-	}
-	
-	public static ArrayList<Airport> getAirports(){
-		ArrayList<Airport> a = new ArrayList<Airport>();
-		a.addAll(testbed.getAirports());
-		return a;
-		
+
+	public static Testbed getTestbed() {
+		return testbed;
 	}
 }
 	

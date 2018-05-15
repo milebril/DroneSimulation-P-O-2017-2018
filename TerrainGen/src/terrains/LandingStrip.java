@@ -40,7 +40,7 @@ public class LandingStrip extends Terrain{
 			SIZE = 100;
 			SIZE_X = 830;
 		} else {
-			SIZE = 400;
+			SIZE = 830;
 			SIZE_X = 100;
 		}
 	}

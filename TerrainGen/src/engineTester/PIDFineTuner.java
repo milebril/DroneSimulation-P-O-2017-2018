@@ -74,7 +74,7 @@ public class PIDFineTuner {
         System.out.println((int)PhysicsEngine.groundLevel -autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius());
 		for (int i = 0; i < DRONE_COUNT; i++) {
 			Drone drone = new Drone(null, new Matrix4f().translate(new Vector3f(0, (int)PhysicsEngine.groundLevel -autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius(), 0)), 1,
-					autopilotConfig, new EulerPrediction(STEP_TIME));
+					autopilotConfig, new EulerPrediction(STEP_TIME), i, "Drone " + i);
 			Autopilot autopilot = AutopilotFactory.createAutopilot();
 			autopilot.simulationStarted(autopilotConfig, drone.getAutoPilotInputs());
 			System.out.println("New AP: PID = " + ((SimpleAutopilot) autopilot).p + " " +

@@ -14,23 +14,29 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	
 	// Constructor
 	
+	public boolean crashed = false;
+	
+	private long time;
+	private float startZ;
+	public long timeToLand;
+	public float lengthToLand;
+	private float groundTouchStart;
+	public float groundLength; 
+
 	public AutopilotAlain(Algorithm startingAlgorithm) {
 		setAlgorithm(startingAlgorithm);
 	}
 	
 	public AutopilotAlain() {
-		
 		// add algorithms in order
-		addAlgorithm(new Aanloop(50f));
+		addAlgorithm(new Aanloop(34f, 15f));
 		addAlgorithm(new FlyToHeight(20f));
-		addAlgorithm(new FlyToHeight(5f));
+//		addAlgorithm(new FlyToHeight(10f));
 		addAlgorithm(new Land());
-		
 		
 		// start 1st algorithm
 		nextAlgorithm();
 	}
-	
 	
 	private LinkedList<Algorithm> algorithmList = new LinkedList<Algorithm>();
 	
@@ -45,8 +51,14 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 			setAlgorithm(new VliegRechtdoor());
 		}
 		
-		if (getAlgorithm() == null)
+		if (algorithm instanceof Land) {
+			startZ = getProperties().getPosition().z;
+			time = System.currentTimeMillis();
+		}
+		
+		if (getAlgorithm() == null) {
 			setAlgorithm(new VliegRechtdoor());
+		}
 	}
 	
 	// AlgorithmHandler interface
@@ -123,6 +135,7 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	}
 
 	private float rightBrakeForce = 0;
+	public float lenghtOnGround;
 	public float getRightBrakeForce() {
 		return rightBrakeForce;
 	}
@@ -148,9 +161,12 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
 		// update Properties
 		getProperties().update(inputs);
-		System.out.println("Hierss");
 		// run 1 cycle of the current algorithm
 		getAlgorithm().cycle(this);
+		
+		if (getProperties().getPosition().getY() < 2.5f && groundTouchStart == 0) {
+			groundTouchStart = getProperties().getPosition().getZ();
+		}
 		
 		return this;
 	}
@@ -162,6 +178,7 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	// Properties
 	
 	private Properties properties;
+	
 	public Properties getProperties() {
 		return this.properties;
 	}
@@ -174,8 +191,15 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 		getAlgorithm().cycle(this);
 		return this;
 	}
-		
-	
-	
-	
+
+	public boolean isFinished() {
+		if (algorithm instanceof VliegRechtdoor) {
+			timeToLand = System.currentTimeMillis() - time;
+			lengthToLand = Math.abs(getProperties().getPosition().z - startZ);
+			groundLength = Math.abs(getProperties().getPosition().z - groundTouchStart);
+			return true;
+		} else {
+			return false;
+		}
+	}
 }

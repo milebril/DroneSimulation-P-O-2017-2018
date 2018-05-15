@@ -31,6 +31,8 @@ public class DroneList extends JFrame {
 	private JLabel lblAngularSpeed;
 	private JLabel lblApState;
 	private JLabel lblHoldingPackage;
+	private JLabel lblLeftrightInclination;
+	private JLabel lblHorverIncldegr;
 
 	/**
 	 * Create the frame.
@@ -76,15 +78,15 @@ public class DroneList extends JFrame {
 		});
 		btnChoose.setBounds(134, 6, 117, 29);
 		contentPane.add(btnChoose);
-		
+
 		lblApState = new JLabel("AP State");
 		lblApState.setBounds(6, 294, 261, 16);
 		contentPane.add(lblApState);
-		
+
 		lblHoldingPackage = new JLabel("Holding Package");
 		lblHoldingPackage.setBounds(6, 322, 261, 16);
 		contentPane.add(lblHoldingPackage);
-		
+
 		JButton btnTopDown = new JButton("TOP DOWN");
 		btnTopDown.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -93,7 +95,7 @@ public class DroneList extends JFrame {
 		});
 		btnTopDown.setBounds(134, 47, 117, 29);
 		contentPane.add(btnTopDown);
-		
+
 		JButton btnLeftSide = new JButton("LEFT SIDE");
 		btnLeftSide.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -102,7 +104,7 @@ public class DroneList extends JFrame {
 		});
 		btnLeftSide.setBounds(134, 88, 117, 29);
 		contentPane.add(btnLeftSide);
-		
+
 		JButton btnRightSide = new JButton("RIGHT SIDE");
 		btnRightSide.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -111,6 +113,14 @@ public class DroneList extends JFrame {
 		});
 		btnRightSide.setBounds(134, 129, 117, 29);
 		contentPane.add(btnRightSide);
+
+		lblLeftrightInclination = new JLabel("Left/Right Incl (degr):");
+		lblLeftrightInclination.setBounds(6, 350, 283, 16);
+		contentPane.add(lblLeftrightInclination);
+
+		lblHorverIncldegr = new JLabel("Hor/Ver Incl (degr):");
+		lblHorverIncldegr.setBounds(6, 378, 283, 16);
+		contentPane.add(lblHorverIncldegr);
 	}
 
 	public void updateLabels(Drone drone) {
@@ -120,11 +130,19 @@ public class DroneList extends JFrame {
 		lblSpeed.setText("Speed: (" + (float) Math.round(drone.getLinearVelocity().x * 100) / 100 + ", "
 				+ (float) Math.round(drone.getLinearVelocity().y * 100) / 100 + ", "
 				+ (float) Math.round(drone.getLinearVelocity().z * 100) / 100 + ")");
-		lblAngularSpeed.setText("Angular Velocity: (" + (float) Math.round(drone.getAngularVelocity().x * 100) / 100 + ", "
-				+ (float) Math.round(drone.getAngularVelocity().y * 100) / 100 + ", "
+		lblAngularSpeed.setText("Angular Velocity: (" + (float) Math.round(drone.getAngularVelocity().x * 100) / 100
+				+ ", " + (float) Math.round(drone.getAngularVelocity().y * 100) / 100 + ", "
 				+ (float) Math.round(drone.getAngularVelocity().z * 100) / 100 + ")");
-		
-		//lblApState.setText("AP State : " + ((AlgorithmHandler) drone.getAutopilot()).getAlgorithmName()); 
+
+		lblApState.setText("AP State : " + ((AlgorithmHandler) drone.getAutopilot()).getAlgorithmName());
 		lblHoldingPackage.setText("Holding Package: False");
+
+		lblLeftrightInclination.setText("Left/Right Incl (degr): "
+				+ (float) Math.round(Math.toDegrees(drone.getLeftWing().getInclination() * 100) / 100) + "/"
+				+ (float) Math.round(Math.toDegrees(drone.getRightWing().getInclination() * 100) / 100));
+	
+		lblHorverIncldegr.setText("Hor/Ver Incl (degr): "
+				+ (float) Math.round(Math.toDegrees(drone.getHorStabilizer().getInclination() * 100) / 100) + "/"
+				+ (float) Math.round(Math.toDegrees(drone.getVertStabilizer().getInclination() * 100) / 100));
 	}
 }

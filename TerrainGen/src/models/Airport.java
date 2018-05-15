@@ -59,7 +59,7 @@ public class Airport {
 			rightGate = new Gate(staticGateModel, new Matrix4f().translate(new Vector3f(x + 40, 1, z)), 1, airportId, 1);
 			
 			landingStrip = new LandingStrip(x - 30, z - 400, loader, new ModelTexture(loader.loadTexture("landing")), airportId, 0, false);
-			landingStrip2 = new LandingStrip(x - 30, z, loader, new ModelTexture(loader.loadTexture("landing")),airportId, 1, false);
+			landingStrip2 = new LandingStrip(x - 30, z - 400, loader, new ModelTexture(loader.loadTexture("landing")),airportId, 1, false);
 		}
 		
 		rotated = (rotation.equals("block")) ? true : false;
@@ -67,7 +67,7 @@ public class Airport {
 	}
 
 	public void render(MasterRenderer renderer, Camera camera, Light light) {
-		renderer.processTerrain(landingStrip);
+		//renderer.processTerrain(landingStrip);
 		renderer.processTerrain(landingStrip2);
 		renderer.processEntity(leftGate);
 		renderer.processEntity(rightGate);
