@@ -224,6 +224,8 @@ public class MainGameLoop {
 		Camera camera = new Camera(200, 200);
 		camera.setPosition(activeDrone.getPosition().translate(0, 0, 0));
 		renderer = new MasterRenderer();
+		
+		activeDrone.setCamera(camera);
 
 		// Cube Render
 		cubeShader = new CubeShader();
@@ -238,18 +240,11 @@ public class MainGameLoop {
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -800)), 1));
 		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -880)), 1));
 		
-		
 		// ***INITIALIZE BUTTONS GUI***
 		List<GuiTexture> guis = new ArrayList<>();
 		GuiRenderer guiRenderer = new GuiRenderer(loader);
 
 		List<GuiTexture> droneTextures = new ArrayList<>();
-
-		createOpenFileButton();
-		openFile.show(guis);
-
-		createRandomCubeButton();
-		randomCubes.show(guis);
 
 		BufferedImage i = null;
 		try {
@@ -338,8 +333,6 @@ public class MainGameLoop {
 				GL11.glEnable(GL11.GL_SCISSOR_TEST);
 
 				guiRenderer.render(guis);
-				openFile.checkHover();
-				randomCubes.checkHover();
 				break;
 			}
 
@@ -469,7 +462,7 @@ public class MainGameLoop {
 			}
 			sLock = true;
 		} else if (Keyboard.isKeyDown(Keyboard.KEY_R)) {
-			reset();
+			
 		} else if (Keyboard.isKeyDown(Keyboard.KEY_M)) {
 			if (!mLock) {
 				if (currentView == ViewEnum.MAIN) {
@@ -504,187 +497,5 @@ public class MainGameLoop {
 		}
 		lLock = false;
 		sLock = false;
-	}
-
-	private static void reset() {
-		// Reset Cubes & Display
-		generateRandomCubes();
-		// DisplayManager.reset();
-
-		// Reset Cameras
-		chaseCameraLocked = true;
-		// viewState = ViewStates.CHASE;
-
-		entities.remove(activeDrone);
-		RawModel droneModel = OBJLoader.loadObjModel("untitled5", loader);
-		TexturedModel staticDroneModel = new TexturedModel(droneModel,
-				new ModelTexture(loader.loadTexture("untitled")));
-		activeDrone = new Drone(staticDroneModel, new Matrix4f().translate(new Vector3f(0,
-				(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius(), 0)),
-				1f, autopilotConfig, new EulerPrediction(STEP_TIME));
-		// drone.getPose().rotate((float) -(Math.PI/2), new Vector3f(1,0,0));
-		entities.add(activeDrone);
-
-		// Reset AP
-		autopilot = AutopilotFactory.createAutopilot();
-		autopilot.simulationStarted(autopilotConfig, activeDrone.getAutoPilotInputs());
-	}
-
-	public static void generateRandomCubes() {
-		Random r = new Random();
-		cubes = new ArrayList<>();
-
-		float prevX = 0.0f;
-		float prevY = 0.0f;
-
-		for (int i = 1; i <= 5; i++) {
-			Cube c = null;
-
-			switch (i) {
-			case 1:
-				c = new Cube(1, 0, 0);
-				break;
-			case 2:
-				c = new Cube(0, 1, 0);
-				break;
-			case 3:
-				c = new Cube(1, 0, 0);
-				break;
-			case 4:
-				c = new Cube(1, 1, 0);
-				break;
-			case 5:
-				c = new Cube(0, 1, 1);
-				break;
-			default:
-				break;
-			}
-
-			RawCubeModel model = loader.loadToVAO(c.positions, c.colors);
-			float x = r.nextFloat() * 20 - 10;
-			x = 0;
-			float y = ((float) r.nextInt(20));
-			float z = i * -40;
-			Vector3f position = new Vector3f(x, y, z);
-
-			while (Math.sqrt(Math.pow(x - prevX, 2) + Math.pow(y - prevY, 2)) > 10) {
-				x = r.nextFloat() * 20 - 10;
-				// x = 0;
-				y = ((float) r.nextInt(1000) / 500 - 1) * 10;
-			}
-
-			prevX = x;
-			prevY = y;
-
-			cubes.add(new Entity(model, new Matrix4f().translate(position), 1));
-		}
-
-	}
-
-	private static void createOpenFileButton() {
-		JFileChooser fc = new JFileChooser();
-		float normalizedX = -1.0f + 2.0f * (float) 1200 / (float) Display.getWidth();
-		float normalizedY = 1.0f - 2.0f * (float) 20 / (float) Display.getHeight();
-
-		System.out.println(new Vector2f(normalizedX, normalizedY));
-
-		openFile = new Button(loader, "openfile", new Vector2f(normalizedX, normalizedY), new Vector2f(0.05f, 0.05f)) {
-			@Override
-			public void whileHover() {
-			}
-
-			@Override
-			public void stopHover() {
-				this.setScale(new Vector2f(0.05f, 0.05f));
-			}
-
-			@Override
-			public void startHover() {
-				this.playHoverAnimation(0.01f);
-			}
-
-			@Override
-			public void onClick() {
-				this.playerClickAnimation(0.02f);
-
-				int returnVal = fc.showOpenDialog(null);
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					File file = fc.getSelectedFile();
-					// Read file and load cubes
-					loadCubes(file);
-				} else {
-					System.out.println("Open command cancelled by user.");
-				}
-			}
-		};
-	}
-
-	private static void createRandomCubeButton() {
-		randomCubes = new Button(loader, "random", new Vector2f(0.9f, 0.75f), new Vector2f(0.05f, 0.05f)) {
-			@Override
-			public void whileHover() {
-			}
-
-			@Override
-			public void stopHover() {
-			}
-
-			@Override
-			public void startHover() {
-			}
-
-			@Override
-			public void onClick() {
-				generateRandomCubes();
-			}
-		};
-	}
-
-	public static void loadCubes(File file) {
-		// reset entities first
-		cubes = new ArrayList<>();
-
-		int count = 0;
-
-		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-			for (String line; (line = br.readLine()) != null;) {
-				String[] s = line.split(" ");
-				float x = Float.parseFloat(s[0]);
-				float y = Float.parseFloat(s[1]);
-				float z = Float.parseFloat(s[2]);
-
-				Cube c = null;
-
-				switch (count) {
-				case 0:
-					c = new Cube(1, 0, 0);
-					break;
-				case 1:
-					c = new Cube(0, 1, 0);
-					break;
-				case 2:
-					c = new Cube(1, 0, 1);
-					break;
-				case 3:
-					c = new Cube(1, 1, 0);
-					break;
-				case 4:
-					c = new Cube(0, 1, 1);
-					break;
-				default:
-					break;
-				}
-				count++;
-
-				RawCubeModel model = loader.loadToVAO(c.positions, c.colors);
-
-				cubes.add(new Entity(model, new Matrix4f().translate(new Vector3f(x, y, z)), 1));
-			}
-			// line is not visible here.
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 }

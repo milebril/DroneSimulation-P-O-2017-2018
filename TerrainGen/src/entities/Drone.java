@@ -557,7 +557,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	public AutopilotInputs getAutoPilotInputs() {
 
 		return new AutopilotInputs() {
-			public byte[] getImage() { return null;} //TODO: is null zetten hier voldoende?
+			public byte[] getImage() { return camera.takeByteArraySnapshot();} //TODO: is null zetten hier voldoende?
 			
 			public float getX() { return getPosition().x; }
 			public float getY() { return getPosition().y; }
@@ -684,5 +684,9 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 
 		Vector3f headingVector = this.getHeadingVector(); 
 		return (float) Math.atan2(-headingVector.x, - headingVector.z);
+	}
+
+	public void setCamera(Camera camera) {
+		this.camera = camera;
 	}
 }
