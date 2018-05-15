@@ -3,7 +3,7 @@ package autopilot.interfaces.path;
 import java.util.LinkedList;
 import org.lwjgl.util.vector.Vector3f;
 
-import autopilot.interfaces.Path;
+import interfaces.Path;
 
 public class MyPath extends LinkedList<Vector3f> implements Path {
 	

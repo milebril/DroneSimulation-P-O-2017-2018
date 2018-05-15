@@ -4,8 +4,8 @@ import org.lwjgl.util.vector.Vector3f;
 
 import autopilot.PID;
 import autopilot.algorithmHandler.AlgorithmHandler;
-import autopilot.interfaces.Path;
 import autopilot.interfaces.path.VectorPath;
+import interfaces.Path;
 
 public class PathFinder implements Algorithm {
 	
@@ -60,7 +60,7 @@ public class PathFinder implements Algorithm {
 			
 			//System.out.println("pitch: " + Math.round((handler.getProperties().getPitch()) * 10.0) / 10.0 + " (error: " +  Math.round((handler.getProperties().getPitch() - pitch) * 10.0) / 10.0 + ")");
 			//System.out.println("PID feedback: " + feedback);
-			//System.out.println("-> new angle: " + Math.round((180 / Math.PI * feedback) * 10.0) / 10.0 + "°");
+			//System.out.println("-> new angle: " + Math.round((180 / Math.PI * feedback) * 10.0) / 10.0 + "ï¿½");
 			//System.out.println();
 			handler.setHorStabInclination(feedback);
 			

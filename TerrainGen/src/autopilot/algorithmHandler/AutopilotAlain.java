@@ -4,11 +4,11 @@ import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
 import autopilot.algorithms.*;
-import autopilot.interfaces.Autopilot;
-import autopilot.interfaces.AutopilotConfig;
-import autopilot.interfaces.AutopilotInputs;
-import autopilot.interfaces.AutopilotOutputs;
 import autopilot.interfaces.path.MyPath;
+import interfaces.Autopilot;
+import interfaces.AutopilotConfig;
+import interfaces.AutopilotInputs;
+import interfaces.AutopilotOutputs;
 
 public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	

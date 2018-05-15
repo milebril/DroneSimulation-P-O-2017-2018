@@ -7,11 +7,11 @@ import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
-import autopilot.interfaces.Autopilot;
-import autopilot.interfaces.AutopilotConfig;
-import autopilot.interfaces.AutopilotFactory;
-import autopilot.interfaces.AutopilotInputs;
-import autopilot.interfaces.AutopilotOutputs;
+import interfaces.Autopilot;
+import interfaces.AutopilotConfig;
+import interfaces.AutopilotFactory;
+import interfaces.AutopilotInputs;
+import interfaces.AutopilotOutputs;
 import models.RawModel;
 import models.TexturedModel;
 import physicsEngine.approximationMethods.EulerPrediction;

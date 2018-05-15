@@ -9,8 +9,8 @@ import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
-import autopilot.interfaces.AutopilotConfig;
-import autopilot.interfaces.AutopilotInputs;
+import interfaces.AutopilotConfig;
+import interfaces.AutopilotInputs;
 
 public class Properties implements AutopilotConfig, AutopilotInputs {
 	

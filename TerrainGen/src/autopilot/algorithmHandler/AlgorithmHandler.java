@@ -1,7 +1,7 @@
 package autopilot.algorithmHandler;
 
 import autopilot.algorithms.Algorithm;
-import autopilot.interfaces.AutopilotOutputs;
+import interfaces.AutopilotOutputs;
 
 public interface AlgorithmHandler extends AutopilotOutputs {
 	

@@ -1,4 +1,4 @@
-package autopilot.interfaces;
+package interfaces;
 
 import autopilot.algorithmHandler.AutopilotAlain;
 import prevAutopilot.SimpleAutopilot;

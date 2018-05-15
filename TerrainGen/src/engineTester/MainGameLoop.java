@@ -41,12 +41,6 @@ import org.lwjgl.util.vector.Vector3f;
 import org.newdawn.slick.TrueTypeFont;
 import org.opencv.core.Core;
 
-import autopilot.interfaces.Autopilot;
-import autopilot.interfaces.AutopilotConfig;
-import autopilot.interfaces.AutopilotFactory;
-import autopilot.interfaces.AutopilotInputs;
-import autopilot.interfaces.AutopilotOutputs;
-import autopilot.interfaces.Path;
 import autopilot.interfaces.config.AutopilotConfigReader;
 import autopilot.interfaces.path.MyPath;
 import renderEngine.CubeRenderer;
@@ -72,6 +66,12 @@ import fontRendering.TextMaster;
 import guis.Button;
 import guis.GuiRenderer;
 import guis.GuiTexture;
+import interfaces.Autopilot;
+import interfaces.AutopilotConfig;
+import interfaces.AutopilotFactory;
+import interfaces.AutopilotInputs;
+import interfaces.AutopilotOutputs;
+import interfaces.Path;
 
 public class MainGameLoop {
 

@@ -1,6 +1,6 @@
 package autopilot.interfaces.config;
 
-import autopilot.interfaces.AutopilotConfig;
+import interfaces.AutopilotConfig;
 
 public class AutopilotConfigValues implements AutopilotConfig{
 

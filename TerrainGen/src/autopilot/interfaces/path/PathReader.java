@@ -1,6 +1,6 @@
 package autopilot.interfaces.path;
 
-import autopilot.interfaces.Path;
+import interfaces.Path;
 
 public class PathReader {
     private static byte[] readByteArray(java.io.DataInputStream stream) throws java.io.IOException {

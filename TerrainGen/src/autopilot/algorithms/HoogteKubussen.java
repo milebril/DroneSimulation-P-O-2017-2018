@@ -3,7 +3,7 @@ package autopilot.algorithms;
 import org.lwjgl.util.vector.Vector3f;
 
 import autopilot.algorithmHandler.AlgorithmHandler;
-import autopilot.interfaces.Path;
+import interfaces.Path;
 
 public class HoogteKubussen implements Algorithm {
 	

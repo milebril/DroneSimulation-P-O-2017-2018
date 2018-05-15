@@ -1,6 +1,6 @@
 package autopilot.interfaces.path;
 
-import autopilot.interfaces.Path;
+import interfaces.Path;
 
 public class PathWriter {
     private static void writeByteArray(java.io.DataOutputStream stream, byte[] array) throws java.io.IOException {
