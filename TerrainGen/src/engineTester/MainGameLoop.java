@@ -170,8 +170,6 @@ public class MainGameLoop {
 		renderer = new MasterRenderer();
 
 		drones.get(0).setCamera(camera);
-		System.out.println("HIERRRR");
-		System.out.println(activeDrone.getCamera());
 
 		// ***INITIALIZE CHASE-CAM***
 		chaseCam = new Camera();
@@ -228,7 +226,7 @@ public class MainGameLoop {
 		cubeShader = new CubeShader();
 		cubeRenderer = new CubeRenderer(cubeShader, 120, 120);
 
-		Cube c1 = new Cube(1, 1, 0);
+		Cube c1 = new Cube(1, 0, 0);
 		Cube c2 = new Cube(1, 0, 1);
 		Cube c3 = new Cube(0, 1, 1);
 		Cube c4 = new Cube(0, 1, 0);
@@ -240,17 +238,12 @@ public class MainGameLoop {
 		RawCubeModel cube4 = loader.loadToVAO(c4.positions, c4.colors);
 		RawCubeModel cube5 = loader.loadToVAO(c5.positions, c5.colors);
 		RawCubeModel cube6 = loader.loadToVAO(c6.positions, c6.colors);
-		cubes.add(new Entity(cube1, new Matrix4f().translate(new Vector3f(0, 30, -400)), 1));
-		// cubes.add(new Entity(cube2, new Matrix4f().translate(new Vector3f(0, 30,
-		// -400)), 1));
-		// cubes.add(new Entity(cube3, new Matrix4f().translate(new Vector3f(0, 30,
-		// -400)), 1));
-		// cubes.add(new Entity(cube4, new Matrix4f().translate(new Vector3f(0, 30,
-		// -400)), 1));
-		// cubes.add(new Entity(cube5, new Matrix4f().translate(new Vector3f(0, 30,
-		// -400)), 1));
-		// cubes.add(new Entity(cube6, new Matrix4f().translate(new Vector3f(0, 30,
-		// -400)), 1));
+		cubes.add(new Entity(cube1, new Matrix4f().translate(new Vector3f(0, 15, -370)), 1));
+		cubes.add(new Entity(cube2, new Matrix4f().translate(new Vector3f(0, 10, -450)), 1));
+		cubes.add(new Entity(cube3, new Matrix4f().translate(new Vector3f(0, 15, -500)), 1));
+		cubes.add(new Entity(cube4, new Matrix4f().translate(new Vector3f(0, 12, -550)), 1));
+		cubes.add(new Entity(cube5, new Matrix4f().translate(new Vector3f(0, 9, -600)), 1));
+		cubes.add(new Entity(cube6, new Matrix4f().translate(new Vector3f(0, 15, -650)), 1));
 
 		// ***INITIALIZE BUTTONS GUI***
 		List<GuiTexture> guis = new ArrayList<>();
@@ -370,8 +363,6 @@ public class MainGameLoop {
 						System.exit(-1);
 
 					}
-					System.out.println("DIT");
-					System.out.println(d.getCamera());
 					AutopilotInputs inputs = d.getAutoPilotInputs();
 					AutopilotOutputs outputs = d.getAutopilot().timePassed(inputs);
 					d.setAutopilotOutputs(outputs);

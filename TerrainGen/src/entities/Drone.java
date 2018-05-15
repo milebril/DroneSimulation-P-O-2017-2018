@@ -559,10 +559,6 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	 * @throws IOException
 	 */
 	public AutopilotInputs getAutoPilotInputs() {
-		// TODO: nullpointer fixen:
-		// byte[] image = camera.takeByteArraySnapshot();
-		System.out.println(camera);
-		
 		return new AutopilotInputs() {
 			public byte[] getImage() { return camera.takeByteArraySnapshot();}
 			

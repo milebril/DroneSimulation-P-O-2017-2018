@@ -1,4 +1,4 @@
-package imageRecognition;
+package autopilot;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -21,7 +21,6 @@ public class Pep {
 		for (int i=0; i < differentColorsHSVList.size(); i++) {
 			int Amount = getAmountOfPixels(HSVList, differentColorsHSVList.get(i) ); 
 			mostPixels[i] = Amount;
-			System.out.println(Amount);
 		}
 		
 		int largest = 0;
@@ -89,7 +88,7 @@ public class Pep {
 					}
 				}
 				if ( (teller == 0) && (colorHSVList.get(i)[2] == 45 || colorHSVList.get(i)[2] == 20 || colorHSVList.get(i)[2] == 40 || colorHSVList.get(i)[2] == 25 || colorHSVList.get(i)[2] == 35|| colorHSVList.get(i)[2] == 30)) {
-					if (! ((colorHSVList.get(i)[0]  == 63 || colorHSVList.get(i)[0] == 64)  && (colorHSVList.get(i)[1] == 99|| colorHSVList.get(i)[1] == 98))) {
+					if (! ((colorHSVList.get(i)[0]  == 63 || colorHSVList.get(i)[0] == 64)  && (colorHSVList.get(i)[1] == 99|| colorHSVList.get(i)[1] == 98) || (colorHSVList.get(i)[1] < 30))) {
 					differentColorsHSVList.add(new double[]{colorHSVList.get(i)[0],colorHSVList.get(i)[1],colorHSVList.get(i)[2]});
 					}
 				}
@@ -137,8 +136,10 @@ public class Pep {
 		// calculate the coordinates
 		double[] coordinates = new double[2];
 		coordinates[0] = (int) Math.round(xCoord / (float) amount);
+		System.out.println(coordinates[0]);
 		coordinates[0] = (coordinates[0] - 100.0) / 100.0;
 		coordinates[1] = (int) Math.round(yCoord / (float) amount);
+		System.out.println(coordinates[1]);
 		coordinates[1] = (100.0 - coordinates[1]) / 100.0;
 		
 		return coordinates;

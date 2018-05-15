@@ -4,6 +4,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 import autopilot.PID;
 import autopilot.algorithmHandler.AlgorithmHandler;
+import autopilot.algorithmHandler.AutopilotAlain;
 
 /**
  * An algorithm aligning the drone with the given heading orientation.
@@ -16,7 +17,7 @@ public class Turn implements Algorithm {
 	
 	private final float headingDest;
 
-	private float maxRoll = (float) Math.toRadians(30);
+	private float maxRoll = (float) Math.toRadians(40);
 	private float wingBaseIncl = (float) Math.toRadians(2);
 	private float smoothness = 9.4f; // max inclination change per dt
 	private float height = -1;
@@ -45,16 +46,15 @@ public class Turn implements Algorithm {
 		float rollError = (rollFeedback - roll);
 		
 		// REAR WINGS
-		feedback = heightPID.getFeedback(heightError, dt);
 		
 		float wingFeedback = rearWingPID.getFeedback(rollError, dt);
-		handler.setLeftWingInclination(-wingFeedback+0.1f-feedback);
-		handler.setRightWingInclination(wingFeedback+0.1f-feedback);
-		handler.setVerStabInclination(-0.5f*wingFeedback);
+		handler.setLeftWingInclination(-wingFeedback+0.15f);
+		handler.setRightWingInclination(wingFeedback+0.15f);
+		handler.setVerStabInclination(-0.7f*wingFeedback);
 		
 		// HOR STAB
 		feedback = horstabPID.getFeedback(handler.getProperties().getPitch(), dt);
-		handler.setHorStabInclination(feedback);
+		handler.setHorStabInclination(-0.07f);
 		
 		
 
@@ -70,16 +70,16 @@ public class Turn implements Algorithm {
 		
 		// velocity op 50 m/s houden
 		float cruiseForce = handler.getProperties().getGravity();
-		feedback = thrustPID.getFeedback(50 - handler.getProperties().getVelocity().length(), dt);
+		feedback = thrustPID.getFeedback(AutopilotAlain.CRUISESPEED - handler.getProperties().getVelocity().length(), dt);
 		handler.setThrust(Math.max(0, cruiseForce + feedback));
 		
 		
 		if (Math.abs(headingError) < 0.05) {
-			System.out.println("HEADING ERROR < 0.05 ! ! !");
+			handler.nextAlgorithm();
 		}
 	}
 
-	private PID rollPID = new PID(1f, 0.01f, 0.05f, 0.3f);
+	private PID rollPID = new PID(0.5f, 0.2f, 0.05f, maxRoll);
 	private PID rearWingPID = new PID(0.5f, 0.05f, 0f, 0.1f);
 	private PID heightPID = new PID(0.5f, 0.05f, 0f, 0.1f);
 	

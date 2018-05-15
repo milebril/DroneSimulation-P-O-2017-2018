@@ -33,9 +33,19 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	public AutopilotAlain() {
 		
 		// add algorithms in order
-		addAlgorithm(new TakeOff(34f));
-		addAlgorithm(new FlyToHeight(30f));
-		addAlgorithm(new CubeZoeker());
+		addAlgorithm(new TakeOff(40f));
+		addAlgorithm(new FlyToHeight(20f));
+		addAlgorithm(new Turn(1.0f));
+		addAlgorithm(new Stabilize());
+		
+		/*
+		addAlgorithm(new FlyToHeight2(15f, -370f));
+		addAlgorithm(new FlyToHeight2(10f, -450f));
+		addAlgorithm(new FlyToHeight2(15f, -500f));
+		addAlgorithm(new FlyToHeight2(12f, -550f));
+		addAlgorithm(new FlyToHeight2(9f, -600f));
+		addAlgorithm(new FlyToHeight2(15f, -650f));
+		*/
 		
 		// start 1st algorithm
 		nextAlgorithm();

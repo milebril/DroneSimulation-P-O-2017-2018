@@ -20,6 +20,8 @@ public class TakeOff implements Algorithm {
 		handler.setRightBrakeForce(0);
 		if (handler.getProperties().getVelocity().length() < this.snelheid) { // versnellen
 			handler.setThrust(handler.getProperties().getMaxThrust());
+			handler.setLeftWingInclination((float) Math.toRadians(0)); 
+			handler.setRightWingInclination((float) Math.toRadians(0)); 
 		} else if (handler.getProperties().getY() < 8) {
 			handler.setLeftWingInclination((float) Math.toRadians(15)); 
 			handler.setRightWingInclination((float) Math.toRadians(15)); 

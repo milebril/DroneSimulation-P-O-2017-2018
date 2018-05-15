@@ -3,9 +3,9 @@ package autopilot.algorithms;
 import org.lwjgl.util.vector.Vector3f;
 
 import autopilot.PID;
+import autopilot.Pep;
 import autopilot.algorithmHandler.AlgorithmHandler;
 import autopilot.algorithmHandler.AutopilotAlain;
-import imageRecognition.Pep;
 import imageRecognition.openCV.ImageProcessor;
 
 public class CubeZoeker implements Algorithm {
@@ -29,10 +29,11 @@ public class CubeZoeker implements Algorithm {
 		handler.setLeftWingInclination(0.15f+feedback);
 		handler.setRightWingInclination(0.15f+feedback);
 
-		System.out.println("handler.getProperties().getImage()==null:" + handler.getProperties().getImage()==null);
 		double[] temp = GetRotation(handler.getProperties().getImage());
 		double hoek = temp[0];
 		double r = temp[1];
+		System.out.println();
+		System.out.println("x:" + temp[0] +" y:"+ temp[1]);
 		System.out.println("hoek:" + hoek + " r:" + r);
 	}
 	
