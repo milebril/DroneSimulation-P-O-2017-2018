@@ -2,14 +2,14 @@ package autopilot.algorithms;
 
 import autopilot.algorithmHandler.AlgorithmHandler;
 
-public class Aanloop implements Algorithm {
+public class TakeOff implements Algorithm {
 	
 	private final float snelheid;
 	
 	/**
 	 * Versnelt tot de gegeven de snelheid is behaalt en start dan het volgende algoritme
 	 */
-	public Aanloop(float snelheid) {
+	public TakeOff(float snelheid) {
 		this.snelheid = snelheid;
 	}
 	

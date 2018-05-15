@@ -555,7 +555,10 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	 * @throws IOException
 	 */
 	public AutopilotInputs getAutoPilotInputs() {
-
+		// TODO: nullpointer fixen:
+		// byte[] image = camera.takeByteArraySnapshot();
+		byte[] image = null;
+		
 		return new AutopilotInputs() {
 			public byte[] getImage() { return camera.takeByteArraySnapshot();} //TODO: is null zetten hier voldoende?
 			

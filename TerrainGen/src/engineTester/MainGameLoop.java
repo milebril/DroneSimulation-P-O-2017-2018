@@ -156,13 +156,9 @@ public class MainGameLoop {
 		RawModel droneModel = OBJLoader.loadObjModel("untitled5", loader);
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,
 				new ModelTexture(loader.loadTexture("untitled")));
-
+		
 		Drone droneOne = new Drone(staticDroneModel,
-				new Matrix4f()
-						.translate(new Vector3f(0,
-								(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
-										+ autopilotConfig.getTyreRadius(),
-								0)),
+				new Matrix4f().translate(new Vector3f(0, (int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY() + autopilotConfig.getTyreRadius(), 0)),
 				1f, autopilotConfig, new EulerPrediction(STEP_TIME));
 
 		activeDrone = droneOne;
@@ -231,14 +227,24 @@ public class MainGameLoop {
 		cubeShader = new CubeShader();
 		cubeRenderer = new CubeRenderer(cubeShader, 120, 120);
 
-		Cube c = new Cube(1, 1, 0);
-		RawCubeModel cube = loader.loadToVAO(c.positions, c.colors);
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -480)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -560)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -640)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -720)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -800)), 1));
-		cubes.add(new Entity(cube, new Matrix4f().translate(new Vector3f(0, 20, -880)), 1));
+		Cube c1 = new Cube(1, 1, 0);
+		Cube c2 = new Cube(1, 0, 1);
+		Cube c3 = new Cube(0, 1, 1);
+		Cube c4 = new Cube(0, 1, 0);
+		Cube c5 = new Cube(1, 0, 0);
+		Cube c6 = new Cube(0, 0, 1);
+		RawCubeModel cube1 = loader.loadToVAO(c1.positions, c1.colors);
+		RawCubeModel cube2 = loader.loadToVAO(c2.positions, c2.colors);
+		RawCubeModel cube3 = loader.loadToVAO(c3.positions, c3.colors);
+		RawCubeModel cube4 = loader.loadToVAO(c4.positions, c4.colors);
+		RawCubeModel cube5 = loader.loadToVAO(c5.positions, c5.colors);
+		RawCubeModel cube6 = loader.loadToVAO(c6.positions, c6.colors);
+		cubes.add(new Entity(cube1, new Matrix4f().translate(new Vector3f(0, 30, -400)), 1));
+		//cubes.add(new Entity(cube2, new Matrix4f().translate(new Vector3f(0, 30, -400)), 1));
+		//cubes.add(new Entity(cube3, new Matrix4f().translate(new Vector3f(0, 30, -400)), 1));
+		//cubes.add(new Entity(cube4, new Matrix4f().translate(new Vector3f(0, 30, -400)), 1));
+		//cubes.add(new Entity(cube5, new Matrix4f().translate(new Vector3f(0, 30, -400)), 1));
+		//cubes.add(new Entity(cube6, new Matrix4f().translate(new Vector3f(0, 30, -400)), 1));
 		
 		// ***INITIALIZE BUTTONS GUI***
 		List<GuiTexture> guis = new ArrayList<>();
@@ -304,23 +310,23 @@ public class MainGameLoop {
 				textPosition.setString("Position = (" + xpos + " , " + ypos + " , " + zpos + ")");
 				TextMaster.loadText(textPosition);
 
-				leftWingInc = String.valueOf(Math.round(activeDrone.getLeftWing().getInclination() * 100.0) / 100.0);
+				leftWingInc = String.valueOf(Math.round(activeDrone.getLeftWing().getInclination() * 10000.0) / 10000.0);
 				textLeftWing.setString("Left wing inclination = " + leftWingInc + "rad");
 				TextMaster.loadText(textLeftWing);
 
-				rightWingInc = String.valueOf(Math.round(activeDrone.getRightWing().getInclination() * 100.0) / 100.0);
+				rightWingInc = String.valueOf(Math.round(activeDrone.getRightWing().getInclination() * 10000.0) / 10000.0);
 				textRightWing.setString("Right wing inclination = " + rightWingInc + "rad");
 				TextMaster.loadText(textRightWing);
 
-				horzStab = String.valueOf(Math.round(activeDrone.getHorStabilizer().getInclination() * 100.0) / 100.0);
+				horzStab = String.valueOf(Math.round(activeDrone.getHorStabilizer().getInclination() * 10000.0) / 10000.0);
 				textHorzStab.setString("Horizontal stabilizer inclination = " + horzStab + "rad");
 				TextMaster.loadText(textHorzStab);
 
-				vertStab = String.valueOf(Math.round(activeDrone.getVertStabilizer().getInclination() * 100.0) / 100.0);
+				vertStab = String.valueOf(Math.round(activeDrone.getVertStabilizer().getInclination() * 10000.0) / 10000.0);
 				textVertStab.setString("Vertical stabilizer inclination = " + vertStab + "rad");
 				TextMaster.loadText(textVertStab);
 				
-				thrust = String.valueOf(Math.round(activeDrone.getThrustForce() * 100.0) / 100.0);
+				thrust = String.valueOf(Math.round(activeDrone.getThrustForce() * 10.0) / 10.0);
 				textThrust.setString("Thrust = " + thrust);
 				TextMaster.loadText(textThrust);
 

@@ -14,6 +14,16 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	
 	public static float CRUISESPEED = 40f;
 	
+	/*
+	 * INFORMATIE IVM VERSCHILLENDE CRUISE SNELHEDEN
+	 * 	Cruise speed	|	Vereiste rear wing incl om -+ hoogte te behouden
+	 * 	45				|	0.117 rad
+	 * 	42				|	0.134 rad
+	 * 	40				|	0.149 rad
+	 * 	38				|	0.165 rad
+	 * 	35				|	0.197 rad
+	 */
+	
 	// Constructor
 	
 	public AutopilotAlain(Algorithm startingAlgorithm) {
@@ -23,10 +33,9 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	public AutopilotAlain() {
 		
 		// add algorithms in order
-		addAlgorithm(new Aanloop(34f));
-		addAlgorithm(new FlyToHeight(20f));
-		addAlgorithm(new Turn(1.1f));
-		addAlgorithm(new Land());
+		addAlgorithm(new TakeOff(34f));
+		addAlgorithm(new FlyToHeight(30f));
+		addAlgorithm(new Turn((float) Math.toRadians(90)));
 		
 		// start 1st algorithm
 		nextAlgorithm();

@@ -4,6 +4,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 import autopilot.PID;
 import autopilot.algorithmHandler.AlgorithmHandler;
+import autopilot.algorithmHandler.AutopilotAlain;
 
 public class VliegRechtdoor implements Algorithm {
 	
@@ -70,7 +71,7 @@ public class VliegRechtdoor implements Algorithm {
 		
 		// velocity op 50 m/s houden
 		float cruiseForce = handler.getProperties().getGravity();
-		feedback = thrustPID.getFeedback(50 - handler.getProperties().getVelocity().length(), dt);
+		feedback = thrustPID.getFeedback(AutopilotAlain.CRUISESPEED - handler.getProperties().getVelocity().length(), dt);
 		handler.setThrust(Math.max(0, cruiseForce + feedback));
 		//System.out.println("- - Engine - -");
 		//System.out.println("thrust: " + handler.getThrust());
