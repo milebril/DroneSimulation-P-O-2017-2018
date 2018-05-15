@@ -461,7 +461,22 @@ public class MainGameLoop {
 		}
 
 		if (chaseCameraLocked) {
-			Vector3f.add(activeDrone.getPosition(), new Vector3f(0, 0, 30), chaseCam.getPosition());
+			float one = Math.abs((float) (Math.cos(activeDrone.getHeadingFloat()) * 30));
+			float two = Math.abs((float) (Math.sin(activeDrone.getHeadingFloat()) * 30));
+			
+			if (activeDrone.getHeadingFloat() > 0) {
+				if (activeDrone.getHeadingFloat() > Math.PI/2) {
+					one = -one;
+				}
+				Vector3f.add(activeDrone.getPosition(), new Vector3f(two, 0, one), chaseCam.getPosition());
+			} else {
+				if (activeDrone.getHeadingFloat() < -Math.PI/2) {
+					one = -one;
+				}
+				Vector3f.add(activeDrone.getPosition(), new Vector3f(-two, 0, one), chaseCam.getPosition());
+			}
+			
+			chaseCam.setPitch(-activeDrone.getHeadingFloat());
 		} else {
 			chaseCam.roam();
 		}
