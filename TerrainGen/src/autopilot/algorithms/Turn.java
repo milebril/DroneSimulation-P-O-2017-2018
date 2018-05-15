@@ -68,7 +68,7 @@ public class Turn implements Algorithm {
 		
 		
 		
-		// velocity op 50 m/s houden
+		// cruisesnelheid houden
 		float cruiseForce = handler.getProperties().getGravity();
 		feedback = thrustPID.getFeedback(AutopilotAlain.CRUISESPEED - handler.getProperties().getVelocity().length(), dt);
 		handler.setThrust(Math.max(0, cruiseForce + feedback));
