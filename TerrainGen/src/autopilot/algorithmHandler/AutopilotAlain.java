@@ -35,7 +35,7 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 		// add algorithms in order
 		addAlgorithm(new TakeOff(34f));
 		addAlgorithm(new FlyToHeight(30f));
-		addAlgorithm(new Turn((float) Math.toRadians(90)));
+		addAlgorithm(new CubeZoeker());
 		
 		// start 1st algorithm
 		nextAlgorithm();

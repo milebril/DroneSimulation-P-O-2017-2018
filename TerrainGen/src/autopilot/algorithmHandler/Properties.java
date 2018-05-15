@@ -603,17 +603,12 @@ public class Properties implements AutopilotConfig, AutopilotInputs {
 		setRotationSpeed(newRotationSpeed);
 		
 		// save inputs
-		System.out.println("inputs.getImage() == null:");
-		System.out.println(inputs.getImage() == null);
 		setImage(inputs.getImage());
 		setPosition(new Vector3f(inputs.getX(), inputs.getY(), inputs.getZ()));
 		setHeading(inputs.getHeading());
 		setPitch(inputs.getPitch());
 		setRoll(inputs.getRoll());
 		setElapsedTime(inputs.getElapsedTime());
-		
-		System.out.println("properties update - this.getImage() == null : ");
-		System.out.println(this.getImage() == null);
 	}
 	
 	
