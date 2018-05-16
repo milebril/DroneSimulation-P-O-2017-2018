@@ -610,7 +610,4 @@ public class Properties implements AutopilotConfig, AutopilotInputs {
 		setRoll(inputs.getRoll());
 		setElapsedTime(inputs.getElapsedTime());
 	}
-	
-	
-	
 }
