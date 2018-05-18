@@ -16,7 +16,7 @@ public class Turn implements Algorithm {
 
 	public Turn(float height) {
 		// this.headingDest = headingDest;
-		this.pidRoll = new PIDController(5.0f, 0.0f, 3.0f, (float) Math.toRadians(1), (float) Math.toRadians(-20));
+		this.pidRoll = new PIDController(1.0f, 0.0f, 2.0f, (float) Math.toRadians(1), (float) Math.toRadians(-20));
 		this.pidHorStab = new PIDController(0, 0, 0.5f, (float) (Math.PI / 360), 0);
 		this.height = 20;
 	}
@@ -43,26 +43,9 @@ public class Turn implements Algorithm {
 		// ROLL AT 15 DEGREES
 		float changeWingRoll = this.pidRoll.calculateChange(handler.getProperties().getRoll(),
 				handler.getProperties().getDeltaTime());
-		// System.out.println("Roll | ChangeWingRoll : " + this.inputAP.getRoll() + " |
-		// " + changeWingRoll);
 
 		handler.setLeftWingInclination(handler.getLeftWingInclination() + changeWingRoll);
-		if (handler.getLeftWingInclination() > Math.toRadians(15))
-			handler.setLeftWingInclination((float) Math.toRadians(15));
-		if (handler.getLeftWingInclination() < Math.toRadians(-15))
-			handler.setLeftWingInclination((float) Math.toRadians(-15));
-
 		handler.setRightWingInclination(handler.getRightWingInclination() - changeWingRoll);
-		if (handler.getRightWingInclination() > Math.toRadians(15))
-			handler.setRightWingInclination((float) Math.toRadians(15));
-		if (handler.getRightWingInclination() < Math.toRadians(-15))
-			handler.setRightWingInclination((float) Math.toRadians(-15));
-
-		if (handler.getProperties().getVelocity().length() > 40) // als de drone sneller vliegt dan 40m/s zet de thrust
-																	// dan uit
-			handler.setThrust(0);
-		else
-			handler.setThrust(handler.getProperties().getMaxThrust());
 
 		// STIJGEN/DALEN ~ ZIJVLEUGELS
 		float heightError = this.height - handler.getProperties().getY();
@@ -71,16 +54,33 @@ public class Turn implements Algorithm {
 		handler.setLeftWingInclination(handler.getLeftWingInclination() + feedback);
 		handler.setRightWingInclination(handler.getRightWingInclination() + feedback);
 		
+		// MAX ANGLE OF 15
+		if (handler.getLeftWingInclination() > Math.toRadians(15))
+			handler.setLeftWingInclination((float) Math.toRadians(15));
+		if (handler.getLeftWingInclination() < Math.toRadians(-15))
+			handler.setLeftWingInclination((float) Math.toRadians(-15));
+		
+		if (handler.getRightWingInclination() > Math.toRadians(15))
+			handler.setRightWingInclination((float) Math.toRadians(15));
+		if (handler.getRightWingInclination() < Math.toRadians(-15))
+			handler.setRightWingInclination((float) Math.toRadians(-15));
+		
+		//THRUST
+		if (handler.getProperties().getVelocity().length() > 40) // als de drone sneller vliegt dan 40m/s zet de thrust dan uit
+			handler.setThrust(0);
+		else
+			handler.setThrust(handler.getProperties().getMaxThrust());
+		
 		//ROLL naar de andere kant vanaf ??? meter in Z
 		if(handler.getProperties().getZ() < - 450) {
-			this.pidRoll = new PIDController(5.0f, 0.0f, 3.0f, (float) Math.toRadians(1), (float) Math.toRadians(20));
+			handler.nextAlgorithm();
+			//this.pidRoll = new PIDController(1.0f, 0.0f, 2.0f, (float) Math.toRadians(1), (float) Math.toRadians(0));
 		}
-
-		// TODO: next algorithm
-		// if(properties.getHeading() <= Math.toRadians(-160)) {
-		// parent.setStage(AutopilotStages.STABILISE);
-		// }
-
+		System.out.println("Left Wing INC: " + handler.getLeftWingInclination());
+		System.out.println("Right Wing INC: " + handler.getRightWingInclination());
+//		if(handler.getProperties().getZ() < - 450) {
+//			this.pidRoll = new PIDController(5.0f, 0.0f, 3.0f, (float) Math.toRadians(1), (float) Math.toRadians(20));
+//		}
 	}
 
 	private float getVerAngle(AlgorithmHandler handler) {
@@ -91,7 +91,7 @@ public class Turn implements Algorithm {
 		else
 			aanliggende = 10;
 
-		System.out.println("getVerAngle()" + Math.atan(overstaande / aanliggende));
+		//System.out.println("getVerAngle()" + Math.atan(overstaande / aanliggende));
 
 		return (float) Math.atan(overstaande / aanliggende);
 	}
