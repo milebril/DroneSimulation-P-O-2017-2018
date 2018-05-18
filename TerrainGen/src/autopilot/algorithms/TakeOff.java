@@ -25,9 +25,12 @@ public class TakeOff implements Algorithm {
 		} else if (handler.getProperties().getY() < 8) {
 			handler.setLeftWingInclination((float) Math.toRadians(15)); 
 			handler.setRightWingInclination((float) Math.toRadians(15)); 
-		} else {
-			handler.nextAlgorithm();
-		}
+		} 
+		
+		if (handler.getProperties().getY() > 5) {
+            handler.nextAlgorithm();
+        }
+ 
 	}
 
 	@Override

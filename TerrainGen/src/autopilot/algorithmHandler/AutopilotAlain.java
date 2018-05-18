@@ -3,6 +3,8 @@ package autopilot.algorithmHandler;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
+import org.lwjgl.util.vector.Vector3f;
+
 import autopilot.algorithms.*;
 import autopilot.interfaces.path.MyPath;
 import interfaces.Autopilot;
