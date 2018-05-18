@@ -16,14 +16,14 @@ public class Turn implements Algorithm {
 
 	public Turn(float height) {
 		// this.headingDest = headingDest;
-		this.pidRoll = new PIDController(5.0f, 0.0f, 3.0f, (float) Math.toRadians(1), (float) Math.toRadians(-30));
+		this.pidRoll = new PIDController(5.0f, 0.0f, 3.0f, (float) Math.toRadians(1), (float) Math.toRadians(-20));
 		this.pidHorStab = new PIDController(0, 0, 0.5f, (float) (Math.PI / 360), 0);
 		this.height = 20;
 	}
 
 	// private final float headingDest;
 	private int height = 20;
-	private final PIDController pidRoll;
+	private PIDController pidRoll;
 	private final PIDController pidHorStab;
 	private PID heightPID = new PID(0.5f, 0.5f, 0.1f, 0.2f);
 
@@ -70,6 +70,11 @@ public class Turn implements Algorithm {
 
 		handler.setLeftWingInclination(handler.getLeftWingInclination() + feedback);
 		handler.setRightWingInclination(handler.getRightWingInclination() + feedback);
+		
+		//ROLL naar de andere kant vanaf ??? meter in Z
+		if(handler.getProperties().getZ() < - 450) {
+			this.pidRoll = new PIDController(5.0f, 0.0f, 3.0f, (float) Math.toRadians(1), (float) Math.toRadians(20));
+		}
 
 		// TODO: next algorithm
 		// if(properties.getHeading() <= Math.toRadians(-160)) {
