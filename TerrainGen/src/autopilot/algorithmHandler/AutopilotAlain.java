@@ -3,6 +3,8 @@ package autopilot.algorithmHandler;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
+import org.lwjgl.util.vector.Vector3f;
+
 import autopilot.algorithms.*;
 import autopilot.interfaces.path.MyPath;
 import interfaces.Autopilot;
@@ -33,10 +35,10 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	public AutopilotAlain() {
 		
 		// add algorithms in order
-		addAlgorithm(new TakeOff(40f));
-		addAlgorithm(new FlyToHeight(20f));
-		addAlgorithm(new Turn(1.0f));
-		addAlgorithm(new Stabilize());
+		addAlgorithm(new TakeOff(34f));
+		addAlgorithm(new FlyToPoint(new FlyToPoint(new VliegRechtdoor(), new Vector3f(5, 40, -500)), new Vector3f(5, 20, -300)));
+//		addAlgorithm(new Turn(1.0f));
+//		addAlgorithm(new Stabilize());
 		
 		/*
 		addAlgorithm(new FlyToHeight2(15f, -370f));
