@@ -14,13 +14,11 @@ public class Stabilize implements Algorithm {
 		// PITCH OP 0
 		float feedback = pitchPID.getFeedback(handler.getProperties().getPitch(), dt);
 		handler.setHorStabInclination(feedback);
-		System.out.println("pitchfeedback: " + feedback);
 		
 		// ROLL op 0
 		feedback = rollPID.getFeedback(-handler.getProperties().getRoll(), dt);
 		handler.setLeftWingInclination(-feedback+0.15f);
 		handler.setRightWingInclination(feedback+0.15f);
-		System.out.println("wingfeedback: " + feedback);
 		
 		// cruisesnelheid houden
 		float cruiseForce = handler.getProperties().getGravity();

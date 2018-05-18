@@ -4,12 +4,14 @@ import org.lwjgl.util.vector.Vector3f;
 
 import autopilot.PID;
 import autopilot.algorithmHandler.AlgorithmHandler;
+import prevAutopilot.DroneProperties;
 import prevAutopilot.PIDController;
 
 public class FlyToPointTorben implements Algorithm {
 
 		private PID heightPID = new PID(0.5f, 0.5f, 0.1f, 0.2f);
 		private PID pitchPID = new PID(1f, 0.1f, 0.1f, 1f);
+		private PIDController pidHorStab = new PIDController(0, 0, 0.5f, (float) (Math.PI / 360), 0);
 
 		private final PIDController pidRoll;
 		private PIDController pidGetRoll = new PIDController(1000.0f,0,0,(float) Math.toRadians(1),0);
@@ -17,7 +19,7 @@ public class FlyToPointTorben implements Algorithm {
 		public FlyToPointTorben(Algorithm nextAlgorithm, Vector3f point) {
 			this.point = point;
 			this.nextAlgorithm = nextAlgorithm;
-			this.pidRoll = new PIDController(5.0f, 0.0f, 3.0f, (float) Math.toRadians(1), (float) Math.toRadians(0));
+			this.pidRoll = new PIDController(5.0f, 0.0f, 3.0f, (float) Math.toRadians(1), (float) Math.toRadians(-15));
 		}
 
 		private final Vector3f point;
@@ -34,55 +36,75 @@ public class FlyToPointTorben implements Algorithm {
 
 		@Override
 		public void cycle(AlgorithmHandler handler) {
-
-			float dt = handler.getProperties().getDeltaTime();
-
+			// BLIJF OP JUISTE HOOGTE
+			handler.setHorStabInclination(handler.getHorStabInclination() + pidHorStab.calculateChange(
+					handler.getProperties().getPitch() + getVerAngle(handler), handler.getProperties().getDeltaTime()));
+			if (handler.getHorStabInclination() > Math.PI / 6) {
+				handler.setHorStabInclination((float) (Math.PI / 6));
+			} else if (handler.getHorStabInclination() < -Math.PI / 6) {
+				handler.setHorStabInclination((float) -(Math.PI / 6));
+			}
 			// properties.setHorStabInclination((float)Math.toRadians(-4));
 			handler.setVerStabInclination((float) Math.toRadians(0));
-			
-			float headingError = (float) Math.tan((point.x - handler.getProperties().getPosition().x) / (point.z - handler.getProperties().getPosition().z));
-			float roll = - pidGetRoll.calculateChange(headingError, dt);
-			System.out.println("Wanted roll: " + Math.toDegrees(roll));
-			roll = (float) Math.toRadians( - 5 );
-			//float feedback = rollPID.getFeedback(headingError, dt);
-			
+
 			// ROLL AT 15 DEGREES
-			//TODO: check +- changeWingRoll
-			float changeWingRoll = this.pidRoll.calculateChange(roll - handler.getProperties().getRoll(),dt);
+			float changeWingRoll = this.pidRoll.calculateChange(handler.getProperties().getRoll(),
+					handler.getProperties().getDeltaTime());
+
 			handler.setLeftWingInclination(handler.getLeftWingInclination() + changeWingRoll);
+			handler.setRightWingInclination(handler.getRightWingInclination() - changeWingRoll);
+
+			// STIJGEN/DALEN ~ ZIJVLEUGELS
+			float heightError = point.getY() - handler.getProperties().getY();
+			float feedback = heightPID.getFeedback(heightError, handler.getProperties().getDeltaTime());
+
+			handler.setLeftWingInclination(handler.getLeftWingInclination() + feedback);
+			handler.setRightWingInclination(handler.getRightWingInclination() + feedback);
+			
+			// MAX ANGLE OF 15
 			if (handler.getLeftWingInclination() > Math.toRadians(15))
 				handler.setLeftWingInclination((float) Math.toRadians(15));
 			if (handler.getLeftWingInclination() < Math.toRadians(-15))
 				handler.setLeftWingInclination((float) Math.toRadians(-15));
-			handler.setRightWingInclination(handler.getLeftWingInclination() - changeWingRoll);
+			
 			if (handler.getRightWingInclination() > Math.toRadians(15))
 				handler.setRightWingInclination((float) Math.toRadians(15));
 			if (handler.getRightWingInclination() < Math.toRadians(-15))
 				handler.setRightWingInclination((float) Math.toRadians(-15));
-
 			
-			// STIJGEN/DALEN ~ ZIJVLEUGELS
-			float heightError = point.y - handler.getProperties().getY();
-			float feedback = heightPID.getFeedback(heightError, dt);
-
-			handler.setLeftWingInclination(handler.getLeftWingInclination() + feedback);
-			handler.setRightWingInclination(handler.getRightWingInclination() + feedback);
-
-			// PITCH ~ HOR STAB
-			feedback = pitchPID.getFeedback(handler.getProperties().getPitch(), dt);
-			handler.setHorStabInclination(feedback);
-
-			boolean reached = false;
-			if (heightError < 0.2 && handler.getProperties().getZ() < point.z) { // TODO
-				reached = true;
-			}
-
-			// if the point is reached activate next algorithm
-			if (reached) {
-				handler.setAlgorithm(getNextAlgorithm());
+			//THRUST
+			if (handler.getProperties().getVelocity().length() > 40) // als de drone sneller vliegt dan 40m/s zet de thrust dan uit
+				handler.setThrust(0);
+			else
+				handler.setThrust(handler.getProperties().getMaxThrust());
+			
+			//ROLL naar de andere kant vanaf ??? meter in Z
+			System.out.println("The Thing: " + (handler.getProperties().getHeading() - getHorAngle(handler)));
+			if((handler.getProperties().getHeading() - getHorAngle(handler)) < 0.01) {
+				handler.nextAlgorithm();
 			}
 		}
+		
+		private float getHorAngle(AlgorithmHandler handler) {
+			float overstaande = point.getX() - handler.getProperties().getPosition().getX();
+			System.out.println("Overstaande: " + overstaande);
+			float aanliggende = point.getZ() - handler.getProperties().getPosition().getZ();
+			System.out.println("Aanliggende: " + aanliggende);
+			return (float) Math.atan(overstaande / aanliggende);
+		}
 
+		private float getVerAngle(AlgorithmHandler handler) {
+			float overstaande = point.getY() - handler.getProperties().getPosition().getY();
+			float aanliggende;
+			if (handler.getProperties().getHeading() < Math.toRadians(90))
+				aanliggende = -10;
+			else
+				aanliggende = 10;
+
+			//System.out.println("getVerAngle()" + Math.atan(overstaande / aanliggende));
+
+			return (float) Math.atan(overstaande / aanliggende);
+		}
 
 		@Override
 		public String getName() {
