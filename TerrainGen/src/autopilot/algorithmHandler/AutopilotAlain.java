@@ -3,6 +3,8 @@ package autopilot.algorithmHandler;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
+import org.lwjgl.util.vector.Vector3f;
+
 import autopilot.algorithms.*;
 import autopilot.interfaces.Autopilot;
 import autopilot.interfaces.AutopilotConfig;
@@ -14,6 +16,8 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	
 	// Constructor
 	
+	public static float CRUISESPEED = 40;
+
 	public boolean crashed = false;
 	
 	private long time;
@@ -33,6 +37,8 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 //		addAlgorithm(new FlyToHeight(20f));
 ////		addAlgorithm(new FlyToHeight(10f));
 //		addAlgorithm(new Land());
+		
+		new FlyToAirport(new Vector3f(0,0, -1000), this);
 		
 		// start 1st algorithm
 		nextAlgorithm();
@@ -150,7 +156,7 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 		
 		// create Properties object
 		this.properties = new Properties(config, inputs);
-		
+		properties.setCruiseHeight(20f);
 		// run 1 cycle of the current algorithm
 		getAlgorithm().cycle(this);
 		

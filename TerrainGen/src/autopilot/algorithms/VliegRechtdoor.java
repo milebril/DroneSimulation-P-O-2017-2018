@@ -4,6 +4,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 import autopilot.PID;
 import autopilot.algorithmHandler.AlgorithmHandler;
+import autopilot.algorithmHandler.AutopilotAlain;
 
 public class VliegRechtdoor implements Algorithm {
 	
@@ -35,7 +36,7 @@ public class VliegRechtdoor implements Algorithm {
 		
 		//System.out.println("pitch: " + Math.round((handler.getProperties().getPitch()) * 10.0) / 10.0 + " (error: " +  Math.round((handler.getProperties().getPitch() - pitch) * 10.0) / 10.0 + ")");
 		//System.out.println("PID feedback: " + feedback);
-		//System.out.println("-> new angle: " + Math.round((180 / Math.PI * feedback) * 10.0) / 10.0 + "ï¿½");
+		//System.out.println("-> new angle: " + Math.round((180 / Math.PI * feedback) * 10.0) / 10.0 + "°");
 		//System.out.println();
 		handler.setHorStabInclination(feedback);
 		
@@ -70,7 +71,7 @@ public class VliegRechtdoor implements Algorithm {
 		
 		// velocity op 50 m/s houden
 		float cruiseForce = handler.getProperties().getGravity();
-		feedback = thrustPID.getFeedback(50 - handler.getProperties().getVelocity().length(), dt);
+		feedback = thrustPID.getFeedback(AutopilotAlain.CRUISESPEED - handler.getProperties().getVelocity().length(), dt);
 		handler.setThrust(Math.max(0, cruiseForce + feedback));
 		//System.out.println("- - Engine - -");
 		//System.out.println("thrust: " + handler.getThrust());

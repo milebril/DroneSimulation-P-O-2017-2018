@@ -15,7 +15,7 @@ public class Land implements Algorithm {
 			handler.setRightWingInclination(feedback);
 		} else {
 			handler.setThrust(0);
-			
+
 			// pitch op 0 houden
 			float feedback = pitchPID.getFeedback(handler.getProperties().getPitch(), dt);
 			handler.setHorStabInclination(feedback);
@@ -23,20 +23,19 @@ public class Land implements Algorithm {
 			// rusting dalen
 			handler.setLeftWingInclination(-feedback);
 			handler.setRightWingInclination(-feedback);
-			
+
 			// remmen
 			handler.setFrontBrakeForce(handler.getProperties().getRMax());
 			handler.setLeftBrakeForce(handler.getProperties().getRMax());
 			handler.setRightBrakeForce(handler.getProperties().getRMax());
 		}
-		
+
 		// wanneer het vliegtuig stilstaat is het geland
 		if (handler.getProperties().getVelocity().length() <= 0.0005) {
 			handler.nextAlgorithm();
 		}
 	}
-	
-	
+
 	private PID rollPID = new PID(0.7f, 0.01f, 0.1f, 0.8f);
 	private PID pitchPID = new PID(1f, 0.1f, 0.1f, 1f);
 

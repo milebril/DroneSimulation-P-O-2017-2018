@@ -4,13 +4,15 @@ import autopilot.PID;
 import autopilot.algorithmHandler.AlgorithmHandler;
 import autopilot.algorithmHandler.AutopilotAlain;
 
-public class FlyToHeight implements Algorithm {
+public class FlyToHeight2 implements Algorithm {
 
-	public FlyToHeight(float height) {
+	public FlyToHeight2(float height, float z) {
 		this.height = height;
+		this.z = z;
 	}
 	
 	private float height;
+	private float z;
 	
 	private float prevP = -100f;
 	private float prevH = -100f;
@@ -47,8 +49,7 @@ public class FlyToHeight implements Algorithm {
 		prevH = handler.getProperties().getY();
 		
 		// als hoogte behaalt is en drone gestabiliseert is, volgend algoritme
-		if (Math.abs(height-handler.getProperties().getY()) < 1 && Math.abs(handler.getProperties().getPitch()) < 0.03 
-				&& Math.abs(deltaP) < 0.4 && Math.abs(deltaH) < 0.2) {
+		if (handler.getProperties().getZ() < this.z) {
 			handler.nextAlgorithm();
 		}
 		

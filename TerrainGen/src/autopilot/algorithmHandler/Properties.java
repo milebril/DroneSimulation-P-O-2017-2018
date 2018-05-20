@@ -365,6 +365,7 @@ public class Properties implements AutopilotConfig, AutopilotInputs {
 	// Rotation speed
 	
 	private Vector3f rotationSpeed = new Vector3f(0, 0, 0);
+	private float cruiseHeight;
 	public Vector3f getRotationSpeed() {
 		return new Vector3f(rotationSpeed.x, rotationSpeed.y, rotationSpeed.z);
 	}
@@ -610,7 +611,10 @@ public class Properties implements AutopilotConfig, AutopilotInputs {
 		setRoll(inputs.getRoll());
 		setElapsedTime(inputs.getElapsedTime());
 	}
-	
-	
-	
+	public void setCruiseHeight(float cruiseHeight) {
+		this.cruiseHeight = cruiseHeight;
+	}
+	public float getCruiseheight() {
+		return this.cruiseHeight;
+	}
 }

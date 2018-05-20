@@ -4,8 +4,8 @@ import org.lwjgl.util.vector.Vector3f;
 
 import autopilot.PID;
 import autopilot.algorithmHandler.AlgorithmHandler;
-import autopilot.interfaces.Path;
 import autopilot.interfaces.path.VectorPath;
+import autopilot.interfaces.Path;
 
 public class PathFinder implements Algorithm {
 	
@@ -29,6 +29,7 @@ public class PathFinder implements Algorithm {
 		if (nextPos != null) // if there is a position to reach
 		{
 			// fly to the next position
+			System.out.println("[PathFinder] next position: (" + nextPos.x + ", " + nextPos.y + ", " + nextPos.z + ")");
 			Algorithm flyToPoint = new FlyToPoint(this, nextPos);
 			handler.setAlgorithm(flyToPoint);
 			flyToPoint.cycle(handler);
