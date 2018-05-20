@@ -79,7 +79,6 @@ public class PhysicsEngine {
 			}
 		}
 		
-		System.out.println("---------------------------------------------------------------");
 		// recursieve oproep
 		PhysicsEngine.applyPhysics(drone, (dt - h));
 	}
@@ -107,8 +106,8 @@ public class PhysicsEngine {
 
 		boolean printAirfoils = false;
 		boolean printCompression = false;
-		boolean printFriction = true;
-		boolean printTotal = true;
+		boolean printFriction = false;
+		boolean printTotal = false;
 		
 		// The total force and torque that are exercised on the given Drone (in
 		// drone frame)
@@ -259,7 +258,7 @@ public class PhysicsEngine {
 			Vector3f totalTyreForce = new Vector3f();
 			Vector3f.add(rollingOrientation, frictionOrientation, totalTyreForce);
 			
-			System.out.println(tyre.name + " frictionF: " + p(frictionOrientation) + " | brakeF: " + p(rollingOrientation));
+			if (printFriction) System.out.println(tyre.name + " frictionF: " + p(frictionOrientation) + " | brakeF: " + p(rollingOrientation));
 			
 			// resulterende torque
 			Vector3f brakeTorque = new Vector3f();
