@@ -54,9 +54,7 @@ public class PhysicsEngine {
 
 		if (!deltaPositions[1].equals(new Vector3f(0, 0, 0))) {
 			Vector3f rotationAxis = new Vector3f(0, 0, 0);
-			System.out.println("rotationAxis " + deltaPositions[1]);
 			deltaPositions[1].normalise(rotationAxis);
-			System.out.println("normalised rotationAxis " +rotationAxis);
 			drone.rotate(deltaPositions[1].length(), rotationAxis);
 		}
 
@@ -99,6 +97,11 @@ public class PhysicsEngine {
 	 */
 	private static Vector3f[] calculateForces(Drone drone, float stepsize) throws MaxAoAException {
 
+		boolean printAirfoils = true;
+		boolean printCompression = true;
+		boolean printFriction = true;
+		boolean printTotal = true;
+		
 		// The total force and torque that are exercised on the given Drone (in
 		// drone frame)
 		Vector3f force = new Vector3f(0, 0, 0);
@@ -120,6 +123,10 @@ public class PhysicsEngine {
 			// add the calculated force and torque to the total force and torque
 			Vector3f.add(force, liftForceD, force);
 			Vector3f.add(torque, currentAirFoilTorqueD, torque);
+			
+			if (printAirfoils) System.out.println(currentAirFoil.name);
+			if (printAirfoils) System.out.println("  liftForceD: " + liftForceD);
+			if (printAirfoils) System.out.println("  torqueD: " + currentAirFoilTorqueD);
 		}
 		
 		// force exercised by the engine
@@ -153,6 +160,8 @@ public class PhysicsEngine {
 
 			Vector3f compressionTorque = new Vector3f();
 			Vector3f.cross(tyre.getGroundedPosition(), compressionForce, compressionTorque);
+			
+			if (printCompression) System.out.println(tyre.name + " compressionF: " + compressionForce + " | compressionT: " + compressionTorque);
 			
 			// optellen bij het totaal
 			Vector3f.add(force, compressionForce, force);
@@ -189,6 +198,8 @@ public class PhysicsEngine {
 				// optellen bij het totaal
 				Vector3f.add(force, brakeForce, force);
 				Vector3f.add(torque, brakeTorque, torque);
+				
+				if (printFriction) System.out.println("front wheel brakeF: " + brakeForce + " | brakeT: " + brakeTorque);
 			}
 		}
 
@@ -243,12 +254,19 @@ public class PhysicsEngine {
 			// optellen bij het totaal
 			Vector3f.add(force, totalTyreForce, force);
 			Vector3f.add(torque, brakeTorque, torque);
+			
+			if (printFriction) System.out.println(tyre.name + " frictionF: " + totalTyreForce + " | frictionT: " + brakeTorque);
 		}
-		
+
+		if (printTotal) System.out.println("force (D): " + force);
+		if (printTotal) System.out.println("torque (D): " + torque);
 		
 		// to world frame
 		force = drone.transformToWorldFrame(force);
 		torque = drone.transformToWorldFrame(torque);
+
+		if (printTotal) System.out.println("force (W): " + force);
+		if (printTotal) System.out.println("torque (W): " + torque);
 		
 		// return the results
 		return new Vector3f[] { force, torque };
