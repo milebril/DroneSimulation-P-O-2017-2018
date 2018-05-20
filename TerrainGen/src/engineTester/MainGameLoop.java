@@ -159,33 +159,17 @@ public class MainGameLoop {
 		module = new Module(testbed);
 
 		// ***INITIALIZE DRONEVIEW***
-//		RawModel droneModel = OBJLoader.loadObjModel("untitled5", loader);
-//		TexturedModel staticDroneModel = new TexturedModel(droneModel,
-//				new ModelTexture(loader.loadTexture("untitled")));
-
-
-//		for (int i = 1; i <= 10; i++) {
-			
-//			Drone drone = new Drone(staticDroneModel,
-//					new Matrix4f().translate(new Vector3f(-20*i,
-//							(int) PhysicsEngine.groundLevel - autopilotConfig.getWheelY()
-//									+ autopilotConfig.getTyreRadius() + 20,
-//							20 * i)),
-//					1f, autopilotConfig, new EulerPrediction(STEP_TIME));
-//			drone.setName("Drone " + i);
-//			drone.setId(drones.size());
-//			
-//			activeDrone = drone;
-//			entities.add(drone);
-//			drones.add(drone);
-//		}
 		
 		module.defineAirport(0, 0, 20, 20);
-//		module.defineAirport(0, -400, 1, 50);
+		module.defineAirport(0, -1000, 20, 20);
 //		module.defineAirport(0, -100, 50, 50);
 //		module.defineAirport(0, -200, 50, 50);
+		
+		module.defineDrone(0, 1, 1, autopilotConfig);
+		//module.defineDrone(0, 1, 1, autopilotConfig);
+		
 //		for (int i = 0; i < 10; i++) {
-			module.defineDrone(0, 1, 1, autopilotConfig);
+			
 		//}
 		//module.defineDrone(2, 1, 1, autopilotConfig);
 		
