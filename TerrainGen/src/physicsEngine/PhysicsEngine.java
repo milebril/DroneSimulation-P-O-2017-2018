@@ -54,7 +54,9 @@ public class PhysicsEngine {
 
 		if (!deltaPositions[1].equals(new Vector3f(0, 0, 0))) {
 			Vector3f rotationAxis = new Vector3f(0, 0, 0);
+			System.out.println("rotationAxis " + deltaPositions[1]);
 			deltaPositions[1].normalise(rotationAxis);
+			System.out.println("normalised rotationAxis " +rotationAxis);
 			drone.rotate(deltaPositions[1].length(), rotationAxis);
 		}
 
@@ -79,7 +81,7 @@ public class PhysicsEngine {
 			}
 		}
 		
-		
+		System.out.println("_____________________________________________");
 		// recursieve oproep
 		PhysicsEngine.applyPhysics(drone, (dt - h));
 	}
