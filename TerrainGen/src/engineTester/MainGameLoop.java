@@ -165,9 +165,9 @@ public class MainGameLoop {
 //		module.defineAirport(0, -100, 50, 50);
 //		module.defineAirport(0, -200, 50, 50);
 		
-		//module.defineDrone(0, 1, 1, autopilotConfig);
-		module.defineDrone(0, 0, 0, autopilotConfig);
-		module.defineDrone(0, 0, 1, autopilotConfig);
+		module.defineDrone(0, 1, 1, autopilotConfig);
+		//module.defineDrone(0, 0, 0, autopilotConfig);
+		//module.defineDrone(0, 0, 1, autopilotConfig);
 		//module.defineDrone(0, 1, 1, autopilotConfig);
 		
 //		for (int i = 0; i < 10; i++) {

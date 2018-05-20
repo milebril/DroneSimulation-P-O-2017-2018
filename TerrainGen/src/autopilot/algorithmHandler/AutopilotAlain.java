@@ -33,12 +33,12 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	
 	public AutopilotAlain() {
 		// add algorithms in order
-		addAlgorithm(new Aanloop(34f, 15f));
+		//addAlgorithm(new Aanloop(34f, 15f));
 //		addAlgorithm(new FlyToHeight(20f));
 ////		addAlgorithm(new FlyToHeight(10f));
 //		addAlgorithm(new Land());
 		
-		//new FlyToAirport(new Vector3f(0,0, -1000), this);
+		new FlyToAirport(new Vector3f(0,0, -1000), this);
 		
 		// start 1st algorithm
 		nextAlgorithm();
