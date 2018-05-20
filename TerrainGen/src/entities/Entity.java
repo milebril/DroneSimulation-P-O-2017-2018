@@ -94,7 +94,64 @@ public class Entity {
 	 * Rotates this entity for the given angle around the x- y- z axis of the world frame
 	 */
 	public void rotate(float angle, Vector3f axis){
-		this.getPose().rotate(angle , axis);
+//		this.getPose().rotate(angle , axis);
+		float ux = axis.x;
+		float uy = axis.y;
+		float uz = axis.z;
+		
+		float cth = (float) Math.cos(angle);
+		float sth = (float) Math.sin(angle);
+		Matrix3f rm = new Matrix3f();
+		rm.m00 = cth + ux*ux*(1-cth);
+		rm.m10 = ux*uy*(1-cth)-uz*sth;
+		rm.m20 = ux*uz*(1-cth) + uy*sth;
+		rm.m01 = uy*ux*(1-cth) + uz*sth;
+		rm.m11 = cth + uy*uy*(1-cth);
+		rm.m21 = uy*uz*(1-cth) - ux*sth;
+		rm.m02 = uz*ux*(1-cth) - uy*sth;
+		rm.m12 = uz*uy*(1-cth) + ux*sth;
+		rm.m22 = cth + uz*uz*(1-cth);
+//		
+		Matrix4f p = this.getPose();
+//		System.out.println("matrix p: " + p);
+		Matrix3f t = new Matrix3f();
+		
+		t.m00 = p.m00;
+		t.m01 = p.m01;
+		t.m02 = p.m02;
+		t.m10 = p.m10;
+		t.m11 = p.m11;
+		t.m12 = p.m12;
+		t.m20 = p.m20;
+		t.m21 = p.m21;
+		t.m22 = p.m22;
+		
+//		System.out.println("rotatiematrix: \r" + t);
+		System.out.println("rotatieas: " + axis);
+		
+//		System.out.println("p.m31: " + p.m31);
+		
+		Matrix3f.mul(rm, t, t);
+		
+		Matrix4f newPose = new Matrix4f();
+		
+		newPose.m00 = t.m00;
+		newPose.m01 = t.m01;
+		newPose.m02 = t.m02;
+		newPose.m30 = p.m30;
+		newPose.m10 = t.m10;
+		newPose.m11 = t.m11;
+		newPose.m12 = t.m12;
+		newPose.m31 = p.m31;
+//		System.out.println("newPose m13: " + newPose.m13);
+		newPose.m32 = p.m32;
+		newPose.m20 = t.m20;
+		newPose.m21 = t.m21;
+		newPose.m22 = t.m22;
+		
+		this.setPose(newPose);
+		
+//		System.out.println("after rotate: \n" + this.getPose());
 	}
 	
 	// SCALE
