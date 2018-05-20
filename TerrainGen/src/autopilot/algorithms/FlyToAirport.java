@@ -19,7 +19,12 @@ public class FlyToAirport implements Algorithm {
 		ap.addAlgorithm(new TakeOff(35f));
 		ap.addAlgorithm(new FlyToHeight(20f));
 		
-		Vector3f groundTouchPosition = new Vector3f(target.x, target.y, target.z + 150);
+		Vector3f groundTouchPosition;
+		if (airportPosition.getZ() >= -200) {
+			groundTouchPosition = new Vector3f(target.x, target.y, target.z - 150);
+		} else {
+			groundTouchPosition = new Vector3f(target.x, target.y, target.z + 150);
+		}
 		ap.addAlgorithm(new FlyStraightToLand(groundTouchPosition));
 		
 		ap.addAlgorithm(new Land());
