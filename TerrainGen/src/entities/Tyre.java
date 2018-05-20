@@ -18,6 +18,8 @@ public class Tyre {
 		this.dampSlope = dampSlope;
 	}
 	
+	public String name;
+	
 	// DRONE
 	
 	/**
