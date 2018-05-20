@@ -79,7 +79,7 @@ public class PhysicsEngine {
 			}
 		}
 		
-		System.out.println("_____________________________________________");
+		System.out.println("---------------------------------------------------------------");
 		// recursieve oproep
 		PhysicsEngine.applyPhysics(drone, (dt - h));
 	}
@@ -106,7 +106,7 @@ public class PhysicsEngine {
 	private static Vector3f[] calculateForces(Drone drone, float stepsize) throws MaxAoAException {
 
 		boolean printAirfoils = false;
-		boolean printCompression = true;
+		boolean printCompression = false;
 		boolean printFriction = true;
 		boolean printTotal = true;
 		
@@ -218,44 +218,48 @@ public class PhysicsEngine {
 			// -> start next iteration of for loop
 			if (!tyre.isGrounded())
 				continue;
+			
+			// snelheid vd tyre (in drone frame)
+			Vector3f tyreVelocityD = drone.transformToDroneFrame(drone.getVelocityOfPoint(tyre.getGroundedPosition()));
+			
+			// ZIJWAARTSE WRIJVING
+			
+			Vector3f frictionOrientation = new Vector3f(0, 0, 0);
+			if (0 < tyreVelocityD.x) frictionOrientation.x = -1;
+			else frictionOrientation.x = 1;
+			
+			// projecteren op het grondvlak + normaliseren
+			frictionOrientation = drone.transformToWorldFrame(frictionOrientation);
+			frictionOrientation.y = 0;
+			frictionOrientation = drone.transformToDroneFrame(frictionOrientation);
+			frictionOrientation.normalise();
 
-			// transformeer de x-as van het drone as nr was en projecteren op
-			// het grondvlak + normaliseren
-			Vector3f forictionOrientation = drone.transformToWorldFrame(new Vector3f(1, 0, 0));
-			forictionOrientation.y = 0;
-			forictionOrientation.normalise();
-
-			//
-			Vector3f tyreVelocity = drone.getVelocityOfPoint(tyre.getGroundedPosition());
-
-			// de x-component van de dronespeed geprojecteerd op grondvlak x
-			// wrijvingscoefficient x normaalkracht.
+			// grootte vd wrijvingskracht
 			float N = (float) compressionForces[1];
-			double frictionForceSize = -Vector3f.dot(forictionOrientation, tyreVelocity) * N
-					* tyre.getMaxFrictionCoeff();
+			double frictionForceSize = -Vector3f.dot(frictionOrientation, tyreVelocityD) * N * tyre.getMaxFrictionCoeff();
 
-			forictionOrientation.scale((float) frictionForceSize);
+			frictionOrientation.scale((float) frictionForceSize);
+			
+			// REMKRACHT
 
 			Vector3f rollingOrientation = new Vector3f(0, 0, 0);
-
-			if (drone.transformToDroneFrame(tyreVelocity).z > 0) {
-				rollingOrientation.z = -1;
-			} else {
-				rollingOrientation.z = 1;
-			}
-
+			if (0 < tyreVelocityD.z) rollingOrientation.z = -1;
+			else rollingOrientation.z = 1;
+			
+			// projecteren op het grondvlak + normaliseren
 			rollingOrientation = drone.transformToWorldFrame(rollingOrientation);
 			rollingOrientation.y = 0;
-			rollingOrientation.normalise();
 			rollingOrientation = drone.transformToDroneFrame(rollingOrientation);
+			rollingOrientation.normalise();
 			
-
+			// grootte vd kracht
 			rollingOrientation.scale((float) tyre.getBrakingForce());
-
-			Vector3f totalTyreForce = new Vector3f();
-			Vector3f.add(rollingOrientation, forictionOrientation, totalTyreForce);
 			
-			System.out.println(tyre.name + " frictionF: " + p(forictionOrientation) + " | brakeF: " + p(rollingOrientation));
+			// BEIDE KRACHTEN OPTELLEN
+			Vector3f totalTyreForce = new Vector3f();
+			Vector3f.add(rollingOrientation, frictionOrientation, totalTyreForce);
+			
+			System.out.println(tyre.name + " frictionF: " + p(frictionOrientation) + " | brakeF: " + p(rollingOrientation));
 			
 			// resulterende torque
 			Vector3f brakeTorque = new Vector3f();
