@@ -126,10 +126,6 @@ public class Entity {
 		t.m21 = p.m21;
 		t.m22 = p.m22;
 		
-//		System.out.println("rotatiematrix: \r" + t);
-		System.out.println("rotatieas: " + axis);
-		
-//		System.out.println("p.m31: " + p.m31);
 		
 		Matrix3f.mul(rm, t, t);
 		

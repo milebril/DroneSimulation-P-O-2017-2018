@@ -54,9 +54,7 @@ public class PhysicsEngine {
 
 		if (!deltaPositions[1].equals(new Vector3f(0, 0, 0))) {
 			Vector3f rotationAxis = new Vector3f(0, 0, 0);
-			System.out.println("rotationAxis " + deltaPositions[1]);
 			deltaPositions[1].normalise(rotationAxis);
-			System.out.println("normalised rotationAxis " +rotationAxis);
 			drone.rotate(deltaPositions[1].length(), rotationAxis);
 		}
 
@@ -81,13 +79,20 @@ public class PhysicsEngine {
 			}
 		}
 		
-		System.out.println("_____________________________________________");
 		// recursieve oproep
 		PhysicsEngine.applyPhysics(drone, (dt - h));
 	}
 
 	// ACCELERATIONS
-
+	
+	public static String p(Vector3f a) {
+		return "(" + s(a.x) + ", " + s(a.y) + ", " + s(a.z) + ")";
+	}
+	
+	public static String s(double a) {
+		return Double.toString(Math.round(a*1000)/1000);
+	}
+	
 	/**
 	 * All the forces and torques exercised on the drone are calculated, added
 	 * together and then returned in an array. uses: the AirFoils liftForce and
@@ -99,6 +104,11 @@ public class PhysicsEngine {
 	 */
 	private static Vector3f[] calculateForces(Drone drone, float stepsize) throws MaxAoAException {
 
+		boolean printAirfoils = false;
+		boolean printCompression = false;
+		boolean printFriction = false;
+		boolean printTotal = false;
+		
 		// The total force and torque that are exercised on the given Drone (in
 		// drone frame)
 		Vector3f force = new Vector3f(0, 0, 0);
@@ -120,6 +130,10 @@ public class PhysicsEngine {
 			// add the calculated force and torque to the total force and torque
 			Vector3f.add(force, liftForceD, force);
 			Vector3f.add(torque, currentAirFoilTorqueD, torque);
+			
+			if (printAirfoils) System.out.println(currentAirFoil.name);
+			if (printAirfoils) System.out.println("  liftForceD: " + liftForceD);
+			if (printAirfoils) System.out.println("  torqueD: " + currentAirFoilTorqueD);
 		}
 		
 		// force exercised by the engine
@@ -153,6 +167,8 @@ public class PhysicsEngine {
 
 			Vector3f compressionTorque = new Vector3f();
 			Vector3f.cross(tyre.getGroundedPosition(), compressionForce, compressionTorque);
+			
+			if (printCompression) System.out.println(tyre.name + " compressionF: " + p(compressionForce) + " | compressionT: " + p(compressionTorque));
 			
 			// optellen bij het totaal
 			Vector3f.add(force, compressionForce, force);
@@ -189,6 +205,8 @@ public class PhysicsEngine {
 				// optellen bij het totaal
 				Vector3f.add(force, brakeForce, force);
 				Vector3f.add(torque, brakeTorque, torque);
+				
+				if (printFriction) System.out.println("front wheel brakeF: " + p(brakeForce) + " | brakeT: " + p(brakeTorque));
 			}
 		}
 
@@ -199,43 +217,49 @@ public class PhysicsEngine {
 			// -> start next iteration of for loop
 			if (!tyre.isGrounded())
 				continue;
+			
+			// snelheid vd tyre (in drone frame)
+			Vector3f tyreVelocityD = drone.transformToDroneFrame(drone.getVelocityOfPoint(tyre.getGroundedPosition()));
+			
+			// ZIJWAARTSE WRIJVING
+			
+			Vector3f frictionOrientation = new Vector3f(0, 0, 0);
+			if (0 < tyreVelocityD.x) frictionOrientation.x = -1;
+			else frictionOrientation.x = 1;
+			
+			// projecteren op het grondvlak + normaliseren
+			frictionOrientation = drone.transformToWorldFrame(frictionOrientation);
+			frictionOrientation.y = 0;
+			frictionOrientation = drone.transformToDroneFrame(frictionOrientation);
+			frictionOrientation.normalise();
 
-			// transformeer de x-as van het drone as nr was en projecteren op
-			// het grondvlak + normaliseren
-			Vector3f forictionOrientation = drone.transformToWorldFrame(new Vector3f(1, 0, 0));
-			forictionOrientation.y = 0;
-			forictionOrientation.normalise();
-
-			//
-			Vector3f tyreVelocity = drone.getVelocityOfPoint(tyre.getGroundedPosition());
-
-			// de x-component van de dronespeed geprojecteerd op grondvlak x
-			// wrijvingscoefficient x normaalkracht.
+			// grootte vd wrijvingskracht
 			float N = (float) compressionForces[1];
-			double frictionForceSize = -Vector3f.dot(forictionOrientation, tyreVelocity) * N
-					* tyre.getMaxFrictionCoeff();
+			double frictionForceSize = -Vector3f.dot(frictionOrientation, tyreVelocityD) * N * tyre.getMaxFrictionCoeff();
 
-			forictionOrientation.scale((float) frictionForceSize);
+			frictionOrientation.scale((float) frictionForceSize);
+			
+			// REMKRACHT
 
 			Vector3f rollingOrientation = new Vector3f(0, 0, 0);
-
-			if (drone.transformToDroneFrame(tyreVelocity).z > 0) {
-				rollingOrientation.z = -1;
-			} else {
-				rollingOrientation.z = 1;
-			}
-
+			if (0 < tyreVelocityD.z) rollingOrientation.z = -1;
+			else rollingOrientation.z = 1;
+			
+			// projecteren op het grondvlak + normaliseren
 			rollingOrientation = drone.transformToWorldFrame(rollingOrientation);
 			rollingOrientation.y = 0;
-			rollingOrientation.normalise();
 			rollingOrientation = drone.transformToDroneFrame(rollingOrientation);
+			rollingOrientation.normalise();
 			
-
+			// grootte vd kracht
 			rollingOrientation.scale((float) tyre.getBrakingForce());
-
+			
+			// BEIDE KRACHTEN OPTELLEN
 			Vector3f totalTyreForce = new Vector3f();
-			Vector3f.add(rollingOrientation, forictionOrientation, totalTyreForce);
-
+			Vector3f.add(rollingOrientation, frictionOrientation, totalTyreForce);
+			
+			if (printFriction) System.out.println(tyre.name + " frictionF: " + p(frictionOrientation) + " | brakeF: " + p(rollingOrientation));
+			
 			// resulterende torque
 			Vector3f brakeTorque = new Vector3f();
 			Vector3f.cross(tyre.getGroundedPosition(), totalTyreForce, brakeTorque);
@@ -243,12 +267,18 @@ public class PhysicsEngine {
 			// optellen bij het totaal
 			Vector3f.add(force, totalTyreForce, force);
 			Vector3f.add(torque, brakeTorque, torque);
+			
 		}
-		
+
+		if (printTotal) System.out.println("force (D): " + p(force));
+		if (printTotal) System.out.println("torque (D): " + p(torque));
 		
 		// to world frame
 		force = drone.transformToWorldFrame(force);
 		torque = drone.transformToWorldFrame(torque);
+
+		if (printTotal) System.out.println("force (W): " + p(force));
+		if (printTotal) System.out.println("torque (W): " + p(torque));
 		
 		// return the results
 		return new Vector3f[] { force, torque };
