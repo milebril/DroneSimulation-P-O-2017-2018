@@ -13,6 +13,7 @@ import autopilot.interfaces.AutopilotConfig;
 import autopilot.interfaces.AutopilotFactory;
 import autopilot.interfaces.AutopilotInputs;
 import autopilot.interfaces.AutopilotOutputs;
+import models.Airport;
 import models.RawModel;
 import models.TexturedModel;
 import physicsEngine.approximationMethods.EulerPrediction;
@@ -712,5 +713,32 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	}
 
 	private Autopilot autopilot;
+
+	private Airport homebase;
+	private Airport currentAirport;
 	
+	/**
+	 * Sets the homebase airport
+	 * @param luchthaven
+	 */
+	public void setHomeBase(Airport luchthaven) {
+		homebase = luchthaven;
+	}
+	
+	public Airport getHomebase() {
+		return this.homebase;
+	}
+	
+	/**
+	 * Sets the homebase airport
+	 * @param luchthaven
+	 */
+	public void setCurrentAirport(Airport luchthaven) {
+		currentAirport = luchthaven;
+	}
+	
+	public Airport getCurrentAirport() {
+		return this.currentAirport;
+	}
+ 	
 }
