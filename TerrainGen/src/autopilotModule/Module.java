@@ -9,6 +9,7 @@ import org.lwjgl.util.vector.Vector3f;
 import autopilot.algorithmHandler.AutopilotAlain;
 import autopilot.algorithms.FlyToAirport;
 import autopilot.algorithms.VliegRechtdoor;
+import autopilot.algorithms.Wait;
 import autopilot.interfaces.AutopilotConfig;
 import autopilot.interfaces.AutopilotInputs;
 import autopilot.interfaces.AutopilotModule;
@@ -33,6 +34,8 @@ public class Module implements AutopilotModule {
 	private float width;
 
 	private Testbed testbed;
+
+	private int droneCount = 0;
 
 	private AutopilotOutputs[] apOutputs = new AutopilotOutputs[2000];
 
@@ -70,7 +73,7 @@ public class Module implements AutopilotModule {
 		TexturedModel staticDroneModel = new TexturedModel(droneModel,
 				new ModelTexture(loader.loadTexture("untitled")));
 		Random r = new Random();
-		int droneId = getTestbed().getNextDroneID();
+		int droneId = droneCount++;
 		// int x = r.nextInt(2000);
 		// int z = r.nextInt(2000);
 		int x = 0;
@@ -97,14 +100,14 @@ public class Module implements AutopilotModule {
 		drone.getAutopilot().simulationStarted(config, drone.getAutoPilotInputs());
 
 		// TODO: Drones mogen pas actief worden als er een pakketje op valt
-		this.getTestbed().getInactiveDrones().add(droneId, drone);
+		this.getTestbed().getInactiveDrones()[droneId] = drone;
 	}
 
 	@Override
 	public void startTimeHasPassed(int drone, AutopilotInputs inputs) {
 		// Allows the autopilots for all drones to run in parallel if desired. Called
 		// with drone = 0 through N - 1, in that order, if N drones have been defined.
-		apOutputs[drone] = this.getTestbed().getActiveDrones().get(drone).getAutopilot().timePassed(inputs);
+		apOutputs[drone] = this.getTestbed().getActiveDrones()[drone].getAutopilot().timePassed(inputs);
 	}
 
 	@Override
@@ -120,7 +123,7 @@ public class Module implements AutopilotModule {
 		// the testbed.
 
 		Integer distance = Integer.MAX_VALUE;
-		Drone dBest = this.testbed.getInactiveDrones().get(0);
+		Drone dBest = this.testbed.getInactiveDrones()[0];
 
 		Vector3f airport = this.getTestbed().getAirports().get(fromAirport).getPackagePosition(fromGate);
 		for (Drone d : this.testbed.getInactiveDrones()) {
@@ -132,10 +135,6 @@ public class Module implements AutopilotModule {
 				dBest = d;
 			}
 		}
-
-		this.getTestbed().getInactiveDrones().remove(dBest);
-		this.getTestbed().getActiveDrones().add(dBest);
-
 	}
 
 	@Override
@@ -152,30 +151,59 @@ public class Module implements AutopilotModule {
 	}
 
 	public void update() {
-		for (Drone d : testbed.getDrones()) {
-			if (d.getHomebase() == d.getCurrentAirport()) { // Drone is at homebase
-				int gate = getEuclidDist(d.getPosition(), d.getHomebase().getGate(0).getPosition()) <= 2 ? 0 : 1;
-				if (d.getHomebase().containsPackage(gate)) {
-					entities.Package temp = d.getHomebase().getPackage(gate);
-					d.getHomebase().showPackage(gate);
-					flyToAirport(d, temp.getDestAirport(), temp.getDestGate());
-					
-					testbed.getInactiveDrones().remove(d);
-					testbed.getActiveDrones().add(d);
-					
-					MainGameLoop.setActiveDrone(d);
+		for (int i = 0; i < testbed.getInactiveDrones().length; i++) {
+			if (testbed.getInactiveDrones()[i] != null) {
+				Drone d = testbed.getInactiveDrones()[i];
+				if (d.getHomebase() == d.getCurrentAirport()) { // Drone is at homebase
+					int gate = getEuclidDist(d.getPosition(), d.getHomebase().getGate(0).getPosition()) <= 2 ? 0 : 1;
+					if (d.getHomebase().containsPackage(gate)) {
+						entities.Package temp = d.getCurrentAirport().getPackage(gate);
+						if (temp.getDestAirport() != d.getHomebase()) {
+							System.out.println("Take Packet");
+							d.getHomebase().showPackage(gate);
+							flyToAirport(d, temp.getDestAirport(), temp.getDestGate());
+
+							testbed.getInactiveDrones()[i] = null;
+							testbed.getActiveDrones()[i] = d;
+
+							MainGameLoop.setActiveDrone(d);
+							
+							Vector3f current = d.getCurrentAirport().getPosition();
+							Vector3f homebasePosition = d.getHomebase().getPosition();
+							System.out.println(d.getHeadingFloat());
+							if (current.z < homebasePosition.z && Math.abs((int) d.getHeadingFloat()) == 3) {
+								// ((AutopilotAlain) drone.getAutopilot()).setAlgorithm(new Turn(Math.PI / 2));
+								d.rotate((float) Math.PI, new Vector3f(0, 1, 0));
+							} else if (current.z > homebasePosition.z && (int) d.getHeadingFloat() == 0) {
+								// ((AutopilotAlain) drone.getAutopilot()).setAlgorithm(new Turn(-Math.PI / 2));
+								d.rotate((float) -Math.PI, new Vector3f(0, 1, 0));
+							}
+						} else {
+							((AutopilotAlain) d.getAutopilot()).setAlgorithm(new Wait());
+						}
+					}
 				}
 			}
-			
-			System.out.println(d.getCurrentAirport() != d.getHomebase());
-			//Airport reached
-			if (((AutopilotAlain) d.getAutopilot()).getAlgorithm() instanceof VliegRechtdoor
-					&& d.getCurrentAirport() != d.getHomebase()) {
-				System.out.println("HIER");
-				d.getCurrentAirport().showPackage(0);
-				flyToHomebase(d);
+		}
+
+		for (int i = 0; i < testbed.getActiveDrones().length; i++) {
+			if (testbed.getActiveDrones()[i] != null) {
+				Drone d = testbed.getActiveDrones()[i];
+
+				// Airport reached
+				if (((AutopilotAlain) d.getAutopilot()).getAlgorithm() instanceof VliegRechtdoor
+						&& d.getCurrentAirport() != d.getHomebase()) {
+					d.getCurrentAirport().showPackage(getEuclidDist(d.getPosition(), d.getCurrentAirport().getGate(0).getPosition()) <= 2 ? 0: 1);
+					flyToHomebase(d);
+				} else if (d.getHomebase() == d.getCurrentAirport()
+						&& getEuclidDist(d.getPosition(), d.getHomebase().getGate(0).getPosition()) <= 2) {
+					System.out.println("DITTE");
+					testbed.getActiveDrones()[i] = null;
+					testbed.getInactiveDrones()[i] = d;
+				}
 			}
 		}
+
 	}
 
 	public void spawnPacket(Airport startAirport, int startGate, Airport destAirport, int destGate) {

@@ -59,8 +59,6 @@ public class FlyStraightToLand implements Algorithm{
 		handler.setThrust(Math.max(0, cruiseForce + feedback));
 		
 		float landingLength = 49.359f * (float) handler.getProperties().getCruiseheight() / 5f + 3.4363f;
-		System.out.println("L: " + landingLength);
-		System.out.println(handler.getProperties().getHeading());
 		if (handler.getProperties().getHeading() <= 0.0001 && handler.getProperties().getHeading() >= -0.0001) {
 			float startZ = whereToLand.z + landingLength;
 			if (handler.getProperties().getPosition().z <= startZ) {

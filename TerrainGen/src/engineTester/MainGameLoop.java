@@ -151,7 +151,20 @@ public class MainGameLoop {
 
 		// module.defineDrone(1, 0, 0, autopilotConfig);
 
-		ArrayList<Drone> drones = getTestbed().getDrones();
+		ArrayList<Drone> drones = new ArrayList<>();
+		for (int j = 0; j < testbed.getInactiveDrones().length; j++) {
+			if (testbed.getInactiveDrones()[j] != null) {
+				Drone d = testbed.getInactiveDrones()[j];
+				drones.add(d);
+			}
+		}
+		
+		for (int j = 0; j < testbed.getActiveDrones().length; j++) {
+			if (testbed.getActiveDrones()[j] != null) {
+				Drone d = testbed.getActiveDrones()[j];
+				drones.add(d);
+			}
+		}
 
 		// Drone randomValue = testbed.getInactiveDrones().get(0);
 		// activeDrone = randomValue;
@@ -204,9 +217,23 @@ public class MainGameLoop {
 			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
 				// camera.takeSnapshot();
 			}
-
-			drones = getTestbed().getDrones();
-
+			
+			drones = new ArrayList<>();
+			for (int j = 0; j < testbed.getInactiveDrones().length; j++) {
+				if (testbed.getInactiveDrones()[j] != null) {
+					Drone d = testbed.getInactiveDrones()[j];
+					drones.add(d);
+				}
+			}
+			
+			for (int j = 0; j < testbed.getActiveDrones().length; j++) {
+				if (testbed.getActiveDrones()[j] != null) {
+					Drone d = testbed.getActiveDrones()[j];
+					drones.add(d);
+				}
+			}
+			
+		
 			switch (currentView) {
 			case MINIMAP:
 				miniMap.render(drones, getTestbed().getAirports(), guiRenderer, loader);
@@ -256,9 +283,6 @@ public class MainGameLoop {
 				break;
 			}
 
-			module.update();
-			//System.out.println(activeDrone);
-
 			// ***UPDATES***
 			float dt = DisplayManager.getFrameTimeSeconds();
 			if (dt > 0.00001) {
@@ -269,6 +293,10 @@ public class MainGameLoop {
 
 				// Maak een thread aan voor elke drone
 				for (Drone d : getTestbed().getActiveDrones()) {
+					if (d == null) {
+						continue;
+					}
+					
 					Runnable toRun = new Runnable() {
 						@Override
 						public void run() {
@@ -302,6 +330,10 @@ public class MainGameLoop {
 				ArrayList<Future<?>> futureList2 = new ArrayList<Future<?>>();
 				// Maak een thread aan voor elke drone
 				for (Drone d : getTestbed().getActiveDrones()) {
+					if (d == null) {
+						continue;
+					}
+					
 					Runnable toRun = new Runnable() {
 						@Override
 						public void run() {
@@ -329,6 +361,9 @@ public class MainGameLoop {
 					fut.get();
 				}
 			}
+			
+			module.update();
+			//System.out.println(activeDrone);
 
 			keyInputs();
 
@@ -358,8 +393,18 @@ public class MainGameLoop {
 		// renderer.processEntity(entity);
 		// }
 
-		for (Drone d : getTestbed().getDrones()) {
-			renderer.processEntity(d);
+		for (int i = 0; i < testbed.getInactiveDrones().length; i++) {
+			if (testbed.getInactiveDrones()[i] != null) {
+				Drone d = testbed.getInactiveDrones()[i];
+				renderer.processEntity(d);
+			}
+		}
+		
+		for (int i = 0; i < testbed.getActiveDrones().length; i++) {
+			if (testbed.getActiveDrones()[i] != null) {
+				Drone d = testbed.getActiveDrones()[i];
+				renderer.processEntity(d);
+			}
 		}
 
 		for (Airport a : getTestbed().getAirports()) {

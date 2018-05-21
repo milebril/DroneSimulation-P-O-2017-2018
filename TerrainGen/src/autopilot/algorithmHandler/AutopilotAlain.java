@@ -84,6 +84,10 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 			return "wait";
 		}
 	}
+	
+	public LinkedList<Algorithm> getAlgorithms() {
+		return this.algorithmList;
+	}
 
 	private float thrust = 0;
 

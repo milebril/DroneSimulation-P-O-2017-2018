@@ -123,6 +123,11 @@ public class Airport {
 		
 		if (gate == 0) {
 			packetGateOne = new Package(staticTreeModel, new Matrix4f().translate(leftGate.getPosition()), 1, startAirport, startGate, destAirport, destGate);
+			packetGateTwo = new Package(staticTreeModel, new Matrix4f().translate(rightGate.getPosition()), 1, startAirport, startGate, destAirport, destGate);
+			showPackage(gate);
+		} else if (gate == 1) {
+			packetGateTwo = new Package(staticTreeModel, new Matrix4f().translate(rightGate.getPosition()), 1, startAirport, startGate, destAirport, destGate);
+			packetGateOne = new Package(staticTreeModel, new Matrix4f().translate(leftGate.getPosition()), 1, startAirport, startGate, destAirport, destGate);
 			showPackage(gate);
 		}
 	}

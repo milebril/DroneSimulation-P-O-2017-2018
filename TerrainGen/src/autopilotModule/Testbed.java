@@ -12,8 +12,8 @@ public class Testbed {
 	public Testbed(){
 	}
 	
-	private static ArrayList<Drone> activeDrones = new ArrayList<Drone>();
-	private static ArrayList<Drone> inactiveDrones = new ArrayList<Drone>();
+	private static Drone[] activeDrones = new Drone[50];
+	private static Drone[] inactiveDrones = new Drone[50];
 	private static ArrayList<Airport> airports = new ArrayList<Airport>();
 	
 	public ArrayList<Airport> getAirports(){
@@ -24,22 +24,22 @@ public class Testbed {
 		return this.airports.size();
 	}
 	
-	public ArrayList<Drone> getInactiveDrones(){
+	public Drone[] getInactiveDrones(){
 		return this.activeDrones;
 	}
 	
-	public ArrayList<Drone> getActiveDrones(){
+	public Drone[] getActiveDrones(){
 		return this.inactiveDrones;
 	}
 	
-	public ArrayList<Drone> getDrones(){
-		ArrayList<Drone> d = new ArrayList<Drone>();
-		d.addAll(activeDrones);
-		d.addAll(inactiveDrones);
-		return d;
-	}
+//	public ArrayList<Drone> getDrones(){
+//		ArrayList<Drone> d = new ArrayList<Drone>();
+//		d.addAll(activeDrones);
+//		d.addAll(inactiveDrones);
+//		return d;
+//	}
 	
-	public int getNextDroneID() {
-		return getDrones().size();
-	}
+//	public int getNextDroneID() {
+//		return getDrones().size();
+//	}
 }
