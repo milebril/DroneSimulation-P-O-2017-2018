@@ -26,25 +26,33 @@ public class YayoRechtdoor implements Algorithm {
 		relTarget.z = targetW.z - handler.getProperties().getZ();
 		relTarget = handler.getProperties().transformToDroneFrame(relTarget);
 		
-		float dt = handler.getProperties().getDeltaTime();
-		float feedback;
 		
+		// RECHTDOOR VLIEGEN
+		handler.setHorStabInclination(0);
 		handler.setVerStabInclination(0);
 		
-		// PITCH ~ HOR STAB
-		feedback = horStabPID.getFeedback(handler.getProperties().getPitch(), dt);
+		// fly in a straight line at 40m/s, maintaining altitude
+		float feedback;
+		float dt = handler.getProperties().getDeltaTime();
+
+		// HORIZONTAL STABILIZER -> pitch op 0 deg houden
+		float pitch = 0.0f;
+		
+		feedback = horStabPID.getFeedback(handler.getProperties().getPitch() - pitch, dt);
 		handler.setHorStabInclination(feedback);
 		
-		// ROLL & HEIGHT
+		// LEFT AND RIGHT WING -> ensure the plane is moving as its forward vector
+		float roll = 0.0f;
 		float rollFeedback = rollPID.getFeedback(handler.getProperties().getRoll(), dt);
 		
-		float heightError = handler.getProperties().getY() - handler.getProperties().getCruiseheight();
-		float heightFeedback = heightPID.getFeedback(heightError, dt);
+		Vector3f velocityD = handler.getProperties().transformToDroneFrame(handler.getProperties().getVelocity());
 		
-		handler.setLeftWingInclination(heightFeedback-rollFeedback+0.15f);
-		handler.setRightWingInclination(heightFeedback+rollFeedback+0.15f);
+		feedback = upwardsForcePID.getFeedback(-velocityD.y, dt);
 		
-		// THRUST
+		handler.setLeftWingInclination(feedback + rollFeedback+0.15f);
+		handler.setRightWingInclination(feedback - rollFeedback + 0.15f);
+		
+		// velocity op 50 m/s houden
 		float cruiseForce = handler.getProperties().getGravity();
 		feedback = thrustPID.getFeedback(AutopilotAlain.CRUISESPEED - handler.getProperties().getVelocity().length(), dt);
 		handler.setThrust(Math.max(0, cruiseForce + feedback));
@@ -59,7 +67,6 @@ public class YayoRechtdoor implements Algorithm {
 	private PID upwardsForcePID = new PID(0.1f, 1f, 0.0f, 2);
 	private PID horStabPID = new PID(4, 1, 1, 2);
 	private PID rollPID = new PID(0.7f, 0.5f, 0.16f, 2);
-	private PID heightPID = new PID(0.1f, 1f, 0.0f, 2);
 
 	@Override
 	public String getName() {

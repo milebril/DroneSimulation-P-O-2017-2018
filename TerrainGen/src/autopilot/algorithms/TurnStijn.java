@@ -45,9 +45,7 @@ public class TurnStijn implements Algorithm {
 	    float feedback;
 	    
 	    // HEADING
-	    System.out.println("headingDest: " + headingDest);
 	    float headingError = (headingDest - handler.getProperties().getHeading()) % (float)(2*Math.PI);
-	    System.out.println(headingError);
 	    if (headingError < -Math.PI) headingError += 2*Math.PI;
 	    if (Math.PI < headingError) headingError -= 2*Math.PI;
 	    
@@ -68,13 +66,13 @@ public class TurnStijn implements Algorithm {
 	    handler.setHorStabInclination(feedback);
 	    
 	    
-	    System.out.println("--------------------");
-	    System.out.println("heading error: " + headingError + " rad");
-	    System.out.println("rollPID: " + rollFeedback);
-	    System.out.println("roll: " + roll + " -> error: " + rollError);
-	    System.out.println("wingPID: " + wingFeedback);
-	    System.out.println("HeightERROR " + heightError);
-	    System.out.println("height feedback: " + heightFeedback);
+//	    System.out.println("--------------------");
+//	    System.out.println("heading error: " + headingError + " rad");
+//	    System.out.println("rollPID: " + rollFeedback);
+//	    System.out.println("roll: " + roll + " -> error: " + rollError);
+//	    System.out.println("wingPID: " + wingFeedback);
+//	    System.out.println("HeightERROR " + heightError);
+//	    System.out.println("height feedback: " + heightFeedback);
 	    
 	    
 	    // THRUST

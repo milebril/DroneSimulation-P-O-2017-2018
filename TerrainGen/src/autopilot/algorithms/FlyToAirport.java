@@ -42,7 +42,7 @@ public class FlyToAirport implements Algorithm {
 		System.out.println("doelrichting: " + doelrichting);
 		
 		// rechtdoor vliegen
-		ap.addAlgorithm(new YayoRechtdoor(-250, positionTarget));
+		ap.addAlgorithm(new YayoRechtdoor(-255 - ap.getProperties().getCruiseheight() / 2, positionTarget));
 		
 		// optioneel: links of rechts draaien
 		if (doelrichting == Doel.LINKS) {
@@ -55,9 +55,8 @@ public class FlyToAirport implements Algorithm {
 		// rechtdoor vliegen naar de luchthaven
 		ap.addAlgorithm(new YayoRechtdoor(-350, positionTarget));
 		
-		
 		// landen
-		ap.addAlgorithm(new FlyToHeight(6.0f));
+		//ap.addAlgorithm(new FlyToHeight(6.0f));
 		ap.addAlgorithm(new Land());
 		
 		ap.addAlgorithm(new Taxi(positionTarget));

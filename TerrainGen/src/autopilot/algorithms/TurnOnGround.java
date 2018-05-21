@@ -49,12 +49,13 @@ public class TurnOnGround implements Algorithm {
 				} else if (handler.getLeftBrakeForce() <= 0) {
 					handler.setLeftBrakeForce(0);
 				}
-				handler.setRightBrakeForce(handler.getRightBrakeForce() + pidBrake.calculateChange(angleDif, dt));
-				if (handler.getRightBrakeForce() >= handler.getProperties().getRMax()) {
-					handler.setRightBrakeForce(handler.getProperties().getRMax());
-				} else if (handler.getRightBrakeForce() <= 0) {
-					handler.setRightBrakeForce(0);
-				}
+//				handler.setRightBrakeForce(handler.getRightBrakeForce() + pidBrake.calculateChange(angleDif, dt));
+//				if (handler.getRightBrakeForce() >= handler.getProperties().getRMax()) {
+//					handler.setRightBrakeForce(handler.getProperties().getRMax());
+//				} else if (handler.getRightBrakeForce() <= 0) {
+//					handler.setRightBrakeForce(0);
+//				}
+				handler.setRightBrakeForce(handler.getProperties().getRMax());
 				handler.setThrust(100);
 				handler.setFrontBrakeForce(0);
 				
@@ -70,32 +71,6 @@ public class TurnOnGround implements Algorithm {
 
 			}
 		}
-
-		// } else {
-		// if (angleDif > -0.01 || angleDif < 0.01) {
-		// handler.setLeftBrakeForce((handler.getLeftBrakeForce() +
-		// pidBrake.getFeedback(angleDif, dt)));
-		// if (handler.getLeftBrakeForce() > handler.getProperties().getRMax()) {
-		// handler.setLeftBrakeForce(handler.getProperties().getRMax());
-		// } else if (handler.getLeftBrakeForce() < 0) {
-		// handler.setLeftBrakeForce(0);
-		// }
-		// handler.setRightBrakeForce(handler.getRightBrakeForce() -
-		// pidBrake.getFeedback(angleDif, dt));
-		// if (handler.getRightBrakeForce() > handler.getProperties().getRMax()) {
-		// handler.setRightBrakeForce(handler.getProperties().getRMax());
-		// } else if (handler.getRightBrakeForce() < 0) {
-		// handler.setRightBrakeForce(0);
-		// }
-		// handler.setThrust(200);
-		// //System.out.println("left:" + handler.getLeftBrakeForce());
-		// //System.out.println("right:" + handler.getRightBrakeForce());
-		// System.out.println("angleDif:" + angleDif);
-		// } else if (handler.getProperties().getVelocity().length()<0.01 && (angleDif <
-		// -0.01 || angleDif > 0.01)){
-		// handler.nextAlgorithm();
-		// System.out.println("woepsie");
-		// }
 	}
 
 	// }

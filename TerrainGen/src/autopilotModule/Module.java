@@ -213,19 +213,22 @@ public class Module implements AutopilotModule {
 	public void flyToAirport(Drone drone, Airport airport, int gate) {
 		new FlyToAirport(airport, gate, (AutopilotAlain) drone.getAutopilot());
 		drone.setCurrentAirport(airport);
-		System.out.println( ((AutopilotAlain) drone.getAutopilot()).getAlgorithms());
 	}
 
 	public void flyToHomebase(Drone drone) {
 		Vector3f current = drone.getCurrentAirport().getPosition();
 		Vector3f homebasePosition = drone.getHomebase().getPosition();
-
-		if (current.z < homebasePosition.z) {
+		
+		if (drone.getCurrentAirport().getAirportID() == 0) {
+			((AutopilotAlain) drone.getAutopilot()).addAlgorithm(new TurnOnGround((float) (Math.PI/2)));
+		} else if (drone.getCurrentAirport().getAirportID() == 1) {
 			((AutopilotAlain) drone.getAutopilot()).addAlgorithm(new TurnOnGround((float) (-3.1415)));
-		} else if (current.z > homebasePosition.z) {
-			((AutopilotAlain) drone.getAutopilot()).addAlgorithm(new TurnOnGround(-0.0f));
+		} else if (drone.getCurrentAirport().getAirportID() == 2) {
+			((AutopilotAlain) drone.getAutopilot()).addAlgorithm(new TurnOnGround((float) (-1.569)));
+		} else if (drone.getCurrentAirport().getAirportID() == 3) {
+			((AutopilotAlain) drone.getAutopilot()).addAlgorithm(new TurnOnGround((float) (0.0)));
 		}
-
+		
 		flyToAirport(drone, drone.getHomebase(), drone.getStartGate());
 	}
 
