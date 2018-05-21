@@ -33,8 +33,11 @@ public class FlyToAirport implements Algorithm {
 		relativeTarget.x = positionTarget.x - ap.getProperties().getX();
 		relativeTarget.y = positionTarget.y - ap.getProperties().getY();
 		relativeTarget.z = positionTarget.z - ap.getProperties().getZ();
+		System.out.println(relativeTarget);
 		relativeTarget = ap.getProperties().transformToDroneFrame(relativeTarget);
 		Doel doelrichting = null;
+		System.out.println(positionTarget);
+		System.out.println(relativeTarget);
 		if (Math.abs(relativeTarget.x + 750) < 20) doelrichting = Doel.LINKS;
 		else if (Math.abs(relativeTarget.x - 750) < 20) doelrichting = Doel.RECHTS;
 		else doelrichting = Doel.RECHTDOOR;
@@ -42,7 +45,7 @@ public class FlyToAirport implements Algorithm {
 		System.out.println("doelrichting: " + doelrichting);
 		
 		// rechtdoor vliegen
-		ap.addAlgorithm(new YayoRechtdoor(-290, positionTarget));
+		ap.addAlgorithm(new YayoRechtdoor(-250, positionTarget));
 		
 		// optioneel: links of rechts draaien
 		if (doelrichting == Doel.LINKS) {
@@ -57,7 +60,7 @@ public class FlyToAirport implements Algorithm {
 		
 		
 		// landen
-		ap.addAlgorithm(new FlyToHeight(4.0f));
+		ap.addAlgorithm(new FlyToHeight(5.0f));
 		ap.addAlgorithm(new Land());
 		
 		ap.addAlgorithm(new Taxi(positionTarget));

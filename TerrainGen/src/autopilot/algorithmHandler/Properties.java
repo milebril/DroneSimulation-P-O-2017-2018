@@ -59,7 +59,7 @@ public class Properties implements AutopilotConfig, AutopilotInputs {
 		setDeltaTime(0);
 		setVelocity(new Vector3f(0, 0, 0));
 		setAcceleration(new Vector3f(0, 0, 0));
-		setOrientationMatrix(new Matrix3f());
+		setOrientationMatrix(calculateOrientationMatrix(inputs.getHeading(), inputs.getPitch(), inputs.getRoll()));
 	}
 	
 	// AutopilotInputs
@@ -335,7 +335,6 @@ public class Properties implements AutopilotConfig, AutopilotInputs {
 		this.orientationMatrix = orientationMatrix;
 	}
 	private Matrix3f calculateOrientationMatrix(float heading, float pitch, float roll) {
-		
 		Matrix3f xRot = new Matrix3f();
 		xRot.m11 = (float) Math.cos(pitch);
 		xRot.m22 = (float) Math.cos(pitch);
