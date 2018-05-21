@@ -18,7 +18,7 @@ public class TurnOnGround implements Algorithm {
 	}
 
 	private final float angle;
-	private PIDController pidBrake = new PIDController(1f, 0f, 0.5f, (float) (1 * 2486), getAngle());
+	private PIDController pidBrake = new PIDController(2f, 0f, 5f, (float) (1 * 2486), 0);
 
 	private float getAngle() {
 		return this.angle;
@@ -33,12 +33,12 @@ public class TurnOnGround implements Algorithm {
 		//System.out.println("angleDif: " + angleDif);
 
 
-		if (angleDif <= Math.PI) {
+		if (angleDif < Math.PI) {
 			//angleDif += Math.PI;
-			if (angleDif > Math.PI) {
+			if (angleDif >= Math.PI) {
 				//angleDif -= 2 * Math.PI;
 			}
-			if (Math.abs(angleDif) > 0.0005) {
+			if (Math.abs(angleDif) > 0.00005) {
 				handler.setLeftBrakeForce((handler.getLeftBrakeForce() - pidBrake.calculateChange(angleDif, dt)));
 				if (handler.getLeftBrakeForce() >= handler.getProperties().getRMax()) {
 					handler.setLeftBrakeForce(handler.getProperties().getRMax());

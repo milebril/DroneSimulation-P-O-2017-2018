@@ -13,7 +13,7 @@ public class Taxi implements Algorithm {
 	}
 
 	private final Vector3f point;
-	private PIDController pidBrake = new PIDController(1f, 0f, 0.5f, (float) (1 * 2486), 0);
+	private PIDController pidBrake = new PIDController(1f, 0f, 20f, (float) (1 * 2486), 0);
 
 	private Vector3f getPoint() {
 		return this.point;
