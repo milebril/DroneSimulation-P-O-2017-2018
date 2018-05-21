@@ -130,18 +130,15 @@ public class MainGameLoop {
 
 		// ***INITIALIZE DRONEVIEW***
 
-		module.defineAirport(0, 0, 20, 20);
-		module.defineAirport(0, -1000, 20, 20);
-		//module.defineAirport(0, 1000, 20, 20);
-
-		module.defineDrone(0, 0, 1, autopilotConfig);
-		module.defineDrone(1, 1, 0, autopilotConfig);
-		//module.defineDrone(1, 0, 0, autopilotConfig);
-
+		module.defineAirport(750, 0, 1, 20); // orienteer drone 0
+		module.defineAirport(0, -750, 20, 20);
+		module.defineAirport(-750, 0, 1, 20); // orienteer drone 0
+		module.defineAirport(0, 750, 20, 20);
+		
+		module.defineDrone(3, 0, 1, autopilotConfig);
+		
 		List<Airport> temp = testbed.getAirports();
-
-		module.spawnPacket(temp.get(0), 0, temp.get(1), 0);
-		module.spawnPacket(temp.get(1), 1, temp.get(0), 1);
+		module.spawnPacket(temp.get(0), 0, temp.get(2), 0);
 
 		// for (int i = 0; i < 10; i++) {
 

@@ -15,6 +15,7 @@ public class FlyToAirport implements Algorithm {
 	private int targetGate;
 	
 	private Vector3f positionTarget;
+	private enum Doel {LINKS, RECHTS, RECHTDOOR};
 	
 	public FlyToAirport(Airport airport, int gate, AutopilotAlain ap) {
 		this.target = airport;
@@ -22,32 +23,43 @@ public class FlyToAirport implements Algorithm {
 		
 		positionTarget = target.getGate(gate).getPosition();
 		
-		//Algorithms to follow
-		//
-
-		//ap.addAlgorithm(new TurnOnGround((float) (2*Math.PI)/2));
-		//ap.addAlgorithm(new TurnOnGround((float) (3*Math.PI)/2));
+		// opstijgen
 		ap.addAlgorithm(new TakeOff(35f));
 		ap.addAlgorithm(new FlyToHeight(ap.getCruiseHeight()));
 		
-		Vector3f groundTouchPosition;
-		if (positionTarget.getZ() >= -200) {
-			groundTouchPosition = new Vector3f(positionTarget.x, positionTarget.y, positionTarget.z - 150);
-		} else {
-			groundTouchPosition = new Vector3f(positionTarget.x, positionTarget.y, positionTarget.z + 150);
-		}
-		ap.addAlgorithm(new FlyStraightToLand(groundTouchPosition));
 		
+		// RICHTING BEPALEN
+		Vector3f relativeTarget = new Vector3f();
+		relativeTarget.x = positionTarget.x - ap.getProperties().getX();
+		relativeTarget.y = positionTarget.y - ap.getProperties().getY();
+		relativeTarget.z = positionTarget.z - ap.getProperties().getZ();
+		relativeTarget = ap.getProperties().transformToDroneFrame(relativeTarget);
+		Doel doelrichting = null;
+		if (Math.abs(relativeTarget.x + 750) < 20) doelrichting = Doel.LINKS;
+		else if (Math.abs(relativeTarget.x - 750) < 20) doelrichting = Doel.RECHTS;
+		else doelrichting = Doel.RECHTDOOR;
+		
+		System.out.println("doelrichting: " + doelrichting);
+		
+		// rechtdoor vliegen
+		ap.addAlgorithm(new YayoRechtdoor(-290, positionTarget));
+		
+		// optioneel: links of rechts draaien
+		if (doelrichting == Doel.LINKS) {
+			ap.addAlgorithm(new TurnStijn((float) Math.PI/2));
+		} else if (doelrichting == Doel.RECHTS) {
+			ap.addAlgorithm(new TurnStijn((float) -Math.PI/2));
+		}
+		
+		
+		// rechtdoor vliegen naar de luchthaven
+		ap.addAlgorithm(new YayoRechtdoor(-350, positionTarget));
+		
+		
+		// landen
+		ap.addAlgorithm(new FlyToHeight(4.0f));
 		ap.addAlgorithm(new Land());
 		
-		if (positionTarget.getZ() >= -200) {
-			groundTouchPosition = new Vector3f(positionTarget.x, positionTarget.y, positionTarget.z);
-		} else {
-			groundTouchPosition = new Vector3f(positionTarget.x, positionTarget.y, positionTarget.z);
-		}
-		
-		ap.addAlgorithm(new Taxi(positionTarget));
-		//ap.addAlgorithm(new TurnOnGround((float) -3.141592));
 	}
 	
 	@Override
