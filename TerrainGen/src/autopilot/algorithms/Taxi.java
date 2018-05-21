@@ -7,23 +7,17 @@ import autopilot.algorithmHandler.AlgorithmHandler;
 
 public class Taxi implements Algorithm {
 
-	public Taxi(Algorithm nextAlgorithm, Vector3f point) {
+	public Taxi(Vector3f point) {
 		this.point = point;
-		this.nextAlgorithm = nextAlgorithm;
 	}
 
 	private final Vector3f point;
-	private PID pidBrake = new PID(1f, 0f, 0.5f, (float) (0.1 * 2486));
+	private PID pidBrake = new PID(2f, 0f, 0.5f, (float) (0.1 * 2486));
 
 	private Vector3f getPoint() {
 		return this.point;
 	}
 
-	private final Algorithm nextAlgorithm;
-
-	private Algorithm getNextAlgorithm() {
-		return this.nextAlgorithm;
-	}
 
 	@Override
 	public void cycle(AlgorithmHandler handler) {
@@ -95,7 +89,7 @@ public class Taxi implements Algorithm {
 			handler.setFrontBrakeForce(0);
 		}
 
-		if (getEuclidDist(handler.getProperties().getPosition(), point) <= 1.5) {
+		if (getEuclidDist(handler.getProperties().getPosition(), point) <= 5) {
 			handler.setThrust(0);
 			handler.setLeftBrakeForce(handler.getProperties().getRMax());
 			handler.setRightBrakeForce(handler.getProperties().getRMax());
@@ -106,9 +100,7 @@ public class Taxi implements Algorithm {
 		// bereikt.
 		// In de opgave staat er dat de goal exact bereikt moet worden, maar we nemen
 		// binnen 1 meter want zo exact is niet echt belangrijk.
-		if (getEuclidDist(handler.getProperties().getPosition(), point) <= 2
-				&& handler.getProperties().getVelocity().length() <= 1)
-			handler.setAlgorithm(getNextAlgorithm());
+
 		
 	}
 

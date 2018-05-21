@@ -7,27 +7,41 @@ import org.lwjgl.util.vector.Vector3f;
 
 import autopilot.algorithmHandler.AlgorithmHandler;
 import autopilot.algorithmHandler.AutopilotAlain;
+import models.Airport;
 
 public class FlyToAirport implements Algorithm {
 
-	private Vector3f target;
+	private Airport target;
+	private int targetGate;
 	
-	public FlyToAirport(Vector3f airportPosition, AutopilotAlain ap) {
-		this.target = airportPosition;
+	private Vector3f positionTarget;
+	
+	public FlyToAirport(Airport airport, int gate, AutopilotAlain ap) {
+		this.target = airport;
+		this.targetGate = gate;
+		
+		positionTarget = target.getGate(gate).getPosition();
 		
 		//Algorithms to follow
 		ap.addAlgorithm(new TakeOff(35f));
 		ap.addAlgorithm(new FlyToHeight(20f));
 		
 		Vector3f groundTouchPosition;
-		if (airportPosition.getZ() >= -200) {
-			groundTouchPosition = new Vector3f(target.x, target.y, target.z - 150);
+		if (positionTarget.getZ() >= -200) {
+			groundTouchPosition = new Vector3f(positionTarget.x, positionTarget.y, positionTarget.z - 150);
 		} else {
-			groundTouchPosition = new Vector3f(target.x, target.y, target.z + 150);
+			groundTouchPosition = new Vector3f(positionTarget.x, positionTarget.y, positionTarget.z + 150);
 		}
 		ap.addAlgorithm(new FlyStraightToLand(groundTouchPosition));
 		
 		ap.addAlgorithm(new Land());
+		
+		if (positionTarget.getZ() >= -200) {
+			groundTouchPosition = new Vector3f(positionTarget.x, positionTarget.y, positionTarget.z);
+		} else {
+			groundTouchPosition = new Vector3f(positionTarget.x, positionTarget.y, positionTarget.z);
+		}
+		ap.addAlgorithm(new Taxi(groundTouchPosition));
 	}
 	
 	@Override
