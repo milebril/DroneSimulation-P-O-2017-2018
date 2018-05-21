@@ -35,15 +35,6 @@ public class FlyToPointRight implements Algorithm {
 
 		@Override
 		public void cycle(AlgorithmHandler handler) {
-			// BLIJF OP JUISTE HOOGTE
-//			handler.setHorStabInclination(handler.getHorStabInclination() + pidHorStab.calculateChange(
-//					handler.getProperties().getPitch() + getVerAngle(handler), handler.getProperties().getDeltaTime()));
-//			if (handler.getHorStabInclination() > Math.PI / 6) {
-//				handler.setHorStabInclination((float) (Math.PI / 6));
-//			} else if (handler.getHorStabInclination() < -Math.PI / 6) {
-//				handler.setHorStabInclination((float) -(Math.PI / 6));
-//			}
-//			handler.setHorStabInclination((float)Math.toRadians(0));
 			
 			// PITCH OP 0
 			float feedback = pitchPID.getFeedback(handler.getProperties().getPitch(), handler.getProperties().getDeltaTime());
@@ -83,7 +74,6 @@ public class FlyToPointRight implements Algorithm {
 				handler.setThrust(handler.getProperties().getMaxThrust());
 			
 			//ROLL naar de andere kant vanaf ??? meter in Z
-			System.out.println("Dingie: " + (handler.getProperties().getHeading() - getHorAngle(handler)));
 			if((handler.getProperties().getHeading() - getHorAngle(handler)) < 0.01) {
 				handler.nextAlgorithm();
 			}
@@ -92,19 +82,6 @@ public class FlyToPointRight implements Algorithm {
 		private float getHorAngle(AlgorithmHandler handler) {
 			float overstaande = point.getX() - handler.getProperties().getPosition().getX();
 			float aanliggende = point.getZ() - handler.getProperties().getPosition().getZ();
-			return (float) Math.atan(overstaande / aanliggende);
-		}
-
-		private float getVerAngle(AlgorithmHandler handler) {
-			float overstaande = point.getY() - handler.getProperties().getPosition().getY();
-			float aanliggende;
-			if (handler.getProperties().getHeading() < Math.toRadians(90))
-				aanliggende = -10;
-			else
-				aanliggende = 10;
-
-			//System.out.println("getVerAngle()" + Math.atan(overstaande / aanliggende));
-
 			return (float) Math.atan(overstaande / aanliggende);
 		}
 

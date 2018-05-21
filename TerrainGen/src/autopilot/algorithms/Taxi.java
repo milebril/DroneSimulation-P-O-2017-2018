@@ -21,7 +21,7 @@ public class Taxi implements Algorithm {
 
 	@Override
 	public void cycle(AlgorithmHandler handler) {
-		System.out.println("TAXI MOTHERFUCKA ");
+		
 		float dt = handler.getProperties().getDeltaTime();
 
 		float aanliggende = getPoint().getX() - handler.getProperties().getPosition().getX();
@@ -110,8 +110,7 @@ public class Taxi implements Algorithm {
 
 	@Override
 	public String getName() {
-
-		return "taxi";
+		return "Taxi";
 	}
 
 	public static float getEuclidDist(Vector3f vec1, Vector3f vec2) {

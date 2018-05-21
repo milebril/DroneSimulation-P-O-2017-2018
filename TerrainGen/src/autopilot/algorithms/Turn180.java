@@ -57,11 +57,7 @@ public class Turn180 implements Algorithm {
 				handler.setThrust(0);
 			else
 				handler.setThrust(handler.getProperties().getMaxThrust());
-			
-			//ROLL naar de andere kant vanaf ??? meter in Z
-			System.out.println("Heading: " + handler.getProperties().getHeading());
-			System.out.println("Position: " + handler.getProperties().getPosition());
-			
+						
 			if(handler.getProperties().getHeading() > Math.toRadians(179)) {
 				handler.nextAlgorithm();
 			}

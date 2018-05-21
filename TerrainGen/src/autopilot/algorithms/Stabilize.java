@@ -33,8 +33,6 @@ public class Stabilize implements Algorithm {
 			handler.setLeftWingInclination(0.15f + changeWingRoll);
 			handler.setRightWingInclination(0.15f - changeWingRoll);
 			
-			
-			System.out.println("ROLL LINKS");
 		//ROLL RECHTS
 		} else if(- handler.getProperties().getHeading() < getHorAngle(handler) - 0.05 ) {
 			changeWingRoll = this.rightRoll.calculateChange(handler.getProperties().getRoll(),
@@ -43,15 +41,12 @@ public class Stabilize implements Algorithm {
 			handler.setLeftWingInclination(0.15f + changeWingRoll);
 			handler.setRightWingInclination(0.15f - changeWingRoll);
 			
-			System.out.println("ROLL RECHTS");
 		} else {
 		
 		// ROLL op 0
 		feedback = rollPID.getFeedback(-handler.getProperties().getRoll(), dt);
 		handler.setLeftWingInclination(-feedback+0.15f);
 		handler.setRightWingInclination(feedback+0.15f);
-		
-		System.out.println("NO ROLL");
 		}
 		
 		// STIJGEN/DALEN ~ ZIJVLEUGELS
@@ -62,9 +57,6 @@ public class Stabilize implements Algorithm {
 		handler.setRightWingInclination(handler.getRightWingInclination()+feedback);
 		
 		// cruisesnelheid houden
-//		float cruiseForce = handler.getProperties().getGravity();
-//		feedback = thrustPID.getFeedback(AutopilotAlain.CRUISESPEED - handler.getProperties().getVelocity().length(), dt);
-//		handler.setThrust(Math.max(0, cruiseForce + feedback));
 		if(handler.getProperties().getVelocity().length() > 40) handler.setThrust(0);
 		else  handler.setThrust(handler.getProperties().getMaxThrust());
 		

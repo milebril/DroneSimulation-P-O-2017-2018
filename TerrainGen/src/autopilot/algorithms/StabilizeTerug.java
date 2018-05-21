@@ -26,7 +26,6 @@ public class StabilizeTerug implements Algorithm {
 		
 		float changeWingRoll;
 		double heading;
-		System.out.println("Real Heading: " + handler.getProperties().getHeading());
 		
 		if(handler.getProperties().getHeading() < 0) {
 			heading = handler.getProperties().getHeading() + Math.PI;
@@ -34,8 +33,6 @@ public class StabilizeTerug implements Algorithm {
 			heading = handler.getProperties().getHeading() - Math.PI;
 		}
 		
-		System.out.println("Heading " + heading); 
-		System.out.println("Horangle " + getHorAngle(handler)); 
 		//ROLL LINKS
 		if(- heading > getHorAngle(handler) + 0.05 ) {
 			changeWingRoll = this.leftRoll.calculateChange(handler.getProperties().getRoll(),
@@ -43,8 +40,7 @@ public class StabilizeTerug implements Algorithm {
 			handler.setLeftWingInclination(0.15f + changeWingRoll);
 			handler.setRightWingInclination(0.15f - changeWingRoll);
 			
-			
-			System.out.println("ROLL LINKS");
+
 		//ROLL RECHTS
 		} else if(- heading < getHorAngle(handler) - 0.05 ) {
 			changeWingRoll = this.rightRoll.calculateChange(handler.getProperties().getRoll(),
@@ -52,16 +48,12 @@ public class StabilizeTerug implements Algorithm {
 
 			handler.setLeftWingInclination(0.15f + changeWingRoll);
 			handler.setRightWingInclination(0.15f - changeWingRoll);
-			
-			System.out.println("ROLL RECHTS");
 		} else {
 		
 		// ROLL op 0
 		feedback = rollPID.getFeedback(-handler.getProperties().getRoll(), dt);
 		handler.setLeftWingInclination(-feedback+0.15f);
 		handler.setRightWingInclination(feedback+0.15f);
-		
-		System.out.println("NO ROLL");
 		}
 		
 		// STIJGEN/DALEN ~ ZIJVLEUGELS
@@ -116,9 +108,7 @@ public class StabilizeTerug implements Algorithm {
 			overstaande = - Math.abs(point.getX() - handler.getProperties().getPosition().getX());
 		else
 			overstaande = Math.abs(handler.getProperties().getPosition().getX() - point.getX());
-		System.out.println("overstaande " + overstaande);
 		float aanliggende = Math.abs(point.getZ() - handler.getProperties().getPosition().getZ());
-		System.out.println("aanliggend " + aanliggende);
 		return (float) Math.atan(overstaande / aanliggende);
 	}
 	
