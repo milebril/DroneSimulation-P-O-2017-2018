@@ -132,7 +132,7 @@ public class MainGameLoop {
 
 		module.defineAirport(0, 0, 20, 20);
 		module.defineAirport(0, -1000, 20, 20);
-		module.defineAirport(0, 1000, 20, 20);
+		//module.defineAirport(0, 1000, 20, 20);
 
 		module.defineDrone(0, 0, 1, autopilotConfig);
 		module.defineDrone(1, 0, 0, autopilotConfig);

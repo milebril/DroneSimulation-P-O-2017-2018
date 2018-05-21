@@ -168,16 +168,7 @@ public class Module implements AutopilotModule {
 							testbed.getActiveDrones()[i] = d;
 
 							MainGameLoop.setActiveDrone(d);
-							
-							Vector3f current = d.getCurrentAirport().getPosition();
-							Vector3f homebasePosition = d.getHomebase().getPosition();
-//							if (current.z < homebasePosition.z) {
-////								((AutopilotAlain) d.getAutopilot()).addAlgorithm(new TurnOnGround((float) (-3.141592)));
-//								((AutopilotAlain) d.getAutopilot()).addAlgorithm(new TurnOnGround((float) (-Math.PI/2)));
-//							} else if (current.z > homebasePosition.z) {
-//								((AutopilotAlain) d.getAutopilot()).addAlgorithm(new TurnOnGround((float) (-Math.PI/2)));
-//							}
-							
+
 						} else {
 							((AutopilotAlain) d.getAutopilot()).setAlgorithm(new Wait());
 						}
@@ -193,13 +184,23 @@ public class Module implements AutopilotModule {
 				// Airport reached
 				if (((AutopilotAlain) d.getAutopilot()).getAlgorithm() instanceof VliegRechtdoor
 						&& d.getCurrentAirport() != d.getHomebase()) {
-					d.getCurrentAirport().showPackage(getEuclidDist(d.getPosition(), d.getCurrentAirport().getGate(0).getPosition()) <= 2 ? 0: 1);
+					d.getCurrentAirport().showPackage(
+							getEuclidDist(d.getPosition(), d.getCurrentAirport().getGate(0).getPosition()) <= 2 ? 0
+									: 1);
 					flyToHomebase(d);
 				} else if (d.getHomebase() == d.getCurrentAirport()
 						&& getEuclidDist(d.getPosition(), d.getHomebase().getGate(0).getPosition()) <= 2) {
-					System.out.println("DITTE");
 					testbed.getActiveDrones()[i] = null;
 					testbed.getInactiveDrones()[i] = d;
+				}
+				
+				if (((AutopilotAlain) d.getAutopilot()).getAlgorithm() instanceof TurnOnGround) {
+					System.out.println("HIER");
+					if (((TurnOnGround)((AutopilotAlain) d.getAutopilot()).getAlgorithm()).angleDif <= 0.005) {
+						
+						d.setHeading(((TurnOnGround)((AutopilotAlain) d.getAutopilot()).getAlgorithm()).angle);
+						((AutopilotAlain) d.getAutopilot()).nextAlgorithm();
+					}
 				}
 			}
 		}
