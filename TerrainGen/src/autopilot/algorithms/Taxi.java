@@ -4,6 +4,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 import autopilot.PID;
 import autopilot.algorithmHandler.AlgorithmHandler;
+import prevAutopilot.PIDController;
 
 public class Taxi implements Algorithm {
 
@@ -12,7 +13,7 @@ public class Taxi implements Algorithm {
 	}
 
 	private final Vector3f point;
-	private PID pidBrake = new PID(2f, 0f, 0.5f, (float) (0.1 * 2486));
+	private PIDController pidBrake = new PIDController(1f, 0f, 0.5f, (float) (1 * 2486), 0);
 
 	private Vector3f getPoint() {
 		return this.point;
@@ -34,13 +35,13 @@ public class Taxi implements Algorithm {
 				angle -= 2 * Math.PI;
 			}
 			if (angle < -0.1 || angle > 0.1) {
-				handler.setLeftBrakeForce((handler.getLeftBrakeForce() - pidBrake.getFeedback(angle, dt)));
+				handler.setLeftBrakeForce((handler.getLeftBrakeForce() - pidBrake.calculateChange(angle, dt)));
 				if (handler.getLeftBrakeForce() > handler.getProperties().getRMax()) {
 					handler.setLeftBrakeForce(handler.getProperties().getRMax());
 				} else if (handler.getLeftBrakeForce() < 0) {
 					handler.setLeftBrakeForce(0);
 				}
-				handler.setRightBrakeForce(handler.getRightBrakeForce() + pidBrake.getFeedback(angle, dt));
+				handler.setRightBrakeForce(handler.getRightBrakeForce() + pidBrake.calculateChange(angle, dt));
 				if (handler.getRightBrakeForce() > handler.getProperties().getRMax()) {
 					handler.setRightBrakeForce(handler.getProperties().getRMax());
 				} else if (handler.getRightBrakeForce() < 0) {
@@ -63,14 +64,14 @@ public class Taxi implements Algorithm {
 
 		else if (angle < -0.1 || angle > 0.1) {
 			handler.setLeftBrakeForce(
-					handler.getLeftBrakeForce() - pidBrake.getFeedback(angle, handler.getProperties().getDeltaTime()));
+					handler.getLeftBrakeForce() - pidBrake.calculateChange(angle, dt));
 			if (handler.getLeftBrakeForce() > handler.getProperties().getRMax()) {
 				handler.setLeftBrakeForce(handler.getProperties().getRMax());
 			} else if (handler.getLeftBrakeForce() < 0) {
 				handler.setLeftBrakeForce(0);
 			}
 			handler.setRightBrakeForce(
-					handler.getRightBrakeForce() + pidBrake.getFeedback(angle, handler.getProperties().getDeltaTime()));
+					handler.getRightBrakeForce() + pidBrake.calculateChange(angle, dt));
 			if (handler.getRightBrakeForce() > handler.getProperties().getRMax()) {
 				handler.setRightBrakeForce(handler.getProperties().getRMax());
 			} else if (handler.getRightBrakeForce() < 0) {
@@ -95,6 +96,7 @@ public class Taxi implements Algorithm {
 			handler.setRightBrakeForce(handler.getProperties().getRMax());
 			handler.setFrontBrakeForce(handler.getProperties().getRMax());
 		}
+
 
 		// Als de drone binnen 1 meter komt en trager dan 1m/s rijdt, dan wordt de goal
 		// bereikt.
