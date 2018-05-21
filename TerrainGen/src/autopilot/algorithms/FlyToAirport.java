@@ -41,6 +41,7 @@ public class FlyToAirport implements Algorithm {
 		} else {
 			groundTouchPosition = new Vector3f(positionTarget.x, positionTarget.y, positionTarget.z);
 		}
+		
 		ap.addAlgorithm(new Taxi(groundTouchPosition));
 	}
 	

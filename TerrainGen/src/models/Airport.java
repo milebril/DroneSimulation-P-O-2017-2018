@@ -8,6 +8,7 @@ import entities.Camera;
 import entities.Entity;
 import entities.Gate;
 import entities.Light;
+import entities.Package;
 import physicsEngine.PhysicsEngine;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
@@ -28,8 +29,8 @@ public class Airport {
 	private LandingStrip landingStrip;
 	private LandingStrip landingStrip2;
 	
-	private Entity packetGateOne;
-	private Entity packetGateTwo;
+	private Package packetGateOne;
+	private Package packetGateTwo;
 	
 	private boolean showLeftPacket = false;
 	private boolean showRightPacket = false;
@@ -70,13 +71,6 @@ public class Airport {
 		
 		rotated = (rotation.equals("block")) ? true : false;
 		position = new Vector3f(x, 0, z);
-		
-		RawModel treeModel = OBJLoader.loadObjModel("tree", loader);
-		TexturedModel staticTreeModel = new TexturedModel(treeModel,
-				new ModelTexture(loader.loadTexture("tree")));
-		
-		packetGateOne = new Entity(staticTreeModel, new Matrix4f().translate(leftGate.getPosition()), 1);
-		packetGateTwo = new Entity(staticTreeModel, new Matrix4f().translate(rightGate.getPosition()), 1);
 	}
 
 	public void render(MasterRenderer renderer, Camera camera, Light light) {
@@ -121,12 +115,39 @@ public class Airport {
 		return rotated;
 	}
 
-	public void setPackage(int gate) {
+	public void setPackage(int gate, Airport startAirport, int startGate, Airport destAirport, int destGate) {
+		Loader loader = new Loader();
+		RawModel treeModel = OBJLoader.loadObjModel("tree", loader);
+		TexturedModel staticTreeModel = new TexturedModel(treeModel,
+				new ModelTexture(loader.loadTexture("tree")));
+		
+		if (gate == 0) {
+			packetGateOne = new Package(staticTreeModel, new Matrix4f().translate(leftGate.getPosition()), 1, startAirport, startGate, destAirport, destGate);
+			showPackage(gate);
+		}
+	}
+	
+	public void showPackage(int gate) {
 		if (gate == 0) {
 			showLeftPacket = !showLeftPacket;
 		} else if (gate == 1) {
 			showRightPacket = !showRightPacket;
 		}
+	}
+	
+	public Package getPackage(int gate) {
+		if (gate == 0)  return packetGateOne;
+		else return packetGateTwo;
+	}
+
+	public boolean containsPackage(int gate) {
+		if (gate == 0) {
+			return showLeftPacket;
+		} else if (gate == 1) {
+			return showRightPacket;
+		}
+		
+		return false;
 	}
 
 }

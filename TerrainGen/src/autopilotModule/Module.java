@@ -8,11 +8,13 @@ import org.lwjgl.util.vector.Vector3f;
 
 import autopilot.algorithmHandler.AutopilotAlain;
 import autopilot.algorithms.FlyToAirport;
+import autopilot.algorithms.VliegRechtdoor;
 import autopilot.interfaces.AutopilotConfig;
 import autopilot.interfaces.AutopilotInputs;
 import autopilot.interfaces.AutopilotModule;
 import autopilot.interfaces.AutopilotOutputs;
 import autopilotModule.Testbed;
+import engineTester.MainGameLoop;
 import entities.Drone;
 import models.Airport;
 import models.RawModel;
@@ -69,15 +71,16 @@ public class Module implements AutopilotModule {
 				new ModelTexture(loader.loadTexture("untitled")));
 		Random r = new Random();
 		int droneId = getTestbed().getNextDroneID();
-//		int x = r.nextInt(2000);
-//		int z = r.nextInt(2000);
+		// int x = r.nextInt(2000);
+		// int z = r.nextInt(2000);
 		int x = 0;
 		int z = 0;
 		Drone drone = new Drone(staticDroneModel,
 				luchthaven.getDronePosition(gate, config).translate(new Vector3f(x, 0, z)), 1f, config,
-				new EulerPrediction(STEP_TIME),droneId,"Drone: " + droneId);
+				new EulerPrediction(STEP_TIME), droneId, "Drone: " + droneId);
 		drone.setHomeBase(luchthaven);
-		
+		drone.setCurrentAirport(luchthaven);
+
 		if (pointingToRunway == 1) {
 			if (luchthaven.isRotated()) {
 				drone.rotate((float) -Math.PI / 2, new Vector3f(0, 1, 0));
@@ -93,8 +96,8 @@ public class Module implements AutopilotModule {
 		((AutopilotAlain) drone.getAutopilot()).setCruiseHeight(drone.getId() * 5 + 10);
 		drone.getAutopilot().simulationStarted(config, drone.getAutoPilotInputs());
 
-		//TODO: Drones mogen pas actief worden als er een pakketje op valt
-		this.getTestbed().getActiveDrones().add(droneId, drone);
+		// TODO: Drones mogen pas actief worden als er een pakketje op valt
+		this.getTestbed().getInactiveDrones().add(droneId, drone);
 	}
 
 	@Override
@@ -147,45 +150,58 @@ public class Module implements AutopilotModule {
 	public void setTestbed(Testbed testbed) {
 		this.testbed = testbed;
 	}
-	
-	public void spawnPacket(Airport startAirport, int startGate, Airport destAirport, int destGate) {
-		Drone closest = null;
-		float distance = 0;
+
+	public void update() {
 		for (Drone d : testbed.getDrones()) {
-			if (closest == null) {
-				distance = getEuclidDist(d.getPosition(), startAirport.getGate(startGate).getPosition());
-				closest = d;
-			} else if (getEuclidDist(d.getPosition(), startAirport.getGate(startGate).getPosition()) < distance) {
-				distance = getEuclidDist(d.getPosition(), startAirport.getGate(startGate).getPosition());
-				closest = d;
+			if (d.getHomebase() == d.getCurrentAirport()) { // Drone is at homebase
+				int gate = getEuclidDist(d.getPosition(), d.getHomebase().getGate(0).getPosition()) <= 2 ? 0 : 1;
+				if (d.getHomebase().containsPackage(gate)) {
+					entities.Package temp = d.getHomebase().getPackage(gate);
+					d.getHomebase().showPackage(gate);
+					flyToAirport(d, temp.getDestAirport(), temp.getDestGate());
+					
+					testbed.getInactiveDrones().remove(d);
+					testbed.getActiveDrones().add(d);
+					
+					MainGameLoop.setActiveDrone(d);
+				}
+			}
+			
+			System.out.println(d.getCurrentAirport() != d.getHomebase());
+			//Airport reached
+			if (((AutopilotAlain) d.getAutopilot()).getAlgorithm() instanceof VliegRechtdoor
+					&& d.getCurrentAirport() != d.getHomebase()) {
+				System.out.println("HIER");
+				d.getCurrentAirport().showPackage(0);
+				flyToHomebase(d);
 			}
 		}
-		
-		startAirport.setPackage(startGate);
-		
-		flyToAirport(closest, destAirport, destGate);
 	}
-	
+
+	public void spawnPacket(Airport startAirport, int startGate, Airport destAirport, int destGate) {
+		startAirport.setPackage(startGate, destAirport, destGate, destAirport, destGate);
+	}
+
 	public void flyToAirport(Drone drone, Airport airport, int gate) {
 		new FlyToAirport(airport, gate, (AutopilotAlain) drone.getAutopilot());
 		drone.setCurrentAirport(airport);
 	}
-	
+
 	public void flyToHomebase(Drone drone) {
 		Vector3f current = drone.getCurrentAirport().getPosition();
 		Vector3f homebasePosition = drone.getHomebase().getPosition();
-		
+
 		if (current.z < homebasePosition.z) {
-			//((AutopilotAlain) drone.getAutopilot()).setAlgorithm(new Turn(Math.PI / 2));
+			// ((AutopilotAlain) drone.getAutopilot()).setAlgorithm(new Turn(Math.PI / 2));
 			drone.rotate((float) -Math.PI, new Vector3f(0, 1, 0));
 		} else if (current.z > homebasePosition.z) {
-			//((AutopilotAlain) drone.getAutopilot()).setAlgorithm(new Turn(-Math.PI / 2));
+			// ((AutopilotAlain) drone.getAutopilot()).setAlgorithm(new Turn(-Math.PI / 2));
 			drone.rotate((float) Math.PI, new Vector3f(0, 1, 0));
 		}
-		
+
 		flyToAirport(drone, drone.getHomebase(), 0);
 	}
-	
+
 	private float getEuclidDist(Vector3f vec1, Vector3f vec2) {
 		Vector3f temp = new Vector3f(0, 0, 0);
 		Vector3f.sub(vec2, vec1, temp);
