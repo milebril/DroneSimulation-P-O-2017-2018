@@ -84,6 +84,7 @@ public class Module implements AutopilotModule {
 				new EulerPrediction(STEP_TIME), droneId, "Drone: " + droneId);
 		drone.setHomeBase(luchthaven);
 		drone.setCurrentAirport(luchthaven);
+		drone.setStartGate(gate);
 
 		if (pointingToRunway == 1) {
 			if (luchthaven.isRotated()) {
@@ -193,12 +194,11 @@ public class Module implements AutopilotModule {
 					testbed.getActiveDrones()[i] = null;
 					testbed.getInactiveDrones()[i] = d;
 				}
-				
+
 				if (((AutopilotAlain) d.getAutopilot()).getAlgorithm() instanceof TurnOnGround) {
-					if (Math.abs(((TurnOnGround)((AutopilotAlain) d.getAutopilot()).getAlgorithm()).angleDif) <= 0.005) {
-						System.out.println("HIER");
-						d.setHeading(((TurnOnGround)((AutopilotAlain) d.getAutopilot()).getAlgorithm()).angle);
-						((TurnOnGround)((AutopilotAlain) d.getAutopilot()).getAlgorithm()).fullBrakeNext();
+					if (Math.abs(((TurnOnGround) ((AutopilotAlain) d.getAutopilot()).getAlgorithm()).angleDif) <= 0.005) {
+						d.setHeading(((TurnOnGround) ((AutopilotAlain) d.getAutopilot()).getAlgorithm()).angle);
+						((TurnOnGround) ((AutopilotAlain) d.getAutopilot()).getAlgorithm()).fullBrakeNext();
 					}
 				}
 			}
@@ -213,6 +213,7 @@ public class Module implements AutopilotModule {
 	public void flyToAirport(Drone drone, Airport airport, int gate) {
 		new FlyToAirport(airport, gate, (AutopilotAlain) drone.getAutopilot());
 		drone.setCurrentAirport(airport);
+		System.out.println( ((AutopilotAlain) drone.getAutopilot()).getAlgorithms());
 	}
 
 	public void flyToHomebase(Drone drone) {
@@ -225,7 +226,7 @@ public class Module implements AutopilotModule {
 			((AutopilotAlain) drone.getAutopilot()).addAlgorithm(new TurnOnGround(-0.0f));
 		}
 
-		flyToAirport(drone, drone.getHomebase(), 0);
+		flyToAirport(drone, drone.getHomebase(), drone.getStartGate());
 	}
 
 	private float getEuclidDist(Vector3f vec1, Vector3f vec2) {

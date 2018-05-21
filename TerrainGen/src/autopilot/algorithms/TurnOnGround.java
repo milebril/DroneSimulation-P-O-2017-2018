@@ -36,9 +36,6 @@ public class TurnOnGround implements Algorithm {
 		}
 		float dt = handler.getProperties().getDeltaTime();
 		angleDif = Math.abs(handler.getProperties().getHeading() - getAngle());
-		 System.out.println("Heading: " + handler.getProperties().getHeading());
-		 System.out.println("angleDif: " + angleDif);
-
 
 		if (angleDif < Math.PI) {
 			//angleDif += Math.PI;

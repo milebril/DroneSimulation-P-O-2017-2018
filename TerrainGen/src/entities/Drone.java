@@ -716,6 +716,7 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 
 	private Airport homebase;
 	private Airport currentAirport;
+	private int startGate;
 	
 	/**
 	 * Sets the homebase airport
@@ -739,6 +740,14 @@ public class Drone extends Entity /* implements AutopilotConfig */ {
 	
 	public Airport getCurrentAirport() {
 		return this.currentAirport;
+	}
+
+	public void setStartGate(int gate) {
+		this.startGate = gate;
+	}
+	
+	public int getStartGate() {
+		return startGate;
 	}
  	
 }

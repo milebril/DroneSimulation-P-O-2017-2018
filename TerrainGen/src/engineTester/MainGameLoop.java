@@ -134,14 +134,14 @@ public class MainGameLoop {
 		module.defineAirport(0, -1000, 20, 20);
 		//module.defineAirport(0, 1000, 20, 20);
 
-		//module.defineDrone(0, 0, 1, autopilotConfig);
-		module.defineDrone(1, 0, 0, autopilotConfig);
+		module.defineDrone(0, 0, 1, autopilotConfig);
+		module.defineDrone(1, 1, 0, autopilotConfig);
 		//module.defineDrone(1, 0, 0, autopilotConfig);
 
 		List<Airport> temp = testbed.getAirports();
 
 		module.spawnPacket(temp.get(0), 0, temp.get(1), 0);
-		module.spawnPacket(temp.get(1), 0, temp.get(0), 0);
+		module.spawnPacket(temp.get(1), 1, temp.get(0), 1);
 
 		// for (int i = 0; i < 10; i++) {
 
