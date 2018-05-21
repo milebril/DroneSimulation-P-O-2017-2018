@@ -28,6 +28,12 @@ public class Airport {
 	private LandingStrip landingStrip;
 	private LandingStrip landingStrip2;
 	
+	private Entity packetGateOne;
+	private Entity packetGateTwo;
+	
+	private boolean showLeftPacket = false;
+	private boolean showRightPacket = false;
+	
 	private int x;
 	private int z;
 
@@ -64,6 +70,13 @@ public class Airport {
 		
 		rotated = (rotation.equals("block")) ? true : false;
 		position = new Vector3f(x, 0, z);
+		
+		RawModel treeModel = OBJLoader.loadObjModel("tree", loader);
+		TexturedModel staticTreeModel = new TexturedModel(treeModel,
+				new ModelTexture(loader.loadTexture("tree")));
+		
+		packetGateOne = new Entity(staticTreeModel, new Matrix4f().translate(leftGate.getPosition()), 1);
+		packetGateTwo = new Entity(staticTreeModel, new Matrix4f().translate(rightGate.getPosition()), 1);
 	}
 
 	public void render(MasterRenderer renderer, Camera camera, Light light) {
@@ -71,6 +84,12 @@ public class Airport {
 		renderer.processTerrain(landingStrip2);
 		renderer.processEntity(leftGate);
 		renderer.processEntity(rightGate);
+		if (showLeftPacket) {
+			renderer.processEntity(packetGateOne);
+		}
+		if (showRightPacket) {
+			renderer.processEntity(packetGateTwo);
+		}
 	}
 
 	public int getAirportID() {
@@ -86,7 +105,7 @@ public class Airport {
 	public Matrix4f getDronePosition(int gateID, AutopilotConfig config) {
 		
 		return new Matrix4f().translate(new Vector3f(0 + 40*gateID + x,(int) PhysicsEngine.groundLevel - config.getWheelY()
-								+ config.getTyreRadius(),0 + 10 + z));
+								+ config.getTyreRadius(),0 + 0 + z));
 	}
 
 	public Vector3f getPackagePosition(int gateID) {
@@ -100,6 +119,14 @@ public class Airport {
 	
 	public boolean isRotated() {
 		return rotated;
+	}
+
+	public void setPackage(int gate) {
+		if (gate == 0) {
+			showLeftPacket = !showLeftPacket;
+		} else if (gate == 1) {
+			showRightPacket = !showRightPacket;
+		}
 	}
 
 }

@@ -161,6 +161,8 @@ public class Module implements AutopilotModule {
 			}
 		}
 		
+		startAirport.setPackage(startGate);
+		
 		flyToAirport(closest, destAirport, destGate);
 	}
 	
