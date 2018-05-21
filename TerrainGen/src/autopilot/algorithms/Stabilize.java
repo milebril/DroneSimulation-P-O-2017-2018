@@ -18,12 +18,13 @@ public class Stabilize implements Algorithm {
 		
 		float dt = handler.getProperties().getDeltaTime();
 		// VLIEG OP VERT STABILISER
+		System.out.println("handler.getProperties().getHeading() - getHorAngle(handler)" + (handler.getProperties().getHeading() - getHorAngle(handler)));
 		float verStabChange = verStab.calculateChange(handler.getProperties().getHeading() - getHorAngle(handler), dt);
 		handler.setVerStabInclination(handler.getVerStabInclination() + verStabChange);
 		if (handler.getVerStabInclination() > Math.toRadians(8))
 			handler.setVerStabInclination((float) Math.toRadians(8));
-		if (handler.getVerStabInclination() < Math.toRadians(8))
-			handler.setVerStabInclination((float) Math.toRadians(8));
+		if (handler.getVerStabInclination() < Math.toRadians(-8))
+			handler.setVerStabInclination((float) Math.toRadians(-8));
 		
 		// PITCH OP 0
 		float feedback = pitchPID.getFeedback(handler.getProperties().getPitch(), dt);
@@ -61,7 +62,7 @@ public class Stabilize implements Algorithm {
 		return temp.length();
 	}
 
-	private PIDController verStab = new PIDController(1.0f,0,1.0f, (float) Math.toRadians(1),0);
+	private PIDController verStab = new PIDController(1.0f,0,0.5f, (float) Math.toRadians(1),0);
 	private PID pitchPID = new PID(1f, 0.1f, 0.1f, 1f);
 	private PID rollPID = new PID(1f, 0f, 0f, 0.3f);
 	private PID thrustPID = new PID(1000, 400, 50, 2000);
