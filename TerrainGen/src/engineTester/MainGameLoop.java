@@ -210,8 +210,11 @@ public class MainGameLoop {
 		droneList = new DroneList(drones);
 
 		while (!Display.isCloseRequested()) {
-			if (Keyboard.isKeyDown(Keyboard.KEY_P)) {
+			if (Keyboard.isKeyDown(Keyboard.KEY_X)) {
+				DisplayManager.multiplier = 3;
 				// camera.takeSnapshot();
+			} else {
+				DisplayManager.multiplier = 1;
 			}
 			
 			drones = new ArrayList<>();

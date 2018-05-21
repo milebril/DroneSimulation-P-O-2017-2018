@@ -62,7 +62,6 @@ public class FlyStraightToLand implements Algorithm{
 		
 		if (Math.abs( (int) handler.getProperties().getHeading()) == 0) {
 			float startZ = whereToLand.z + landingLength;
-			System.out.println(startZ);
 			if (handler.getProperties().getPosition().z <= startZ) {
 				handler.nextAlgorithm();
 			}

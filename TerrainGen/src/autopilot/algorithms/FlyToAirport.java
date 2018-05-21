@@ -60,6 +60,8 @@ public class FlyToAirport implements Algorithm {
 		ap.addAlgorithm(new FlyToHeight(4.0f));
 		ap.addAlgorithm(new Land());
 		
+		ap.addAlgorithm(new Taxi(positionTarget));
+		
 	}
 	
 	@Override

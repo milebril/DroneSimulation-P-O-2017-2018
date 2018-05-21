@@ -20,6 +20,8 @@ public class DisplayManager {
 	private static long lastFrameTime;
 	private static float delta;
 	
+	public static int multiplier = 1;
+	
 	public static boolean started = false;
 	
 	public static void createDisplay(){		
@@ -53,6 +55,7 @@ public class DisplayManager {
 //		if (delta > 0.006) {
 //			delta = 0.006f;
 //		}
+		delta *= multiplier;
 		elapsedTime += delta;
 	}
 	
