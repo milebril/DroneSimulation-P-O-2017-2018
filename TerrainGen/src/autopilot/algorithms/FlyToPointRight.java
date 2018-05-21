@@ -43,7 +43,7 @@ public class FlyToPointRight implements Algorithm {
 			} else if (handler.getHorStabInclination() < -Math.PI / 6) {
 				handler.setHorStabInclination((float) -(Math.PI / 6));
 			}
-			//handler.setHorStabInclination((float)Math.toRadians(0));
+			handler.setHorStabInclination((float)Math.toRadians(0));
 			handler.setVerStabInclination((float) Math.toRadians(0));
 
 			// ROLL AT 15 DEGREES
@@ -78,6 +78,7 @@ public class FlyToPointRight implements Algorithm {
 				handler.setThrust(handler.getProperties().getMaxThrust());
 			
 			//ROLL naar de andere kant vanaf ??? meter in Z
+			System.out.println("Dingie: " + (handler.getProperties().getHeading() - getHorAngle(handler)));
 			if((handler.getProperties().getHeading() - getHorAngle(handler)) < 0.01) {
 				handler.nextAlgorithm();
 			}

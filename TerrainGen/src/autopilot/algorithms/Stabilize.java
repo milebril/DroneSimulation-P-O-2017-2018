@@ -17,23 +17,45 @@ public class Stabilize implements Algorithm {
 	public void cycle(AlgorithmHandler handler) {
 		
 		float dt = handler.getProperties().getDeltaTime();
-		// VLIEG OP VERT STABILISER
-		System.out.println("handler.getProperties().getHeading() - getHorAngle(handler)" + (handler.getProperties().getHeading() - getHorAngle(handler)));
-		float verStabChange = verStab.calculateChange(handler.getProperties().getHeading() - getHorAngle(handler), dt);
-		handler.setVerStabInclination(handler.getVerStabInclination() + verStabChange);
-		if (handler.getVerStabInclination() > Math.toRadians(8))
-			handler.setVerStabInclination((float) Math.toRadians(8));
-		if (handler.getVerStabInclination() < Math.toRadians(-8))
-			handler.setVerStabInclination((float) Math.toRadians(-8));
+		
+		handler.setVerStabInclination(0);
 		
 		// PITCH OP 0
 		float feedback = pitchPID.getFeedback(handler.getProperties().getPitch(), dt);
 		handler.setHorStabInclination(feedback);
 		
+		float changeWingRoll;
+		
+		System.out.println("Heading - Horangle " + (handler.getProperties().getHeading() - getHorAngle(handler))); 
+		System.out.println("Heading " + handler.getProperties().getHeading()); 
+		System.out.println("Horangle " + getHorAngle(handler)); 
+		//ROLL LINKS
+		if(handler.getProperties().getHeading() - getHorAngle(handler) < -0.05) {
+			changeWingRoll = this.leftRoll.calculateChange(handler.getProperties().getRoll(),
+					handler.getProperties().getDeltaTime());
+			handler.setLeftWingInclination(0.15f + changeWingRoll);
+			handler.setRightWingInclination(0.15f - changeWingRoll);
+			
+			
+			System.out.println("ROLL LINKS");
+		//ROLL RECHTS
+		} else if(handler.getProperties().getHeading() - getHorAngle(handler) > 0.05) {
+			changeWingRoll = this.rightRoll.calculateChange(handler.getProperties().getRoll(),
+					handler.getProperties().getDeltaTime());
+
+			handler.setLeftWingInclination(0.15f + changeWingRoll);
+			handler.setRightWingInclination(0.15f - changeWingRoll);
+			
+			System.out.println("ROLL RECHTS");
+		} else {
+		
 		// ROLL op 0
 		feedback = rollPID.getFeedback(-handler.getProperties().getRoll(), dt);
 		handler.setLeftWingInclination(-feedback+0.15f);
 		handler.setRightWingInclination(feedback+0.15f);
+		
+		System.out.println("NO ROLL");
+		}
 		
 		// STIJGEN/DALEN ~ ZIJVLEUGELS
 		float heightError = point.getY() - handler.getProperties().getY();
@@ -49,7 +71,6 @@ public class Stabilize implements Algorithm {
 		if(handler.getProperties().getVelocity().length() > 40) handler.setThrust(0);
 		else  handler.setThrust(handler.getProperties().getMaxThrust());
 		
-		System.out.println(getEuclidDist(handler.getProperties().getPosition(),point));
 		if(getEuclidDist(handler.getProperties().getPosition(),point) < 5 ) {
 			handler.nextAlgorithm();
 		}
@@ -67,10 +88,13 @@ public class Stabilize implements Algorithm {
 	//P = 0.5, D = 1.0 -> lichte oscillatie, haalt 2de kubus niet
 	//P = 0.5, I = 0.1, D = 0.75 -> lichte oscillatie, haalt 2de kubus niet
 	//P = 0.5, I = 0.3, D = 0.75 -> lichte oscillatie, haalt 2de kubus niet
-	private PIDController verStab = new PIDController(0.5f,0.3f,0.75f, (float) Math.toRadians(1),0);
+	private PIDController verStab = new PIDController(0.1f,0.0f,0.2f, (float) Math.toRadians(1),0);
 	private PID pitchPID = new PID(1f, 0.1f, 0.1f, 1f);
 	private PID rollPID = new PID(1f, 0f, 0f, 0.3f);
 	private PID thrustPID = new PID(1000, 400, 50, 2000);
+	private final PIDController leftRoll = new PIDController(5.0f, 0.0f, 3.0f, (float) Math.toRadians(2), (float) Math.toRadians(10));
+	private final PIDController rightRoll = new PIDController(5.0f, 0.0f, 3.0f, (float) Math.toRadians(2), (float) Math.toRadians(-10));
+	
 	
 	private Vector3f point;
 	
