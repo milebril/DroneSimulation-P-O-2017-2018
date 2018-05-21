@@ -93,7 +93,7 @@ public class TLand implements Algorithm {
 		}
 
 		// wanneer het vliegtuig stilstaat is het geland
-		if (handler.getProperties().getVelocity().length() <= 0.0005) {
+		if (handler.getProperties().getVelocity().length() <= 0.1) {
 			handler.nextAlgorithm();
 		}
 	}
