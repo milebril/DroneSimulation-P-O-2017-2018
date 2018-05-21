@@ -151,18 +151,9 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	
 	@Override
 	public AutopilotOutputs simulationStarted(AutopilotConfig config, AutopilotInputs inputs) {
-		
 		// create Properties object
 		this.properties = new Properties(config, inputs);
 		properties.setCruiseHeight(20f);
-		
-		if (inputs.getZ() < -500) {
-			new FlyToAirport(new Vector3f(0,0,0), this);
-		} else {
-			new FlyToAirport(new Vector3f(0,0, -1000), this);
-		}
-		
-		nextAlgorithm();
 		
 		// run 1 cycle of the current algorithm
 		getAlgorithm().cycle(this);
@@ -172,6 +163,11 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 
 	@Override
 	public AutopilotOutputs timePassed(AutopilotInputs inputs) {
+		// check if new algorithm entered queue
+		if (algorithm instanceof VliegRechtdoor) {
+			nextAlgorithm();
+		}
+		
 		// update Properties
 		getProperties().update(inputs);
 		// run 1 cycle of the current algorithm

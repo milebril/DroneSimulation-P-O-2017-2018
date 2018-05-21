@@ -6,6 +6,8 @@ import java.util.Random;
 
 import org.lwjgl.util.vector.Vector3f;
 
+import autopilot.algorithmHandler.AutopilotAlain;
+import autopilot.algorithms.FlyToAirport;
 import autopilot.interfaces.AutopilotConfig;
 import autopilot.interfaces.AutopilotInputs;
 import autopilot.interfaces.AutopilotModule;
@@ -142,6 +144,32 @@ public class Module implements AutopilotModule {
 
 	public void setTestbed(Testbed testbed) {
 		this.testbed = testbed;
+	}
+	
+	public void spawnPacket(Airport startAirport, int startGate, Airport destAirport, int destGate) {
+		Drone closest = null;
+		float distance = 0;
+		for (Drone d : testbed.getDrones()) {
+			if (closest == null) {
+				distance = getEuclidDist(d.getPosition(), startAirport.getGate(startGate).getPosition());
+				closest = d;
+			} else if (getEuclidDist(d.getPosition(), startAirport.getGate(startGate).getPosition()) < distance) {
+				distance = getEuclidDist(d.getPosition(), startAirport.getGate(startGate).getPosition());
+				closest = d;
+			}
+		}
+		
+		flyToAirport(closest, destAirport, destGate);
+	}
+	
+	public void flyToAirport(Drone drone, Airport airport, int gate) {
+		new FlyToAirport(airport, gate, (AutopilotAlain) drone.getAutopilot());
+	}
+	
+	private float getEuclidDist(Vector3f vec1, Vector3f vec2) {
+		Vector3f temp = new Vector3f(0, 0, 0);
+		Vector3f.sub(vec2, vec1, temp);
+		return temp.length();
 	}
 
 }
