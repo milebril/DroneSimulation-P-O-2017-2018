@@ -238,12 +238,12 @@ public class MainGameLoop {
 		RawCubeModel cube4 = loader.loadToVAO(c4.positions, c4.colors);
 		RawCubeModel cube5 = loader.loadToVAO(c5.positions, c5.colors);
 		RawCubeModel cube6 = loader.loadToVAO(c6.positions, c6.colors);
-		cubes.add(new Entity(cube1, new Matrix4f().translate(new Vector3f(0, 15, -370)), 1));
-		cubes.add(new Entity(cube2, new Matrix4f().translate(new Vector3f(0, 10, -450)), 1));
-		cubes.add(new Entity(cube3, new Matrix4f().translate(new Vector3f(0, 15, -500)), 1));
-		cubes.add(new Entity(cube4, new Matrix4f().translate(new Vector3f(0, 12, -550)), 1));
-		cubes.add(new Entity(cube5, new Matrix4f().translate(new Vector3f(0, 9, -600)), 1));
-		cubes.add(new Entity(cube6, new Matrix4f().translate(new Vector3f(0, 15, -650)), 1));
+		cubes.add(new Entity(cube1, new Matrix4f().translate(new Vector3f(50, 20, -800)), 1));
+		cubes.add(new Entity(cube2, new Matrix4f().translate(new Vector3f(-20,30, -1400)), 1));
+		cubes.add(new Entity(cube3, new Matrix4f().translate(new Vector3f(80, 10, -2000)), 1));
+//		cubes.add(new Entity(cube4, new Matrix4f().translate(new Vector3f(0, 12, -550)), 1));
+//		cubes.add(new Entity(cube5, new Matrix4f().translate(new Vector3f(0, 9, -600)), 1));
+//		cubes.add(new Entity(cube6, new Matrix4f().translate(new Vector3f(0, 15, -650)), 1));
 
 		// ***INITIALIZE BUTTONS GUI***
 		List<GuiTexture> guis = new ArrayList<>();

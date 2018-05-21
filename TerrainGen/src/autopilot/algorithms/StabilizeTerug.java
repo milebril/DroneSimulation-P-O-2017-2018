@@ -7,9 +7,9 @@ import autopilot.algorithmHandler.AlgorithmHandler;
 import autopilot.algorithmHandler.AutopilotAlain;
 import prevAutopilot.PIDController;
 
-public class Stabilize implements Algorithm {
+public class StabilizeTerug implements Algorithm {
 	
-	public Stabilize(Vector3f p) {
+	public StabilizeTerug(Vector3f p) {
 		setPoint(p);
 	}
 
@@ -25,9 +25,19 @@ public class Stabilize implements Algorithm {
 		handler.setHorStabInclination(feedback);
 		
 		float changeWingRoll;
+		double heading;
+		System.out.println("Real Heading: " + handler.getProperties().getHeading());
 		
+		if(handler.getProperties().getHeading() < 0) {
+			heading = handler.getProperties().getHeading() + Math.PI;
+		} else {
+			heading = handler.getProperties().getHeading() - Math.PI;
+		}
+		
+		System.out.println("Heading " + heading); 
+		System.out.println("Horangle " + getHorAngle(handler)); 
 		//ROLL LINKS
-		if(- handler.getProperties().getHeading() > getHorAngle(handler) + 0.05 ) {
+		if(- heading > getHorAngle(handler) + 0.05 ) {
 			changeWingRoll = this.leftRoll.calculateChange(handler.getProperties().getRoll(),
 					handler.getProperties().getDeltaTime());
 			handler.setLeftWingInclination(0.15f + changeWingRoll);
@@ -36,7 +46,7 @@ public class Stabilize implements Algorithm {
 			
 			System.out.println("ROLL LINKS");
 		//ROLL RECHTS
-		} else if(- handler.getProperties().getHeading() < getHorAngle(handler) - 0.05 ) {
+		} else if(- heading < getHorAngle(handler) - 0.05 ) {
 			changeWingRoll = this.rightRoll.calculateChange(handler.getProperties().getRoll(),
 					handler.getProperties().getDeltaTime());
 
@@ -103,11 +113,12 @@ public class Stabilize implements Algorithm {
 	private float getHorAngle(AlgorithmHandler handler) {
 		float overstaande;
 		if(point.getX() > handler.getProperties().getPosition().getX())
-			overstaande = Math.abs(point.getX() - handler.getProperties().getPosition().getX());
+			overstaande = - Math.abs(point.getX() - handler.getProperties().getPosition().getX());
 		else
-			overstaande = - Math.abs(handler.getProperties().getPosition().getX() - point.getX());
-
+			overstaande = Math.abs(handler.getProperties().getPosition().getX() - point.getX());
+		System.out.println("overstaande " + overstaande);
 		float aanliggende = Math.abs(point.getZ() - handler.getProperties().getPosition().getZ());
+		System.out.println("aanliggend " + aanliggende);
 		return (float) Math.atan(overstaande / aanliggende);
 	}
 	
