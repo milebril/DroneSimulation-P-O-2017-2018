@@ -24,6 +24,7 @@ public class FlyToAirport implements Algorithm {
 		
 		//Algorithms to follow
 		//
+
 		//ap.addAlgorithm(new TurnOnGround((float) (2*Math.PI)/2));
 		//ap.addAlgorithm(new TurnOnGround((float) (3*Math.PI)/2));
 		ap.addAlgorithm(new TakeOff(35f));
@@ -45,7 +46,8 @@ public class FlyToAirport implements Algorithm {
 			groundTouchPosition = new Vector3f(positionTarget.x, positionTarget.y, positionTarget.z);
 		}
 		
-		ap.addAlgorithm(new Taxi(groundTouchPosition));
+		ap.addAlgorithm(new Taxi(positionTarget));
+		//ap.addAlgorithm(new TurnOnGround((float) -3.141592));
 	}
 	
 	@Override

@@ -33,31 +33,36 @@ public class TurnOnGround implements Algorithm {
 		//System.out.println("angleDif: " + angleDif);
 
 
-//		if (angleDif <= Math.PI) {
-//			//angleDif += Math.PI;
-//			if (angleDif > Math.PI) {
-//				//angleDif -= 2 * Math.PI;
-//			}
-			if (Math.abs(angleDif) > 0.0001) {
+		if (angleDif <= Math.PI) {
+			//angleDif += Math.PI;
+			if (angleDif > Math.PI) {
+				//angleDif -= 2 * Math.PI;
+			}
+			if (Math.abs(angleDif) > 0.0005) {
 				handler.setLeftBrakeForce((handler.getLeftBrakeForce() - pidBrake.calculateChange(angleDif, dt)));
-				if (handler.getLeftBrakeForce() > handler.getProperties().getRMax()) {
+				if (handler.getLeftBrakeForce() >= handler.getProperties().getRMax()) {
 					handler.setLeftBrakeForce(handler.getProperties().getRMax());
-				} else if (handler.getLeftBrakeForce() < 0) {
+				} else if (handler.getLeftBrakeForce() <= 0) {
 					handler.setLeftBrakeForce(0);
 				}
 				handler.setRightBrakeForce(handler.getRightBrakeForce() + pidBrake.calculateChange(angleDif, dt));
-				if (handler.getRightBrakeForce() > handler.getProperties().getRMax()) {
+				if (handler.getRightBrakeForce() >= handler.getProperties().getRMax()) {
 					handler.setRightBrakeForce(handler.getProperties().getRMax());
-				} else if (handler.getRightBrakeForce() < 0) {
+				} else if (handler.getRightBrakeForce() <= 0) {
 					handler.setRightBrakeForce(0);
 				}
 				handler.setThrust(100);
+				handler.setFrontBrakeForce(0);
 				//System.out.println("left:" + handler.getLeftBrakeForce());
 				//System.out.println("right:" + handler.getRightBrakeForce());
 				//System.out.println(pidBrake.calculateChange(angleDif, dt));
 				//System.out.println("angleDif:" + angleDif);
 			} else {
+				handler.setRightBrakeForce(0);
+				handler.setLeftBrakeForce(0);
+				handler.setFrontBrakeForce(0);
 				handler.nextAlgorithm();
+				
 				}
 		}
 			
@@ -83,7 +88,7 @@ public class TurnOnGround implements Algorithm {
 //				handler.nextAlgorithm();
 //				System.out.println("woepsie");
 //			}
-//		}
+		}
 
 		
 

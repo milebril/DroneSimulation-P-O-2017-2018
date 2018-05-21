@@ -28,6 +28,8 @@ public class Taxi implements Algorithm {
 		float overstaande = getPoint().getZ() - handler.getProperties().getPosition().getZ();
 		float horzangle = (float) Math.atan(aanliggende / overstaande);
 		float angle = handler.getProperties().getHeading() - horzangle;
+		
+		handler.setFrontBrakeForce(0);
 
 		if (getPoint().getZ() > handler.getProperties().getPosition().getZ() && angle < Math.PI) {
 			angle += Math.PI;
