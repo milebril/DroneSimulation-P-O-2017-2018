@@ -220,13 +220,13 @@ public class Module implements AutopilotModule {
 		Vector3f homebasePosition = drone.getHomebase().getPosition();
 		
 		if (drone.getCurrentAirport().getAirportID() == 0) {
-			((AutopilotAlain) drone.getAutopilot()).addAlgorithm(new TurnOnGround((float) (Math.PI/2)));
+			((AutopilotAlain) drone.getAutopilot()).addAlgorithm(new TurnOnGround((float) (1.569)));
 		} else if (drone.getCurrentAirport().getAirportID() == 1) {
 			((AutopilotAlain) drone.getAutopilot()).addAlgorithm(new TurnOnGround((float) (-3.1415)));
 		} else if (drone.getCurrentAirport().getAirportID() == 2) {
 			((AutopilotAlain) drone.getAutopilot()).addAlgorithm(new TurnOnGround((float) (-1.569)));
 		} else if (drone.getCurrentAirport().getAirportID() == 3) {
-			((AutopilotAlain) drone.getAutopilot()).addAlgorithm(new TurnOnGround((float) (0.0)));
+			((AutopilotAlain) drone.getAutopilot()).addAlgorithm(new TurnOnGround((float) (-0.0)));
 		}
 		
 		flyToAirport(drone, drone.getHomebase(), drone.getStartGate());
