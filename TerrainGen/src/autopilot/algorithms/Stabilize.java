@@ -9,21 +9,19 @@ import prevAutopilot.PIDController;
 
 public class Stabilize implements Algorithm {
 	
-	public Stabilize(Vector3f p) {
-		setPoint(p);
-	}
-
+	private float heightTarget = -100;
+	private float headingTarget = -100;
+	
 	@Override
 	public void cycle(AlgorithmHandler handler) {
+		if (heightTarget == -100) heightTarget = handler.getProperties().getY();
+		if (headingTarget == -100) headingTarget = handler.getProperties().getHeading();
 		
 		float dt = handler.getProperties().getDeltaTime();
-		// VLIEG OP VERT STABILISER
-		float verStabChange = verStab.calculateChange(handler.getProperties().getHeading() - getHorAngle(handler), dt);
-		handler.setVerStabInclination(handler.getVerStabInclination() + verStabChange);
-		if (handler.getVerStabInclination() > Math.toRadians(8))
-			handler.setVerStabInclination((float) Math.toRadians(8));
-		if (handler.getVerStabInclination() < Math.toRadians(8))
-			handler.setVerStabInclination((float) Math.toRadians(8));
+		
+		// HEADING advh VERT STAB
+		float headingError = handler.getProperties().getHeading() - headingTarget;
+		handler.setVerStabInclination(headingError);
 		
 		// PITCH OP 0
 		float feedback = pitchPID.getFeedback(handler.getProperties().getPitch(), dt);
@@ -35,18 +33,18 @@ public class Stabilize implements Algorithm {
 		handler.setRightWingInclination(feedback+0.15f);
 		
 		// STIJGEN/DALEN ~ ZIJVLEUGELS
-		float heightError = point.getY() - handler.getProperties().getY();
-		feedback = heightPID.getFeedback(heightError, dt);
+		float heightError = handler.getProperties().getY() - heightTarget;
+		feedback = heightPID.getFeedback(-heightError, dt);
 		
 		handler.setLeftWingInclination(handler.getLeftWingInclination()+feedback);
 		handler.setRightWingInclination(handler.getRightWingInclination()+feedback);
 		
 		// cruisesnelheid houden
-//		float cruiseForce = handler.getProperties().getGravity();
-//		feedback = thrustPID.getFeedback(AutopilotAlain.CRUISESPEED - handler.getProperties().getVelocity().length(), dt);
-//		handler.setThrust(Math.max(0, cruiseForce + feedback));
-		if(handler.getProperties().getVelocity().length() > 40) handler.setThrust(0);
-		else  handler.setThrust(handler.getProperties().getMaxThrust());
+		float cruiseForce = handler.getProperties().getGravity();
+		feedback = thrustPID.getFeedback(AutopilotAlain.CRUISESPEED - handler.getProperties().getVelocity().length(), dt);
+		handler.setThrust(Math.max(0, cruiseForce + feedback));
+		
+		System.out.println("headingerror: " + headingError);
 	}
 
 	private PIDController verStab = new PIDController(1.0f,0,1.0f, (float) Math.toRadians(1),0);
