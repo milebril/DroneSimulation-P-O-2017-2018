@@ -23,6 +23,9 @@ public class FlyToAirport implements Algorithm {
 		positionTarget = target.getGate(gate).getPosition();
 		
 		//Algorithms to follow
+		ap.addAlgorithm(new TurnOnGround((float) (-3.141592)));
+		//ap.addAlgorithm(new TurnOnGround((float) (2*Math.PI)/2));
+		//ap.addAlgorithm(new TurnOnGround((float) (3*Math.PI)/2));
 		ap.addAlgorithm(new TakeOff(35f));
 		ap.addAlgorithm(new FlyToHeight(ap.getCruiseHeight()));
 		
