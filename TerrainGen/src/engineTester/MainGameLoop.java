@@ -135,7 +135,7 @@ public class MainGameLoop {
 		module.defineAirport(-750, 0, 1, 20); // orienteer drone 0
 		module.defineAirport(0, 750, 20, 20);
 		
-		module.defineDrone(3, 0, 1, autopilotConfig);
+		module.defineDrone(0, 0, 1, autopilotConfig);
 		
 		List<Airport> temp = testbed.getAirports();
 		module.spawnPacket(temp.get(0), 0, temp.get(2), 0);
