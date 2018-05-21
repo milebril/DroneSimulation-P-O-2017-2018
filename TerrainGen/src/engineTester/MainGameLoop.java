@@ -221,7 +221,7 @@ public class MainGameLoop {
 
 		while (!Display.isCloseRequested()) {
 			if (Keyboard.isKeyDown(Keyboard.KEY_X)) {
-				DisplayManager.multiplier = 7;
+				DisplayManager.multiplier = 3;
 				// camera.takeSnapshot();
 			} else {
 				DisplayManager.multiplier = 1;

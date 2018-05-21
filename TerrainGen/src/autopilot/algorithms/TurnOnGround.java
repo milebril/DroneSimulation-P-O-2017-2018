@@ -21,7 +21,7 @@ public class TurnOnGround implements Algorithm {
 		this.angle = angle;
 	}
 
-	public final float angle;
+	public float angle;
 	private PIDController pidBrake = new PIDController(2f, 0f, 5f, (float) (1 * 2486), 0);
 	private AlgorithmHandler handler;
 
@@ -37,39 +37,34 @@ public class TurnOnGround implements Algorithm {
 		float dt = handler.getProperties().getDeltaTime();
 		angleDif = Math.abs(handler.getProperties().getHeading() - getAngle());
 
-		if (angleDif < Math.PI) {
-			//angleDif += Math.PI;
-			if (angleDif >= Math.PI) {
-				//angleDif -= 2 * Math.PI;
-			}
-			if (Math.abs(angleDif) > 0.00005) {
-				handler.setLeftBrakeForce((handler.getLeftBrakeForce() - pidBrake.calculateChange(angleDif, dt)));
-				if (handler.getLeftBrakeForce() >= handler.getProperties().getRMax()) {
-					handler.setLeftBrakeForce(handler.getProperties().getRMax());
-				} else if (handler.getLeftBrakeForce() <= 0) {
-					handler.setLeftBrakeForce(0);
-				}
-//				handler.setRightBrakeForce(handler.getRightBrakeForce() + pidBrake.calculateChange(angleDif, dt));
-//				if (handler.getRightBrakeForce() >= handler.getProperties().getRMax()) {
-//					handler.setRightBrakeForce(handler.getProperties().getRMax());
-//				} else if (handler.getRightBrakeForce() <= 0) {
-//					handler.setRightBrakeForce(0);
-//				}
-				handler.setRightBrakeForce(handler.getProperties().getRMax());
-				handler.setThrust(100);
-				handler.setFrontBrakeForce(0);
-				
-				// System.out.println("left:" + handler.getLeftBrakeForce());
-				// System.out.println("right:" + handler.getRightBrakeForce());
-				// System.out.println(pidBrake.calculateChange(angleDif, dt));
-				// System.out.println("angleDif:" + angleDif);
-			} else {
-				handler.setRightBrakeForce(0);
+		if (Math.abs(angleDif) > 0.00005) {
+			handler.setLeftBrakeForce((handler.getLeftBrakeForce() - pidBrake.calculateChange(angleDif, dt)));
+			if (handler.getLeftBrakeForce() >= handler.getProperties().getRMax()) {
+				handler.setLeftBrakeForce(handler.getProperties().getRMax());
+			} else if (handler.getLeftBrakeForce() <= 0) {
 				handler.setLeftBrakeForce(0);
-				handler.setFrontBrakeForce(0);
-				handler.nextAlgorithm();
-
 			}
+
+			handler.setRightBrakeForce(handler.getRightBrakeForce() + pidBrake.calculateChange(angleDif, dt));
+			if (handler.getRightBrakeForce() >= handler.getProperties().getRMax()) {
+				handler.setRightBrakeForce(handler.getProperties().getRMax());
+			} else if (handler.getRightBrakeForce() <= 0) {
+				handler.setRightBrakeForce(0);
+			}
+
+			handler.setThrust(100);
+			handler.setFrontBrakeForce(0);
+
+			// System.out.println("left:" + handler.getLeftBrakeForce());
+			// System.out.println("right:" + handler.getRightBrakeForce());
+			// System.out.println(pidBrake.calculateChange(angleDif, dt));
+			// System.out.println("angleDif:" + angleDif);
+		} else {
+			handler.setRightBrakeForce(0);
+			handler.setLeftBrakeForce(0);
+			handler.setFrontBrakeForce(0);
+			handler.nextAlgorithm();
+
 		}
 	}
 
