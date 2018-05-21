@@ -12,7 +12,7 @@ public class TLand implements Algorithm {
 	public void cycle(AlgorithmHandler handler) {
 		float dt = handler.getProperties().getDeltaTime();
 
-		if (handler.getProperties().getPosition().getZ() > -300) {
+		if (handler.getProperties().getPosition().getZ() > -350) {
 			handler.setThrust(0);
 
 			// pitch op 0 houden
