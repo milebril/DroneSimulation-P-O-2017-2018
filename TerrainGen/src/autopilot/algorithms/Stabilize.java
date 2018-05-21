@@ -62,7 +62,12 @@ public class Stabilize implements Algorithm {
 		return temp.length();
 	}
 
-	private PIDController verStab = new PIDController(1.0f,0,0.5f, (float) Math.toRadians(1),0);
+	//P = 0.5, D = 0.75 -> lichte oscillatie, haalt 2de kubus niet
+	//P = 0.75, D = 0.75 -> sterkere oscillatie, haalt 2de kubus niet
+	//P = 0.5, D = 1.0 -> lichte oscillatie, haalt 2de kubus niet
+	//P = 0.5, I = 0.1, D = 0.75 -> lichte oscillatie, haalt 2de kubus niet
+	//P = 0.5, I = 0.3, D = 0.75 -> lichte oscillatie, haalt 2de kubus niet
+	private PIDController verStab = new PIDController(0.5f,0.3f,0.75f, (float) Math.toRadians(1),0);
 	private PID pitchPID = new PID(1f, 0.1f, 0.1f, 1f);
 	private PID rollPID = new PID(1f, 0f, 0f, 0.3f);
 	private PID thrustPID = new PID(1000, 400, 50, 2000);
