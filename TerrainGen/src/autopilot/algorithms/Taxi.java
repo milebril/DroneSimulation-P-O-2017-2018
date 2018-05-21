@@ -100,7 +100,10 @@ public class Taxi implements Algorithm {
 		// bereikt.
 		// In de opgave staat er dat de goal exact bereikt moet worden, maar we nemen
 		// binnen 1 meter want zo exact is niet echt belangrijk.
-
+		if (getEuclidDist(handler.getProperties().getPosition(), point) <= 5 &&
+				handler.getProperties().getVelocity().length() <= 1) {
+			handler.nextAlgorithm();
+		}
 		
 	}
 

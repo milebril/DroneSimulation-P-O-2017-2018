@@ -24,6 +24,9 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import static org.lwjgl.opengl.GL11.*;
 import org.lwjgl.util.vector.Vector3f;
+
+import autopilot.algorithmHandler.AutopilotAlain;
+import autopilot.algorithms.VliegRechtdoor;
 import autopilot.interfaces.AutopilotConfig;
 import autopilot.interfaces.AutopilotOutputs;
 import autopilot.interfaces.config.AutopilotConfigReader;
@@ -294,14 +297,15 @@ public class MainGameLoop {
 					Runnable toRun = new Runnable() {
 						@Override
 						public void run() {
+							if (((AutopilotAlain) d.getAutopilot()).getAlgorithm() instanceof VliegRechtdoor &&
+									d.getCurrentAirport() != d.getHomebase()) {
+								module.flyToHomebase(d);
+							}
+							
 							// Autopilot stuff
 							module.startTimeHasPassed(d.getId(), d.getAutoPilotInputs());
-							//TODO: timePassed moet weg! foetsieee
 							AutopilotOutputs outputs = module.completeTimeHasPassed(d.getId());
 							d.setAutopilotOutputs(outputs);
-							
-
-							//System.out.println(d.getName() + " is ready with AP.");
 						}
 					};
 

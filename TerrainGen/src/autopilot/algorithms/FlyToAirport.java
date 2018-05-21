@@ -24,7 +24,7 @@ public class FlyToAirport implements Algorithm {
 		
 		//Algorithms to follow
 		ap.addAlgorithm(new TakeOff(35f));
-		ap.addAlgorithm(new FlyToHeight(20f));
+		ap.addAlgorithm(new FlyToHeight(ap.getCruiseHeight()));
 		
 		Vector3f groundTouchPosition;
 		if (positionTarget.getZ() >= -200) {

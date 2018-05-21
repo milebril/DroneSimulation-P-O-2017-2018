@@ -76,6 +76,7 @@ public class Module implements AutopilotModule {
 		Drone drone = new Drone(staticDroneModel,
 				luchthaven.getDronePosition(gate, config).translate(new Vector3f(x, 0, z)), 1f, config,
 				new EulerPrediction(STEP_TIME),droneId,"Drone: " + droneId);
+		drone.setHomeBase(luchthaven);
 		
 		if (pointingToRunway == 1) {
 			if (luchthaven.isRotated()) {
@@ -89,6 +90,7 @@ public class Module implements AutopilotModule {
 			}
 		}
 
+		((AutopilotAlain) drone.getAutopilot()).setCruiseHeight(drone.getId() * 5 + 10);
 		drone.getAutopilot().simulationStarted(config, drone.getAutoPilotInputs());
 
 		//TODO: Drones mogen pas actief worden als er een pakketje op valt
@@ -164,6 +166,22 @@ public class Module implements AutopilotModule {
 	
 	public void flyToAirport(Drone drone, Airport airport, int gate) {
 		new FlyToAirport(airport, gate, (AutopilotAlain) drone.getAutopilot());
+		drone.setCurrentAirport(airport);
+	}
+	
+	public void flyToHomebase(Drone drone) {
+		Vector3f current = drone.getCurrentAirport().getPosition();
+		Vector3f homebasePosition = drone.getHomebase().getPosition();
+		
+		if (current.z < homebasePosition.z) {
+			//((AutopilotAlain) drone.getAutopilot()).setAlgorithm(new Turn(Math.PI / 2));
+			drone.rotate((float) -Math.PI, new Vector3f(0, 1, 0));
+		} else if (current.z > homebasePosition.z) {
+			//((AutopilotAlain) drone.getAutopilot()).setAlgorithm(new Turn(-Math.PI / 2));
+			drone.rotate((float) Math.PI, new Vector3f(0, 1, 0));
+		}
+		
+		flyToAirport(drone, drone.getHomebase(), 0);
 	}
 	
 	private float getEuclidDist(Vector3f vec1, Vector3f vec2) {
