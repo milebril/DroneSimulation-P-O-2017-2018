@@ -105,7 +105,9 @@ public class Stabilize implements Algorithm {
 	
 	private float getHorAngle(AlgorithmHandler handler) {
 		float overstaande = point.getX() - handler.getProperties().getPosition().getX();
+		System.out.println("overstaande " + overstaande);
 		float aanliggende = point.getZ() - handler.getProperties().getPosition().getZ();
+		System.out.println("aanliggend " + aanliggende);
 		return (float) Math.atan(overstaande / aanliggende);
 	}
 	

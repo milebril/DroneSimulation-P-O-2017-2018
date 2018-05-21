@@ -36,14 +36,19 @@ public class FlyToPointRight implements Algorithm {
 		@Override
 		public void cycle(AlgorithmHandler handler) {
 			// BLIJF OP JUISTE HOOGTE
-			handler.setHorStabInclination(handler.getHorStabInclination() + pidHorStab.calculateChange(
-					handler.getProperties().getPitch() + getVerAngle(handler), handler.getProperties().getDeltaTime()));
-			if (handler.getHorStabInclination() > Math.PI / 6) {
-				handler.setHorStabInclination((float) (Math.PI / 6));
-			} else if (handler.getHorStabInclination() < -Math.PI / 6) {
-				handler.setHorStabInclination((float) -(Math.PI / 6));
-			}
-			handler.setHorStabInclination((float)Math.toRadians(0));
+//			handler.setHorStabInclination(handler.getHorStabInclination() + pidHorStab.calculateChange(
+//					handler.getProperties().getPitch() + getVerAngle(handler), handler.getProperties().getDeltaTime()));
+//			if (handler.getHorStabInclination() > Math.PI / 6) {
+//				handler.setHorStabInclination((float) (Math.PI / 6));
+//			} else if (handler.getHorStabInclination() < -Math.PI / 6) {
+//				handler.setHorStabInclination((float) -(Math.PI / 6));
+//			}
+//			handler.setHorStabInclination((float)Math.toRadians(0));
+			
+			// PITCH OP 0
+			float feedback = pitchPID.getFeedback(handler.getProperties().getPitch(), handler.getProperties().getDeltaTime());
+			handler.setHorStabInclination(feedback);
+			
 			handler.setVerStabInclination((float) Math.toRadians(0));
 
 			// ROLL AT 15 DEGREES
@@ -55,7 +60,7 @@ public class FlyToPointRight implements Algorithm {
 
 			// STIJGEN/DALEN ~ ZIJVLEUGELS
 			float heightError = point.getY() - handler.getProperties().getY();
-			float feedback = heightPID.getFeedback(heightError, handler.getProperties().getDeltaTime());
+			feedback = heightPID.getFeedback(heightError, handler.getProperties().getDeltaTime());
 
 			handler.setLeftWingInclination(handler.getLeftWingInclination() + feedback);
 			handler.setRightWingInclination(handler.getRightWingInclination() + feedback);

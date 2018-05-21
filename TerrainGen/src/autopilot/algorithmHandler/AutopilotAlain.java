@@ -36,18 +36,20 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 		
 		// add algorithms in order
 		addAlgorithm(new TakeOff(40f));
-		addAlgorithm(new FlyToHeight(20f));
+		//addAlgorithm(new FlyToHeightRight(20f));
 		//addAlgorithm(new Turn(20f));
-		addAlgorithm(new FlyToPointRight(null,new Vector3f(40,20,-800)));
-		addAlgorithm(new Stabilize(new Vector3f(40,20,-800)));
+		addAlgorithm(new FlyToPointRight(null,new Vector3f(50,20,-800)));
+		addAlgorithm(new Stabilize(new Vector3f(50,20,-800)));
 		
-		addAlgorithm(new FlyToHeight(30f));
-		addAlgorithm(new FlyToPointLeft(null,new Vector3f(0,30,-1400)));
-		addAlgorithm(new Stabilize(new Vector3f(0,30,-1400)));
+		//addAlgorithm(new FlyToHeightLeft(30f));
+		addAlgorithm(new FlyToPointLeft(null,new Vector3f(-20,30,-1400)));
+		addAlgorithm(new Stabilize(new Vector3f(-20,30,-1400)));
 		
-		addAlgorithm(new FlyToHeight(10f));
-		addAlgorithm(new FlyToPointRight(null,new Vector3f(-100,10,-2000)));
-		addAlgorithm(new Stabilize(new Vector3f(-100,10,-2000)));
+		addAlgorithm(new FlyToPointRight(null,new Vector3f(40,15,-1800)));
+		
+		//addAlgorithm(new FlyToHeightRight(10f));
+		addAlgorithm(new FlyToPointRight(null,new Vector3f(50,10,-2000)));
+		addAlgorithm(new Stabilize(new Vector3f(50,10,-2000)));
 		
 		addAlgorithm(new Land());
 		
