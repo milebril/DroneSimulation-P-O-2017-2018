@@ -33,10 +33,10 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 	
 	public AutopilotAlain() {
 		// add algorithms in order
-		//addAlgorithm(new Aanloop(34f, 15f));
-//		addAlgorithm(new FlyToHeight(20f));
-////		addAlgorithm(new FlyToHeight(10f));
-//		addAlgorithm(new Land());
+		addAlgorithm(new Aanloop(40f, 15f));
+		addAlgorithm(new FlyToHeight(20f));
+		addAlgorithm(new TurnStijn((float)(-1.5)));
+		addAlgorithm(new Stabilize());
 
 		// start 1st algorithm
 		nextAlgorithm();
@@ -155,14 +155,6 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 		// create Properties object
 		this.properties = new Properties(config, inputs);
 		properties.setCruiseHeight(20f);
-		
-		if (inputs.getZ() < -500) {
-			new FlyToAirport(new Vector3f(0,0,0), this);
-		} else {
-			new FlyToAirport(new Vector3f(0,0, -1000), this);
-		}
-		
-		nextAlgorithm();
 		
 		// run 1 cycle of the current algorithm
 		getAlgorithm().cycle(this);
