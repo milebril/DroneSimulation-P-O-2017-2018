@@ -8,6 +8,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 import autopilot.algorithmHandler.AutopilotAlain;
 import autopilot.algorithms.FlyToAirport;
+import autopilot.algorithms.TurnOnGround;
 import autopilot.algorithms.VliegRechtdoor;
 import autopilot.algorithms.Wait;
 import autopilot.interfaces.AutopilotConfig;
@@ -170,14 +171,13 @@ public class Module implements AutopilotModule {
 							
 							Vector3f current = d.getCurrentAirport().getPosition();
 							Vector3f homebasePosition = d.getHomebase().getPosition();
-							System.out.println(d.getHeadingFloat());
-							if (current.z < homebasePosition.z && Math.abs((int) d.getHeadingFloat()) == 3) {
-								// ((AutopilotAlain) drone.getAutopilot()).setAlgorithm(new Turn(Math.PI / 2));
-								d.rotate((float) Math.PI, new Vector3f(0, 1, 0));
-							} else if (current.z > homebasePosition.z && (int) d.getHeadingFloat() == 0) {
-								// ((AutopilotAlain) drone.getAutopilot()).setAlgorithm(new Turn(-Math.PI / 2));
-								d.rotate((float) -Math.PI, new Vector3f(0, 1, 0));
-							}
+//							if (current.z < homebasePosition.z) {
+////								((AutopilotAlain) d.getAutopilot()).addAlgorithm(new TurnOnGround((float) (-3.141592)));
+//								((AutopilotAlain) d.getAutopilot()).addAlgorithm(new TurnOnGround((float) (-Math.PI/2)));
+//							} else if (current.z > homebasePosition.z) {
+//								((AutopilotAlain) d.getAutopilot()).addAlgorithm(new TurnOnGround((float) (-Math.PI/2)));
+//							}
+							
 						} else {
 							((AutopilotAlain) d.getAutopilot()).setAlgorithm(new Wait());
 						}
@@ -220,11 +220,9 @@ public class Module implements AutopilotModule {
 		Vector3f homebasePosition = drone.getHomebase().getPosition();
 
 		if (current.z < homebasePosition.z) {
-			// ((AutopilotAlain) drone.getAutopilot()).setAlgorithm(new Turn(Math.PI / 2));
-			drone.rotate((float) -Math.PI, new Vector3f(0, 1, 0));
+			((AutopilotAlain) drone.getAutopilot()).addAlgorithm(new TurnOnGround((float) (-3.141592)));
 		} else if (current.z > homebasePosition.z) {
-			// ((AutopilotAlain) drone.getAutopilot()).setAlgorithm(new Turn(-Math.PI / 2));
-			drone.rotate((float) Math.PI, new Vector3f(0, 1, 0));
+			((AutopilotAlain) drone.getAutopilot()).addAlgorithm(new TurnOnGround((float) (-Math.PI/2)));
 		}
 
 		flyToAirport(drone, drone.getHomebase(), 0);
