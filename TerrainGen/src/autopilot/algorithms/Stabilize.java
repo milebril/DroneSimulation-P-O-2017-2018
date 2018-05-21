@@ -30,7 +30,7 @@ public class Stabilize implements Algorithm {
 		System.out.println("Heading " + handler.getProperties().getHeading()); 
 		System.out.println("Horangle " + getHorAngle(handler)); 
 		//ROLL LINKS
-		if(handler.getProperties().getHeading() - getHorAngle(handler) < -0.05) {
+		if(- handler.getProperties().getHeading() > getHorAngle(handler) + 0.05 ) {
 			changeWingRoll = this.leftRoll.calculateChange(handler.getProperties().getRoll(),
 					handler.getProperties().getDeltaTime());
 			handler.setLeftWingInclination(0.15f + changeWingRoll);
@@ -39,7 +39,7 @@ public class Stabilize implements Algorithm {
 			
 			System.out.println("ROLL LINKS");
 		//ROLL RECHTS
-		} else if(handler.getProperties().getHeading() - getHorAngle(handler) > 0.05) {
+		} else if(- handler.getProperties().getHeading() < getHorAngle(handler) - 0.05 ) {
 			changeWingRoll = this.rightRoll.calculateChange(handler.getProperties().getRoll(),
 					handler.getProperties().getDeltaTime());
 
@@ -104,9 +104,13 @@ public class Stabilize implements Algorithm {
 	}
 	
 	private float getHorAngle(AlgorithmHandler handler) {
-		float overstaande = point.getX() - handler.getProperties().getPosition().getX();
+		float overstaande;
+		if(point.getX() > handler.getProperties().getPosition().getX())
+			overstaande = Math.abs(point.getX() - handler.getProperties().getPosition().getX());
+		else
+			overstaande = - Math.abs(handler.getProperties().getPosition().getX() - point.getX());
 		System.out.println("overstaande " + overstaande);
-		float aanliggende = point.getZ() - handler.getProperties().getPosition().getZ();
+		float aanliggende = Math.abs(point.getZ() - handler.getProperties().getPosition().getZ());
 		System.out.println("aanliggend " + aanliggende);
 		return (float) Math.atan(overstaande / aanliggende);
 	}
