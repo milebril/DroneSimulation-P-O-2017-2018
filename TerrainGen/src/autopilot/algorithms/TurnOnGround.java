@@ -17,11 +17,13 @@ public class TurnOnGround implements Algorithm {
 	 * @param angle
 	 */
 	public TurnOnGround(float angle) {
+		System.out.println(angle);
 		this.angle = angle;
 	}
 
-	private final float angle;
+	public final float angle;
 	private PIDController pidBrake = new PIDController(2f, 0f, 5f, (float) (1 * 2486), 0);
+	private AlgorithmHandler handler;
 
 	private float getAngle() {
 		return this.angle;
@@ -29,10 +31,13 @@ public class TurnOnGround implements Algorithm {
 
 	@Override
 	public void cycle(AlgorithmHandler handler) {
+		if (this.handler == null) {
+			this.handler = handler;
+		}
 		float dt = handler.getProperties().getDeltaTime();
-		angleDif = handler.getProperties().getHeading() - getAngle();
-		// System.out.println("Heading: " + handler.getProperties().getHeading());
-		// System.out.println("angleDif: " + angleDif);
+		angleDif = Math.abs(handler.getProperties().getHeading() - getAngle());
+		 System.out.println("Heading: " + handler.getProperties().getHeading());
+		 System.out.println("angleDif: " + angleDif);
 
 
 		if (angleDif < Math.PI) {
@@ -55,6 +60,7 @@ public class TurnOnGround implements Algorithm {
 				}
 				handler.setThrust(100);
 				handler.setFrontBrakeForce(0);
+				
 				// System.out.println("left:" + handler.getLeftBrakeForce());
 				// System.out.println("right:" + handler.getRightBrakeForce());
 				// System.out.println(pidBrake.calculateChange(angleDif, dt));
@@ -101,6 +107,13 @@ public class TurnOnGround implements Algorithm {
 	public String getName() {
 
 		return "TurnOnGround";
+	}
+
+	public void fullBrakeNext() {
+		handler.setLeftBrakeForce(handler.getProperties().getRMax());
+		handler.setRightBrakeForce(handler.getProperties().getRMax());
+		handler.setFrontBrakeForce(handler.getProperties().getRMax());
+		handler.nextAlgorithm();
 	}
 
 }

@@ -195,11 +195,10 @@ public class Module implements AutopilotModule {
 				}
 				
 				if (((AutopilotAlain) d.getAutopilot()).getAlgorithm() instanceof TurnOnGround) {
-					System.out.println("HIER");
-					if (((TurnOnGround)((AutopilotAlain) d.getAutopilot()).getAlgorithm()).angleDif <= 0.005) {
-						
+					if (Math.abs(((TurnOnGround)((AutopilotAlain) d.getAutopilot()).getAlgorithm()).angleDif) <= 0.005) {
+						System.out.println("HIER");
 						d.setHeading(((TurnOnGround)((AutopilotAlain) d.getAutopilot()).getAlgorithm()).angle);
-						((AutopilotAlain) d.getAutopilot()).nextAlgorithm();
+						((TurnOnGround)((AutopilotAlain) d.getAutopilot()).getAlgorithm()).fullBrakeNext();
 					}
 				}
 			}
@@ -223,7 +222,7 @@ public class Module implements AutopilotModule {
 		if (current.z < homebasePosition.z) {
 			((AutopilotAlain) drone.getAutopilot()).addAlgorithm(new TurnOnGround((float) (-3.1415)));
 		} else if (current.z > homebasePosition.z) {
-			((AutopilotAlain) drone.getAutopilot()).addAlgorithm(new TurnOnGround(0));
+			((AutopilotAlain) drone.getAutopilot()).addAlgorithm(new TurnOnGround(-0.0f));
 		}
 
 		flyToAirport(drone, drone.getHomebase(), 0);
