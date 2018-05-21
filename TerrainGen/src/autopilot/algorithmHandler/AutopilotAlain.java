@@ -38,8 +38,10 @@ public class AutopilotAlain implements Autopilot, AlgorithmHandler {
 		addAlgorithm(new TakeOff(40f));
 		addAlgorithm(new FlyToHeight(20f));
 		//addAlgorithm(new Turn(20f));
-		addAlgorithm(new FlyToPointTorben(null,new Vector3f(40,20,-800)));
+		addAlgorithm(new FlyToPointRight(null,new Vector3f(40,20,-800)));
 		addAlgorithm(new Stabilize(new Vector3f(40,20,-800)));
+		addAlgorithm(new FlyToPointLeft(null,new Vector3f(0,20,-1200)));
+		addAlgorithm(new Stabilize(new Vector3f(20,20,-1200)));
 		
 		
 		/*

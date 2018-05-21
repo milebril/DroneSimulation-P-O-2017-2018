@@ -47,6 +47,18 @@ public class Stabilize implements Algorithm {
 //		handler.setThrust(Math.max(0, cruiseForce + feedback));
 		if(handler.getProperties().getVelocity().length() > 40) handler.setThrust(0);
 		else  handler.setThrust(handler.getProperties().getMaxThrust());
+		
+		System.out.println(getEuclidDist(handler.getProperties().getPosition(),point));
+		if(getEuclidDist(handler.getProperties().getPosition(),point) < 5 ) {
+			handler.nextAlgorithm();
+		}
+			
+	}
+	
+	private float getEuclidDist(Vector3f vec1, Vector3f vec2) {
+		Vector3f temp = new Vector3f(0, 0, 0);
+		Vector3f.sub(vec2, vec1, temp);
+		return temp.length();
 	}
 
 	private PIDController verStab = new PIDController(1.0f,0,1.0f, (float) Math.toRadians(1),0);

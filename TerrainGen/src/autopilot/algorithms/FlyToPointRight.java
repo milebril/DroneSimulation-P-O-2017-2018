@@ -7,19 +7,18 @@ import autopilot.algorithmHandler.AlgorithmHandler;
 import prevAutopilot.DroneProperties;
 import prevAutopilot.PIDController;
 
-public class FlyToPointTorben implements Algorithm {
+public class FlyToPointRight implements Algorithm {
 
 		private PID heightPID = new PID(0.5f, 0.5f, 0.1f, 0.2f);
 		private PID pitchPID = new PID(1f, 0.1f, 0.1f, 1f);
-		private PIDController pidHorStab = new PIDController(0, 0, 0.5f, (float) (Math.PI / 360), 0);
+		private PIDController pidHorStab = new PIDController(0.0f, 0, 0.5f, (float) (Math.PI / 360), 0);
 
-		private final PIDController pidRoll;
+		private final PIDController pidRoll = new PIDController(5.0f, 0.0f, 3.0f, (float) Math.toRadians(1), (float) Math.toRadians(-15));
 		private PIDController pidGetRoll = new PIDController(1000.0f,0,0,(float) Math.toRadians(1),0);
 
-		public FlyToPointTorben(Algorithm nextAlgorithm, Vector3f point) {
+		public FlyToPointRight(Algorithm nextAlgorithm, Vector3f point) {
 			this.point = point;
 			this.nextAlgorithm = nextAlgorithm;
-			this.pidRoll = new PIDController(5.0f, 0.0f, 3.0f, (float) Math.toRadians(1), (float) Math.toRadians(-15));
 		}
 
 		private final Vector3f point;
@@ -44,7 +43,7 @@ public class FlyToPointTorben implements Algorithm {
 			} else if (handler.getHorStabInclination() < -Math.PI / 6) {
 				handler.setHorStabInclination((float) -(Math.PI / 6));
 			}
-			// properties.setHorStabInclination((float)Math.toRadians(-4));
+			//handler.setHorStabInclination((float)Math.toRadians(0));
 			handler.setVerStabInclination((float) Math.toRadians(0));
 
 			// ROLL AT 15 DEGREES
@@ -79,7 +78,6 @@ public class FlyToPointTorben implements Algorithm {
 				handler.setThrust(handler.getProperties().getMaxThrust());
 			
 			//ROLL naar de andere kant vanaf ??? meter in Z
-			System.out.println("The Thing: " + (handler.getProperties().getHeading() - getHorAngle(handler)));
 			if((handler.getProperties().getHeading() - getHorAngle(handler)) < 0.01) {
 				handler.nextAlgorithm();
 			}
@@ -87,9 +85,7 @@ public class FlyToPointTorben implements Algorithm {
 		
 		private float getHorAngle(AlgorithmHandler handler) {
 			float overstaande = point.getX() - handler.getProperties().getPosition().getX();
-			System.out.println("Overstaande: " + overstaande);
 			float aanliggende = point.getZ() - handler.getProperties().getPosition().getZ();
-			System.out.println("Aanliggende: " + aanliggende);
 			return (float) Math.atan(overstaande / aanliggende);
 		}
 
@@ -108,6 +104,6 @@ public class FlyToPointTorben implements Algorithm {
 
 		@Override
 		public String getName() {
-			return "FlyToPoint";
+			return "FlyToPointRight";
 		}
 }
