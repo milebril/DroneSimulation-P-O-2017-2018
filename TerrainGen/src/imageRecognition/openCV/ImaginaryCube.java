@@ -6,13 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+import org.lwjgl.util.vector.Vector3f;
 
 import java.awt.Point;
 
 public class ImaginaryCube {
 	
-	public ImaginaryCube(double heading, double pitch, double roll) {
+	public ImaginaryCube(double heading, double pitch, double roll, Vector3f guessedPosition, Vector3f dronePosition) {
 		this.heading = heading;
 		this.pitch = pitch;
 		this.roll = roll;
@@ -21,7 +21,7 @@ public class ImaginaryCube {
 		alignCube();
 		
 		// place the cube in front of the camera
-		translate(28,55 , -55);
+		translate(guessedPosition.x - dronePosition.x, guessedPosition.y - dronePosition.y, guessedPosition.z - dronePosition.z);
 	}
 	
 	

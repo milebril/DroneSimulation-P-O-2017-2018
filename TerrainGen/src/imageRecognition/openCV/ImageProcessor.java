@@ -440,7 +440,7 @@ public class ImageProcessor {
 
 		
 		
-		public Vector3f getCoordinatesOfCube() {
+		public Vector3f getCoordinatesOfCube(Vector3f guessedPosition) {
 			// calculate positions of cubes
 
 			// create a list with the HSV values
@@ -482,7 +482,7 @@ public class ImageProcessor {
 
 
 			// create imaginary cube
-			ImaginaryCube imaginaryCube = new ImaginaryCube(0.0, 0.0, 0.0);
+			ImaginaryCube imaginaryCube = new ImaginaryCube(getHeading(), getPitch(), getRoll(), guessedPosition, properties.getPosition());
 
 			double[] imCenterOfMass; double deltaX=10; double deltaY=10;
 			double imPercentage; double ratio = 10;
@@ -491,7 +491,7 @@ public class ImageProcessor {
 
 			while (deltaX > 0.005 || deltaY > 0.005 || ratio > 1.025 || ratio < 0.975) {
 				iterations++;
-				if (iterations > 400) {
+				if (iterations > 600) {
 					break;
 				}
 				// get difference between the centers of mass
