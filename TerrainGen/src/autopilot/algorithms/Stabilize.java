@@ -17,6 +17,11 @@ public class Stabilize implements Algorithm {
 	public void cycle(AlgorithmHandler handler) {
 		
 		float dt = handler.getProperties().getDeltaTime();
+		handler.getProperties().getImage();
+
+		//HEY URBAN TODO FIX
+		
+		
 		
 		handler.setVerStabInclination(0);
 		
@@ -86,6 +91,7 @@ public class Stabilize implements Algorithm {
 	
 	
 	private Vector3f point;
+	private Vector3f editedPoint;
 	
 	@Override
 	public String getName() {
