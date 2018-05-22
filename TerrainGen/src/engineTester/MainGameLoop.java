@@ -105,6 +105,8 @@ public class MainGameLoop {
 	private static MiniMap miniMap;
 	private static DroneList droneList;
 
+	private static Camera camera;
+
 	public static void main(String[] args) throws InterruptedException, ExecutionException {
 		// Needed to load openCV
 		// System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -194,7 +196,7 @@ public class MainGameLoop {
 		// terrains.add(new LandingStrip(-0.5f, -1, loader, new
 		// ModelTexture(loader.loadTexture("landing"))));
 
-		Camera camera = new Camera(200, 200);
+		camera = new Camera(200, 200);
 		if (activeDrone != null)
 			camera.setPosition(activeDrone.getPosition().translate(0, 0, 0));
 		renderer = new MasterRenderer();
@@ -490,20 +492,28 @@ public class MainGameLoop {
 			if (activeDrone != null) {
 				float one = Math.abs((float) (Math.cos(activeDrone.getHeadingFloat()) * 30));
 				float two = Math.abs((float) (Math.sin(activeDrone.getHeadingFloat()) * 30));
+				
+				float three = Math.abs((float) (Math.cos(activeDrone.getHeadingFloat()) * -5));
+				float four = Math.abs((float) (Math.sin(activeDrone.getHeadingFloat()) * -5));
 
 				if (activeDrone.getHeadingFloat() > 0) {
 					if (activeDrone.getHeadingFloat() > Math.PI / 2) {
 						one = -one;
+						three = -three;
 					}
 					Vector3f.add(activeDrone.getPosition(), new Vector3f(two, 0, one), chaseCam.getPosition());
+					Vector3f.add(activeDrone.getPosition(), new Vector3f(three, 0, four), camera.getPosition());
 				} else {
 					if (activeDrone.getHeadingFloat() < -Math.PI / 2) {
 						one = -one;
+						four = -four;
 					}
 					Vector3f.add(activeDrone.getPosition(), new Vector3f(-two, 0, one), chaseCam.getPosition());
+					Vector3f.add(activeDrone.getPosition(), new Vector3f(-four, 0, three), camera.getPosition());
 				}
 
 				chaseCam.setPitch(-activeDrone.getHeadingFloat());
+				camera.setPitch(-activeDrone.getHeadingFloat());
 			}
 		} else {
 			chaseCam.roam();
