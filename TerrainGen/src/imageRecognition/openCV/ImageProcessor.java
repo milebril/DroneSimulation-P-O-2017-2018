@@ -17,7 +17,6 @@ public class ImageProcessor {
 	
 	/* ImageProcessor constructor */
 	
-
 	public ImageProcessor(SimpleAutopilot autopilot) {
 		this.autopilot = autopilot;
 		// rotate the cube to be in alignment with the world frame
@@ -440,80 +439,83 @@ public class ImageProcessor {
 
 		
 		
-		public List<Vector3f> getCoordinatesOfCube() {
-			List<Vector3f> listWithCoordinatesOfCubes = new ArrayList<Vector3f>();
+		public Vector3f getCoordinatesOfCube() {
 			// calculate positions of cubes
-			
+
 			// create a list with the HSV values
 			List<float[]> colorHSVList = byteArrayToHSVList(getImage());
-			
+
 			// create a matrix
 			float [][][] HSVList = createMatrixOfHSVList(colorHSVList);
-			
+
 			// create a list with all the different HSV colors.
 			List<double[]> differentColorsHSVList = getAllDifferentHSVColors(colorHSVList);
-			
-			
-			for (int i = 0; i < differentColorsHSVList.size(); i++){
-				
-				double[] color = differentColorsHSVList.get(i);
-			
-				
-			
-
-				// Get center of mass (of the 2D red cube)
-				double[] centerOfMass = getType0CenterOfMass(HSVList, color);
-
-
-				// Get red area in image
-				int redArea = getAmountOfPixels(HSVList, color); 
-
-
-				// Get red area percentage
-				double percentage = redArea / ((float) 200*200);
-
-
-
-				// create imaginary cube
-				ImaginaryCube imaginaryCube = new ImaginaryCube(0.0, 0.0, 0.0);
-
-				double[] imCenterOfMass; double deltaX=10; double deltaY=10;
-				double imPercentage; double ratio = 10;
-				int iterations = 0;
-
-				
-				while (deltaX > 0.005 || deltaY > 0.005 || ratio > 1.025 || ratio < 0.975) {
-					iterations++;
-					if (iterations > 700) {
-						break;
-					}
-					// get difference between the centers of mass
-					imCenterOfMass = imaginaryCube.getProjectedAreaCenterOfMass((float) (120.0 / 180 * Math.PI), (float) (120.0 / 180 * Math.PI));
-					deltaX =  (centerOfMass[0] - imCenterOfMass[0]);
-					deltaY =  (centerOfMass[1] - imCenterOfMass[1]);
-
-					imaginaryCube.translate(deltaX * 3, deltaY * 3, 0);
-
-					// get the ration between the projected areas
-					imPercentage = imaginaryCube.getProjectedAreaPercentage((float) (120.0 / 180 * Math.PI), (float) (120.0 / 180 * Math.PI));
-					ratio = imPercentage / percentage;
-					imaginaryCube.translate(0, 0, (1 - ratio)*0.1);
-					
-					
-				}
-				
-			
-				Vector3f Coordinates = new Vector3f(); 
-				Coordinates.set((float)imaginaryCube.getPosition()[0], (float) (imaginaryCube.getPosition()[1]+2.32), (float) (imaginaryCube.getPosition()[2]-(5.0)));
-				listWithCoordinatesOfCubes.add(Coordinates);
+			int[] mostPixels = new int[differentColorsHSVList.size()];
+			for (int i=0; i < differentColorsHSVList.size(); i++) {
+				int Amount = getAmountOfPixels(HSVList, differentColorsHSVList.get(i) ); 
+				mostPixels[i] = Amount;
+				System.out.println(Amount);
 			}
-				
-		return listWithCoordinatesOfCubes;
+
+			int largest = 0;
+			for ( int i = 1; i < mostPixels.length; i++ ){
+				if ( mostPixels[i] > mostPixels[largest] ) {
+					largest = i;
+				}
+			}
+
+
+			double[] color = differentColorsHSVList.get(largest);
+
+			// Get center of mass (of the 2D red cube)
+			double[] centerOfMass = getType0CenterOfMass(HSVList, color);
+
+
+			// Get red area in image
+			int redArea = getAmountOfPixels(HSVList, color); 
+
+
+			// Get red area percentage
+			double percentage = redArea / ((float) 200*200);
+
+
+
+			// create imaginary cube
+			ImaginaryCube imaginaryCube = new ImaginaryCube(0.0, 0.0, 0.0);
+
+			double[] imCenterOfMass; double deltaX=10; double deltaY=10;
+			double imPercentage; double ratio = 10;
+			int iterations = 0;
+
+
+			while (deltaX > 0.005 || deltaY > 0.005 || ratio > 1.025 || ratio < 0.975) {
+				iterations++;
+				if (iterations > 400) {
+					break;
+				}
+				// get difference between the centers of mass
+				imCenterOfMass = imaginaryCube.getProjectedAreaCenterOfMass((float) (120.0 / 180 * Math.PI), (float) (120.0 / 180 * Math.PI));
+				deltaX =  (centerOfMass[0] - imCenterOfMass[0]);
+				deltaY =  (centerOfMass[1] - imCenterOfMass[1]);
+
+				imaginaryCube.translate(deltaX * 3, deltaY * 3, 0);
+
+				// get the ration between the projected areas
+				imPercentage = imaginaryCube.getProjectedAreaPercentage((float) (120.0 / 180 * Math.PI), (float) (120.0 / 180 * Math.PI));
+				ratio = imPercentage / percentage;
+				imaginaryCube.translate(0, 0, (1 - ratio)*0.1);
+
+
+			}
+
+
+			return new Vector3f( (float) imaginaryCube.getPosition()[0], (float)imaginaryCube.getPosition()[0],(float)imaginaryCube.getPosition()[0]);
+
+
+
+
+
 		}
-		
 
-	
-	}
-	
-
+}
 
