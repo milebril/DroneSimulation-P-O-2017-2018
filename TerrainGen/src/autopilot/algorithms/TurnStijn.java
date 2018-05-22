@@ -59,7 +59,7 @@ public class TurnStijn implements Algorithm {
 	    float wingFeedback = rearWingPID.getFeedback(rollError, dt);
 	    handler.setLeftWingInclination(-wingFeedback+0.15f+heightFeedback);
 	    handler.setRightWingInclination(wingFeedback+0.15f+heightFeedback);
-	    handler.setVerStabInclination(-0.7f*wingFeedback);
+	    handler.setVerStabInclination(-0.8f*wingFeedback);
 	    
 	    // HOR STAB
 	    feedback = horstabPID.getFeedback(handler.getProperties().getPitch(), dt);

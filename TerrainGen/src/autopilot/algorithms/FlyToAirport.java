@@ -28,7 +28,6 @@ public class FlyToAirport implements Algorithm {
 		ap.addAlgorithm(new TakeOff(35f));
 		ap.addAlgorithm(new FlyToHeight(ap.getCruiseHeight()));
 		
-		
 		// RICHTING BEPALEN
 		Vector3f relativeTarget = new Vector3f();
 		relativeTarget.x = positionTarget.x - ap.getProperties().getX();
@@ -47,9 +46,9 @@ public class FlyToAirport implements Algorithm {
 		
 		// optioneel: links of rechts draaien
 		if (doelrichting == Doel.LINKS) {
-			ap.addAlgorithm(new TurnStijn((float) Math.PI/2));
+			ap.addAlgorithm(new TurnStijn((float) Math.PI/2 + 0.04f));
 		} else if (doelrichting == Doel.RECHTS) {
-			ap.addAlgorithm(new TurnStijn((float) -Math.PI/2));
+			ap.addAlgorithm(new TurnStijn((float) -Math.PI/2 - 0.04f));
 		}
 		
 		

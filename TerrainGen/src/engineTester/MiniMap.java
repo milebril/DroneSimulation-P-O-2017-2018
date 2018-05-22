@@ -45,6 +45,7 @@ public class MiniMap {
 					new Vector2f(0.02f, 0.02f));
 			droneTextures.add(e);
 		}
+		
 		for (Airport a : airports) {
 			float normalizedX = 2.0f * (float) (a.getPosition().x * Display.getWidth() / 4000)
 					/ (float) Display.getWidth();
