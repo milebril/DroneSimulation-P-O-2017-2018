@@ -80,6 +80,6 @@ public class Turn180 implements Algorithm {
 
 		@Override
 		public String getName() {
-			return "FlyToPointRight";
+			return "Turn180";
 		}
 }
