@@ -5,6 +5,7 @@ import org.lwjgl.util.vector.Vector3f;
 import autopilot.PID;
 import autopilot.algorithmHandler.AlgorithmHandler;
 import autopilot.algorithmHandler.AutopilotAlain;
+import imageRecognition.openCV.ImageProcessor;
 import prevAutopilot.PIDController;
 
 public class Stabilize implements Algorithm {
@@ -12,12 +13,22 @@ public class Stabilize implements Algorithm {
 	public Stabilize(Vector3f p) {
 		setPoint(p);
 	}
+	
+	private ImageProcessor proc;
 
 	@Override
 	public void cycle(AlgorithmHandler handler) {
 		
 		float dt = handler.getProperties().getDeltaTime();
-		handler.getProperties().getImage();
+		
+		if(Math.abs(handler.getProperties().getZ() - point.getZ()) < 100 && Math.abs(handler.getProperties().getZ() - point.getZ()) % 10 < 1) {
+			
+			proc = new ImageProcessor(handler.getProperties());
+			Vector3f temp = new Vector3f(0,0,0);
+			Vector3f.add(handler.getProperties().getPosition(), proc.getCoordinatesOfCube(), temp);
+			System.out.println("Calculated coord: " + temp);
+			System.out.println("real coord: " + point);
+		}
 
 		//HEY URBAN TODO FIX
 		

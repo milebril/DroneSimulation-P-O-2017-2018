@@ -11,14 +11,15 @@ import java.util.Map;
 
 import org.lwjgl.util.vector.Vector3f;
 
+import autopilot.algorithmHandler.Properties;
 import prevAutopilot.SimpleAutopilot;
 
 public class ImageProcessor {
 	
 	/* ImageProcessor constructor */
 	
-	public ImageProcessor(SimpleAutopilot autopilot) {
-		this.autopilot = autopilot;
+	public ImageProcessor(Properties properties) {
+		this.properties = properties;
 		// rotate the cube to be in alignment with the world frame
 		alignCube();
 
@@ -26,43 +27,43 @@ public class ImageProcessor {
 		translate(0, 0, -5);
 	}
 	
-	private final SimpleAutopilot autopilot;
+	private final Properties properties;
 	
 	//Getters for the AutoPilot config 
 	
 	public float getHorizontalAngleOfView() {
-		return autopilot.getConfig().getHorizontalAngleOfView();
+		return properties.getHorizontalAngleOfView();
 	}
 	
 	public float getVerticalAngleOfView() {
-		return autopilot.getConfig().getVerticalAngleOfView();
+		return properties.getVerticalAngleOfView();
 	}
 	
 	public int getImageWidth() {
-		return autopilot.getConfig().getNbColumns();
+		return properties.getNbColumns();
 	}
 	
 	public int getImageHeight() {
-		return autopilot.getConfig().getNbRows();
+		return properties.getNbRows();
 	}
 	
 	
 	//Getters for the AutoPilot input 
 	
 	public byte[] getImage() {
-		return autopilot.getInput().getImage();
+		return properties.getImage();
 	}
 	
 	public float getHeading() {
-		return autopilot.getInput().getHeading();
+		return properties.getHeading();
 	}
 	
 	public float getPitch() {
-		return autopilot.getInput().getPitch();
+		return properties.getPitch();
 	}
 	
 	public float getRoll() {
-		return autopilot.getInput().getRoll();
+		return properties.getRoll();
 	}
 	
 	
@@ -509,7 +510,7 @@ public class ImageProcessor {
 			}
 
 
-			return new Vector3f( (float) imaginaryCube.getPosition()[0], (float)imaginaryCube.getPosition()[0],(float)imaginaryCube.getPosition()[0]);
+			return new Vector3f( (float) imaginaryCube.getPosition()[0], (float)imaginaryCube.getPosition()[1],(float)imaginaryCube.getPosition()[2]);
 
 
 
