@@ -22,6 +22,7 @@ public class FlyToAirport implements Algorithm {
 		this.targetGate = gate;
 		
 		positionTarget = target.getGate(gate).getPosition();
+		System.out.println(positionTarget);
 		
 		// opstijgen
 		ap.addAlgorithm(new TakeOff(35f));
