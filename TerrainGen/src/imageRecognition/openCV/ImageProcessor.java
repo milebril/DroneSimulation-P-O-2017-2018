@@ -510,7 +510,7 @@ public class ImageProcessor {
 			}
 
 
-			return new Vector3f( (float) - imaginaryCube.getPosition()[0], (float)imaginaryCube.getPosition()[1],(float)imaginaryCube.getPosition()[2]);
+			return new Vector3f( (float) ((float) imaginaryCube.getPosition()[0]*Math.cos(getHeading()) + (float) imaginaryCube.getPosition()[2]*Math.sin(getHeading())), (float)imaginaryCube.getPosition()[1],(float)imaginaryCube.getPosition()[2]);
 
 
 
