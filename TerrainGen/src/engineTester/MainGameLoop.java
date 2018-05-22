@@ -225,6 +225,10 @@ public class MainGameLoop {
 		// Cube Render
 		cubeShader = new CubeShader();
 		cubeRenderer = new CubeRenderer(cubeShader, 120, 120);
+		
+		RawModel cubeModel = OBJLoader.loadObjModel("cube5", loader);
+		TexturedModel staticCubeModel = new TexturedModel(cubeModel,
+				new ModelTexture(loader.loadTexture("untitled")));
 
 		Cube c1 = new Cube(1, 0, 0);
 		Cube c2 = new Cube(1, 0, 1);
@@ -238,9 +242,9 @@ public class MainGameLoop {
 		RawCubeModel cube4 = loader.loadToVAO(c4.positions, c4.colors);
 		RawCubeModel cube5 = loader.loadToVAO(c5.positions, c5.colors);
 		RawCubeModel cube6 = loader.loadToVAO(c6.positions, c6.colors);
-		cubes.add(new Entity(cube1, new Matrix4f().translate(new Vector3f(50, 20, -800)), 1));
-		cubes.add(new Entity(cube2, new Matrix4f().translate(new Vector3f(-20,30, -1400)), 1));
-		cubes.add(new Entity(cube3, new Matrix4f().translate(new Vector3f(80, 10, -2000)), 1));
+		entities.add(new Entity(staticCubeModel, new Matrix4f().translate(new Vector3f(50, 20, -800)), 5));
+		entities.add(new Entity(staticCubeModel, new Matrix4f().translate(new Vector3f(-20,30, -1400)), 5));
+		entities.add(new Entity(staticCubeModel, new Matrix4f().translate(new Vector3f(80, 10, -2000)), 5));
 //		cubes.add(new Entity(cube4, new Matrix4f().translate(new Vector3f(0, 12, -550)), 1));
 //		cubes.add(new Entity(cube5, new Matrix4f().translate(new Vector3f(0, 9, -600)), 1));
 //		cubes.add(new Entity(cube6, new Matrix4f().translate(new Vector3f(0, 15, -650)), 1));
