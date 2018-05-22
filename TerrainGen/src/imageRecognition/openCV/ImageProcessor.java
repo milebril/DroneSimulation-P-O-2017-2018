@@ -491,7 +491,7 @@ public class ImageProcessor {
 
 			while (deltaX > 0.005 || deltaY > 0.005 || ratio > 1.025 || ratio < 0.975) {
 				iterations++;
-				if (iterations > 600) {
+				if (iterations > 400) {
 					break;
 				}
 				// get difference between the centers of mass
@@ -510,7 +510,7 @@ public class ImageProcessor {
 			}
 
 
-			return new Vector3f( (float) imaginaryCube.getPosition()[0], (float)imaginaryCube.getPosition()[1],(float)imaginaryCube.getPosition()[2]);
+			return new Vector3f( (float) - imaginaryCube.getPosition()[0], (float)imaginaryCube.getPosition()[1],(float)imaginaryCube.getPosition()[2]);
 
 
 

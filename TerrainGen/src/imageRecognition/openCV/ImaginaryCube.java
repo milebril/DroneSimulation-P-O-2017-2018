@@ -21,7 +21,7 @@ public class ImaginaryCube {
 		alignCube();
 		
 		// place the cube in front of the camera
-		translate(guessedPosition.x - dronePosition.x, guessedPosition.y - dronePosition.y, guessedPosition.z - dronePosition.z);
+		translate(guessedPosition.x - dronePosition.x + 5, guessedPosition.y - dronePosition.y + 4, guessedPosition.z - dronePosition.z + 4.5f);
 	}
 	
 	

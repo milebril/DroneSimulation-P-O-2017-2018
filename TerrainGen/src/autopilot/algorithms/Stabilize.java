@@ -21,10 +21,11 @@ public class Stabilize implements Algorithm {
 		
 		float dt = handler.getProperties().getDeltaTime();
 		
-		if(Math.abs(handler.getProperties().getZ() - point.getZ()) < 100 && Math.abs(handler.getProperties().getZ() - point.getZ()) % 10 < 0.001) {
+		if(Math.abs(handler.getProperties().getZ() - point.getZ()) < 100 && Math.abs(handler.getProperties().getZ() - point.getZ()) % 10 < 0.1) {
 			proc = new ImageProcessor(handler.getProperties());
 			Vector3f temp = new Vector3f(0,0,0);
 			Vector3f.add(handler.getProperties().getPosition(), proc.getCoordinatesOfCube(point), temp);
+			System.out.println("rel coord: " + proc.getCoordinatesOfCube(point));
 			System.out.println("Calculated coord: " + temp);
 			System.out.println("real coord: " + point);
 			System.out.println(Math.abs(handler.getProperties().getZ() - point.getZ()));
