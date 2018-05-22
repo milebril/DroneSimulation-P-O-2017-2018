@@ -1,0 +1,7 @@
+Commando: 
+
+- OSX: java -cp ProvidedTestbed.jar:AP.jar testbed.TestbedGUI
+
+- Windows:  java -cp ProvidedTestbed.jar;AP.jar testbed.TestbedGUI
+
+Load pre-set padje.txt
